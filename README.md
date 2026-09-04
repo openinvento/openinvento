@@ -1,6 +1,15 @@
 # openinvento
 OpenInvento - Selfhosted Inventory Manager
 
+## Data architecture
+"inventory" 
+    -> "Users" (a user can be assigned to ONE inventory. So an inventory can be accessible by multiple users) Multi inventory per user may follow later
+    -> "Areas"
+        -> "Shelves"
+            -> "Chests"
+                -> "Articles"
+
+
 ## Fair-Code & License
 OpenInvento is Source-Available and completely free for personal, educational, and non-commercial use.
 
