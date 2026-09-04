@@ -1,11 +1,13 @@
-from django.db import models
-import uuid
 import os
 import secrets
 import string
-from django.core.validators import FileExtensionValidator, MaxValueValidator
-from django.core.exceptions import ValidationError
+import uuid
+
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator, MaxValueValidator
+from django.db import models
+
 
 def validate_file_size(value):
     if value.size > settings.MAX_FILE_SIZE:

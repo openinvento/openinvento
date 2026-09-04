@@ -1,9 +1,12 @@
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, Http404, HttpResponseNotAllowed
 import os
-from .settings import MEDIA_ROOT, MEDIA_URL
+
+from django.contrib.auth.decorators import login_required
+from django.http import Http404, HttpResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+
+from .settings import MEDIA_ROOT
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated]) #
