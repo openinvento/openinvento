@@ -6,3 +6,5 @@ env/Lib/**/__pycache__/
 db.sqlite3
 media
 .vscode
+*.egg-info/
+build
