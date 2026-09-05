@@ -38,6 +38,10 @@ jobs:
 
 
     # --- 2. NODE.JS FRONTEND ---
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 11
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
