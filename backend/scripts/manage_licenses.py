@@ -7,6 +7,9 @@ import subprocess
 FORBIDDEN_LICENSES = "GPL;AGPL;LGPL"
 OUTPUT_FILE = "THIRD-PARTY-NOTICES-PYTHON.txt"
 
+# Packages to ignore because they are CI/tooling artifacts and change frequently
+IGNORED_PACKAGES = "pip;setuptools;wheel;pip-licenses;pip-tools;uv"
+
 def run_command(command):
     """Executes a CLI command and returns the result."""
     try:
@@ -21,13 +24,15 @@ def install_dependencies():
     subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "pip-licenses"], check=True)
 
 def generate_licenses():
-    """Generates the third-party license documentation file."""
+    """Generates the third-party license documentation file without versions."""
     print(f"📄 Generating {OUTPUT_FILE}...")
     cmd = [
         "pip-licenses",
         "--format=plain-vertical",
         "--with-license-file",
         "--no-license-path",
+        "--no-version", 
+        f"--ignore-packages={IGNORED_PACKAGES}",
         f"--output-file={OUTPUT_FILE}"
     ]
     res = run_command(cmd)
@@ -39,7 +44,12 @@ def generate_licenses():
 def check_licenses():
     """Checks project dependencies for forbidden licenses (for CI/CD)."""
     print("🔍 Checking Python dependencies for restricted licenses...")
-    cmd = ["pip-licenses", "--fail-on", FORBIDDEN_LICENSES, "--summary"]
+    cmd = [
+        "pip-licenses", 
+        "--fail-on", FORBIDDEN_LICENSES, 
+        "--summary",
+        f"--ignore-packages={IGNORED_PACKAGES}"
+    ]
     
     res = run_command(cmd)
     

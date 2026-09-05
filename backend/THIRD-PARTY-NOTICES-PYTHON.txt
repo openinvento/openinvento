@@ -1,5 +1,4 @@
 Django
-6.1.1
 BSD-3-Clause
 Copyright (c) Django Software Foundation and individual contributors.
 All rights reserved.
@@ -31,7 +30,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 asgiref
-3.12.1
 BSD License
 Copyright (c) Django Software Foundation and individual contributors.
 All rights reserved.
@@ -63,7 +61,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 click
-8.5.0
 BSD-3-Clause
 Copyright 2014 Pallets
 
@@ -96,7 +93,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 h11
-0.16.0
 MIT License
 The MIT License (MIT)
 
@@ -123,12 +119,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 my-backend-project
-0.1.0
 YOUR-CUSTOM-SOURCE-AVAILABLE-LICENSE
 UNKNOWN
 
 sqlparse
-0.6.0
 BSD License
 Copyright (c) 2016, Andi Albrecht <albrecht.andi@gmail.com>
 All rights reserved.
@@ -158,7 +152,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 tzdata
-2026.3
 Apache-2.0
 Apache Software License 2.0
 
@@ -179,7 +172,6 @@ limitations under the License.
 
 
 uvicorn
-0.52.4
 BSD-3-Clause
 Copyright © 2017-present, [Encode OSS Ltd](https://www.encode.io/).
 All rights reserved.
