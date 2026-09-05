@@ -14,7 +14,6 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
       with:
-        # Wichtig, damit GitHub Actions die Rechte hat, zurückzupushen
         token: ${{ secrets.GITHUB_TOKEN }}
         ref: ${{ github.head_ref || github.ref }}
 
@@ -42,9 +41,9 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
+        node-version: '24'
+        cache: 'pnpm'
+        cache-dependency-path: frontend/pnpm-lock.yaml
 
     - name: Install Frontend Dependencies
       working-directory: ./frontend
@@ -61,7 +60,6 @@ jobs:
 
     # --- 3. AUTO-COMMIT CHANGES BACK TO REPOSITORY ---
     - name: Commit and Push Updated License Files
-      # Dieser Schritt läuft nur bei normalen Pushes (nicht bei PRs von Forks, um Fehler zu vermeiden)
       if: github.event_name == 'push'
       run: |
         git config --global user.name "github-actions[bot]"
