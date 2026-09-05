@@ -67,7 +67,7 @@ jobs:
       if: github.event_name == 'push'
       run: |
         git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@://github.com"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
         # Prüfen, ob sich überhaupt etwas geändert hat
         if [ -n "$(git status --porcelain backend/THIRD-PARTY-NOTICES-PYTHON.txt frontend/THIRD_PARTY_LICENSES.md)" ]; then
