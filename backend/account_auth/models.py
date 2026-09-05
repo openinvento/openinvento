@@ -9,6 +9,6 @@ class CustomUser(AbstractUser):
     email = models.EmailField(unique=True, blank=True)
     password = models.CharField(max_length=300)
     name = models.CharField(max_length=35)
-    inventories = models.ManyToManyField('Inventory', blank=True, related_name='users')
+    inventories = models.ManyToManyField('inventory.Inventory', blank=True, related_name='users')
     last_login = models.DateTimeField(null=True, blank=True)
     is_superuser = models.BooleanField(default=False)

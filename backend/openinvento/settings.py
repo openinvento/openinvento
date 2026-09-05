@@ -65,7 +65,6 @@ MIDDLEWARE = [
 
     'corsheaders.middleware.CorsMiddleware',
     'django_ratelimit.middleware.RatelimitMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = []
