@@ -63,5 +63,6 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--check":
         check_licenses()
     else:
+        check_licenses()  # Always check licenses first
         # Default behavior without arguments: Generate documentation
         generate_licenses()
