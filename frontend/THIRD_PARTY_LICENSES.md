@@ -4,7 +4,7 @@ This project contains third-party software components licensed under various ope
 
 ---
 
-## @babel/code-frame@7.29.7
+## @babel/code-frame
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -37,7 +37,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/compat-data@7.29.7
+## @babel/compat-data
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -70,7 +70,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/core@7.29.7
+## @babel/core
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -103,7 +103,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/generator@7.29.8
+## @babel/generator
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -136,7 +136,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helper-annotate-as-pure@7.29.7
+## @babel/helper-annotate-as-pure
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -169,7 +169,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helper-compilation-targets@7.29.7
+## @babel/helper-compilation-targets
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -202,7 +202,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helper-create-class-features-plugin@7.29.7
+## @babel/helper-create-class-features-plugin
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -235,7 +235,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helper-globals@7.29.7
+## @babel/helper-globals
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -268,7 +268,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helper-member-expression-to-functions@7.29.7
+## @babel/helper-member-expression-to-functions
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -301,7 +301,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helper-module-imports@7.29.7
+## @babel/helper-module-imports
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -334,7 +334,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helper-module-transforms@7.29.7
+## @babel/helper-module-transforms
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -367,7 +367,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helper-optimise-call-expression@7.29.7
+## @babel/helper-optimise-call-expression
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -400,7 +400,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helper-plugin-utils@7.29.7
+## @babel/helper-plugin-utils
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -433,7 +433,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helper-replace-supers@7.29.7
+## @babel/helper-replace-supers
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -466,7 +466,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helper-skip-transparent-expression-wrappers@7.29.7
+## @babel/helper-skip-transparent-expression-wrappers
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -499,7 +499,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helper-string-parser@7.29.7
+## @babel/helper-string-parser
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -532,7 +532,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helper-validator-identifier@7.29.7
+## @babel/helper-validator-identifier
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -565,7 +565,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helper-validator-option@7.29.7
+## @babel/helper-validator-option
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -598,7 +598,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/helpers@7.29.7
+## @babel/helpers
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -632,7 +632,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/parser@7.29.8
+## @babel/parser
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -662,7 +662,7 @@ THE SOFTWARE.
 
 ---
 
-## @babel/plugin-syntax-jsx@7.29.7
+## @babel/plugin-syntax-jsx
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -695,7 +695,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/plugin-syntax-typescript@7.29.7
+## @babel/plugin-syntax-typescript
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -728,7 +728,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/plugin-transform-modules-commonjs@7.29.7
+## @babel/plugin-transform-modules-commonjs
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -761,7 +761,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/plugin-transform-typescript@7.29.7
+## @babel/plugin-transform-typescript
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -794,7 +794,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/preset-typescript@7.29.7
+## @babel/preset-typescript
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -827,7 +827,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/runtime@7.29.7
+## @babel/runtime
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -860,7 +860,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/template@7.29.7
+## @babel/template
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -893,7 +893,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/traverse@7.29.8
+## @babel/traverse
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -926,7 +926,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @babel/types@7.29.8
+## @babel/types
 - **License:** MIT
 - **Author/Publisher:** The Babel Team
 - **Repository:** https://github.com/babel/babel
@@ -959,7 +959,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @base-ui/react@1.7.0
+## @base-ui/react
 - **License:** MIT
 - **Author/Publisher:** MUI Team
 - **Repository:** https://github.com/mui/base-ui
@@ -991,7 +991,7 @@ SOFTWARE.
 
 ---
 
-## @base-ui/utils@0.3.2
+## @base-ui/utils
 - **License:** MIT
 - **Author/Publisher:** MUI Team
 - **Repository:** https://github.com/mui/base-ui
@@ -1023,7 +1023,7 @@ SOFTWARE.
 
 ---
 
-## @dotenvx/dotenvx@1.75.1
+## @dotenvx/dotenvx
 - **License:** BSD-3-Clause
 - **Author/Publisher:** @motdotla
 - **Repository:** https://github.com/dotenvx/dotenvx
@@ -1062,7 +1062,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## @dotenvx/primitives@0.8.0
+## @dotenvx/primitives
 - **License:** BSD-3-Clause
 - **Author/Publisher:** @motdotla
 - **Repository:** https://github.com/dotenvx/dotenvx
@@ -1101,7 +1101,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## @floating-ui/core@1.8.0
+## @floating-ui/core
 - **License:** MIT
 - **Author/Publisher:** atomiks
 - **Repository:** https://github.com/floating-ui/floating-ui
@@ -1132,7 +1132,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @floating-ui/dom@1.8.0
+## @floating-ui/dom
 - **License:** MIT
 - **Author/Publisher:** atomiks
 - **Repository:** https://github.com/floating-ui/floating-ui
@@ -1163,7 +1163,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @floating-ui/react-dom@2.1.9
+## @floating-ui/react-dom
 - **License:** MIT
 - **Author/Publisher:** atomiks
 - **Repository:** https://github.com/floating-ui/floating-ui
@@ -1194,7 +1194,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @floating-ui/utils@0.2.12
+## @floating-ui/utils
 - **License:** MIT
 - **Author/Publisher:** atomiks
 - **Repository:** https://github.com/floating-ui/floating-ui
@@ -1225,7 +1225,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## @fontsource-variable/geist@5.3.0
+## @fontsource-variable/geist
 - **License:** OFL-1.1
 - **Author/Publisher:** Google Inc.
 - **Repository:** https://github.com/fontsource/font-files
@@ -1329,7 +1329,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 ---
 
-## @hono/node-server@2.1.1
+## @hono/node-server
 - **License:** MIT
 - **Author/Publisher:** Yusuke Wada
 - **Repository:** https://github.com/honojs/node-server
@@ -1361,7 +1361,7 @@ SOFTWARE.
 
 ---
 
-## @jridgewell/gen-mapping@0.3.13
+## @jridgewell/gen-mapping
 - **License:** MIT
 - **Author/Publisher:** Justin Ridgewell
 - **Repository:** https://github.com/jridgewell/sourcemaps
@@ -1391,7 +1391,7 @@ SOFTWARE.
 
 ---
 
-## @jridgewell/remapping@2.3.5
+## @jridgewell/remapping
 - **License:** MIT
 - **Author/Publisher:** Justin Ridgewell
 - **Repository:** https://github.com/jridgewell/sourcemaps
@@ -1421,7 +1421,7 @@ SOFTWARE.
 
 ---
 
-## @jridgewell/resolve-uri@3.1.2
+## @jridgewell/resolve-uri
 - **License:** MIT
 - **Author/Publisher:** Justin Ridgewell
 - **Repository:** https://github.com/jridgewell/resolve-uri
@@ -1451,7 +1451,7 @@ SOFTWARE.
 
 ---
 
-## @jridgewell/sourcemap-codec@1.6.0
+## @jridgewell/sourcemap-codec
 - **License:** MIT
 - **Author/Publisher:** Justin Ridgewell
 - **Repository:** https://github.com/jridgewell/sourcemaps
@@ -1481,7 +1481,7 @@ SOFTWARE.
 
 ---
 
-## @jridgewell/trace-mapping@0.3.31
+## @jridgewell/trace-mapping
 - **License:** MIT
 - **Author/Publisher:** Justin Ridgewell
 - **Repository:** https://github.com/jridgewell/sourcemaps
@@ -1511,7 +1511,7 @@ SOFTWARE.
 
 ---
 
-## @modelcontextprotocol/sdk@1.30.0
+## @modelcontextprotocol/sdk
 - **License:** MIT
 - **Author/Publisher:** Anthropic, PBC
 - **Repository:** https://github.com/modelcontextprotocol/typescript-sdk
@@ -1543,7 +1543,7 @@ SOFTWARE.
 
 ---
 
-## @nodelib/fs.scandir@2.1.5
+## @nodelib/fs.scandir
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/nodelib/nodelib.git#master
@@ -1575,7 +1575,7 @@ SOFTWARE.
 
 ---
 
-## @nodelib/fs.stat@2.0.5
+## @nodelib/fs.stat
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/nodelib/nodelib.git#master
@@ -1607,7 +1607,7 @@ SOFTWARE.
 
 ---
 
-## @nodelib/fs.walk@1.2.8
+## @nodelib/fs.walk
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/nodelib/nodelib.git#master
@@ -1639,7 +1639,7 @@ SOFTWARE.
 
 ---
 
-## @sec-ant/readable-stream@0.4.1
+## @sec-ant/readable-stream
 - **License:** MIT
 - **Author/Publisher:** Ze-Zheng Wu
 - **Repository:** https://github.com/Sec-ant/readable-stream
@@ -1671,7 +1671,7 @@ SOFTWARE.
 
 ---
 
-## @sindresorhus/merge-streams@4.0.0
+## @sindresorhus/merge-streams
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/merge-streams
@@ -1691,7 +1691,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## @ts-morph/common@0.27.0
+## @ts-morph/common
 - **License:** MIT
 - **Author/Publisher:** David Sherret
 - **Repository:** https://github.com/dsherret/ts-morph
@@ -1723,7 +1723,7 @@ SOFTWARE.
 
 ---
 
-## @types/react@19.2.18
+## @types/react
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/DefinitelyTyped/DefinitelyTyped
@@ -1755,7 +1755,7 @@ MIT License
 
 ---
 
-## @types/validate-npm-package-name@4.0.2
+## @types/validate-npm-package-name
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/DefinitelyTyped/DefinitelyTyped
@@ -1787,7 +1787,7 @@ MIT License
 
 ---
 
-## accepts@2.0.0
+## accepts
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/jshttp/accepts
@@ -1821,7 +1821,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## ajv-formats@2.1.1
+## ajv-formats
 - **License:** MIT
 - **Author/Publisher:** Evgeny Poberezkin
 - **Repository:** https://github.com/ajv-validator/ajv-formats
@@ -1853,7 +1853,7 @@ SOFTWARE.
 
 ---
 
-## ajv-formats@3.0.1
+## ajv-formats
 - **License:** MIT
 - **Author/Publisher:** Evgeny Poberezkin
 - **Repository:** https://github.com/ajv-validator/ajv-formats
@@ -1885,7 +1885,7 @@ SOFTWARE.
 
 ---
 
-## ajv@8.20.0
+## ajv
 - **License:** MIT
 - **Author/Publisher:** Evgeny Poberezkin
 - **Repository:** https://github.com/ajv-validator/ajv
@@ -1917,7 +1917,7 @@ SOFTWARE.
 
 ---
 
-## ansi-colors@4.1.3
+## ansi-colors
 - **License:** MIT
 - **Author/Publisher:** Brian Woodward
 - **Repository:** https://github.com/doowb/ansi-colors
@@ -1949,7 +1949,7 @@ THE SOFTWARE.
 
 ---
 
-## ansi-regex@5.0.1
+## ansi-regex
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/chalk/ansi-regex
@@ -1969,7 +1969,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## ansi-regex@6.3.0
+## ansi-regex
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/chalk/ansi-regex
@@ -1989,7 +1989,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## argparse@2.0.1
+## argparse
 - **License:** Python-2.0
 - **Author/Publisher:** true
 - **Repository:** https://github.com/nodeca/argparse
@@ -2254,7 +2254,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## ast-types@0.16.3
+## ast-types
 - **License:** MIT
 - **Author/Publisher:** Ben Newman
 - **Repository:** https://github.com/benjamn/ast-types
@@ -2285,7 +2285,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## atomically@1.7.0
+## atomically
 - **License:** MIT
 - **Author/Publisher:** Fabio Spampinato
 - **Repository:** https://github.com/fabiospampinato/atomically
@@ -2317,7 +2317,7 @@ DEALINGS IN THE SOFTWARE.
 
 ---
 
-## balanced-match@4.0.4
+## balanced-match
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/juliangruber/balanced-match
@@ -2351,7 +2351,7 @@ SOFTWARE.
 
 ---
 
-## baseline-browser-mapping@2.11.21
+## baseline-browser-mapping
 - **License:** Apache-2.0
 - **Author/Publisher:** true
 - **Repository:** https://github.com/web-platform-dx/baseline-browser-mapping
@@ -2563,7 +2563,7 @@ Apache License
 
 ---
 
-## body-parser@2.3.0
+## body-parser
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/expressjs/body-parser
@@ -2597,7 +2597,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## brace-expansion@5.0.9
+## brace-expansion
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/juliangruber/brace-expansion
@@ -2631,7 +2631,7 @@ SOFTWARE.
 
 ---
 
-## braces@3.0.3
+## braces
 - **License:** MIT
 - **Author/Publisher:** Jon Schlinkert
 - **Repository:** https://github.com/micromatch/braces
@@ -2663,7 +2663,7 @@ THE SOFTWARE.
 
 ---
 
-## browserslist@4.28.8
+## browserslist
 - **License:** MIT
 - **Author/Publisher:** Andrey Sitnik
 - **Repository:** https://github.com/browserslist/browserslist
@@ -2694,7 +2694,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## bundle-name@4.1.0
+## bundle-name
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/bundle-name
@@ -2714,7 +2714,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## bytes@3.1.2
+## bytes
 - **License:** MIT
 - **Author/Publisher:** TJ Holowaychuk
 - **Repository:** https://github.com/visionmedia/bytes.js
@@ -2748,7 +2748,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## call-bind-apply-helpers@1.0.2
+## call-bind-apply-helpers
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/ljharb/call-bind-apply-helpers
@@ -2780,7 +2780,7 @@ SOFTWARE.
 
 ---
 
-## call-bound@1.0.4
+## call-bound
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/ljharb/call-bound
@@ -2812,7 +2812,7 @@ SOFTWARE.
 
 ---
 
-## callsites@3.1.0
+## callsites
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/callsites
@@ -2832,7 +2832,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## caniuse-lite@1.0.30001810
+## caniuse-lite
 - **License:** CC-BY-4.0
 - **Author/Publisher:** Ben Briggs
 - **Repository:** https://github.com/browserslist/caniuse-lite
@@ -3238,7 +3238,7 @@ Creative Commons may be contacted at creativecommons.org.
 
 ---
 
-## chalk@5.6.2
+## chalk
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/chalk/chalk
@@ -3258,7 +3258,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## class-variance-authority@0.7.1
+## class-variance-authority
 - **License:** Apache-2.0
 - **Author/Publisher:** Joe Bell
 - **Repository:** https://github.com/joe-bell/cva
@@ -3459,7 +3459,7 @@ Apache License
 
 ---
 
-## cli-cursor@5.0.0
+## cli-cursor
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/cli-cursor
@@ -3479,7 +3479,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## cli-spinners@2.9.2
+## cli-spinners
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/cli-spinners
@@ -3499,7 +3499,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## clsx@2.1.1
+## clsx
 - **License:** MIT
 - **Author/Publisher:** Luke Edwards
 - **Repository:** https://github.com/lukeed/clsx
@@ -3519,7 +3519,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## cn@0.2.4
+## cn
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/shadcn-ui/cn
@@ -3551,7 +3551,7 @@ SOFTWARE.
 
 ---
 
-## code-block-writer@13.0.3
+## code-block-writer
 - **License:** MIT
 - **Author/Publisher:** David Sherret
 - **Repository:** https://github.com/dsherret/code-block-writer
@@ -3583,7 +3583,7 @@ SOFTWARE.
 
 ---
 
-## commander@11.1.0
+## commander
 - **License:** MIT
 - **Author/Publisher:** TJ Holowaychuk
 - **Repository:** https://github.com/tj/commander.js
@@ -3616,7 +3616,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## commander@14.0.3
+## commander
 - **License:** MIT
 - **Author/Publisher:** TJ Holowaychuk
 - **Repository:** https://github.com/tj/commander.js
@@ -3649,7 +3649,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## conf@10.2.0
+## conf
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/conf
@@ -3669,7 +3669,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## content-disposition@1.1.0
+## content-disposition
 - **License:** MIT
 - **Author/Publisher:** Douglas Christopher Wilson
 - **Repository:** https://github.com/jshttp/content-disposition
@@ -3702,7 +3702,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## content-type@1.0.5
+## content-type
 - **License:** MIT
 - **Author/Publisher:** Douglas Christopher Wilson
 - **Repository:** https://github.com/jshttp/content-type
@@ -3735,7 +3735,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## content-type@2.1.0
+## content-type
 - **License:** MIT
 - **Author/Publisher:** Douglas Christopher Wilson
 - **Repository:** https://github.com/jshttp/content-type
@@ -3768,7 +3768,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## convert-source-map@2.0.0
+## convert-source-map
 - **License:** MIT
 - **Author/Publisher:** Thorsten Lorenz
 - **Repository:** https://github.com/thlorenz/convert-source-map
@@ -3802,7 +3802,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## cookie-es@3.1.1
+## cookie-es
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/unjs/cookie-es
@@ -3841,7 +3841,7 @@ SOFTWARE.
 
 ---
 
-## cookie-signature@1.2.2
+## cookie-signature
 - **License:** MIT
 - **Author/Publisher:** TJ Holowaychuk
 - **Repository:** https://github.com/visionmedia/node-cookie-signature
@@ -3874,7 +3874,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## cookie@0.7.2
+## cookie
 - **License:** MIT
 - **Author/Publisher:** Roman Shtylman
 - **Repository:** https://github.com/jshttp/cookie
@@ -3908,7 +3908,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## cors@2.8.6
+## cors
 - **License:** MIT
 - **Author/Publisher:** Troy Goode
 - **Repository:** https://github.com/expressjs/cors
@@ -3941,7 +3941,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## cosmiconfig@9.0.2
+## cosmiconfig
 - **License:** MIT
 - **Author/Publisher:** Daniel Fischer
 - **Repository:** https://github.com/cosmiconfig/cosmiconfig
@@ -3973,7 +3973,7 @@ SOFTWARE.
 
 ---
 
-## cross-spawn@7.0.6
+## cross-spawn
 - **License:** MIT
 - **Author/Publisher:** André Cruz
 - **Repository:** https://github.com/moxystudio/node-cross-spawn
@@ -4005,7 +4005,7 @@ THE SOFTWARE.
 
 ---
 
-## cssesc@3.0.0
+## cssesc
 - **License:** MIT
 - **Author/Publisher:** Mathias Bynens
 - **Repository:** https://github.com/mathiasbynens/cssesc
@@ -4036,7 +4036,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## csstype@3.2.3
+## csstype
 - **License:** MIT
 - **Author/Publisher:** Fredrik Nicol
 - **Repository:** https://github.com/frenic/csstype
@@ -4066,7 +4066,7 @@ SOFTWARE.
 
 ---
 
-## debounce-fn@4.0.0
+## debounce-fn
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/debounce-fn
@@ -4086,7 +4086,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## debug@4.4.3
+## debug
 - **License:** MIT
 - **Author/Publisher:** Josh Junon
 - **Repository:** https://github.com/debug-js/debug
@@ -4116,7 +4116,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## dedent@1.7.2
+## dedent
 - **License:** MIT
 - **Author/Publisher:** Desmond Brand
 - **Repository:** https://github.com/dmnd/dedent
@@ -4147,7 +4147,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## deepmerge@4.3.1
+## deepmerge
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/TehShrike/deepmerge
@@ -4179,7 +4179,7 @@ THE SOFTWARE.
 
 ---
 
-## default-browser-id@5.0.1
+## default-browser-id
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/default-browser-id
@@ -4199,7 +4199,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## default-browser@5.5.1
+## default-browser
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/default-browser
@@ -4219,7 +4219,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## define-lazy-prop@2.0.0
+## define-lazy-prop
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/define-lazy-prop
@@ -4239,7 +4239,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## define-lazy-prop@3.0.0
+## define-lazy-prop
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/define-lazy-prop
@@ -4259,7 +4259,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## depd@2.0.0
+## depd
 - **License:** MIT
 - **Author/Publisher:** Douglas Christopher Wilson
 - **Repository:** https://github.com/dougwilson/nodejs-depd
@@ -4292,7 +4292,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## diff@8.0.4
+## diff
 - **License:** BSD-3-Clause
 - **Author/Publisher:** true
 - **Repository:** https://github.com/kpdecker/jsdiff
@@ -4332,7 +4332,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## dot-prop@6.0.1
+## dot-prop
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/dot-prop
@@ -4352,7 +4352,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## dotenv@17.4.2
+## dotenv
 - **License:** BSD-2-Clause
 - **Author/Publisher:** true
 - **Repository:** https://github.com/motdotla/dotenv
@@ -4386,7 +4386,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## dunder-proto@1.0.1
+## dunder-proto
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/es-shims/dunder-proto
@@ -4418,7 +4418,7 @@ SOFTWARE.
 
 ---
 
-## ee-first@1.1.1
+## ee-first
 - **License:** MIT
 - **Author/Publisher:** Jonathan Ong
 - **Repository:** https://github.com/jonathanong/ee-first
@@ -4450,7 +4450,7 @@ THE SOFTWARE.
 
 ---
 
-## electron-to-chromium@1.5.421
+## electron-to-chromium
 - **License:** ISC
 - **Author/Publisher:** Kilian Valkhof
 - **Repository:** https://github.com/Kilian/electron-to-chromium
@@ -4466,7 +4466,7 @@ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH RE
 
 ---
 
-## emoji-regex@10.6.0
+## emoji-regex
 - **License:** MIT
 - **Author/Publisher:** Mathias Bynens
 - **Repository:** https://github.com/mathiasbynens/emoji-regex
@@ -4497,7 +4497,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## encodeurl@2.0.0
+## encodeurl
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/pillarjs/encodeurl
@@ -4530,7 +4530,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## enquirer@2.4.1
+## enquirer
 - **License:** MIT
 - **Author/Publisher:** Jon Schlinkert
 - **Repository:** https://github.com/enquirer/enquirer
@@ -4562,7 +4562,7 @@ THE SOFTWARE.
 
 ---
 
-## env-paths@2.2.1
+## env-paths
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/env-paths
@@ -4582,7 +4582,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## error-ex@1.3.4
+## error-ex
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/qix-/node-error-ex
@@ -4614,7 +4614,7 @@ THE SOFTWARE.
 
 ---
 
-## es-define-property@1.0.1
+## es-define-property
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/ljharb/es-define-property
@@ -4646,7 +4646,7 @@ SOFTWARE.
 
 ---
 
-## es-errors@1.3.0
+## es-errors
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/ljharb/es-errors
@@ -4678,7 +4678,7 @@ SOFTWARE.
 
 ---
 
-## es-object-atoms@1.1.2
+## es-object-atoms
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/ljharb/es-object-atoms
@@ -4710,7 +4710,7 @@ SOFTWARE.
 
 ---
 
-## escalade@3.2.0
+## escalade
 - **License:** MIT
 - **Author/Publisher:** Luke Edwards
 - **Repository:** https://github.com/lukeed/escalade
@@ -4730,7 +4730,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## escape-html@1.0.3
+## escape-html
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/component/escape-html
@@ -4765,7 +4765,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## esprima@4.0.1
+## esprima
 - **License:** BSD-2-Clause
 - **Author/Publisher:** Ariya Hidayat
 - **Repository:** https://github.com/jquery/esprima
@@ -4797,7 +4797,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## etag@1.8.1
+## etag
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/jshttp/etag
@@ -4830,7 +4830,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## eventsource-parser@3.1.1
+## eventsource-parser
 - **License:** MIT
 - **Author/Publisher:** Espen Hovlandsdal
 - **Repository:** https://github.com/rexxars/eventsource-parser
@@ -4862,7 +4862,7 @@ SOFTWARE.
 
 ---
 
-## eventsource@3.0.7
+## eventsource
 - **License:** MIT
 - **Author/Publisher:** Espen Hovlandsdal
 - **Repository:** git://git@github.com/EventSource/eventsource
@@ -4895,7 +4895,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## execa@5.1.1
+## execa
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/execa
@@ -4915,7 +4915,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## execa@9.6.1
+## execa
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/execa
@@ -4935,7 +4935,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## express-rate-limit@8.7.0
+## express-rate-limit
 - **License:** MIT
 - **Author/Publisher:** Nathan Friedly
 - **Repository:** https://github.com/express-rate-limit/express-rate-limit
@@ -4967,7 +4967,7 @@ SOFTWARE.
 
 ---
 
-## express@5.2.1
+## express
 - **License:** MIT
 - **Author/Publisher:** TJ Holowaychuk
 - **Repository:** https://github.com/expressjs/express
@@ -5002,7 +5002,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## fast-deep-equal@3.1.3
+## fast-deep-equal
 - **License:** MIT
 - **Author/Publisher:** Evgeny Poberezkin
 - **Repository:** https://github.com/epoberezkin/fast-deep-equal
@@ -5034,7 +5034,7 @@ SOFTWARE.
 
 ---
 
-## fast-glob@3.3.3
+## fast-glob
 - **License:** MIT
 - **Author/Publisher:** Denis Malinochkin
 - **Repository:** https://github.com/mrmlnc/fast-glob
@@ -5066,7 +5066,7 @@ SOFTWARE.
 
 ---
 
-## fast-uri@3.1.7
+## fast-uri
 - **License:** BSD-3-Clause
 - **Author/Publisher:** Vincent Le Goff
 - **Repository:** https://github.com/fastify/fast-uri
@@ -5107,7 +5107,7 @@ The complete list of contributors can be found at:
 
 ---
 
-## fastq@1.20.3
+## fastq
 - **License:** ISC
 - **Author/Publisher:** Matteo Collina
 - **Repository:** https://github.com/mcollina/fastq
@@ -5131,7 +5131,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## fdir@6.5.0
+## fdir
 - **License:** MIT
 - **Author/Publisher:** thecodrr
 - **Repository:** https://github.com/thecodrr/fdir
@@ -5149,7 +5149,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## figures@6.1.0
+## figures
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/figures
@@ -5169,7 +5169,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## fill-range@7.1.1
+## fill-range
 - **License:** MIT
 - **Author/Publisher:** Jon Schlinkert
 - **Repository:** https://github.com/jonschlinkert/fill-range
@@ -5201,7 +5201,7 @@ THE SOFTWARE.
 
 ---
 
-## finalhandler@2.1.1
+## finalhandler
 - **License:** MIT
 - **Author/Publisher:** Douglas Christopher Wilson
 - **Repository:** https://github.com/pillarjs/finalhandler
@@ -5234,7 +5234,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## find-up@3.0.0
+## find-up
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/find-up
@@ -5254,7 +5254,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## forwarded@0.2.0
+## forwarded
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/jshttp/forwarded
@@ -5287,7 +5287,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## fresh@2.0.0
+## fresh
 - **License:** MIT
 - **Author/Publisher:** TJ Holowaychuk
 - **Repository:** https://github.com/jshttp/fresh
@@ -5321,7 +5321,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## fs-extra@11.4.0
+## fs-extra
 - **License:** MIT
 - **Author/Publisher:** JP Richardson
 - **Repository:** https://github.com/jprichardson/node-fs-extra
@@ -5347,7 +5347,7 @@ OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHE
 
 ---
 
-## function-bind@1.1.2
+## function-bind
 - **License:** MIT
 - **Author/Publisher:** Raynos
 - **Repository:** https://github.com/Raynos/function-bind
@@ -5377,7 +5377,7 @@ THE SOFTWARE.
 
 ---
 
-## fuzzysort@3.1.0
+## fuzzysort
 - **License:** MIT
 - **Author/Publisher:** farzher
 - **Repository:** https://github.com/farzher/fuzzysort
@@ -5409,7 +5409,7 @@ SOFTWARE.
 
 ---
 
-## gensync@1.0.0-beta.2
+## gensync
 - **License:** MIT
 - **Author/Publisher:** Logan Smyth
 - **Repository:** https://github.com/loganfsmyth/gensync
@@ -5427,7 +5427,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## get-east-asian-width@1.6.0
+## get-east-asian-width
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/get-east-asian-width
@@ -5447,7 +5447,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## get-intrinsic@1.3.0
+## get-intrinsic
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/ljharb/get-intrinsic
@@ -5479,7 +5479,7 @@ SOFTWARE.
 
 ---
 
-## get-own-enumerable-keys@1.0.0
+## get-own-enumerable-keys
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/get-own-enumerable-keys
@@ -5499,7 +5499,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## get-proto@1.0.1
+## get-proto
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/ljharb/get-proto
@@ -5531,7 +5531,7 @@ SOFTWARE.
 
 ---
 
-## get-stream@6.0.1
+## get-stream
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/get-stream
@@ -5551,7 +5551,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## get-stream@9.0.1
+## get-stream
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/get-stream
@@ -5571,7 +5571,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## glob-parent@5.1.2
+## glob-parent
 - **License:** ISC
 - **Author/Publisher:** Gulp Team
 - **Repository:** https://github.com/gulpjs/glob-parent
@@ -5597,7 +5597,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## gopd@1.2.0
+## gopd
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/ljharb/gopd
@@ -5629,7 +5629,7 @@ SOFTWARE.
 
 ---
 
-## graceful-fs@4.2.11
+## graceful-fs
 - **License:** ISC
 - **Author/Publisher:** true
 - **Repository:** https://github.com/isaacs/node-graceful-fs
@@ -5655,7 +5655,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## has-symbols@1.1.0
+## has-symbols
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/inspect-js/has-symbols
@@ -5687,7 +5687,7 @@ SOFTWARE.
 
 ---
 
-## hasown@2.0.4
+## hasown
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/inspect-js/hasOwn
@@ -5719,7 +5719,7 @@ SOFTWARE.
 
 ---
 
-## hono@4.13.5
+## hono
 - **License:** MIT
 - **Author/Publisher:** Yusuke Wada
 - **Repository:** https://github.com/honojs/hono
@@ -5751,7 +5751,7 @@ SOFTWARE.
 
 ---
 
-## http-errors@2.0.1
+## http-errors
 - **License:** MIT
 - **Author/Publisher:** Jonathan Ong
 - **Repository:** https://github.com/jshttp/http-errors
@@ -5784,7 +5784,7 @@ THE SOFTWARE.
 
 ---
 
-## human-signals@2.1.0
+## human-signals
 - **License:** Apache-2.0
 - **Author/Publisher:** ehmicky
 - **Repository:** https://github.com/ehmicky/human-signals
@@ -5996,7 +5996,7 @@ Apache License
 
 ---
 
-## human-signals@8.0.1
+## human-signals
 - **License:** Apache-2.0
 - **Author/Publisher:** ehmicky
 - **Repository:** https://github.com/ehmicky/human-signals
@@ -6208,7 +6208,7 @@ Apache License
 
 ---
 
-## iconv-lite@0.7.3
+## iconv-lite
 - **License:** MIT
 - **Author/Publisher:** Alexander Shtuchkin
 - **Repository:** https://github.com/pillarjs/iconv-lite
@@ -6239,7 +6239,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## ignore@5.3.2
+## ignore
 - **License:** MIT
 - **Author/Publisher:** kael
 - **Repository:** https://github.com/kaelzhang/node-ignore
@@ -6271,7 +6271,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## import-fresh@3.3.1
+## import-fresh
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/import-fresh
@@ -6291,7 +6291,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## inherits@2.0.4
+## inherits
 - **License:** ISC
 - **Author/Publisher:** true
 - **Repository:** https://github.com/isaacs/inherits
@@ -6317,7 +6317,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## ip-address@10.7.0
+## ip-address
 - **License:** MIT
 - **Author/Publisher:** Beau Gunderson
 - **Repository:** https://github.com/beaugunderson/ip-address
@@ -6347,7 +6347,7 @@ THE SOFTWARE.
 
 ---
 
-## ipaddr.js@1.9.1
+## ipaddr.js
 - **License:** MIT
 - **Author/Publisher:** whitequark
 - **Repository:** https://github.com/whitequark/ipaddr.js
@@ -6377,7 +6377,7 @@ THE SOFTWARE.
 
 ---
 
-## is-arrayish@0.2.1
+## is-arrayish
 - **License:** MIT
 - **Author/Publisher:** Qix
 - **Repository:** https://github.com/qix-/node-is-arrayish
@@ -6409,7 +6409,7 @@ THE SOFTWARE.
 
 ---
 
-## is-docker@2.2.1
+## is-docker
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-docker
@@ -6429,7 +6429,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## is-docker@3.0.0
+## is-docker
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-docker
@@ -6449,7 +6449,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## is-extglob@2.1.1
+## is-extglob
 - **License:** MIT
 - **Author/Publisher:** Jon Schlinkert
 - **Repository:** https://github.com/jonschlinkert/is-extglob
@@ -6481,7 +6481,7 @@ THE SOFTWARE.
 
 ---
 
-## is-glob@4.0.3
+## is-glob
 - **License:** MIT
 - **Author/Publisher:** Jon Schlinkert
 - **Repository:** https://github.com/micromatch/is-glob
@@ -6513,7 +6513,7 @@ THE SOFTWARE.
 
 ---
 
-## is-in-ssh@1.0.0
+## is-in-ssh
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-in-ssh
@@ -6533,7 +6533,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## is-inside-container@1.0.0
+## is-inside-container
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-inside-container
@@ -6553,7 +6553,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## is-interactive@2.0.0
+## is-interactive
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-interactive
@@ -6573,7 +6573,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## is-number@7.0.0
+## is-number
 - **License:** MIT
 - **Author/Publisher:** Jon Schlinkert
 - **Repository:** https://github.com/jonschlinkert/is-number
@@ -6605,7 +6605,7 @@ THE SOFTWARE.
 
 ---
 
-## is-obj@2.0.0
+## is-obj
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-obj
@@ -6625,7 +6625,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## is-obj@3.0.0
+## is-obj
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-obj
@@ -6645,7 +6645,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## is-plain-obj@4.1.0
+## is-plain-obj
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-plain-obj
@@ -6665,7 +6665,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## is-promise@4.0.0
+## is-promise
 - **License:** MIT
 - **Author/Publisher:** ForbesLindesay
 - **Repository:** https://github.com/then/is-promise
@@ -6695,7 +6695,7 @@ THE SOFTWARE.
 
 ---
 
-## is-regexp@3.1.0
+## is-regexp
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-regexp
@@ -6715,7 +6715,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## is-stream@2.0.1
+## is-stream
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-stream
@@ -6735,7 +6735,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## is-stream@4.0.1
+## is-stream
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-stream
@@ -6755,7 +6755,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## is-unicode-supported@1.3.0
+## is-unicode-supported
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-unicode-supported
@@ -6775,7 +6775,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## is-unicode-supported@2.1.0
+## is-unicode-supported
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-unicode-supported
@@ -6795,7 +6795,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## is-wsl@2.2.0
+## is-wsl
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-wsl
@@ -6815,7 +6815,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## is-wsl@3.1.1
+## is-wsl
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/is-wsl
@@ -6835,7 +6835,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## isexe@2.0.0
+## isexe
 - **License:** ISC
 - **Author/Publisher:** Isaac Z. Schlueter
 - **Repository:** https://github.com/isaacs/isexe
@@ -6861,7 +6861,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## isexe@3.1.5
+## isexe
 - **License:** BlueOak-1.0.0
 - **Author/Publisher:** Isaac Z. Schlueter
 - **Repository:** https://github.com/isaacs/isexe
@@ -6927,7 +6927,7 @@ software or this license, under any kind of legal claim.***
 
 ---
 
-## jose@6.2.10
+## jose
 - **License:** MIT
 - **Author/Publisher:** Filip Skokan
 - **Repository:** https://github.com/panva/jose
@@ -6959,7 +6959,7 @@ SOFTWARE.
 
 ---
 
-## js-tokens@4.0.0
+## js-tokens
 - **License:** MIT
 - **Author/Publisher:** Simon Lydell
 - **Repository:** https://github.com/lydell/js-tokens
@@ -6991,7 +6991,7 @@ THE SOFTWARE.
 
 ---
 
-## js-yaml@4.3.2
+## js-yaml
 - **License:** MIT
 - **Author/Publisher:** Vladimir Zapparov
 - **Repository:** https://github.com/nodeca/js-yaml
@@ -7023,7 +7023,7 @@ THE SOFTWARE.
 
 ---
 
-## jsesc@3.1.0
+## jsesc
 - **License:** MIT
 - **Author/Publisher:** Mathias Bynens
 - **Repository:** https://github.com/mathiasbynens/jsesc
@@ -7054,7 +7054,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## json-parse-even-better-errors@2.3.1
+## json-parse-even-better-errors
 - **License:** MIT
 - **Author/Publisher:** Kat Marchán
 - **Repository:** https://github.com/npm/json-parse-even-better-errors
@@ -7090,7 +7090,7 @@ distributed under the terms of the MIT license above.
 
 ---
 
-## json-schema-traverse@1.0.0
+## json-schema-traverse
 - **License:** MIT
 - **Author/Publisher:** Evgeny Poberezkin
 - **Repository:** https://github.com/epoberezkin/json-schema-traverse
@@ -7122,7 +7122,7 @@ SOFTWARE.
 
 ---
 
-## json-schema-typed@7.0.3
+## json-schema-typed
 - **License:** BSD-2-Clause
 - **Author/Publisher:** true
 - **Repository:** https://github.com/typeslick/json-schema-typed
@@ -7159,7 +7159,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## json-schema-typed@8.0.2
+## json-schema-typed
 - **License:** BSD-2-Clause
 - **Author/Publisher:** Remy Rylan
 - **Repository:** https://github.com/RemyRylan/json-schema-typed
@@ -7227,7 +7227,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## json5@2.2.3
+## json5
 - **License:** MIT
 - **Author/Publisher:** Aseem Kishore
 - **Repository:** https://github.com/json5/json5
@@ -7261,7 +7261,7 @@ SOFTWARE.
 
 ---
 
-## jsonfile@6.2.1
+## jsonfile
 - **License:** MIT
 - **Author/Publisher:** JP Richardson
 - **Repository:** https://github.com/jprichardson/node-jsonfile
@@ -7287,7 +7287,7 @@ OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHE
 
 ---
 
-## kleur@3.0.3
+## kleur
 - **License:** MIT
 - **Author/Publisher:** Luke Edwards
 - **Repository:** https://github.com/lukeed/kleur
@@ -7319,7 +7319,7 @@ THE SOFTWARE.
 
 ---
 
-## kleur@4.1.5
+## kleur
 - **License:** MIT
 - **Author/Publisher:** Luke Edwards
 - **Repository:** https://github.com/lukeed/kleur
@@ -7351,7 +7351,7 @@ THE SOFTWARE.
 
 ---
 
-## lines-and-columns@1.2.4
+## lines-and-columns
 - **License:** MIT
 - **Author/Publisher:** Brian Donovan
 - **Repository:** https://github.com/eventualbuddha/lines-and-columns
@@ -7383,7 +7383,7 @@ THE SOFTWARE.
 
 ---
 
-## locate-path@3.0.0
+## locate-path
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/locate-path
@@ -7403,7 +7403,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## log-symbols@6.0.0
+## log-symbols
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/log-symbols
@@ -7423,7 +7423,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## lru-cache@5.1.1
+## lru-cache
 - **License:** ISC
 - **Author/Publisher:** Isaac Z. Schlueter
 - **Repository:** https://github.com/isaacs/node-lru-cache
@@ -7449,7 +7449,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## lucide-react@1.40.0
+## lucide-react
 - **License:** ISC
 - **Author/Publisher:** Eric Fennis
 - **Repository:** https://github.com/lucide-icons/lucide
@@ -7503,7 +7503,7 @@ SOFTWARE.
 
 ---
 
-## math-intrinsics@1.1.0
+## math-intrinsics
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/es-shims/math-intrinsics
@@ -7535,7 +7535,7 @@ SOFTWARE.
 
 ---
 
-## media-typer@1.1.1
+## media-typer
 - **License:** MIT
 - **Author/Publisher:** Douglas Christopher Wilson
 - **Repository:** https://github.com/jshttp/media-typer
@@ -7568,7 +7568,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## merge-descriptors@2.0.0
+## merge-descriptors
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/sindresorhus/merge-descriptors
@@ -7590,7 +7590,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## merge-stream@2.0.0
+## merge-stream
 - **License:** MIT
 - **Author/Publisher:** Stephen Sugden
 - **Repository:** https://github.com/grncdr/merge-stream
@@ -7622,7 +7622,7 @@ THE SOFTWARE.
 
 ---
 
-## merge2@1.4.1
+## merge2
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/teambition/merge2
@@ -7654,7 +7654,7 @@ SOFTWARE.
 
 ---
 
-## micromatch@4.0.8
+## micromatch
 - **License:** MIT
 - **Author/Publisher:** Jon Schlinkert
 - **Repository:** https://github.com/micromatch/micromatch
@@ -7686,7 +7686,7 @@ THE SOFTWARE.
 
 ---
 
-## mime-db@1.54.0
+## mime-db
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/jshttp/mime-db
@@ -7720,7 +7720,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## mime-types@3.0.2
+## mime-types
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/jshttp/mime-types
@@ -7754,7 +7754,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## mimic-fn@2.1.0
+## mimic-fn
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/mimic-fn
@@ -7774,7 +7774,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## mimic-fn@3.1.0
+## mimic-fn
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/mimic-fn
@@ -7794,7 +7794,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## mimic-function@5.0.1
+## mimic-function
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/mimic-function
@@ -7814,7 +7814,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## minimatch@10.2.6
+## minimatch
 - **License:** BlueOak-1.0.0
 - **Author/Publisher:** Isaac Z. Schlueter
 - **Repository:** https://github.com/isaacs/minimatch
@@ -7880,7 +7880,7 @@ software or this license, under any kind of legal claim._**
 
 ---
 
-## minimist@1.2.8
+## minimist
 - **License:** MIT
 - **Author/Publisher:** James Halliday
 - **Repository:** https://github.com/minimistjs/minimist
@@ -7909,7 +7909,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## ms@2.1.3
+## ms
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/vercel/ms
@@ -7941,7 +7941,7 @@ SOFTWARE.
 
 ---
 
-## nanoid@3.3.18
+## nanoid
 - **License:** MIT
 - **Author/Publisher:** Andrey Sitnik
 - **Repository:** https://github.com/ai/nanoid
@@ -7972,7 +7972,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## negotiator@1.1.0
+## negotiator
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/jshttp/negotiator
@@ -8007,7 +8007,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## node-releases@2.0.54
+## node-releases
 - **License:** MIT
 - **Author/Publisher:** Sergey Rubanov
 - **Repository:** https://github.com/chicoxyzzy/node-releases
@@ -8039,7 +8039,7 @@ THE SOFTWARE.
 
 ---
 
-## npm-run-path@4.0.1
+## npm-run-path
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/npm-run-path
@@ -8059,7 +8059,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## npm-run-path@6.0.0
+## npm-run-path
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/npm-run-path
@@ -8079,7 +8079,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## object-assign@4.1.1
+## object-assign
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/object-assign
@@ -8111,7 +8111,7 @@ THE SOFTWARE.
 
 ---
 
-## object-inspect@1.13.4
+## object-inspect
 - **License:** MIT
 - **Author/Publisher:** James Halliday
 - **Repository:** https://github.com/inspect-js/object-inspect
@@ -8143,7 +8143,7 @@ SOFTWARE.
 
 ---
 
-## object-treeify@1.1.33
+## object-treeify
 - **License:** MIT
 - **Author/Publisher:** Lukas Siemon
 - **Repository:** https://github.com/blackflux/object-treeify
@@ -8176,7 +8176,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## on-finished@2.4.1
+## on-finished
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/jshttp/on-finished
@@ -8210,7 +8210,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## once@1.4.0
+## once
 - **License:** ISC
 - **Author/Publisher:** Isaac Z. Schlueter
 - **Repository:** https://github.com/isaacs/once
@@ -8236,7 +8236,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## onetime@5.1.2
+## onetime
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/onetime
@@ -8256,7 +8256,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## onetime@7.0.0
+## onetime
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/onetime
@@ -8276,7 +8276,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## open@11.0.2
+## open
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/open
@@ -8296,7 +8296,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## open@8.4.2
+## open
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/open
@@ -8316,7 +8316,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## openinvento-frontend@0.0.0
+## openinvento-frontend
 - **License:** UNLICENSED
 - **Author/Publisher:** true
 - **Repository:** true
@@ -8405,7 +8405,7 @@ export default defineConfig([
 
 ---
 
-## ora@8.2.0
+## ora
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/ora
@@ -8425,7 +8425,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## p-limit@2.3.0
+## p-limit
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/p-limit
@@ -8445,7 +8445,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## p-locate@3.0.0
+## p-locate
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/p-locate
@@ -8465,7 +8465,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## p-try@2.2.0
+## p-try
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/p-try
@@ -8485,7 +8485,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## parent-module@1.0.1
+## parent-module
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/parent-module
@@ -8505,7 +8505,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## parse-json@5.2.0
+## parse-json
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/parse-json
@@ -8525,7 +8525,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## parse-ms@4.0.0
+## parse-ms
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/parse-ms
@@ -8545,7 +8545,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## parseurl@1.3.3
+## parseurl
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/pillarjs/parseurl
@@ -8579,7 +8579,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## path-browserify@1.0.1
+## path-browserify
 - **License:** MIT
 - **Author/Publisher:** James Halliday
 - **Repository:** https://github.com/browserify/path-browserify
@@ -8610,7 +8610,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## path-exists@3.0.0
+## path-exists
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/path-exists
@@ -8642,7 +8642,7 @@ THE SOFTWARE.
 
 ---
 
-## path-key@3.1.1
+## path-key
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/path-key
@@ -8662,7 +8662,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## path-key@4.0.0
+## path-key
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/path-key
@@ -8682,7 +8682,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## path-to-regexp@8.4.2
+## path-to-regexp
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/pillarjs/path-to-regexp
@@ -8714,7 +8714,7 @@ THE SOFTWARE.
 
 ---
 
-## picocolors@1.1.1
+## picocolors
 - **License:** ISC
 - **Author/Publisher:** Alexey Raspopov
 - **Repository:** https://github.com/alexeyraspopov/picocolors
@@ -8740,7 +8740,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## picomatch@2.3.2
+## picomatch
 - **License:** MIT
 - **Author/Publisher:** Jon Schlinkert
 - **Repository:** https://github.com/micromatch/picomatch
@@ -8772,7 +8772,7 @@ THE SOFTWARE.
 
 ---
 
-## picomatch@4.0.7
+## picomatch
 - **License:** MIT
 - **Author/Publisher:** Jon Schlinkert
 - **Repository:** https://github.com/micromatch/picomatch
@@ -8804,7 +8804,7 @@ THE SOFTWARE.
 
 ---
 
-## pkce-challenge@5.0.1
+## pkce-challenge
 - **License:** MIT
 - **Author/Publisher:** crouchcd
 - **Repository:** https://github.com/crouchcd/pkce-challenge
@@ -8836,7 +8836,7 @@ SOFTWARE.
 
 ---
 
-## pkg-up@3.1.0
+## pkg-up
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/pkg-up
@@ -8856,7 +8856,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## postcss-selector-parser@7.1.6
+## postcss-selector-parser
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/postcss/postcss-selector-parser
@@ -8889,7 +8889,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## postcss@8.5.28
+## postcss
 - **License:** MIT
 - **Author/Publisher:** Andrey Sitnik
 - **Repository:** https://github.com/postcss/postcss
@@ -8920,7 +8920,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## powershell-utils@0.1.0
+## powershell-utils
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/powershell-utils
@@ -8940,7 +8940,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## powershell-utils@0.2.1
+## powershell-utils
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/powershell-utils
@@ -8960,7 +8960,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## pretty-ms@9.3.1
+## pretty-ms
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/pretty-ms
@@ -8980,7 +8980,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## prompts@2.4.2
+## prompts
 - **License:** MIT
 - **Author/Publisher:** Terkel Gjervig
 - **Repository:** https://github.com/terkelg/prompts
@@ -9012,7 +9012,7 @@ SOFTWARE.
 
 ---
 
-## proxy-addr@2.0.7
+## proxy-addr
 - **License:** MIT
 - **Author/Publisher:** Douglas Christopher Wilson
 - **Repository:** https://github.com/jshttp/proxy-addr
@@ -9045,7 +9045,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## qs@6.16.0
+## qs
 - **License:** BSD-3-Clause
 - **Author/Publisher:** true
 - **Repository:** https://github.com/ljharb/qs
@@ -9085,7 +9085,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## queue-microtask@1.2.3
+## queue-microtask
 - **License:** MIT
 - **Author/Publisher:** Feross Aboukhadijeh
 - **Repository:** https://github.com/feross/queue-microtask
@@ -9116,7 +9116,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## range-parser@1.3.0
+## range-parser
 - **License:** MIT
 - **Author/Publisher:** TJ Holowaychuk
 - **Repository:** https://github.com/jshttp/range-parser
@@ -9150,7 +9150,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## raw-body@3.0.2
+## raw-body
 - **License:** MIT
 - **Author/Publisher:** Jonathan Ong
 - **Repository:** https://github.com/stream-utils/raw-body
@@ -9183,7 +9183,7 @@ THE SOFTWARE.
 
 ---
 
-## react-dom@19.2.8
+## react-dom
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/react/react
@@ -9215,7 +9215,7 @@ SOFTWARE.
 
 ---
 
-## react-router@8.3.1
+## react-router
 - **License:** MIT
 - **Author/Publisher:** Remix Software
 - **Repository:** https://github.com/remix-run/react-router
@@ -9249,7 +9249,7 @@ SOFTWARE.
 
 ---
 
-## react@19.2.8
+## react
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/react/react
@@ -9281,7 +9281,7 @@ SOFTWARE.
 
 ---
 
-## recast@0.23.21
+## recast
 - **License:** MIT
 - **Author/Publisher:** Ben Newman
 - **Repository:** https://github.com/benjamn/recast
@@ -9312,7 +9312,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## require-from-string@2.0.2
+## require-from-string
 - **License:** MIT
 - **Author/Publisher:** Vsevolod Strukchinsky
 - **Repository:** https://github.com/floatdrop/require-from-string
@@ -9344,7 +9344,7 @@ THE SOFTWARE.
 
 ---
 
-## reselect@5.3.0
+## reselect
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/reduxjs/reselect
@@ -9376,7 +9376,7 @@ SOFTWARE.
 
 ---
 
-## resolve-from@4.0.0
+## resolve-from
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/resolve-from
@@ -9396,7 +9396,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## restore-cursor@5.1.0
+## restore-cursor
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/restore-cursor
@@ -9416,7 +9416,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## reusify@1.1.0
+## reusify
 - **License:** MIT
 - **Author/Publisher:** Matteo Collina
 - **Repository:** https://github.com/mcollina/reusify
@@ -9448,7 +9448,7 @@ SOFTWARE.
 
 ---
 
-## router@2.2.0
+## router
 - **License:** MIT
 - **Author/Publisher:** Douglas Christopher Wilson
 - **Repository:** https://github.com/pillarjs/router
@@ -9482,7 +9482,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## run-applescript@7.1.0
+## run-applescript
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/run-applescript
@@ -9502,7 +9502,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## run-parallel@1.2.0
+## run-parallel
 - **License:** MIT
 - **Author/Publisher:** Feross Aboukhadijeh
 - **Repository:** https://github.com/feross/run-parallel
@@ -9533,7 +9533,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## safer-buffer@2.1.2
+## safer-buffer
 - **License:** MIT
 - **Author/Publisher:** Nikita Skovoroda
 - **Repository:** https://github.com/ChALkeR/safer-buffer
@@ -9565,7 +9565,7 @@ SOFTWARE.
 
 ---
 
-## scheduler@0.27.0
+## scheduler
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/facebook/react
@@ -9597,7 +9597,7 @@ SOFTWARE.
 
 ---
 
-## semver@6.3.1
+## semver
 - **License:** ISC
 - **Author/Publisher:** GitHub Inc.
 - **Repository:** https://github.com/npm/node-semver
@@ -9623,7 +9623,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## semver@7.8.5
+## semver
 - **License:** ISC
 - **Author/Publisher:** GitHub Inc.
 - **Repository:** https://github.com/npm/node-semver
@@ -9649,7 +9649,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## send@1.2.1
+## send
 - **License:** MIT
 - **Author/Publisher:** TJ Holowaychuk
 - **Repository:** https://github.com/pillarjs/send
@@ -9683,7 +9683,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## serve-static@2.2.1
+## serve-static
 - **License:** MIT
 - **Author/Publisher:** Douglas Christopher Wilson
 - **Repository:** https://github.com/expressjs/serve-static
@@ -9719,7 +9719,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## setprototypeof@1.2.0
+## setprototypeof
 - **License:** ISC
 - **Author/Publisher:** Wes Todd
 - **Repository:** https://github.com/wesleytodd/setprototypeof
@@ -9743,7 +9743,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## shadcn@4.20.1
+## shadcn
 - **License:** MIT
 - **Author/Publisher:** shadcn
 - **Repository:** https://github.com/shadcn-ui/ui
@@ -9775,7 +9775,7 @@ SOFTWARE.
 
 ---
 
-## shebang-command@2.0.0
+## shebang-command
 - **License:** MIT
 - **Author/Publisher:** Kevin Mårtensson
 - **Repository:** https://github.com/kevva/shebang-command
@@ -9795,7 +9795,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## shebang-regex@3.0.0
+## shebang-regex
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/shebang-regex
@@ -9815,7 +9815,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## side-channel-list@1.0.1
+## side-channel-list
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/ljharb/side-channel-list
@@ -9847,7 +9847,7 @@ SOFTWARE.
 
 ---
 
-## side-channel-map@1.0.1
+## side-channel-map
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/ljharb/side-channel-map
@@ -9879,7 +9879,7 @@ SOFTWARE.
 
 ---
 
-## side-channel-weakmap@1.0.2
+## side-channel-weakmap
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/ljharb/side-channel-weakmap
@@ -9911,7 +9911,7 @@ SOFTWARE.
 
 ---
 
-## side-channel@1.1.1
+## side-channel
 - **License:** MIT
 - **Author/Publisher:** Jordan Harband
 - **Repository:** https://github.com/ljharb/side-channel
@@ -9943,7 +9943,7 @@ SOFTWARE.
 
 ---
 
-## signal-exit@3.0.7
+## signal-exit
 - **License:** ISC
 - **Author/Publisher:** Ben Coe
 - **Repository:** https://github.com/tapjs/signal-exit
@@ -9970,7 +9970,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## signal-exit@4.1.0
+## signal-exit
 - **License:** ISC
 - **Author/Publisher:** Ben Coe
 - **Repository:** https://github.com/tapjs/signal-exit
@@ -9997,7 +9997,7 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## sisteransi@1.0.5
+## sisteransi
 - **License:** MIT
 - **Author/Publisher:** Terkel Gjervig
 - **Repository:** https://github.com/terkelg/sisteransi
@@ -10029,7 +10029,7 @@ SOFTWARE.
 
 ---
 
-## smart-buffer@4.2.0
+## smart-buffer
 - **License:** MIT
 - **Author/Publisher:** Josh Glazebrook
 - **Repository:** https://github.com/JoshGlazebrook/smart-buffer
@@ -10060,7 +10060,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## socks@2.8.10
+## socks
 - **License:** MIT
 - **Author/Publisher:** Josh Glazebrook
 - **Repository:** https://github.com/JoshGlazebrook/socks
@@ -10091,7 +10091,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## source-map-js@1.2.1
+## source-map-js
 - **License:** BSD-3-Clause
 - **Author/Publisher:** Valentin 7rulnik Semirulnik
 - **Repository:** https://github.com/7rulnik/source-map-js
@@ -10129,7 +10129,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## source-map@0.6.1
+## source-map
 - **License:** BSD-3-Clause
 - **Author/Publisher:** Nick Fitzgerald
 - **Repository:** https://github.com/mozilla/source-map
@@ -10167,7 +10167,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## statuses@2.0.2
+## statuses
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/jshttp/statuses
@@ -10200,7 +10200,7 @@ THE SOFTWARE.
 
 ---
 
-## stdin-discarder@0.2.2
+## stdin-discarder
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/stdin-discarder
@@ -10220,7 +10220,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## string-width@7.2.0
+## string-width
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/string-width
@@ -10240,7 +10240,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## stringify-object@5.0.0
+## stringify-object
 - **License:** BSD-2-Clause
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/yeoman/stringify-object
@@ -10273,7 +10273,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
 
-## strip-ansi@6.0.1
+## strip-ansi
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/chalk/strip-ansi
@@ -10293,7 +10293,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## strip-ansi@7.2.0
+## strip-ansi
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/chalk/strip-ansi
@@ -10313,7 +10313,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## strip-bom@3.0.0
+## strip-bom
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/strip-bom
@@ -10345,7 +10345,7 @@ THE SOFTWARE.
 
 ---
 
-## strip-final-newline@2.0.0
+## strip-final-newline
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/strip-final-newline
@@ -10365,7 +10365,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## strip-final-newline@4.0.0
+## strip-final-newline
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/strip-final-newline
@@ -10385,7 +10385,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## systeminformation@5.33.8
+## systeminformation
 - **License:** MIT
 - **Author/Publisher:** Sebastian Hildebrandt
 - **Repository:** https://github.com/sebhildebrandt/systeminformation
@@ -10416,7 +10416,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## tailwind-merge@3.6.0
+## tailwind-merge
 - **License:** MIT
 - **Author/Publisher:** Dany Castillo
 - **Repository:** https://github.com/dcastil/tailwind-merge
@@ -10448,7 +10448,7 @@ SOFTWARE.
 
 ---
 
-## tiny-invariant@1.3.3
+## tiny-invariant
 - **License:** MIT
 - **Author/Publisher:** Alex Reardon
 - **Repository:** https://github.com/alexreardon/tiny-invariant
@@ -10480,7 +10480,7 @@ SOFTWARE.
 
 ---
 
-## to-regex-range@5.0.1
+## to-regex-range
 - **License:** MIT
 - **Author/Publisher:** Jon Schlinkert
 - **Repository:** https://github.com/micromatch/to-regex-range
@@ -10512,7 +10512,7 @@ THE SOFTWARE.
 
 ---
 
-## toidentifier@1.0.1
+## toidentifier
 - **License:** MIT
 - **Author/Publisher:** Douglas Christopher Wilson
 - **Repository:** https://github.com/component/toidentifier
@@ -10544,7 +10544,7 @@ SOFTWARE.
 
 ---
 
-## ts-morph@26.0.0
+## ts-morph
 - **License:** MIT
 - **Author/Publisher:** David Sherret
 - **Repository:** https://github.com/dsherret/ts-morph
@@ -10576,7 +10576,7 @@ SOFTWARE.
 
 ---
 
-## tsconfig-paths@4.2.0
+## tsconfig-paths
 - **License:** MIT
 - **Author/Publisher:** Jonas Kello
 - **Repository:** https://github.com/dividab/tsconfig-paths
@@ -10608,7 +10608,7 @@ SOFTWARE.
 
 ---
 
-## tslib@2.8.1
+## tslib
 - **License:** 0BSD
 - **Author/Publisher:** Microsoft Corp.
 - **Repository:** https://github.com/Microsoft/tslib
@@ -10631,7 +10631,7 @@ PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## tw-animate-css@1.4.0
+## tw-animate-css
 - **License:** MIT
 - **Author/Publisher:** Luca Bosin
 - **Repository:** https://github.com/Wombosvideo/tw-animate-css
@@ -10663,7 +10663,7 @@ SOFTWARE.
 
 ---
 
-## type-is@2.1.0
+## type-is
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/jshttp/type-is
@@ -10697,7 +10697,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## typescript@6.0.3
+## typescript
 - **License:** Apache-2.0
 - **Author/Publisher:** Microsoft Corp.
 - **Repository:** https://github.com/microsoft/TypeScript
@@ -10763,7 +10763,7 @@ END OF TERMS AND CONDITIONS
 
 ---
 
-## undici@7.29.0
+## undici
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/nodejs/undici
@@ -10795,7 +10795,7 @@ SOFTWARE.
 
 ---
 
-## unicorn-magic@0.3.0
+## unicorn-magic
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/unicorn-magic
@@ -10815,7 +10815,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## universalify@2.0.1
+## universalify
 - **License:** MIT
 - **Author/Publisher:** Ryan Zimmerman
 - **Repository:** https://github.com/RyanZim/universalify
@@ -10846,7 +10846,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## unpipe@1.0.0
+## unpipe
 - **License:** MIT
 - **Author/Publisher:** Douglas Christopher Wilson
 - **Repository:** https://github.com/stream-utils/unpipe
@@ -10879,7 +10879,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## update-browserslist-db@1.3.2
+## update-browserslist-db
 - **License:** MIT
 - **Author/Publisher:** Andrey Sitnik
 - **Repository:** https://github.com/browserslist/update-db
@@ -10910,7 +10910,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## use-sync-external-store@1.6.0
+## use-sync-external-store
 - **License:** MIT
 - **Author/Publisher:** true
 - **Repository:** https://github.com/facebook/react
@@ -10942,7 +10942,7 @@ SOFTWARE.
 
 ---
 
-## util-deprecate@1.0.2
+## util-deprecate
 - **License:** MIT
 - **Author/Publisher:** Nathan Rajlich
 - **Repository:** https://github.com/TooTallNate/util-deprecate
@@ -10977,7 +10977,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## validate-npm-package-name@7.0.2
+## validate-npm-package-name
 - **License:** ISC
 - **Author/Publisher:** GitHub Inc.
 - **Repository:** https://github.com/npm/validate-npm-package-name
@@ -10994,7 +10994,7 @@ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH RE
 
 ---
 
-## vary@1.1.2
+## vary
 - **License:** MIT
 - **Author/Publisher:** Douglas Christopher Wilson
 - **Repository:** https://github.com/jshttp/vary
@@ -11027,7 +11027,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
 
-## which@2.0.2
+## which
 - **License:** ISC
 - **Author/Publisher:** Isaac Z. Schlueter
 - **Repository:** https://github.com/isaacs/node-which
@@ -11053,7 +11053,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## which@4.0.0
+## which
 - **License:** ISC
 - **Author/Publisher:** GitHub Inc.
 - **Repository:** https://github.com/npm/node-which
@@ -11079,7 +11079,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## wrappy@1.0.2
+## wrappy
 - **License:** ISC
 - **Author/Publisher:** Isaac Z. Schlueter
 - **Repository:** https://github.com/npm/wrappy
@@ -11105,7 +11105,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## wsl-utils@1.0.0
+## wsl-utils
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/wsl-utils
@@ -11125,7 +11125,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## yallist@3.1.1
+## yallist
 - **License:** ISC
 - **Author/Publisher:** Isaac Z. Schlueter
 - **Repository:** https://github.com/isaacs/yallist
@@ -11151,7 +11151,7 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## yocto-spinner@1.2.2
+## yocto-spinner
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/yocto-spinner
@@ -11171,7 +11171,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## yoctocolors@2.2.0
+## yoctocolors
 - **License:** MIT
 - **Author/Publisher:** Sindre Sorhus
 - **Repository:** https://github.com/sindresorhus/yoctocolors
@@ -11191,7 +11191,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---
 
-## zod-to-json-schema@3.25.2
+## zod-to-json-schema
 - **License:** ISC
 - **Author/Publisher:** Stefan Terdell
 - **Repository:** https://github.com/StefanTerdell/zod-to-json-schema
@@ -11217,7 +11217,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ---
 
-## zod@3.25.76
+## zod
 - **License:** MIT
 - **Author/Publisher:** Colin McDonnell
 - **Repository:** https://github.com/colinhacks/zod
