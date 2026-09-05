@@ -8,7 +8,7 @@ FORBIDDEN_LICENSES = "GPL;AGPL;LGPL"
 OUTPUT_FILE = "THIRD-PARTY-NOTICES-PYTHON.txt"
 
 # Packages to ignore because they are CI/tooling artifacts and change frequently
-IGNORED_PACKAGES = "pip;setuptools;wheel;pip-licenses;pip-tools;uv;tzdata"
+IGNORED_PACKAGES = "pip;setuptools;wheel;pip-licenses;pip-tools;uv"
 
 def run_command(command):
     """Executes a CLI command and returns the result."""

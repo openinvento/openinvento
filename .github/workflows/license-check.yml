@@ -1,4 +1,4 @@
-name: License Compliance Check (Frontend & Backend)
+name: License Compliance Check & Auto-Commit
 
 on:
   push:
@@ -13,7 +13,12 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
+      with:
+        # Wichtig, damit GitHub Actions die Rechte hat, zurückzupushen
+        token: ${{ secrets.GITHUB_TOKEN }}
+        ref: ${{ github.head_ref || github.ref }}
 
+    # --- 1. PYTHON BACKEND ---
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -28,23 +33,12 @@ jobs:
       working-directory: ./backend
       run: python scripts/manage_licenses.py --check
 
-    - name: Verify THIRD-PARTY-NOTICES-PYTHON.txt is up to date
-      run: |
-        cd backend
-        python scripts/manage_licenses.py
-        cd ..
-        if [ -n "$(git status --porcelain backend/THIRD-PARTY-NOTICES-PYTHON.txt)" ]; then
-          echo "❌ ERROR: backend/THIRD-PARTY-NOTICES-PYTHON.txt is out of date!"
-          echo "------------------ EXPLICIT DIFF ------------------"
-          git diff backend/THIRD-PARTY-NOTICES-PYTHON.txt
-          echo "---------------------------------------------------"
-          echo "Please run 'python scripts/manage_licenses.py' inside the backend/ folder locally and commit the changes."
-          exit 1
-        fi
-        echo "✅ Python license file is up to date!"
+    - name: Generate Python License File
+      working-directory: ./backend
+      run: python scripts/manage_licenses.py
 
 
-    # --- 2. NODE.JS FRONTEND SETUP & CHECKS ---
+    # --- 2. NODE.JS FRONTEND ---
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
@@ -60,17 +54,25 @@ jobs:
       working-directory: ./frontend
       run: pnpm run license:check
 
-    - name: Verify frontend/THIRD_PARTY_LICENSES.md is up to date
+    - name: Generate Frontend License File
+      working-directory: ./frontend
+      run: pnpm run license:generate
+
+
+    # --- 3. AUTO-COMMIT CHANGES BACK TO REPOSITORY ---
+    - name: Commit and Push Updated License Files
+      # Dieser Schritt läuft nur bei normalen Pushes (nicht bei PRs von Forks, um Fehler zu vermeiden)
+      if: github.event_name == 'push'
       run: |
-        cd frontend
-        pnpm run license:generate
-        cd ..
-        if [ -n "$(git status --porcelain frontend/THIRD_PARTY_LICENSES.md)" ]; then
-          echo "❌ ERROR: frontend/THIRD_PARTY_LICENSES.md is out of date!"
-          echo "------------------ EXPLICIT DIFF ------------------"
-          git diff frontend/THIRD_PARTY_LICENSES.md
-          echo "---------------------------------------------------"
-          echo "Please run 'pnpm run license:generate' inside the frontend/ folder locally and commit the changes."
-          exit 1
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@://github.com"
+        
+        # Prüfen, ob sich überhaupt etwas geändert hat
+        if [ -n "$(git status --porcelain backend/THIRD-PARTY-NOTICES-PYTHON.txt frontend/THIRD_PARTY_LICENSES.md)" ]; then
+          echo "📝 License files changed. Committing updates..."
+          git add backend/THIRD-PARTY-NOTICES-PYTHON.txt frontend/THIRD_PARTY_LICENSES.md
+          git commit -m "chore: automatically update third-party license notices [skip ci]"
+          git push
+        else
+          echo "✅ License files are already up to date. Nothing to commit."
         fi
-        echo "✅ Frontend license markdown file is up to date!"
