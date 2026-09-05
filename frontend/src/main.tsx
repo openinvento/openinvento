@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router' // 💡 Wichtig: aus 'react-router' importieren
 import './index.css'
 import Start from './routes/Start.tsx'
+import LoginPage from './routes/auth/Login.tsx'
 
 
 /* Routes configuration */
@@ -10,6 +11,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Start />,
+  },
+  {
+    path: "/auth/login",
+    element: <LoginPage />,
   },
   {
     path: "/about",
