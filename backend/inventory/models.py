@@ -81,7 +81,7 @@ class Chest(InventoryComponent):
         return self.name
 
 class Article(InventoryComponent):
-    name = models.CharField(max_length=250)
+    name = models.CharField(max_length=100)
     description = models.CharField(blank=True, null=True, max_length=750)
     
     area = models.ForeignKey(Area, on_delete=models.CASCADE, null=True, blank=True)

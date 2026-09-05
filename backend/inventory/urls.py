@@ -1,10 +1,20 @@
-from operator import add
+from rest_framework.routers import DefaultRouter
 
-from django.contrib import admin
-from django.urls import path
+from .views import (
+    AreaViewSet,
+    ArticleCategoryViewSet,
+    ArticleViewSet,
+    ChestViewSet,
+    InventoryViewSet,
+    ShelfViewSet,
+)
 
-from .views import *
+router = DefaultRouter()
+router.register(r"inventories", InventoryViewSet, basename="inventory")
+router.register(r"areas", AreaViewSet, basename="area")
+router.register(r"shelves", ShelfViewSet, basename="shelf")
+router.register(r"chests", ChestViewSet, basename="chest")
+router.register(r"article-categories", ArticleCategoryViewSet, basename="article-category")
+router.register(r"articles", ArticleViewSet, basename="article")
 
-urlpatterns = [
-
-]
+urlpatterns = router.urls
