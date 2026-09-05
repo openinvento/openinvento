@@ -26,12 +26,12 @@ jobs:
 
     - name: Run Python Forbidden License Check
       working-directory: ./backend
-      run: python manage_licenses.py --check
+      run: python scripts/manage_licenses.py --check
 
     - name: Verify THIRD-PARTY-NOTICES-PYTHON.txt is up to date
       run: |
         cd backend
-        python manage_licenses.py
+        python scripts/manage_licenses.py
         cd ..
         if [ -n "$(git status --porcelain backend/THIRD-PARTY-NOTICES-PYTHON.txt)" ]; then
           echo "❌ ERROR: backend/THIRD-PARTY-NOTICES-PYTHON.txt is out of date!"
