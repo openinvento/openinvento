@@ -2,10 +2,10 @@ name: License Compliance Check & Auto-Commit
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
+permissions:
+  contents: write
 jobs:
   license-check:
     runs-on: ubuntu-latest
