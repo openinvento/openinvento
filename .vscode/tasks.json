@@ -4,7 +4,7 @@
         {
             "label": "Frontend Server",
             "type": "shell",
-            "command": "npm run dev",
+            "command": "pnpm run dev",
             "options": {
                 "cwd": "${workspaceFolder}/frontend"
             },
