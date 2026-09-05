@@ -31,7 +31,7 @@ def generate_licenses():
         "--format=plain-vertical",
         "--with-license-file",
         "--no-license-path",
-        "--no-version", 
+        "--no-version",
         f"--ignore-packages={IGNORED_PACKAGES}",
         f"--output-file={OUTPUT_FILE}"
     ]
@@ -39,6 +39,17 @@ def generate_licenses():
     if isinstance(res, subprocess.CalledProcessError):
         print(f"❌ Generation failed: {res.stderr}")
         sys.exit(1)
+        
+    try:
+        with open(OUTPUT_FILE, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+        # Replace Windows CRLF with Unix LF
+        content = content.replace("\r\n", "\n")
+        with open(OUTPUT_FILE, "w", encoding="utf-8", newline="\n") as f:
+            f.write(content)
+    except Exception as e:
+        print(f"⚠️ Warning: Could not normalize line endings: {e}")
+
     print(f"✅ License documentation successfully saved to '{OUTPUT_FILE}'!")
 
 def check_licenses():
