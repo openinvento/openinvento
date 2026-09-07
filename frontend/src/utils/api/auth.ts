@@ -1,9 +1,38 @@
-import {fetchData, postData} from './base';
+import { fetchData, postData } from "./base"
 
-async function login(username: string, password: string) {
-    const response = await postData('/api/login', { username, password });
+export type SessionUser = {
+  username: string
+  email: string
+  name: string
+  uuid: string
+  is_superuser: boolean
 }
 
-async function logout() {
-    const response = await postData('/api/logout', {});
+export async function login(identifier: string, password: string) {
+  return postData<{ detail: string; user: SessionUser }>("/api/login/", {
+    identifier,
+    password,
+  })
+}
+
+export async function signup(
+  username: string,
+  email: string,
+  name: string,
+  password: string,
+) {
+  return postData<{ detail: string; user: SessionUser }>('/api/signup/', {
+    username,
+    email,
+    name,
+    password,
+  })
+}
+
+export async function logout() {
+  return postData<{ detail: string }>("/api/logout/", {})
+}
+
+export async function getCurrentSession() {
+  return fetchData<{ authenticated: boolean; user: SessionUser | null }>("/api/me/")
 }
