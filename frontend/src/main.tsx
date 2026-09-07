@@ -4,7 +4,9 @@ import { createBrowserRouter, RouterProvider, Navigate } from 'react-router' // 
 import './index.css'
 import Start from './routes/Start.tsx'
 import LoginPage from './routes/auth/Login.tsx'
+import SignupPage from './routes/auth/Signup.tsx'
 import AppLayout from './layouts/AppLayout.tsx'
+import Dashboard from './routes/Dashboard.tsx'
 import { TooltipProvider } from "@/components/ui/tooltip"
 
 
@@ -25,7 +27,7 @@ const router = createBrowserRouter([
       },
       {
         path: "dashboard",
-        element: <Start />,
+        element: <Dashboard />,
       },
       {
         path: "settings", 
@@ -39,6 +41,10 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <LoginPage />,
+      },
+      {
+        path: "signup",
+        element: <SignupPage />,
       },
     ],
   }
