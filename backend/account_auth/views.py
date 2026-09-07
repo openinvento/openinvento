@@ -1,41 +1,80 @@
-import json
-
 from django.contrib.auth import authenticate, login, logout
-from django.http.response import JsonResponse
+from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.decorators.http import require_POST
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .models import CustomUser
+from .serializers import SignupSerializer, UserSerializer
 
 
-def ratelimited_error(request, exception):
-    # or other types:
-    return JsonResponse({'error': 'ratelimited'}, status=429)
+class SignupView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = SignupSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            login(request, user)
+            return Response(
+                {
+                    'detail': 'Account created successfully',
+                    'user': UserSerializer(user).data
+                },
+                status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@ensure_csrf_cookie  
-def get_csrf_token(request):
-    """Set the csrf token in the cookie."""
-    return JsonResponse({'detail': 'CSRF cookie set'})
+class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
 
-@require_POST
-def api_login(request):
-    """ Authenticates the user and creates a session. Expects JSON with 'username' and 'password'. """
-    try:
-        data = json.loads(request.body)
-        username = data.get('username')
-        password = data.get('password')
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    def post(self, request):
+        identifier = request.data.get('identifier') or request.data.get('username') or request.data.get('email')
+        password = request.data.get('password')
 
-    user = authenticate(request, username=username, password=password)
-    
-    if user is not None:
-        login(request, user)
-        return JsonResponse({'detail': 'Successfully logged in', 'username': user.username})
-    else:
-        return JsonResponse({'error': 'Invalid credentials'}, status=401)
+        if not identifier or not password:
+            return Response({'error': 'Missing credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
-@require_POST
-def api_logout(request):
-    """ Logs out the user and clears the session. """
-    logout(request)
-    return JsonResponse({'detail': 'Successfully logged out'})
+        username = identifier
+        if '@' in identifier:
+            user_obj = CustomUser.objects.filter(email__iexact=identifier).first()
+            if user_obj:
+                username = user_obj.username
+
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            return Response({
+                'detail': 'Successfully logged in',
+                'user': UserSerializer(user).data
+            })
+        
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class LogoutView(APIView):
+    def post(self, request):
+        logout(request)
+        return Response({'detail': 'Successfully logged out'})
+
+class GetCSRFTokenView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    @method_decorator(ensure_csrf_cookie)
+    def get(self, request):
+        """Setzt den 'csrftoken' Cookie im Browser."""
+        return Response({'detail': 'CSRF cookie set'})
+
+class MeView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response({'authenticated': False, 'user': None})
+        
+        return Response({
+            'authenticated': True,
+            'user': UserSerializer(request.user).data
+        })

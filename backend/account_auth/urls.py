@@ -1,11 +1,17 @@
-from operator import add
-
 from django.urls import path
 
-from .views import *
+from .views import (
+    GetCSRFTokenView,
+    LoginView,
+    LogoutView,
+    MeView,
+    SignupView,
+)
 
 urlpatterns = [
-    path('login/', api_login, name='login'),
-    path('logout/', api_logout, name='logout'),
-    path('csrf/', get_csrf_token, name='get_csrf_token'),
+    path('signup/', SignupView.as_view(), name='signup'),
+    path('login/', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name='logout'),
+    path('csrf-token/', GetCSRFTokenView.as_view(), name='csrf-token'),
+    path('me/', MeView.as_view(), name='me'),
 ]
