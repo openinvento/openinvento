@@ -10,6 +10,8 @@ license = { text = "YOUR-CUSTOM-SOURCE-AVAILABLE-LICENSE" }
 dependencies = [
     "django>=6.1.1",
     "uvicorn>=0.28.0",
+    "djangorestframework==3.18.0",
+    "Pillow==12.3.0"
 ]
 
 [tool.setuptools]
