@@ -1,13 +1,25 @@
 
 from pathlib import Path
 import os
-from dotenv import load_dotenv
 from django.core.management.utils import get_random_secret_key  
 from datetime import timedelta
 import logging
 
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
+
+if load_dotenv is not None:
+    load_dotenv()
 logger = logging.getLogger(__name__)
+
+try:
+    import corsheaders  # noqa: F401
+except ImportError:
+    HAS_CORSHEADERS = False
+else:
+    HAS_CORSHEADERS = True
 
 envDebugMode = os.getenv("DEBUG")
 envSecretKey = os.getenv("SECRET_KEY")
@@ -34,7 +46,15 @@ if envDebugMode:
     DEBUG = True
 
 
-ALLOWED_HOSTS = [""]
+def _csv_env(name, default):
+    raw_value = os.getenv(name)
+    if not raw_value:
+        return default
+
+    return [item.strip() for item in raw_value.split(",") if item.strip()]
+
+
+ALLOWED_HOSTS = _csv_env("ALLOWED_HOSTS", ["localhost", "127.0.0.1", "[::1]", "testserver"])
 
 
 INSTALLED_APPS = [
@@ -44,15 +64,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    'corsheaders',
     "rest_framework",
     'rest_framework.authtoken',
-    "rest_framework_simplejwt",
 
     "inventory",
     "account_auth",
 ]
+
+if HAS_CORSHEADERS:
+    INSTALLED_APPS.append("corsheaders")
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -63,15 +83,23 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'corsheaders.middleware.CorsMiddleware',
     'django_ratelimit.middleware.RatelimitMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = []
+if HAS_CORSHEADERS:
+    MIDDLEWARE.insert(1, 'corsheaders.middleware.CorsMiddleware')
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = _csv_env(
+    "CORS_ALLOWED_ORIGINS",
+    ["http://localhost:5173", "http://127.0.0.1:5173"],
+)
 
 
-CSRF_TRUSTED_ORIGINS = []
+CSRF_TRUSTED_ORIGINS = _csv_env(
+    "CSRF_TRUSTED_ORIGINS",
+    ["http://localhost:5173", "http://127.0.0.1:5173"],
+)
 
 
 
@@ -132,7 +160,7 @@ REST_AUTH = {
 }
 
 #django ratelimit config
-RATELIMIT_VIEW = 'auth.views.ratelimited_error'
+RATELIMIT_VIEW = 'account_auth.views.ratelimited_error'
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
