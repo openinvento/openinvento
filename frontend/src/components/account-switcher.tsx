@@ -17,9 +17,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { ChevronDownIcon, PlusIcon } from "lucide-react"
+import { ChevronDownIcon, LogOutIcon } from "lucide-react"
 
-export function TeamSwitcher({
+export function AccountSwitcher({
   teams,
 }: {
   teams: {
@@ -53,7 +53,7 @@ export function TeamSwitcher({
           >
             <DropdownMenuGroup>
               <DropdownMenuLabel className="text-xs text-muted-foreground">
-                Teams
+                Account
               </DropdownMenuLabel>
               {teams.map((team, index) => (
                 <DropdownMenuItem
@@ -71,14 +71,26 @@ export function TeamSwitcher({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="gap-2 p-2">
+
+              {/* Multi acc support coming later eventually */}
+{/*               <DropdownMenuItem className="gap-2 p-2">
                 <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                   <PlusIcon className="size-4" />
                 </div>
                 <div className="font-medium text-muted-foreground">
                   Add team
                 </div>
+              </DropdownMenuItem> */}
+
+              <DropdownMenuItem className="gap-2 p-2">
+                <div className="flex size-6 items-center justify-center rounded-md border bg-background">
+                  <LogOutIcon className="size-4" />
+                </div>
+                <div className="font-medium text-muted-foreground">
+                  Logout
+                </div>
               </DropdownMenuItem>
+
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>

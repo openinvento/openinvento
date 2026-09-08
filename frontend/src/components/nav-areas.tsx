@@ -18,9 +18,9 @@ import {
 import { ChevronRightIcon, PlusIcon, MoreHorizontalIcon } from "lucide-react"
 
 export function NavWorkspaces({
-  workspaces,
+  areas: areas,
 }: {
-  workspaces: {
+  areas: {
     name: string
     emoji: React.ReactNode
     pages: {
@@ -31,15 +31,15 @@ export function NavWorkspaces({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Workspaces</SidebarGroupLabel>
+    <SidebarGroupLabel>Areas - Quick Access</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {workspaces.map((workspace) => (
-            <Collapsible key={workspace.name}>
+          {areas.map((area) => (
+            <Collapsible key={area.name}>
               <SidebarMenuItem>
                 <SidebarMenuButton render={<a href="#" />}>
-                  <span>{workspace.emoji}</span>
-                  <span>{workspace.name}</span>
+                  <span>{area.emoji}</span>
+                  <span>{area.name}</span>
                 </SidebarMenuButton>
                 <SidebarMenuAction
                   render={<CollapsibleTrigger />}
@@ -55,7 +55,7 @@ export function NavWorkspaces({
                 </SidebarMenuAction>
                 <CollapsibleContent>
                   <SidebarMenuSub>
-                    {workspace.pages.map((page) => (
+                    {area.pages.map((page) => (
                       <SidebarMenuSubItem key={page.name}>
                         <SidebarMenuSubButton render={<a href="#" />}>
                           <span>{page.emoji}</span>

@@ -6,42 +6,26 @@ import { useLocation } from "react-router"
 import { NavFavorites } from "@/components/nav-favorites"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
-import { NavWorkspaces } from "@/components/nav-workspaces"
-import { TeamSwitcher } from "@/components/team-switcher"
+import { NavWorkspaces } from "@/components/nav-areas"
+import { AccountSwitcher } from "@/components/account-switcher"
 import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { TerminalIcon, AudioLinesIcon, SearchIcon, SparklesIcon, HomeIcon, InboxIcon, CalendarIcon, Settings2Icon, BlocksIcon, Trash2Icon, MessageCircleQuestionIcon } from "lucide-react"
+import { TerminalIcon, SettingsIcon, SearchIcon, HouseIcon, HomeIcon, DoorClosedIcon, CalendarIcon, Settings2Icon, BlocksIcon, Trash2Icon, MessageCircleQuestionIcon } from "lucide-react"
 
 // This is sample data.
 const data = {
   teams: [
     {
-      name: "Acme Inc",
+      name: "Your Name",
       logo: (
         <TerminalIcon
         />
       ),
       plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: (
-        <AudioLinesIcon
-        />
-      ),
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: (
-        <TerminalIcon
-        />
-      ),
-      plan: "Free",
     },
   ],
   navMain: [
@@ -53,16 +37,16 @@ const data = {
         />
       ),
     },
-    {
+/*     {
       title: "Ask AI",
       url: "#",
       icon: (
         <SparklesIcon
         />
       ),
-    },
+    }, */
     {
-      title: "Home (Testing)",
+      title: "Home",
       url: "/app",
       icon: (
         <HomeIcon
@@ -71,46 +55,32 @@ const data = {
       isActive: true,
     },
     {
-      title: "Settings (testing)",
+      title: "Areas",
       url: "/app/settings",
       icon: (
-        <InboxIcon
+        <DoorClosedIcon
         />
       ),
       isActive: false,
       badge: "10",
     },
+/*     {
+      title: "Settings",
+      url: "/app/settings",
+      icon: (
+        <SettingsIcon
+        />
+      ),
+      isActive: false,
+      badge: "10",
+    }, */
   ],
   navSecondary: [
     {
-      title: "Calendar",
-      url: "#",
-      icon: (
-        <CalendarIcon
-        />
-      ),
-    },
-    {
       title: "Settings",
-      url: "#",
+      url: "/app/settings",
       icon: (
         <Settings2Icon
-        />
-      ),
-    },
-    {
-      title: "Templates",
-      url: "#",
-      icon: (
-        <BlocksIcon
-        />
-      ),
-    },
-    {
-      title: "Trash",
-      url: "#",
-      icon: (
-        <Trash2Icon
         />
       ),
     },
@@ -125,59 +95,19 @@ const data = {
   ],
   favorites: [
     {
-      name: "Project Management & Task Tracking",
+      name: "Example article",
       url: "#",
       emoji: "📊",
     },
     {
-      name: "Family Recipe Collection & Meal Planning",
+      name: "Example room",
       url: "#",
-      emoji: "🍳",
-    },
-    {
-      name: "Fitness Tracker & Workout Routines",
-      url: "#",
-      emoji: "💪",
-    },
-    {
-      name: "Book Notes & Reading List",
-      url: "#",
-      emoji: "📚",
-    },
-    {
-      name: "Sustainable Gardening Tips & Plant Care",
-      url: "#",
-      emoji: "🌱",
-    },
-    {
-      name: "Language Learning Progress & Resources",
-      url: "#",
-      emoji: "🗣️",
-    },
-    {
-      name: "Home Renovation Ideas & Budget Tracker",
-      url: "#",
-      emoji: "🏠",
-    },
-    {
-      name: "Personal Finance & Investment Portfolio",
-      url: "#",
-      emoji: "💰",
-    },
-    {
-      name: "Movie & TV Show Watchlist with Reviews",
-      url: "#",
-      emoji: "🎬",
-    },
-    {
-      name: "Daily Habit Tracker & Goal Setting",
-      url: "#",
-      emoji: "✅",
-    },
+      emoji: "📊",
+    }
   ],
-  workspaces: [
+  areas: [
     {
-      name: "Personal Life Management",
+      name: "Test room",
       emoji: "🏠",
       pages: [
         {
@@ -198,7 +128,7 @@ const data = {
       ],
     },
     {
-      name: "Professional Development",
+      name: "Test room 2",
       emoji: "💼",
       pages: [
         {
@@ -217,70 +147,7 @@ const data = {
           emoji: "🤝",
         },
       ],
-    },
-    {
-      name: "Creative Projects",
-      emoji: "🎨",
-      pages: [
-        {
-          name: "Writing Ideas & Story Outlines",
-          url: "#",
-          emoji: "✍️",
-        },
-        {
-          name: "Art & Design Portfolio",
-          url: "#",
-          emoji: "🖼️",
-        },
-        {
-          name: "Music Composition & Practice Log",
-          url: "#",
-          emoji: "🎵",
-        },
-      ],
-    },
-    {
-      name: "Home Management",
-      emoji: "🏡",
-      pages: [
-        {
-          name: "Household Budget & Expense Tracking",
-          url: "#",
-          emoji: "💰",
-        },
-        {
-          name: "Home Maintenance Schedule & Tasks",
-          url: "#",
-          emoji: "🔧",
-        },
-        {
-          name: "Family Calendar & Event Planning",
-          url: "#",
-          emoji: "📅",
-        },
-      ],
-    },
-    {
-      name: "Travel & Adventure",
-      emoji: "🧳",
-      pages: [
-        {
-          name: "Trip Planning & Itineraries",
-          url: "#",
-          emoji: "🗺️",
-        },
-        {
-          name: "Travel Bucket List & Inspiration",
-          url: "#",
-          emoji: "🌎",
-        },
-        {
-          name: "Travel Journal & Photo Gallery",
-          url: "#",
-          emoji: "📸",
-        },
-      ],
-    },
+    }
   ],
 }
 
@@ -296,12 +163,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <AccountSwitcher teams={data.teams} />
         <NavMain items={dynamicNavMain} />
       </SidebarHeader>
       <SidebarContent>
         <NavFavorites favorites={data.favorites} />
-        <NavWorkspaces workspaces={data.workspaces} />
+        <NavWorkspaces areas={data.areas} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarRail />
