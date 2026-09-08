@@ -7,6 +7,9 @@ import LoginPage from './routes/auth/Login.tsx'
 import SignupPage from './routes/auth/Signup.tsx'
 import AppLayout from './layouts/AppLayout.tsx'
 import Dashboard from './routes/Dashboard.tsx'
+import AreasPage from './routes/inventory/AreasPage.tsx'
+import AreaDetailScreen from './routes/inventory/AreaDetailScreen.tsx'
+import ArticlePage from './routes/inventory/ArticlePage.tsx'
 import { TooltipProvider } from "@/components/ui/tooltip"
 
 
@@ -28,6 +31,18 @@ const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <Dashboard />,
+      },
+      {
+        path: "areas",
+        element: <AreasPage />,
+      },
+      {
+        path: "areas/:areaId",
+        element: <AreaDetailScreen />,
+      },
+      {
+        path: "articles/:articleId",
+        element: <ArticlePage />,
       },
       {
         path: "settings", 

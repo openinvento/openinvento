@@ -14,7 +14,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { TerminalIcon, SettingsIcon, SearchIcon, HouseIcon, HomeIcon, DoorClosedIcon, CalendarIcon, Settings2Icon, BlocksIcon, Trash2Icon, MessageCircleQuestionIcon } from "lucide-react"
+import { TerminalIcon, SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuestionIcon } from "lucide-react"
 
 // This is sample data.
 const data = {
@@ -56,7 +56,7 @@ const data = {
     },
     {
       title: "Areas",
-      url: "/app/settings",
+      url: "/app/areas",
       icon: (
         <DoorClosedIcon
         />

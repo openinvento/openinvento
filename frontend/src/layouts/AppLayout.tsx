@@ -1,4 +1,4 @@
-import { Outlet } from "react-router" //
+import { Outlet, useLocation } from "react-router"
 import { AppSidebar } from "@/components/app-sidebar"
 import { NavActions } from "@/components/nav-actions"
 import {
@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/sidebar"
 
 export default function DashboardLayout() {
+  const location = useLocation()
+  const pageName = location.pathname.includes("/areas") ? "Inventory areas" : location.pathname.includes("/articles") ? "Article" : "Dashboard"
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -30,7 +32,7 @@ export default function DashboardLayout() {
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbPage className="line-clamp-1">
-                    Project Management & Task Tracking
+                    {pageName}
                   </BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
