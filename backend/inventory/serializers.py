@@ -31,7 +31,7 @@ class InventoryScopedSerializer(serializers.ModelSerializer):
         return inventory
 
     def _validate_same_inventory(self, field_name, related_obj, inventory):
-        if related_obj is not None and related_obj.inventory_id != inventory.id:
+        if related_obj is not None and related_obj.inventory_id != inventory.uuid:
             raise serializers.ValidationError(
                 {field_name: "This object must belong to the same inventory."}
             )
@@ -127,12 +127,12 @@ class ChestSerializer(InventoryScopedSerializer):
 
         if shelf is not None:
             self._validate_same_inventory("shelf", shelf, inventory)
-            if shelf.area_id != area.id:
+            if shelf.area_id != area.uuid:
                 raise serializers.ValidationError({"shelf": "Shelf must belong to the selected area."})
 
         if parent_chest is not None:
             self._validate_same_inventory("parent_chest", parent_chest, inventory)
-            if parent_chest.area_id != area.id:
+            if parent_chest.area_id != area.uuid:
                 raise serializers.ValidationError(
                     {"parent_chest": "Parent chest must belong to the selected area."}
                 )
@@ -205,14 +205,14 @@ class ArticleSerializer(InventoryScopedSerializer):
 
         if shelf is not None:
             self._validate_same_inventory("shelf", shelf, inventory)
-            if area is not None and shelf.area_id != area.id:
+            if area is not None and shelf.area_id != area.uuid:
                 raise serializers.ValidationError({"shelf": "Shelf must belong to the selected area."})
 
         if chest is not None:
             self._validate_same_inventory("chest", chest, inventory)
-            if area is not None and chest.area_id != area.id:
+            if area is not None and chest.area_id != area.uuid:
                 raise serializers.ValidationError({"chest": "Chest must belong to the selected area."})
-            if shelf is not None and chest.shelf_id is not None and chest.shelf_id != shelf.id:
+            if shelf is not None and chest.shelf_id is not None and chest.shelf_id != shelf.uuid:
                 raise serializers.ValidationError({"chest": "Chest must belong to the selected shelf."})
 
         if category is not None:

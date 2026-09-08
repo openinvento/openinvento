@@ -15,6 +15,7 @@ class SignupView(APIView):
     def post(self, request):
         serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
+            # The serializer will create the user and assign an inventory - When a user is invited to an existing inventory, the inventory can be deleted later when the user accepts the invitation
             user = serializer.save()
             login(request, user)
             return Response(
