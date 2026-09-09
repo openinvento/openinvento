@@ -14,7 +14,8 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { TerminalIcon, SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuestionIcon } from "lucide-react"
+import { TerminalIcon, SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuestionIcon, QrCodeIcon } from "lucide-react"
+import { FAVORITES_CHANGED_EVENT, getFavorites, removeFavorite, type Favorite } from "@/utils/favorites"
 
 // This is sample data.
 const data = {
@@ -59,6 +60,16 @@ const data = {
       url: "/app/areas",
       icon: (
         <DoorClosedIcon
+        />
+      ),
+      isActive: false,
+      badge: "10",
+    },
+    {
+      title: "Code Management",
+      url: "/app/codemanagement",
+      icon: (
+        <QrCodeIcon
         />
       ),
       isActive: false,
@@ -153,6 +164,18 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation()
+  const [favorites, setFavorites] = React.useState<Favorite[]>([])
+
+  React.useEffect(() => {
+    const syncFavorites = () => setFavorites(getFavorites())
+    syncFavorites()
+    window.addEventListener(FAVORITES_CHANGED_EVENT, syncFavorites)
+    window.addEventListener("storage", syncFavorites)
+    return () => {
+      window.removeEventListener(FAVORITES_CHANGED_EVENT, syncFavorites)
+      window.removeEventListener("storage", syncFavorites)
+    }
+  }, [])
 
   /* Auto set isActive based on the current URL location */
   const dynamicNavMain = data.navMain.map((item) => ({
@@ -167,7 +190,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={dynamicNavMain} />
       </SidebarHeader>
       <SidebarContent>
-        <NavFavorites favorites={data.favorites} />
+        <NavFavorites favorites={favorites} onRemove={removeFavorite} />
         <NavWorkspaces areas={data.areas} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

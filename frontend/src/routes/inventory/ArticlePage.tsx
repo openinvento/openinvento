@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react"
 import { ArrowLeft, Package, Save } from "lucide-react"
 import { Link, useNavigate, useParams } from "react-router"
 import { Button } from "@/components/ui/button"
+import { removeFavorite } from "@/utils/favorites"
 import { inventoryApi, type Area, type Article, type Chest, type Shelf } from "@/utils/api/inventory"
 
 export default function ArticlePage() {
@@ -33,7 +34,7 @@ export default function ArticlePage() {
   }
   async function remove() {
     if (!article || !window.confirm(`Delete “${article.name}”?`)) return;
-    try { await inventoryApi.remove("articles", article.uuid); navigate(article.area ? `/app/areas/${article.area}` : "/app/areas") } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not delete article.") } 
+    try { await inventoryApi.remove("articles", article.uuid); removeFavorite(`article:${article.uuid}`); navigate(article.area ? `/app/areas/${article.area}` : "/app/areas") } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not delete article.") } 
   }
 
 
@@ -64,9 +65,11 @@ export default function ArticlePage() {
             </div>
           </div>
           
-          <Button variant="destructive" size="sm" onClick={() => void remove()}>
-            Delete
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="destructive" size="sm" onClick={() => void remove()}>
+              Delete
+            </Button>
+          </div>
         </div>
 
         {error && (

@@ -31,7 +31,7 @@ export function NavWorkspaces({
 }) {
   return (
     <SidebarGroup>
-    <SidebarGroupLabel>Areas - Quick Access</SidebarGroupLabel>
+    <SidebarGroupLabel>Areas - Recent</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {areas.map((area) => (
