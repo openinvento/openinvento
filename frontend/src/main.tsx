@@ -7,20 +7,31 @@ import LoginPage from './routes/auth/Login.tsx'
 import SignupPage from './routes/auth/Signup.tsx'
 import AppLayout from './layouts/AppLayout.tsx'
 import Dashboard from './routes/Dashboard.tsx'
+import SettingsPage from './routes/Settings.tsx'
 import AreasPage from './routes/inventory/AreasPage.tsx'
 import AreaDetailScreen from './routes/inventory/AreaDetailScreen.tsx'
 import ArticlePage from './routes/inventory/ArticlePage.tsx'
 import { TooltipProvider } from "@/components/ui/tooltip"
 
-/* Dark/ white mode handling */
-if (
-  typeof window !== 'undefined' &&
-  (localStorage.theme === 'dark' || 
-    (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches))
-) {
-  document.documentElement.classList.add('dark');
-} else {
-  document.documentElement.classList.remove('dark');
+/* Dark / White mode handling */
+function updateTheme() {
+  if (
+    typeof window !== 'undefined' &&
+    (localStorage.theme === 'dark' || 
+      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches))
+  ) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
+
+updateTheme();
+
+// Instant reaction when localStorage changes (e.g., from SettingsPage)
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', updateTheme);
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
 }
 
 
@@ -57,7 +68,7 @@ const router = createBrowserRouter([
       },
       {
         path: "settings", 
-        element: <div>Settings page</div>,
+        element: <SettingsPage />,
       },
     ],
   },
