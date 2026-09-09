@@ -48,8 +48,12 @@ export default function AreaDetailScreen() {
     const payload = modal.kind === "shelf" ? { name, inventory: inventory.uuid, area: areaId } : modal.kind === "chest" ? { name, inventory: inventory.uuid, area: areaId, shelf: optional("shelf") } : { name, inventory: inventory.uuid, area: areaId, shelf: optional("shelf"), chest: optional("chest"), quantity: Number(form.get("quantity") || 1), description: form.get("description")?.toString() || "" }
     setSaving(true)
     try { 
-      if (modal.item) await inventoryApi.update(modal.kind === "shelf" ? "shelves" : "chests", modal.item.uuid, payload); 
-      else await inventoryApi.create(`${modal.kind}s` as "articles" | "chests" | "shelves", payload); setModal(null); await load() 
+      if (modal.item) {
+        await inventoryApi.update(modal.kind === "shelf" ? "shelves" : "chests", modal.item.uuid, payload)
+      }
+      else {
+        await inventoryApi.create(modal.kind === "shelf" ? "shelves" : modal.kind === "chest" ? "chests" : "articles", payload); setModal(null); await load() 
+      }
     }
     catch (reason) { 
       setError(reason instanceof Error ? reason.message : "Could not create item.") 
