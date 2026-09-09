@@ -25,6 +25,18 @@ export default function Dashboard() {
     }
   }
 
+  // Function to toggle theme
+  function toggleTheme() {
+    if (document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark');
+      localStorage.theme = 'light';
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.theme = 'dark';
+    }
+  }
+
+
   return (
     <section className="flex max-w-2xl flex-col gap-4">
       <div>
@@ -49,6 +61,8 @@ export default function Dashboard() {
             {JSON.stringify(user, null, 2)}
           </pre>
         )}
+
+        <Button onClick={toggleTheme}>Toggle Dark/ light</Button>
       </div>
     </section>
   )

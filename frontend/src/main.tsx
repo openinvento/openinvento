@@ -12,6 +12,17 @@ import AreaDetailScreen from './routes/inventory/AreaDetailScreen.tsx'
 import ArticlePage from './routes/inventory/ArticlePage.tsx'
 import { TooltipProvider } from "@/components/ui/tooltip"
 
+/* Dark/ white mode handling */
+if (
+  typeof window !== 'undefined' &&
+  (localStorage.theme === 'dark' || 
+    (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches))
+) {
+  document.documentElement.classList.add('dark');
+} else {
+  document.documentElement.classList.remove('dark');
+}
+
 
 /* Routes configuration */
 const router = createBrowserRouter([
