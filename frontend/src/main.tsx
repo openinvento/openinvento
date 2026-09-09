@@ -13,6 +13,9 @@ import AreaDetailScreen from './routes/inventory/AreaDetailScreen.tsx'
 import ArticlePage from './routes/inventory/ArticlePage.tsx'
 import { TooltipProvider } from "@/components/ui/tooltip"
 
+import './i18n.ts' // Initialize i18next
+
+
 /* Dark / White mode handling */
 function updateTheme() {
   if (

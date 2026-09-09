@@ -1,0 +1,15 @@
+{
+  "settings": {
+    "description": "Wähle aus, wie die Benutzeroberfläche dargestellt werden soll.",
+    "themeDark": "Dunkel",
+    "themeLabel": "Design / Theme",
+    "themeLight": "Hell",
+    "themePlaceholder": "Design wählen",
+    "themeSystem": "System",
+    "title": "Einstellungen"
+  },
+  "sidebar": {
+    "home": "Home",
+    "settings": "Einstellungen"
+  }
+}
