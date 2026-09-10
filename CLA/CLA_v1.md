@@ -138,17 +138,19 @@ Contributions accepted under a previous version.
 By submitting a Contribution to the Project, you must accept this Agreement.
 
 For contributions submitted through GitHub, acceptance may be recorded by
-commenting on the relevant pull request with the following statement:
+checking the Contributor License Agreement checkbox in the relevant pull
+request template.
 
-> I have read the OpenInvento Contributor License Agreement and I hereby agree to it.
+By checking the checkbox and submitting the pull request, the Contributor
+confirms that they have read and agree to this Agreement.
 
-The Contributor's GitHub username, the date and time of acceptance, the
-version of this Agreement, and the relevant contribution or pull request may
-be recorded as evidence of acceptance.
+The Project may retain the pull request and its associated GitHub records as
+evidence of acceptance, including the Contributor's GitHub username, the date
+and time of the pull request, and the version of this Agreement applicable at
+the time of submission.
 
 ---
 
-Copyright © OpenInvento contributors.
 
 This Contributor License Agreement is intended to govern contributions to
 OpenInvento. It does not transfer ownership of Contributions to the Project;
