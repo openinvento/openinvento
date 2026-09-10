@@ -14,6 +14,7 @@ import ArticlePage from './routes/inventory/ArticlePage.tsx'
 import { TooltipProvider } from "@/components/ui/tooltip"
 
 import './i18n.ts' // Initialize i18next
+import ErrorPage from './routes/Error.tsx'
 
 
 /* Dark / White mode handling */
@@ -43,6 +44,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Start />,
+    errorElement: <ErrorPage />,
   },
   {
     path: "/app",
