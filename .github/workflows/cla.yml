@@ -38,7 +38,7 @@ jobs:
             const CLA_VERSION = "v1";
 
             const CLA_URL =
-              "https://github.com/openinvento/openinvento/blob/main/CLA/versions/v1.md";
+              "https://github.com/openinvento/openinvento/blob/main/CLA/CLA_v1.md";
 
             const RECHECK_COMMAND = "recheck";
 
