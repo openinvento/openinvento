@@ -73,6 +73,10 @@ const router = createBrowserRouter([
         path: "settings", 
         element: <SettingsPage />,
       },
+      {
+        path: "codemanagement", 
+        element: <SettingsPage />,
+      },
     ],
   },
   {

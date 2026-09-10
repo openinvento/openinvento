@@ -1,13 +1,7 @@
 "use client"
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Link } from "react-router"
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -17,16 +11,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { MoreHorizontalIcon, StarOffIcon, LinkIcon, ArrowUpRightIcon, Trash2Icon } from "lucide-react"
+import { MoreHorizontalIcon, StarOffIcon } from "lucide-react"
+import type { Favorite } from "@/utils/favorites"
 
 export function NavFavorites({
   favorites,
+  onRemove,
 }: {
-  favorites: {
-    name: string
-    url: string
-    emoji: string
-  }[]
+  favorites: Favorite[]
+  onRemove: (id: string) => void
 }) {
   const { isMobile } = useSidebar()
   return (
@@ -34,8 +27,8 @@ export function NavFavorites({
       <SidebarGroupLabel>Favorites</SidebarGroupLabel>
       <SidebarMenu>
         {favorites.map((item) => (
-          <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton render={<a href={item.url} title={item.name} />}>
+          <SidebarMenuItem key={item.id}>
+            <SidebarMenuButton render={<Link to={favoriteUrl(item)} title={item.name} />}>
               <span>{item.emoji}</span>
               <span>{item.name}</span>
             </SidebarMenuButton>
@@ -58,39 +51,24 @@ export function NavFavorites({
                 align={isMobile ? "end" : "start"}
               >
                 <DropdownMenuGroup>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onRemove(item.id)}>
                     <StarOffIcon className="text-muted-foreground" />
                     <span>Remove from Favorites</span>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem>
-                    <LinkIcon className="text-muted-foreground" />
-                    <span>Copy Link</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <ArrowUpRightIcon className="text-muted-foreground" />
-                    <span>Open in New Tab</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Trash2Icon className="text-muted-foreground" />
-                    <span>Delete</span>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
-            <MoreHorizontalIcon
-            />
-            <span>More</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+        {favorites.length === 0 && <p className="px-2 py-1 text-sm text-sidebar-foreground/70">No favorites yet.</p>}
       </SidebarMenu>
     </SidebarGroup>
   )
+}
+
+function favoriteUrl(item: Favorite) {
+  const [kind, uuid] = item.id.split(":")
+  if (uuid && kind === "area") return `/app/areas/${uuid}`
+  if (uuid && kind === "article") return `/app/articles/${uuid}`
+  return item.url
 }

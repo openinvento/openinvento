@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useLocation } from "react-router"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -15,7 +16,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Settings2Icon, FileTextIcon, LinkIcon, CopyIcon, CornerUpRightIcon, Trash2Icon, CornerUpLeftIcon, ChartLineIcon, GalleryVerticalEndIcon, TrashIcon, BellIcon, ArrowUpIcon, ArrowDownIcon, StarIcon, MoreHorizontalIcon } from "lucide-react"
+import { Settings2Icon, FileTextIcon, LinkIcon, CopyIcon, CornerUpRightIcon, Trash2Icon, CornerUpLeftIcon, ChartLineIcon, GalleryVerticalEndIcon, TrashIcon, BellIcon, ArrowUpIcon, ArrowDownIcon, MoreHorizontalIcon, StarIcon, StarOffIcon } from "lucide-react"
+import { inventoryApi } from "@/utils/api/inventory"
+import { isFavorite, toggleFavorite, type Favorite } from "@/utils/favorites"
 
 const data = [
   [
@@ -120,15 +123,59 @@ const data = [
 ]
 export function NavActions() {
   const [isOpen, setIsOpen] = React.useState(false)
+  const location = useLocation()
+  const [favorite, setFavorite] = React.useState<Favorite | null>(null)
+  const [favorited, setFavorited] = React.useState(false)
+
+  React.useEffect(() => {
+    const areaId = location.pathname.match(/^\/app\/areas\/([^/]+)$/)?.[1]
+    const articleId = location.pathname.match(/^\/app\/articles\/([^/]+)$/)?.[1]
+    if (!areaId && !articleId) {
+      setFavorite(null)
+      setFavorited(false)
+      return
+    }
+
+    let active = true
+    void (async () => {
+      const item = areaId
+        ? (await inventoryApi.listAreas()).find((area) => area.uuid === areaId)
+        : (await inventoryApi.listArticles()).find((article) => article.uuid === articleId)
+      if (!active || !item) return
+      const nextFavorite: Favorite = areaId
+        ? { id: `area:${item.uuid}`, name: item.name, url: `/app/areas/${item.uuid}`, emoji: "🚪" }
+        : { id: `article:${item.uuid}`, name: item.name, url: `/app/articles/${item.uuid}`, emoji: "📦" }
+      setFavorite(nextFavorite)
+      setFavorited(isFavorite(nextFavorite.id))
+    })()
+    return () => { active = false }
+  }, [location.pathname])
+
+  React.useEffect(() => {
+    const syncFavorite = () => setFavorited(favorite ? isFavorite(favorite.id) : false)
+    window.addEventListener("openinvento:favorites-changed", syncFavorite)
+    window.addEventListener("storage", syncFavorite)
+    return () => {
+      window.removeEventListener("openinvento:favorites-changed", syncFavorite)
+      window.removeEventListener("storage", syncFavorite)
+    }
+  }, [favorite])
 
   return (
     <div className="flex items-center gap-2 text-sm">
       <div className="hidden font-medium text-muted-foreground md:inline-block">
         Edit Oct 08
       </div>
-      <Button variant="ghost" size="icon" className="h-7 w-7">
-        <StarIcon
-        />
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7"
+        disabled={!favorite}
+        onClick={() => favorite && setFavorited(toggleFavorite(favorite))}
+        aria-pressed={favorited}
+        aria-label={favorite ? (favorited ? `Remove ${favorite.name} from favorites` : `Add ${favorite.name} to favorites`) : "Favorite"}
+      >
+        {favorited ? <StarOffIcon /> : <StarIcon />}
       </Button>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger
