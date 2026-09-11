@@ -35,7 +35,7 @@ jobs:
             )
           )
 
-        uses: openinvento/cla-github-action@1de7391ccc342943ff8e537925a409b832a88395
+        uses: openinvento/cla-github-action@ae8f6b1ce74f3f32670ba137dfc4be440000f00a
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

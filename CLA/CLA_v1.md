@@ -141,6 +141,11 @@ For contributions submitted through GitHub, acceptance is completed by
 following the Contributor License Agreement acceptance instructions provided
 by the Project.
 
+Once you have accepted a version of this Agreement, that acceptance applies
+to all Contributions you submit to the Project that are covered by the same
+version of this Agreement, unless you are required to provide a new or
+updated acceptance under a later version of the Agreement.
+
 The Project may retain the relevant GitHub records as evidence of acceptance,
 including the Contributor's GitHub username, the date and time of acceptance,
 the relevant contribution or pull request, and the version of this Agreement
