@@ -1,4 +1,31 @@
 {
+  "areas": {
+    "areaName": "Area name",
+    "confirmDelete": "Delete {{name}}? Its inventory contents may be deleted too.",
+    "createArea": "Create area",
+    "description": "Organize your things by room, garage, office, or any other place.",
+    "empty": {
+      "noAreas": {
+        "text": "Start with the place where you keep your things.",
+        "title": "Your inventory has no areas"
+      },
+      "noInventory": {
+        "text": "Ask an administrator to add you to an inventory before creating areas.",
+        "title": "No inventory available"
+      }
+    },
+    "errors": {
+      "delete": "Could not delete area.",
+      "load": "Could not load areas.",
+      "save": "Could not save area."
+    },
+    "inventoryFallback": "Your inventory",
+    "namePlaceholder": "e.g. Kitchen",
+    "newArea": "New area",
+    "openArea": "Open area",
+    "renameArea": "Rename area",
+    "title": "Areas"
+  },
   "search": {
     "searchDescription": "Search your inventory",
     "searchTitle": "Search"

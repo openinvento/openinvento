@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react"
 import { Plus, Warehouse } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router"
 import { AreaCard } from "@/components/inventory/entity-cards"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
@@ -8,6 +9,7 @@ import BaseScreen from "@/layouts/BaseScreen"
 import { inventoryApi, type Area, type Inventory } from "@/utils/api/inventory"
 
 export default function AreasPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [inventory, setInventory] = useState<Inventory | null>(null)
   const [areas, setAreas] = useState<Area[]>([])
@@ -21,7 +23,7 @@ export default function AreasPage() {
       const [inventories, nextAreas] = await Promise.all([inventoryApi.listInventories(), inventoryApi.listAreas()])
       setInventory(inventories[0] ?? null)
       setAreas(nextAreas)
-    } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not load areas.") }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t("areas.errors.load")) }
   }
   useEffect(() => { void load() }, [])
 
@@ -35,23 +37,23 @@ export default function AreasPage() {
       else await inventoryApi.create("areas", { name, inventory: inventory.uuid })
       setModal(null); 
       await load()
-    } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not save area.") }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t("areas.errors.save")) }
     finally { setSaving(false) }
   }
   async function remove(area: Area) {
-    if (!window.confirm(`Delete “${area.name}”? Its inventory contents may be deleted too.`)) return
+    if (!window.confirm(t("areas.confirmDelete", { name: area.name }))) return
     try { await inventoryApi.remove("areas", area.uuid); await load() }
-    catch (reason) { setError(reason instanceof Error ? reason.message : "Could not delete area.") }
+    catch (reason) { setError(reason instanceof Error ? reason.message : t("areas.errors.delete")) }
   }
 
   return (
     <BaseScreen
-      eyebrow={inventory?.name ?? "Your inventory"}
-      title="Areas"
-      description="Organize your things by room, garage, office, or any other place."
+      eyebrow={inventory?.name ?? t("areas.inventoryFallback")}
+      title={t("areas.title")}
+      description={t("areas.description")}
       actions={
         <Button onClick={() => setModal({})} disabled={!inventory}>
-          <Plus /> New area
+          <Plus /> {t("areas.newArea")}
         </Button>
       }
     >
@@ -62,15 +64,15 @@ export default function AreasPage() {
       )}
 
       {!inventory && !error ? (
-        <Empty 
-          title="No inventory available" 
-          text="Ask an administrator to add you to an inventory before creating areas." 
+        <Empty
+          title={t("areas.empty.noInventory.title")}
+          text={t("areas.empty.noInventory.text")}
         />
       ) : areas.length === 0 ? (
-        <Empty 
-          title="Your inventory has no areas" 
-          text="Start with the place where you keep your things." 
-          action={() => setModal({})} 
+        <Empty
+          title={t("areas.empty.noAreas.title")}
+          text={t("areas.empty.noAreas.text")}
+          action={() => setModal({})}
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -78,7 +80,7 @@ export default function AreasPage() {
             <AreaCard 
               key={area.uuid} 
               name={area.name} 
-              subtitle="Open area" 
+              subtitle={t("areas.openArea")}
               onOpen={() => navigate(`/app/areas/${area.uuid}`)} 
               onRename={() => setModal({ area })} 
               onDelete={() => void remove(area)} 
@@ -88,21 +90,21 @@ export default function AreasPage() {
       )}
 
       <InventoryModal 
-        title={modal?.area ? "Rename area" : "New area"} 
+        title={modal?.area ? t("areas.renameArea") : t("areas.newArea")}
         open={modal !== null} 
         submitting={saving} 
         onClose={() => setModal(null)} 
         onSubmit={save}
       >
         <label className="grid gap-1.5 text-sm font-medium">
-          Area name
+          {t("areas.areaName")}
           <input 
             autoFocus 
             name="name" 
             defaultValue={modal?.area?.name} 
             className="h-10 rounded-lg border bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring" 
-            placeholder="e.g. Kitchen" 
-            required 
+            placeholder={t("areas.namePlaceholder")}
+            required
           />
         </label>
       </InventoryModal>
@@ -120,7 +122,7 @@ function Empty({ title, text, action }: { title: string; text: string; action?: 
         
         {action && (
           <Button className="mt-4" onClick={action}>
-            <Plus /> Create area
+            <Plus /> {t("areas.createArea")}
           </Button>
         )}
       </div>
