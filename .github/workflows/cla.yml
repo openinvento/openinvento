@@ -35,7 +35,7 @@ jobs:
             )
           )
 
-        uses: openinvento/cla-github-action@ae8f6b1ce74f3f32670ba137dfc4be440000f00a
+        uses: openinvento/cla-github-action@120ddac3df1ac95308f830024c7e7a3a7e293cc1 # Commit pinned version
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,6 +53,7 @@ jobs:
 
           custom-notsigned-prcomment: 'Thank you for your contribution! Like many software projects that accept external contributions, this project requires contributors to accept a Contributor License Agreement (CLA).<br/><br/>Please read our [Contributor License Agreement]($pathToCLADocument) and accept it by posting the exact acceptance comment shown below.<br/><br/>This is a standard part of the contribution process and is required before your pull request can be merged. Thank you!'
           custom-pr-sign-comment: 'I have read and understood the Contributor License Agreement, and I hereby agree to its terms.'
+          custom-allsigned-prcomment: 'All contributors have signed the [Contributor License Agreement]($pathToCLADocument) ✅.'
 
           require-opener-as-author: true
 
