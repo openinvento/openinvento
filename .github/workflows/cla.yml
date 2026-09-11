@@ -51,7 +51,7 @@ jobs:
           remote-organization-name: 'openinvento'
           remote-repository-name: 'openinvento-cla'
 
-          custom-notsigned-prcomment: 'Thank you for your contribution! Like many software projects that accept external contributions, this project requires contributors to accept a Contributor License Agreement (CLA).<br/><br/>Please read our CLA at $pathToCLADocument and accept it by posting the exact acceptance comment shown below.<br/><br/>This is a standard part of the contribution process and is required before your pull request can be merged. Thank you!'
+          custom-notsigned-prcomment: 'Thank you for your contribution! Like many software projects that accept external contributions, this project requires contributors to accept a Contributor License Agreement (CLA).<br/><br/>Please read our [Contributor License Agreement]($pathToCLADocument) and accept it by posting the exact acceptance comment shown below.<br/><br/>This is a standard part of the contribution process and is required before your pull request can be merged. Thank you!'
           custom-pr-sign-comment: 'I have read and understood the Contributor License Agreement, and I hereby agree to its terms.'
 
           require-opener-as-author: true
