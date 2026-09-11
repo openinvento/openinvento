@@ -1,249 +1,51 @@
 name: CLA Check
 
 on:
+  issue_comment:
+    types: [created]
+
   pull_request_target:
     types:
       - opened
-      - synchronize
-      - reopened
       - closed
-
-  issue_comment:
-    types:
-      - created
-
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: Pull request number to recheck
-        required: true
-        type: string
+      - reopened
+      - synchronize
 
 permissions:
+  actions: write
   contents: read
-  issues: write
   pull-requests: write
+  statuses: write
 
 jobs:
   cla:
-    name: CLA Check
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check CLA
-        uses: actions/github-script@v7
+      - name: CLA Assistant
+        if: >
+          github.event_name == 'pull_request_target' ||
+          github.event.comment.body == 'recheck' ||
+          github.event.comment.body == 'I have read the OpenInvento Contributor License Agreement, and I hereby sign the CLA'
+
+        uses: openinvento/cla-github-action@786020d9a25a88bcbf0cf12dc6b260e61d736355
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.CLA_BOT }}
+
         with:
-          script: |
-            const PROJECT_NAME = "OpenInvento";
-            const CLA_VERSION = "v1";
+          path-to-signatures: 'signatures/v1/cla.json'
 
-            const CLA_URL =
-              "https://github.com/openinvento/openinvento/blob/main/CLA/CLA_v1.md";
+          path-to-document: 'https://github.com/openinvento/openinvento/blob/main/CLA/CLA_v1.md'
 
-            const RECHECK_COMMAND = "recheck";
+          branch: 'main'
 
-            const CLA_CHECKBOX =
-              "I have read and understood the OpenInvento Contributor License Agreement";
+          remote-organization-name: 'openinvento'
+          remote-repository-name: 'openinvento-cla'
 
-            const CLA_REQUIRED_MARKER =
-              "<!-- openinvento-cla-required -->";
+          require-opener-as-author: true
 
-            const CLA_ACCEPTED_MARKER =
-              "<!-- openinvento-cla-accepted -->";
+          lock-pullrequest-aftermerge: true
 
-            const prEvent = context.payload.pull_request;
-            const issueEvent = context.payload.issue;
-            const commentEvent = context.payload.comment;
-
-            let prNumber;
-
-            /*
-             * Determine which PR we are working with.
-             */
-            if (context.eventName === "pull_request_target") {
-              prNumber = prEvent.number;
-            } else if (context.eventName === "issue_comment") {
-              if (!issueEvent?.pull_request) {
-                return;
-              }
-
-              /*
-               * Only react to comments containing "recheck".
-               */
-              const commentBody = commentEvent.body.trim().toLowerCase();
-
-              if (commentBody !== RECHECK_COMMAND) {
-                return;
-              }
-
-              /*
-               * Only repository owners and members may trigger a recheck.
-               */
-              const allowedAssociations = [
-                "OWNER",
-                "MEMBER"
-              ];
-
-              const authorAssociation =
-                commentEvent.author_association;
-
-              if (!allowedAssociations.includes(authorAssociation)) {
-                core.info(
-                  `Ignoring recheck from ${commentEvent.user?.login} ` +
-                  `(association: ${authorAssociation}).`
-                );
-
-                return;
-              }
-
-              core.info(
-                `Recheck requested by ${commentEvent.user?.login}.`
-              );
-
-              prNumber = issueEvent.number;
-            } else if (context.eventName === "workflow_dispatch") {
-              prNumber = Number(
-                context.payload.inputs.pr_number
-              );
-            }
-
-            if (!prNumber) {
-              core.setFailed("Could not determine pull request number.");
-              return;
-            }
-
-            /*
-             * Get the current PR.
-             */
-            const { data: pr } =
-              await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber
-              });
-
-            /*
-             * Lock merged PRs immediately.
-             *
-             * We do this before the CLA check so that a merged PR
-             * is always locked, even if the CLA check fails.
-             */
-            if (
-              context.eventName === "pull_request_target" &&
-              context.payload.action === "closed" &&
-              pr.merged_at
-            ) {
-              await github.rest.issues.lock({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                lock_reason: "resolved"
-              });
-
-              core.info(`Locked merged PR #${prNumber}.`);
-            }
-
-            const body = pr.body || "";
-
-            /*
-             * The checkbox must explicitly mention CLA v1.
-             *
-             * Accepted:
-             * - [x] I have read and understood ... (v1)
-             * - [X] I have read and understood ... (v1)
-             *
-             * Rejected:
-             * - [ ] ...
-             */
-            const checkboxRegex =
-              new RegExp(
-                `- \\[[xX]\\]\\s*${CLA_CHECKBOX.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\(${CLA_VERSION}\\)`,
-                "i"
-              );
-
-            const accepted = checkboxRegex.test(body);
-
-            core.info(`PR #${prNumber}`);
-            core.info(`CLA version: ${CLA_VERSION}`);
-            core.info(`CLA accepted: ${accepted}`);
-
-            /*
-             * Find existing CLA bot comments so we don't spam the PR.
-             */
-            const { data: comments } =
-              await github.rest.issues.listComments({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                per_page: 100
-              });
-
-            const claRequiredComment = comments.find(comment =>
-              comment.user?.type === "Bot" &&
-              comment.body?.includes(CLA_REQUIRED_MARKER)
-            );
-
-            const claAcceptedComment = comments.find(comment =>
-              comment.user?.type === "Bot" &&
-              comment.body?.includes(CLA_ACCEPTED_MARKER)
-            );
-
-            if (accepted) {
-              /*
-               * Remove the old "CLA required" comment if one exists.
-               */
-              if (claRequiredComment) {
-                await github.rest.issues.deleteComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  comment_id: claRequiredComment.id
-                });
-              }
-
-              /*
-               * Add an acceptance confirmation once.
-               */
-              if (!claAcceptedComment) {
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: prNumber,
-                  body:
-                    `${CLA_ACCEPTED_MARKER}\n` +
-                    `✅ **${PROJECT_NAME} CLA ${CLA_VERSION} accepted.**\n\n` +
-                    `The contributor has confirmed acceptance of ` +
-                    `[CLA ${CLA_VERSION}](${CLA_URL}) for this pull request.`
-                });
-              }
-
-              core.notice(
-                `CLA ${CLA_VERSION} accepted for PR #${prNumber}.`
-              );
-
-              return;
-            }
-
-            /*
-             * CLA has NOT been accepted.
-             */
-            if (!claRequiredComment) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-                body:
-                  `${CLA_REQUIRED_MARKER}\n` +
-                  `❌ **CLA ${CLA_VERSION} acceptance required.**\n\n` +
-                  `Please read the [OpenInvento Contributor License Agreement ` +
-                  `(${CLA_VERSION})](${CLA_URL}) and check the CLA checkbox ` +
-                  `in the pull request description.\n\n` +
-                  `The pull request cannot be merged until the CLA checkbox ` +
-                  `has been checked. For a recheck after checking the box, ` +
-                  `a repository owner or member can comment \`${RECHECK_COMMAND}\` ` +
-                  `on this pull request.`
-              });
-            }
-
-            core.setFailed(
-              `CLA ${CLA_VERSION} has not been accepted for PR #${prNumber}.`
-            );
+          suggest-recheck: true
