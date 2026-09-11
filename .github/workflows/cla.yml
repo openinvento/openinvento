@@ -26,7 +26,7 @@ jobs:
         if: >
           github.event_name == 'pull_request_target' ||
           github.event.comment.body == 'recheck' ||
-          github.event.comment.body == 'I have read the OpenInvento Contributor License Agreement, and I hereby sign the CLA'
+          github.event.comment.body == 'I have read and understood the Contributor License Agreement, and I hereby agree to its terms.'
 
         uses: openinvento/cla-github-action@786020d9a25a88bcbf0cf12dc6b260e61d736355
 
@@ -43,6 +43,8 @@ jobs:
 
           remote-organization-name: 'openinvento'
           remote-repository-name: 'openinvento-cla'
+
+          custom-pr-sign-comment: 'I have read and understood the Contributor License Agreement, and I hereby agree to its terms.'
 
           require-opener-as-author: true
 
