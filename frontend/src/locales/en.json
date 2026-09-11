@@ -1,15 +1,22 @@
 {
-    "sidebar": {
-        "home": "Home",
-        "settings": "Settings"
-    },
-    "settings": {
-        "title": "Settings",
-        "themeLabel": "Theme",
-        "themePlaceholder": "Select theme",
-        "themeLight": "Light",
-        "themeDark": "Dark",
-        "themeSystem": "System",
-        "description": "Select how the user interface should be displayed."
-    }
+  "search": {
+    "searchDescription": "Search your inventory",
+    "searchTitle": "Search"
+  },
+  "settings": {
+    "description": "Select how the user interface should be displayed.",
+    "themeDark": "Dark",
+    "themeLabel": "Theme",
+    "themeLight": "Light",
+    "themePlaceholder": "Select theme",
+    "themeSystem": "System",
+    "title": "Settings"
+  },
+  "sidebar": {
+    "areas": "Areas",
+    "codeManagement": "Code Management",
+    "home": "Home",
+    "search": "Search",
+    "settings": "Settings"
+  }
 }

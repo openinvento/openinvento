@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sidebar"
 import { TerminalIcon, SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuestionIcon, QrCodeIcon } from "lucide-react"
 import { FAVORITES_CHANGED_EVENT, getFavorites, removeFavorite, type Favorite } from "@/utils/favorites"
+import i18n from "@/i18n"
 
 // This is sample data.
 const data = {
@@ -31,7 +32,7 @@ const data = {
   ],
   navMain: [
     {
-      title: "Search",
+      title: i18n.t("sidebar.search"),
       url: "/app/search",
       icon: (
         <SearchIcon
@@ -47,7 +48,7 @@ const data = {
       ),
     }, */
     {
-      title: "Home",
+      title: i18n.t("sidebar.home"),
       url: "/app",
       icon: (
         <HomeIcon
@@ -56,7 +57,7 @@ const data = {
       isActive: true,
     },
     {
-      title: "Areas",
+      title: i18n.t("sidebar.areas"),
       url: "/app/areas",
       icon: (
         <DoorClosedIcon
@@ -66,7 +67,7 @@ const data = {
       badge: "10",
     },
     {
-      title: "Code Management",
+      title: i18n.t("sidebar.codeManagement"),
       url: "/app/codemanagement",
       icon: (
         <QrCodeIcon
@@ -88,7 +89,7 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Settings",
+      title: i18n.t("sidebar.settings"),
       url: "/app/settings",
       icon: (
         <Settings2Icon
