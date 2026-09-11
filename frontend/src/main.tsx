@@ -15,6 +15,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 
 import './i18n.ts' // Initialize i18next
 import ErrorPage from './routes/Error.tsx'
+import SearchPage from './routes/inventory/SearchPage.tsx'
 
 
 /* Dark / White mode handling */
@@ -58,6 +59,10 @@ const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <Dashboard />,
+      },
+      {
+        path: "search",
+        element: <SearchPage />,
       },
       {
         path: "areas",

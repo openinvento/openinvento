@@ -32,7 +32,7 @@ const data = {
   navMain: [
     {
       title: "Search",
-      url: "#",
+      url: "/app/search",
       icon: (
         <SearchIcon
         />

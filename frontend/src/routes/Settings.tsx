@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getCurrentSession, type SessionUser } from "@/utils/api/auth";
 import { FieldDescription } from "@/components/ui/field";
+import BaseScreen from "@/layouts/BaseScreen";
 
 import {
   Select,
@@ -40,8 +41,8 @@ export default function SettingsPage() {
   };
 
   return (
-    <section className="flex max-w-2xl flex-col gap-6 p-4">
-      <h1 className="text-2xl font-bold">{t("settings.title")}</h1>
+    <BaseScreen title={t("settings.title")}>
+      <div className="flex max-w-2xl flex-col gap-6">
 
       {/* language settings */}
       <div className="flex flex-col gap-2">
@@ -74,6 +75,7 @@ export default function SettingsPage() {
           {t("settings.description")}
         </FieldDescription>
       </div>
-    </section>
+      </div>
+    </BaseScreen>
   );
 }

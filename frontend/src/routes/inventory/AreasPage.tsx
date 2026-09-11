@@ -4,6 +4,7 @@ import { useNavigate } from "react-router"
 import { AreaCard } from "@/components/inventory/entity-cards"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
+import BaseScreen from "@/layouts/BaseScreen"
 import { inventoryApi, type Area, type Inventory } from "@/utils/api/inventory"
 
 export default function AreasPage() {
@@ -44,23 +45,16 @@ export default function AreasPage() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-6xl">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="mb-1 text-sm font-medium text-muted-foreground">
-            {inventory?.name ?? "Your inventory"}
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight">Areas</h1>
-          <p className="mt-2 text-muted-foreground">
-            Organize your things by room, garage, office, or any other place.
-          </p>
-        </div>
-        
+    <BaseScreen
+      eyebrow={inventory?.name ?? "Your inventory"}
+      title="Areas"
+      description="Organize your things by room, garage, office, or any other place."
+      actions={
         <Button onClick={() => setModal({})} disabled={!inventory}>
           <Plus /> New area
         </Button>
-      </div>
-
+      }
+    >
       {error && (
         <p className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
           {error}
@@ -112,7 +106,7 @@ export default function AreasPage() {
           />
         </label>
       </InventoryModal>
-    </section>
+    </BaseScreen>
   );
 }
 
