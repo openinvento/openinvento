@@ -1,9 +1,9 @@
 [project]
-name = "my-backend-project"
+name = "openinvento"
 version = "0.1.0"
-description = "A public source-available backend"
+description = "Source available inventory app"
 requires-python = ">=3.12"
-license = { text = "YOUR-CUSTOM-SOURCE-AVAILABLE-LICENSE" }
+license = { text = "PolyForm Shield License 1.0.0" }
 
 # List all your production dependencies here
 dependencies = [
