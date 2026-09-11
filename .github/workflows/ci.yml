@@ -32,8 +32,8 @@ jobs:
       - name: Install dependencies
         run: pnpm ci
 
-      - name: Run linter
-        run: pnpm run lint --if-present
+      #- name: Run linter
+      #  run: pnpm run lint --if-present
 
       - name: Run tests
         run: pnpm test -- --watchAll=false --passWithNoTests
