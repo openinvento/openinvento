@@ -28,7 +28,7 @@ jobs:
           github.event.comment.body == 'recheck' ||
           github.event.comment.body == 'I have read and understood the Contributor License Agreement, and I hereby agree to its terms.'
 
-        uses: openinvento/cla-github-action@786020d9a25a88bcbf0cf12dc6b260e61d736355
+        uses: openinvento/cla-github-action@7eb876c7273ac25905c7acc4c21bc39e9c0af0a0
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -44,7 +44,7 @@ jobs:
           remote-organization-name: 'openinvento'
           remote-repository-name: 'openinvento-cla'
 
-          custom-notsigned-prcomment: 'Thank you for your contribution! Like many software projects that accept external contributions, this project requires contributors to accept a Contributor License Agreement (CLA). Please read our CLA at $pathToCLADocument and accept it by posting the exact acceptance comment shown below. This is a standard part of the contribution process and is required before your pull request can be merged. Thank you!'
+          custom-notsigned-prcomment: 'Thank you for your contribution! Like many software projects that accept external contributions, this project requires contributors to accept a Contributor License Agreement (CLA).\n\nPlease read our CLA at $pathToCLADocument and accept it by posting the exact acceptance comment shown below.\n\nThis is a standard part of the contribution process and is required before your pull request can be merged. Thank you!'
           custom-pr-sign-comment: 'I have read and understood the Contributor License Agreement, and I hereby agree to its terms.'
 
           require-opener-as-author: true
