@@ -137,17 +137,14 @@ Contributions accepted under a previous version.
 
 By submitting a Contribution to the Project, you must accept this Agreement.
 
-For contributions submitted through GitHub, acceptance may be recorded by
-checking the Contributor License Agreement checkbox in the relevant pull
-request template.
+For contributions submitted through GitHub, acceptance is completed by
+following the Contributor License Agreement acceptance instructions provided
+by the Project.
 
-By checking the checkbox and submitting the pull request, the Contributor
-confirms that they have read and agree to this Agreement.
-
-The Project may retain the pull request and its associated GitHub records as
-evidence of acceptance, including the Contributor's GitHub username, the date
-and time of the pull request, and the version of this Agreement applicable at
-the time of submission.
+The Project may retain the relevant GitHub records as evidence of acceptance,
+including the Contributor's GitHub username, the date and time of acceptance,
+the relevant contribution or pull request, and the version of this Agreement
+applicable at the time of submission.
 
 ---
 
