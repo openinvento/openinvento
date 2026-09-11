@@ -1,5 +1,6 @@
 {
   "name": "openinvento-frontend",
+  "description": "The frontend for the OpenInvento project",
   "private": true,
   "version": "0.0.0",
   "type": "module",
