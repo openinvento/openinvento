@@ -25,10 +25,17 @@ jobs:
       - name: CLA Assistant
         if: >
           github.event_name == 'pull_request_target' ||
-          github.event.comment.body == 'recheck' ||
-          github.event.comment.body == 'I have read and understood the Contributor License Agreement, and I hereby agree to its terms.'
+          github.event.comment.body == 'I have read and understood the Contributor License Agreement, and I hereby agree to its terms.' ||
+          (
+            github.event.comment.body == 'recheck' &&
+            (
+              github.event.comment.author_association == 'OWNER' ||
+              github.event.comment.author_association == 'MEMBER' ||
+              github.event.comment.author_association == 'COLLABORATOR'
+            )
+          )
 
-        uses: openinvento/cla-github-action@7eb876c7273ac25905c7acc4c21bc39e9c0af0a0
+        uses: openinvento/cla-github-action@1de7391ccc342943ff8e537925a409b832a88395
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -44,7 +51,7 @@ jobs:
           remote-organization-name: 'openinvento'
           remote-repository-name: 'openinvento-cla'
 
-          custom-notsigned-prcomment: 'Thank you for your contribution! Like many software projects that accept external contributions, this project requires contributors to accept a Contributor License Agreement (CLA).\n\nPlease read our CLA at $pathToCLADocument and accept it by posting the exact acceptance comment shown below.\n\nThis is a standard part of the contribution process and is required before your pull request can be merged. Thank you!'
+          custom-notsigned-prcomment: 'Thank you for your contribution! Like many software projects that accept external contributions, this project requires contributors to accept a Contributor License Agreement (CLA).<br/><br/>Please read our CLA at $pathToCLADocument and accept it by posting the exact acceptance comment shown below.<br/><br/>This is a standard part of the contribution process and is required before your pull request can be merged. Thank you!'
           custom-pr-sign-comment: 'I have read and understood the Contributor License Agreement, and I hereby agree to its terms.'
 
           require-opener-as-author: true
