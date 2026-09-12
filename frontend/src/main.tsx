@@ -2,7 +2,6 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router' // 💡 Wichtig: aus 'react-router' importieren
 import './index.css'
-import Start from './routes/Start.tsx'
 import LoginPage from './routes/auth/Login.tsx'
 import SignupPage from './routes/auth/Signup.tsx'
 import AppLayout from './layouts/AppLayout.tsx'

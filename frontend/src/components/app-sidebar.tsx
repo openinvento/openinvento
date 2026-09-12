@@ -7,7 +7,7 @@ import { NavFavorites } from "@/components/nav-favorites"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavWorkspaces } from "@/components/nav-areas"
-import { AccountSwitcher } from "@/components/account-switcher"
+import { AccountSidebarManager } from "@/components/account-sidebar"
 import {
   Sidebar,
   SidebarContent,
@@ -187,7 +187,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
-        <AccountSwitcher teams={data.teams} />
+        <AccountSidebarManager teams={data.teams} />
         <NavMain items={dynamicNavMain} />
       </SidebarHeader>
       <SidebarContent>

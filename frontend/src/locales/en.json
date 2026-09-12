@@ -1,4 +1,7 @@
 {
+  "accounts": {
+    "logoutBtn": "Logout"
+  },
   "areas": {
     "areaName": "Area name",
     "confirmDelete": "Delete {{name}}? Its inventory contents may be deleted too.",

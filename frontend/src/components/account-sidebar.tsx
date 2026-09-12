@@ -18,8 +18,11 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { ChevronDownIcon, LogOutIcon } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import { logout } from "@/utils/api/auth"
+import { useNavigate } from "react-router"
 
-export function AccountSwitcher({
+export function AccountSidebarManager({
   teams,
 }: {
   teams: {
@@ -32,6 +35,21 @@ export function AccountSwitcher({
   if (!activeTeam) {
     return null
   }
+
+  const {t} = useTranslation()
+  const navigate = useNavigate()
+
+  async function logoutUser() {
+    console.log("logout")
+    try {
+      await logout()
+      console.log("Redirecting to login page...")
+      navigate("/auth/login", { replace: true })
+    } catch (error) {
+      console.error("Error during logout:", error)
+    }
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -82,12 +100,13 @@ export function AccountSwitcher({
                 </div>
               </DropdownMenuItem> */}
 
-              <DropdownMenuItem className="gap-2 p-2">
+
+              <DropdownMenuItem className="gap-2 p-2" onClick={logoutUser}>
                 <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                   <LogOutIcon className="size-4" />
                 </div>
-                <div className="font-medium text-muted-foreground">
-                  Logout
+                <div className="font-medium text-muted-foreground" >
+                  {t("accounts.logoutBtn")}
                 </div>
               </DropdownMenuItem>
 
