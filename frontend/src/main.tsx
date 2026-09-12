@@ -16,6 +16,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import './i18n.ts' // Initialize i18next
 import ErrorPage from './routes/Error.tsx'
 import SearchPage from './routes/inventory/SearchPage.tsx'
+import { SessionGuard } from './components/auth/session-guard.tsx'
 
 
 /* Dark / White mode handling */
@@ -44,13 +45,16 @@ if (typeof window !== 'undefined') {
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Start />,
+    element: <SessionGuard mode="guest" redirectUnauthenticated />,
     errorElement: <ErrorPage />,
   },
   {
     path: "/app",
-    element: <AppLayout />,
+    element: <SessionGuard mode="protected" />,
     children: [
+      {
+        element: <AppLayout />,
+        children: [
       {
         /* Auto redirect to /app/dashboard */
         index: true, 
@@ -84,10 +88,13 @@ const router = createBrowserRouter([
         path: "codemanagement", 
         element: <SettingsPage />,
       },
+        ],
+      },
     ],
   },
   {
     path: "/auth",
+    element: <SessionGuard mode="guest" />,
     children: [
       {
         path: "login",
