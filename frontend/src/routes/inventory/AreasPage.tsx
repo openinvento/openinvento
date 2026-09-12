@@ -113,6 +113,7 @@ export default function AreasPage() {
 }
 
 function Empty({ title, text, action }: { title: string; text: string; action?: () => void }) {
+  const { t } = useTranslation()
   return (
     <div className="grid min-h-72 place-items-center rounded-2xl border border-dashed bg-muted/20 p-8 text-center">
       <div>

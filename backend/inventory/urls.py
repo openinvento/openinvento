@@ -1,4 +1,6 @@
+from django.urls import path
 from rest_framework.routers import DefaultRouter
+from django.urls import path
 
 from .views import (
     AreaViewSet,
@@ -6,6 +8,7 @@ from .views import (
     ArticleViewSet,
     ChestViewSet,
     InventoryViewSet,
+    SearchView,
     ShelfViewSet,
 )
 
@@ -17,4 +20,6 @@ router.register(r"chests", ChestViewSet, basename="chest")
 router.register(r"article-categories", ArticleCategoryViewSet, basename="article-category")
 router.register(r"articles", ArticleViewSet, basename="article")
 
-urlpatterns = router.urls
+urlpatterns = router.urls + [
+    path("search/", SearchView.as_view(), name="search"),
+]

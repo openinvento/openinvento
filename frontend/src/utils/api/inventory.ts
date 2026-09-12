@@ -38,6 +38,8 @@ export const inventoryApi = {
   update: <T>(kind: EntityPath, uuid: string, payload: CreatePayload) =>
     patchData<T>(`/api/${kind}/${uuid}/`, payload),
   remove: (kind: EntityPath, uuid: string) => deleteData<void>(`/api/${kind}/${uuid}/`),
+  searchInventory: (query: string, inventory: string) =>
+    fetchData<Article[]>(`/api/search/?q=${encodeURIComponent(query)}&inventory=${encodeURIComponent(inventory)}`),
 }
 
 export type { EntityPath }

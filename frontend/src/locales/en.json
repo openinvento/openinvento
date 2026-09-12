@@ -30,8 +30,20 @@
     "title": "Areas"
   },
   "search": {
+    "empty": "No articles found.",
+    "errors": {
+      "load": "Could not load inventories.",
+      "search": "Could not search articles."
+    },
+    "inventory": "Inventory",
+    "loading": "Loading inventories...",
+    "noInventory": "No inventory available.",
+    "placeholder": "Search articles by name",
+    "prompt": "Enter a search term to find articles.",
+    "quantity": "{{count}} in stock",
     "searchDescription": "Search your inventory",
-    "searchTitle": "Search"
+    "searchTitle": "Search",
+    "submit": "Search"
   },
   "settings": {
     "description": "Select how the user interface should be displayed.",

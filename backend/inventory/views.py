@@ -1,5 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import Area, Article, ArticleCategory, Chest, Inventory, Shelf
 from .permissions import IsInventoryMember
@@ -15,8 +17,8 @@ from .serializers import (
 
 class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = InventorySerializer
-    permission_classes = [IsAuthenticated]
-    http_method_names = ["get", "head", "options"]
+    permission_classes = (IsAuthenticated,)
+    http_method_names = ("get", "head", "options")
 
     def get_queryset(self):
         if self.request.user.is_superuser:
@@ -26,7 +28,7 @@ class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
 
 class InventoryScopedViewSet(viewsets.ModelViewSet):
     """ Base class for viewsets that are scoped to a specific inventory.  (Handle inventory + authentication)"""
-    permission_classes = [IsAuthenticated, IsInventoryMember]
+    permission_classes = (IsAuthenticated, IsInventoryMember)
     select_related_fields = ("inventory",)
     prefetch_related_fields = ()
     ordering = ("name",)
@@ -45,6 +47,16 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
         if self.ordering:
             queryset = queryset.order_by(*self.ordering)
         return queryset
+
+
+class InventoryScopedAPIView(APIView):
+    """ Base class for API views that are scoped to a specific inventory.  (Handle inventory + authentication)"""
+    permission_classes = (IsAuthenticated, IsInventoryMember)
+
+    def get_accessible_inventories(self):
+        if self.request.user.is_superuser:
+            return Inventory.objects.all()
+        return self.request.user.inventories.all()
 
 
 class AreaViewSet(InventoryScopedViewSet):
@@ -73,3 +85,25 @@ class ArticleViewSet(InventoryScopedViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     select_related_fields = ("inventory", "area", "shelf", "chest", "category")
+
+
+class SearchView(InventoryScopedAPIView):
+    """
+    Search for articles in the inventory.
+    """
+    def get(self, request, *args, **kwargs):
+        query = request.query_params.get("q", "")
+        if not query:
+            return Response({"error": "Query parameter 'q' is required."}, status=400)
+
+        inventory = request.query_params.get("inventory")
+        if not inventory:
+            return Response({"error": "Query parameter 'inventory' is required."}, status=400)
+        articles = Article.objects.filter(
+            inventory__in=self.get_accessible_inventories(),
+            inventory__uuid=inventory,
+            name__icontains=query
+        ).select_related("inventory", "area", "shelf", "chest", "category")
+
+        serializer = ArticleSerializer(articles, many=True)
+        return Response(serializer.data)
