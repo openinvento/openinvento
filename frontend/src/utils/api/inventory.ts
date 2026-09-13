@@ -18,7 +18,7 @@ export type Article = EntityBase & {
   category_fields: CategoryField[]
 }
 export type CategoryField = EntityBase & { key: string; label: string; field_type: string; category: string | null }
-export type ArticleCategory = EntityBase & { fields: CategoryField[] }
+export type ArticleCategory = EntityBase & { fields: CategoryField[]; category_fields?: CategoryField[] }
 
 type EntityBase = {
   uuid: string
@@ -29,7 +29,7 @@ type EntityBase = {
   updated_at: string
 }
 
-type EntityPath = "areas" | "shelves" | "chests" | "articles"
+type EntityPath = "areas" | "shelves" | "chests" | "articles" | "article-categories" | "category-fields"
 type CreatePayload = Record<string, unknown>
 
 export const inventoryApi = {
