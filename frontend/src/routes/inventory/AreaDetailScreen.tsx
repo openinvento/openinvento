@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from "react-router"
 import { ArticleCard, ChestCard, ShelfCard } from "@/components/inventory/entity-cards"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
-import { inventoryApi, type Area, type Article, type Chest, type Inventory, type Shelf } from "@/utils/api/inventory"
+import { inventoryApi, type Area, type Article, type ArticleCategory, type CategoryField, type Chest, type Inventory, type Shelf } from "@/utils/api/inventory"
 
 type CreateKind = "article" | "chest" | "shelf"
 
@@ -17,6 +17,9 @@ export default function AreaDetailScreen() {
   const [shelves, setShelves] = useState<Shelf[]>([])
   const [chests, setChests] = useState<Chest[]>([])
   const [articles, setArticles] = useState<Article[]>([])
+  const [categories, setCategories] = useState<ArticleCategory[]>([])
+  const [globalFields, setGlobalFields] = useState<CategoryField[]>([])
+  const [selectedCategory, setSelectedCategory] = useState("")
   const [modal, setModal] = useState<{ kind: CreateKind; item?: Shelf | Chest } | null>(null)
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
@@ -26,17 +29,23 @@ export default function AreaDetailScreen() {
     if (!areaId) return
     setError("")
     try {
-      const [inventories, allAreas, allShelves, allChests, allArticles] = await Promise.all([inventoryApi.listInventories(), inventoryApi.listAreas(), inventoryApi.listShelves(), inventoryApi.listChests(), inventoryApi.listArticles()])
+      const [inventories, allAreas, allShelves, allChests, allArticles, allCategories, allFields] = await Promise.all([inventoryApi.listInventories(), inventoryApi.listAreas(), inventoryApi.listShelves(), inventoryApi.listChests(), inventoryApi.listArticles(), inventoryApi.listCategories(), inventoryApi.listCategoryFields()])
       setInventory(inventories[0] ?? null)
       setArea(allAreas.find((item) => item.uuid === areaId) ?? null)
       setShelves(allShelves.filter((item) => item.area === areaId))
       setChests(allChests.filter((item) => item.area === areaId))
       setArticles(allArticles.filter((item) => item.area === areaId))
+      setCategories(allCategories)
+      setGlobalFields(allFields.filter((field) => field.category === null))
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not load this area.") }
   }
   useEffect(() => { void load() }, [areaId])
 
   const shelfSections = useMemo(() => [{ uuid: "unassigned", name: "Not on a shelf" }, ...shelves], [shelves])
+  const articleFields = useMemo(() => {
+    const categoryFields = categories.find((category) => category.uuid === selectedCategory)?.fields ?? []
+    return [...globalFields, ...categoryFields.filter((field) => !globalFields.some((globalField) => globalField.key === field.key))]
+  }, [categories, globalFields, selectedCategory])
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -45,8 +54,38 @@ export default function AreaDetailScreen() {
     const name = form.get("name")?.toString().trim()
     if (!name) return
     const optional = (key: string) => form.get(key)?.toString() || null
-    const payload = modal.kind === "shelf" ? { name, inventory: inventory.uuid, area: areaId } : modal.kind === "chest" ? { name, inventory: inventory.uuid, area: areaId, shelf: optional("shelf") } : { name, inventory: inventory.uuid, area: areaId, shelf: optional("shelf"), chest: optional("chest"), quantity: Number(form.get("quantity") || 1), description: form.get("description")?.toString() || "" }
-    setSaving(true)
+    const customFields = modal.kind === "article"
+      ? Object.fromEntries(articleFields.map((field) => [field.key, form.get(`custom_${field.key}`)?.toString() || ""]))
+      : {}
+    const basePayload = { 
+      name, 
+      inventory: inventory.uuid, 
+      area: areaId 
+    };
+
+    let payload;
+
+    if (modal.kind === "shelf") {
+      payload = {
+        ...basePayload
+      };
+    } else if (modal.kind === "chest") {
+      payload = {
+        ...basePayload,
+        shelf: optional("shelf")
+      };
+    } else {
+      payload = {
+        ...basePayload,
+        shelf: optional("shelf"),
+        chest: optional("chest"),
+        category: optional("category"),
+        quantity: Number(form.get("quantity") || 1),
+        description: form.get("description")?.toString() || "",
+        custom_fields: customFields
+      };
+    }
+
     try { 
       if (modal.item) {
         await inventoryApi.update(modal.kind === "shelf" ? "shelves" : "chests", modal.item.uuid, payload)
@@ -84,7 +123,7 @@ export default function AreaDetailScreen() {
       <div className="flex flex-wrap gap-2">
       <Button variant="outline" onClick={() => setModal({ kind: "shelf" })}><Plus /> Shelf</Button>
       <Button variant="outline" onClick={() => setModal({ kind: "chest" })}><Plus /> Chest</Button>
-      <Button onClick={() => setModal({ kind: "article" })}><Plus /> Article</Button>
+      <Button onClick={() => { setSelectedCategory(""); setModal({ kind: "article" }) }}><Plus /> Article</Button>
       </div>
     </div>
     
@@ -106,12 +145,116 @@ export default function AreaDetailScreen() {
       
     {sectionChests.length + sectionArticles.length === 0 && <p className="py-3 text-sm text-muted-foreground">Nothing stored here yet.</p>}</div>}</div> })}</div></>}
 
-    <InventoryModal title={modal ? `${modal.item ? "Edit" : "New"} ${modal.kind}` : ""} open={modal !== null} submitting={saving} onClose={() => setModal(null)} onSubmit={save}><label className="grid gap-1.5 text-sm font-medium">Name<input autoFocus name="name" defaultValue={modal?.item?.name} required className="h-10 rounded-lg border bg-background px-3 font-normal" /></label>
-    {modal?.kind !== "shelf" && <label className="grid gap-1.5 text-sm font-medium">Shelf<select name="shelf" defaultValue={modal?.item && "shelf" in modal.item ? modal.item.shelf ?? "" : ""} className="h-10 rounded-lg border bg-background px-3 font-normal">
-      <option value="">Not on a shelf</option>
-      {shelves.map((shelf) => <option key={shelf.uuid} value={shelf.uuid}>{shelf.name}</option>)}</select></label>}{modal?.kind === "article" && <><label className="grid gap-1.5 text-sm font-medium">Chest<select name="chest" className="h-10 rounded-lg border bg-background px-3 font-normal">
-      <option value="">No chest</option>
-      {chests.map((chest) => <option key={chest.uuid} value={chest.uuid}>{chest.name}</option>)}</select></label><label className="grid gap-1.5 text-sm font-medium">Quantity<input name="quantity" type="number" min="0" defaultValue="1" className="h-10 rounded-lg border bg-background px-3 font-normal" /></label><label className="grid gap-1.5 text-sm font-medium">Description<textarea name="description" rows={3} className="rounded-lg border bg-background p-3 font-normal" /></label></>}
+    <InventoryModal
+      title={modal ? `${modal.item ? "Edit" : "New"} ${modal.kind}` : ""}
+      open={modal !== null}
+      submitting={saving}
+      onClose={() => setModal(null)}
+      onSubmit={save}
+    >
+      <label className="grid gap-1.5 text-sm font-medium">
+        Name
+        <input
+          autoFocus
+          name="name"
+          defaultValue={modal?.item?.name}
+          required
+          className="h-10 rounded-lg border bg-background px-3 font-normal"
+        />
+      </label>
+
+      {modal?.kind === "article" && (
+        <label className="grid gap-1.5 text-sm font-medium">
+          Category
+          <select
+            name="category"
+            value={selectedCategory}
+            onChange={(event) => setSelectedCategory(event.target.value)}
+            className="h-10 rounded-lg border bg-background px-3 font-normal"
+          >
+            <option value="">No category</option>
+            {categories.map((category) => (
+              <option key={category.uuid} value={category.uuid}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+
+      {modal?.kind !== "shelf" && (
+        <label className="grid gap-1.5 text-sm font-medium">
+          Shelf
+          <select
+            name="shelf"
+            defaultValue={modal?.item && "shelf" in modal.item ? modal.item.shelf ?? "" : ""}
+            className="h-10 rounded-lg border bg-background px-3 font-normal"
+          >
+            <option value="">Not on a shelf</option>
+            {shelves.map((shelf) => (
+              <option key={shelf.uuid} value={shelf.uuid}>
+                {shelf.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+
+      {modal?.kind === "article" && (
+        <>
+          <label className="grid gap-1.5 text-sm font-medium">
+            Chest
+            <select name="chest" className="h-10 rounded-lg border bg-background px-3 font-normal">
+              <option value="">No chest</option>
+              {chests.map((chest) => (
+                <option key={chest.uuid} value={chest.uuid}>
+                  {chest.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="grid gap-1.5 text-sm font-medium">
+            Quantity
+            <input
+              name="quantity"
+              type="number"
+              min="0"
+              defaultValue="1"
+              className="h-10 rounded-lg border bg-background px-3 font-normal"
+            />
+          </label>
+
+          <label className="grid gap-1.5 text-sm font-medium">
+            Description
+            <textarea
+              name="description"
+              rows={3}
+              className="rounded-lg border bg-background p-3 font-normal"
+            />
+          </label>
+        </>
+      )}
+
+      {/* Dynamic custom fields (Only for articles) */}
+      {modal?.kind === "article" &&
+        articleFields.map((field) => (
+          <label key={field.uuid} className="grid gap-1.5 text-sm font-medium">
+            {field.label}
+            <input
+              name={`custom_${field.key}`}
+              type={
+                field.field_type === "number"
+                  ? "number"
+                  : field.field_type === "date"
+                  ? "date"
+                  : "text"
+              }
+              className="h-10 rounded-lg border bg-background px-3 font-normal"
+            />
+          </label>
+        ))}
     </InventoryModal>
+
   </section>)
 }

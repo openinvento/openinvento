@@ -14,7 +14,11 @@ export type Article = EntityBase & {
   image: string | null
   icon: string | null
   category: string | null
+  custom_fields: Record<string, string | number | boolean | null>
+  category_fields: CategoryField[]
 }
+export type CategoryField = EntityBase & { key: string; label: string; field_type: string; category: string | null }
+export type ArticleCategory = EntityBase & { fields: CategoryField[] }
 
 type EntityBase = {
   uuid: string
@@ -34,6 +38,8 @@ export const inventoryApi = {
   listShelves: () => fetchData<Shelf[]>("/api/shelves/"),
   listChests: () => fetchData<Chest[]>("/api/chests/"),
   listArticles: () => fetchData<Article[]>("/api/articles/"),
+  listCategories: () => fetchData<ArticleCategory[]>("/api/article-categories/"),
+  listCategoryFields: () => fetchData<CategoryField[]>("/api/category-fields/"),
   create: <T>(kind: EntityPath, payload: CreatePayload) => postData<T>(`/api/${kind}/`, payload),
   update: <T>(kind: EntityPath, uuid: string, payload: CreatePayload) =>
     patchData<T>(`/api/${kind}/${uuid}/`, payload),
