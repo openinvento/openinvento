@@ -5,6 +5,7 @@ import { ArticleCard, ChestCard, ShelfCard } from "@/components/inventory/entity
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
 import { inventoryApi, type Area, type Article, type ArticleCategory, type CategoryField, type Chest, type Inventory, type Shelf } from "@/utils/api/inventory"
+import { SectionHeader } from "@/components/ui/SectionHeader"
 
 type CreateKind = "article" | "chest" | "shelf"
 
@@ -18,7 +19,7 @@ export default function AreaDetailScreen() {
   const [chests, setChests] = useState<Chest[]>([])
   const [articles, setArticles] = useState<Article[]>([])
   const [categories, setCategories] = useState<ArticleCategory[]>([])
-  const [globalFields, setGlobalFields] = useState<CategoryField[]>([])
+  const [allFields, setAllFields] = useState<CategoryField[]>([]) // Save all fields
   const [selectedCategory, setSelectedCategory] = useState("")
   const [modal, setModal] = useState<{ kind: CreateKind; item?: Shelf | Chest } | null>(null)
   const [error, setError] = useState("")
@@ -29,23 +30,40 @@ export default function AreaDetailScreen() {
     if (!areaId) return
     setError("")
     try {
-      const [inventories, allAreas, allShelves, allChests, allArticles, allCategories, allFields] = await Promise.all([inventoryApi.listInventories(), inventoryApi.listAreas(), inventoryApi.listShelves(), inventoryApi.listChests(), inventoryApi.listArticles(), inventoryApi.listCategories(), inventoryApi.listCategoryFields()])
+      const [inventories, allAreas, allShelves, allChests, allArticles, allCategories, loadedFields] = await Promise.all([
+        inventoryApi.listInventories(),
+        inventoryApi.listAreas(),
+        inventoryApi.listShelves(),
+        inventoryApi.listChests(),
+        inventoryApi.listArticles(),
+        inventoryApi.listCategories(),
+        inventoryApi.listCategoryFields()
+      ])
       setInventory(inventories[0] ?? null)
       setArea(allAreas.find((item) => item.uuid === areaId) ?? null)
       setShelves(allShelves.filter((item) => item.area === areaId))
       setChests(allChests.filter((item) => item.area === areaId))
       setArticles(allArticles.filter((item) => item.area === areaId))
       setCategories(allCategories)
-      setGlobalFields(allFields.filter((field) => field.category === null))
+      setAllFields(loadedFields) 
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not load this area.") }
   }
   useEffect(() => { void load() }, [areaId])
 
   const shelfSections = useMemo(() => [{ uuid: "unassigned", name: "Not on a shelf" }, ...shelves], [shelves])
+
+  // dynamic custom fields for articles based on selected category
   const articleFields = useMemo(() => {
-    const categoryFields = categories.find((category) => category.uuid === selectedCategory)?.fields ?? []
-    return [...globalFields, ...categoryFields.filter((field) => !globalFields.some((globalField) => globalField.key === field.key))]
-  }, [categories, globalFields, selectedCategory])
+    const globalFields = allFields.filter((field) => field.category === null)
+    if (!selectedCategory) return globalFields
+
+    const categorySpecificFields = allFields.filter((field) => field.category === selectedCategory)
+
+    return [
+      ...globalFields,
+      ...categorySpecificFields.filter((field) => !globalFields.some((gf) => gf.key === field.key))
+    ]
+  }, [allFields, selectedCategory])
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -237,11 +255,13 @@ export default function AreaDetailScreen() {
       )}
 
       {/* Dynamic custom fields (Only for articles) */}
-      {modal?.kind === "article" &&
-        articleFields.map((field) => (
-          <label key={field.uuid} className="grid gap-1.5 text-sm font-medium">
-            {field.label}
-            <input
+      {modal?.kind === "article" && articleFields.length > 0 && (
+        <div>
+          <h1 className="mb-2 mt-5 text-lg font-semibold">Other Fields</h1>
+          {articleFields.map((field) => (
+            <label key={field.uuid} className="grid gap-1.5 text-sm font-medium">
+              {field.label}
+              <input
               name={`custom_${field.key}`}
               type={
                 field.field_type === "number"
@@ -254,6 +274,8 @@ export default function AreaDetailScreen() {
             />
           </label>
         ))}
+        </div>
+      )}
     </InventoryModal>
 
   </section>)
