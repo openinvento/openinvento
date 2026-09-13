@@ -84,15 +84,17 @@ export default function ManageCategoriesAndFieldsPage() {
     event.preventDefault()
     const form = new FormData(event.currentTarget)
     const label = form.get("label")?.toString().trim()
-    const key = form.get("key")?.toString().trim().toLowerCase().replace(/\s+/g, "-")
     const category = form.get("category")?.toString() || null
     const fieldType = form.get("field_type")?.toString() || "text"
 
-    if (!label || !key || (!inventory && !fieldModal?.field)) return
+    if (!label || !fieldType || (!inventory && !fieldModal?.field)) {
+      console.error("Missing required field data:", { label, fieldType, category, inventory, fieldModal })
+      return
+    }
 
     setSaving(true)
     try {
-      const payload = { label, key, field_type: fieldType, category }
+      const payload = { label, field_type: fieldType, category }
       if (fieldModal?.field) {
         await inventoryApi.update("category-fields", fieldModal.field.uuid, payload)
       } else {
@@ -267,7 +269,7 @@ function CategoryModalForm({
       onSubmit={onSubmit}
     >
       <FormField label={t("categoriesAndFields.categoryName")}>
-        <input
+        <Input
           autoFocus
           name="name"
           defaultValue={modal?.category?.name}

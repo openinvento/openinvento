@@ -146,7 +146,18 @@ class CategoryField(InventoryComponent):
     def save(self, *args, **kwargs):
         if not self.key and self.label:
             self.key = slugify(self.label)
-            
+
+        if self.key:
+            base_key = self.key[:45]
+            counter = 1
+            qs = CategoryField.objects.filter(inventory=self.inventory, category=self.category)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+
+            while qs.filter(key=self.key).exists():
+                self.key = f"{base_key}-{counter}"
+                counter += 1
+
         super().save(*args, **kwargs)
 
     def __str__(self):
