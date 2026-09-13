@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { FolderKanban, Pencil, Plus, SlidersHorizontal, Trash2 } from "lucide-react"
+import { CalendarIcon, FolderKanban, HashIcon, ListIcon, Pencil, Plus, SlidersHorizontal, ToggleLeft, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import type { ArticleCategory, CategoryField } from "@/utils/api/inventory"
@@ -77,10 +77,19 @@ export function FieldRow({
   onEdit: () => void
   onDelete: () => void
 }) {
+
+  const Icon = 
+    field.field_type === "text" ? <SlidersHorizontal className="size-4 shrink-0 text-muted-foreground" />
+    : field.field_type === "number" ? <HashIcon className="size-4 shrink-0 text-muted-foreground" /> 
+    : field.field_type === "boolean" ? <ToggleLeft className="size-4 shrink-0 text-muted-foreground" />
+    : field.field_type === "date" ? <CalendarIcon className="size-4 shrink-0 text-muted-foreground" /> 
+    : field.field_type === "select" ? <ListIcon className="size-4 shrink-0 text-muted-foreground" /> 
+    : null
+    
   return (
     <div className="flex items-center justify-between gap-3 border-b py-2 last:border-b-0">
       <div className="flex min-w-0 items-center gap-2">
-        <SlidersHorizontal className="size-4 shrink-0 text-muted-foreground" />
+        {Icon}
         <span className="truncate text-sm font-medium">{field.label}</span>
         <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
           {field.field_type}
