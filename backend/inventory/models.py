@@ -35,6 +35,8 @@ class Inventory(models.Model):
         if not self.identifier:
             self.identifier = generate_random_code()
         super().save(*args, **kwargs)
+        from .category_defaults import ensure_default_categories
+        ensure_default_categories(self)
 
     def __str__(self):
         return self.name
@@ -99,6 +101,7 @@ class Article(InventoryComponent):
     )
     icon = models.CharField(max_length=40, blank=True, null=True)
     category = models.ForeignKey('ArticleCategory', on_delete=models.SET_NULL, null=True, blank=True)
+    custom_fields = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.quantity}x)"
@@ -108,3 +111,36 @@ class ArticleCategory(InventoryComponent):
 
     class Meta:
         verbose_name_plural = "Article Categories"
+
+
+class CategoryField(InventoryComponent):
+    FIELD_TYPES = (
+        ("text", "Text"),
+        ("number", "Number"),
+        ("boolean", "Boolean"),
+        ("date", "Date"),
+        ("barcode", "Barcode"),
+    )
+
+    key = models.SlugField(max_length=50)
+    label = models.CharField(max_length=100)
+    field_type = models.CharField(max_length=20, choices=FIELD_TYPES, default="text")
+    # A nullable category field represents a global field ("All categories")
+    category = models.ForeignKey(
+        ArticleCategory,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="fields",
+    )
+
+    class Meta:
+        constraints = (
+            models.UniqueConstraint(
+                fields=("inventory", "key", "category"),
+                name="unique_category_field",
+            ),
+        )
+
+    def __str__(self):
+        return self.label

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Area, Article, ArticleCategory, Chest, Inventory, Shelf
+from .models import Area, Article, ArticleCategory, CategoryField, Chest, Inventory, Shelf
 
 
 class InventorySerializer(serializers.ModelSerializer):
@@ -141,10 +141,15 @@ class ChestSerializer(InventoryScopedSerializer):
 
 
 class ArticleCategorySerializer(InventoryScopedSerializer):
+    category_fields = serializers.SerializerMethodField()
+
     class Meta:
         model = ArticleCategory
-        fields = ("uuid", "identifier", "inventory", "created_at", "updated_at", "name")
+        fields = ("uuid", "identifier", "inventory", "created_at", "updated_at", "name", "category_fields")
         read_only_fields = ("uuid", "identifier", "created_at", "updated_at")
+
+    def get_category_fields(self, obj):
+        return CategoryFieldSerializer(obj.fields.all(), many=True).data
 
     def validate(self, attrs):
         inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
@@ -161,6 +166,7 @@ class ArticleSerializer(InventoryScopedSerializer):
     category = serializers.PrimaryKeyRelatedField(
         queryset=ArticleCategory.objects.none(), required=False, allow_null=True
     )
+    category_fields = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
@@ -179,6 +185,8 @@ class ArticleSerializer(InventoryScopedSerializer):
             "image",
             "icon",
             "category",
+            "custom_fields",
+            "category_fields",
         )
         read_only_fields = ("uuid", "identifier", "created_at", "updated_at")
 
@@ -188,6 +196,14 @@ class ArticleSerializer(InventoryScopedSerializer):
         self.fields["shelf"].queryset = self._inventory_queryset(Shelf)
         self.fields["chest"].queryset = self._inventory_queryset(Chest)
         self.fields["category"].queryset = self._inventory_queryset(ArticleCategory)
+
+    def get_category_fields(self, obj):
+        if obj.category is None:
+            return CategoryFieldSerializer(
+                CategoryField.objects.filter(inventory=obj.inventory, category__isnull=True), many=True
+            ).data
+        fields = CategoryField.objects.filter(inventory=obj.inventory, category__isnull=True) | obj.category.fields.all()
+        return CategoryFieldSerializer(fields, many=True).data
 
     def validate(self, attrs):
         inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
@@ -218,4 +234,36 @@ class ArticleSerializer(InventoryScopedSerializer):
         if category is not None:
             self._validate_same_inventory("category", category, inventory)
 
+        custom_fields = attrs.get("custom_fields")
+        if custom_fields is not None and not isinstance(custom_fields, dict):
+            raise serializers.ValidationError({"custom_fields": "Expected an object."})
+
+        return attrs
+
+
+class CategoryFieldSerializer(InventoryScopedSerializer):
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=ArticleCategory.objects.none(), required=False, allow_null=True
+    )
+
+    class Meta:
+        model = CategoryField
+        fields = (
+            "uuid", "identifier", "inventory", "created_at", "updated_at",
+            "key", "label", "field_type", "category",
+        )
+        read_only_fields = ("uuid", "identifier", "created_at", "updated_at")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["category"].queryset = self._inventory_queryset(ArticleCategory)
+
+    def validate(self, attrs):
+        inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
+        category = attrs.get("category") if "category" in attrs else getattr(self.instance, "category", None)
+        if inventory is None:
+            raise serializers.ValidationError({"inventory": "Inventory is required."})
+        self._validate_inventory_belongs_to_user(inventory)
+        if category is not None:
+            self._validate_same_inventory("category", category, inventory)
         return attrs

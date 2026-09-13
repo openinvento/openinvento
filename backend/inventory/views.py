@@ -3,11 +3,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Area, Article, ArticleCategory, Chest, Inventory, Shelf
+from .models import Area, Article, ArticleCategory, CategoryField, Chest, Inventory, Shelf
 from .permissions import IsInventoryMember
 from .serializers import (
     AreaSerializer,
     ArticleCategorySerializer,
+    CategoryFieldSerializer,
     ArticleSerializer,
     ChestSerializer,
     InventorySerializer,
@@ -40,12 +41,29 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset().filter(inventory__in=self.get_accessible_inventories())
+        
         if self.select_related_fields:
             queryset = queryset.select_related(*self.select_related_fields)
         if self.prefetch_related_fields:
             queryset = queryset.prefetch_related(*self.prefetch_related_fields)
+            
         if self.ordering:
-            queryset = queryset.order_by(*self.ordering)
+            model_fields = {f.name for f in queryset.model._meta.get_fields()}
+            
+            valid_ordering = []
+            for field in self.ordering:
+                clean_field = field.lstrip('-')
+                
+                if clean_field in model_fields:
+                    valid_ordering.append(field)
+                elif clean_field == "name" and "label" in model_fields:
+                    fallback = field.replace("name", "label")
+                    valid_ordering.append(fallback)
+                elif "id" in model_fields:
+                    valid_ordering.append(field.replace(clean_field, "pk"))
+            if valid_ordering:
+                queryset = queryset.order_by(*valid_ordering)
+                
         return queryset
 
 
@@ -79,6 +97,12 @@ class ChestViewSet(InventoryScopedViewSet):
 class ArticleCategoryViewSet(InventoryScopedViewSet):
     queryset = ArticleCategory.objects.all()
     serializer_class = ArticleCategorySerializer
+
+
+class CategoryFieldViewSet(InventoryScopedViewSet):
+    queryset = CategoryField.objects.all()
+    serializer_class = CategoryFieldSerializer
+    select_related_fields = ("inventory", "category")
 
 
 class ArticleViewSet(InventoryScopedViewSet):
