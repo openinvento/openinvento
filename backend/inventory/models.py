@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator, MaxValueValidator
 from django.db import models
+from django.utils.text import slugify
 
 
 def validate_file_size(value):
@@ -141,6 +142,12 @@ class CategoryField(InventoryComponent):
                 name="unique_category_field",
             ),
         )
+
+    def save(self, *args, **kwargs):
+        if not self.key and self.label:
+            self.key = slugify(self.label)
+            
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.label
