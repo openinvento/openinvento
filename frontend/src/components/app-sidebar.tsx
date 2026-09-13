@@ -14,7 +14,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { TerminalIcon, SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuestionIcon, QrCodeIcon } from "lucide-react"
+import { TerminalIcon, SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuestionIcon, QrCodeIcon, TextSearchIcon } from "lucide-react"
 import { FAVORITES_CHANGED_EVENT, getFavorites, removeFavorite, type Favorite } from "@/utils/favorites"
 import i18n from "@/i18n"
 
@@ -71,6 +71,16 @@ const data = {
       url: "/app/codemanagement",
       icon: (
         <QrCodeIcon
+        />
+      ),
+      isActive: false,
+      badge: "10",
+    },
+    {
+      title: i18n.t("sidebar.categoriesAndFields"),
+      url: "/app/manage-categories-and-fields",
+      icon: (
+        <TextSearchIcon
         />
       ),
       isActive: false,

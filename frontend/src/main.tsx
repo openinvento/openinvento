@@ -16,6 +16,7 @@ import './i18n.ts' // Initialize i18next
 import ErrorPage from './routes/Error.tsx'
 import SearchPage from './routes/inventory/SearchPage.tsx'
 import { SessionGuard } from './components/auth/session-guard.tsx'
+import ManageCategoriesAndFieldsPage from './routes/inventory/ManageCategoriesAndFields.tsx'
 
 
 /* Dark / White mode handling */
@@ -86,6 +87,10 @@ const router = createBrowserRouter([
       {
         path: "codemanagement", 
         element: <SettingsPage />,
+      },
+      {
+        path: "manage-categories-and-fields", 
+        element: <ManageCategoriesAndFieldsPage />,
       },
         ],
       },
