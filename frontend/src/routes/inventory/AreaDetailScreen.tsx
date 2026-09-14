@@ -5,7 +5,7 @@ import { ArticleCard, ChestCard, ShelfCard } from "@/components/inventory/entity
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
 import { inventoryApi, type Area, type Article, type ArticleCategory, type CategoryField, type Chest, type Inventory, type Shelf } from "@/utils/api/inventory"
-import { SectionHeader } from "@/components/ui/SectionHeader"
+import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 
 type CreateKind = "article" | "chest" | "shelf"
 
@@ -193,7 +193,7 @@ export default function AreaDetailScreen() {
             <option value="">No category</option>
             {categories.map((category) => (
               <option key={category.uuid} value={category.uuid}>
-                {category.name}
+                {getCategoryLabel(category.name)}
               </option>
             ))}
           </select>
@@ -260,7 +260,7 @@ export default function AreaDetailScreen() {
           <h1 className="mb-2 mt-5 text-lg font-semibold">Other Fields</h1>
           {articleFields.map((field) => (
             <label key={field.uuid} className="grid gap-1.5 text-sm font-medium">
-              {field.label}
+              {getFieldLabel(field)}
               <input
               name={`custom_${field.key}`}
               type={

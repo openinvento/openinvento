@@ -3,6 +3,7 @@ import { CalendarIcon, FolderKanban, HashIcon, ListIcon, Pencil, Plus, SlidersHo
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import type { ArticleCategory, CategoryField } from "@/utils/api/inventory"
+import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 
 type CategoryCardProps = {
   category: ArticleCategory
@@ -36,7 +37,7 @@ export function CategoryCard({
             <FolderKanban className="size-5" />
           </span>
           <div>
-            <h3 className="font-semibold">{category.name}</h3>
+            <h3 className="font-semibold">{getCategoryLabel(category.name)}</h3>
             <p className="text-sm text-muted-foreground">
               {fields.length} {fieldCountLabel}
             </p>
@@ -77,6 +78,7 @@ export function FieldRow({
   onEdit: () => void
   onDelete: () => void
 }) {
+  const { t } = useTranslation()
 
   const Icon = 
     field.field_type === "text" ? <SlidersHorizontal className="size-4 shrink-0 text-muted-foreground" />
@@ -85,12 +87,14 @@ export function FieldRow({
     : field.field_type === "date" ? <CalendarIcon className="size-4 shrink-0 text-muted-foreground" /> 
     : field.field_type === "select" ? <ListIcon className="size-4 shrink-0 text-muted-foreground" /> 
     : null
+
+    const label = getFieldLabel(field)
     
   return (
     <div className="flex items-center justify-between gap-3 border-b py-2 last:border-b-0">
       <div className="flex min-w-0 items-center gap-2">
         {Icon}
-        <span className="truncate text-sm font-medium">{field.label}</span>
+        <span className="truncate text-sm font-medium">{label}</span>
         <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
           {field.field_type}
         </span>

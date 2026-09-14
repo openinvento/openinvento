@@ -80,6 +80,33 @@
     "themeSystem": "System",
     "title": "Settings"
   },
+  "inventory": {
+    "categories": {
+      "food": "Food",
+      "books": "Books and media",
+      "electronics": "Electronics",
+      "clothing": "Clothing",
+      "medicine": "Medicine"
+    },
+    "fields": {
+      "barcode": "Barcode",
+      "expiration_date": "Expiration date",
+      "isbn": "ISBN",
+      "author": "Author",
+      "pages": "Pages",
+      "read_status": "Read status",
+      "serial_number": "Serial number",
+      "purchase_date": "Purchase date",
+      "warranty_months": "Warranty period in months",
+      "has_insurance": "Has insurance",
+      "brand": "Brand",
+      "size": "Size",
+      "quantity": "Quantity",
+      "pzn_barcode": "PZN barcode",
+      "expiry": "Expiry date",
+      "prescription_required": "Prescription required"
+    }
+  },
   "categoriesAndFields": {
     "title": "Categories and fields",
     "description": "Define the information stored on each article.",

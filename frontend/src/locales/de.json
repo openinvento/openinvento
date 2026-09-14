@@ -1,4 +1,31 @@
 {
+  "inventory": {
+    "categories": {
+      "food": "Lebensmittel",
+      "books": "Bücher und Medien",
+      "electronics": "Elektronik",
+      "clothing": "Kleidung",
+      "medicine": "Medikamente"
+    },
+    "fields": {
+      "barcode": "Barcode",
+      "expiration_date": "Ablaufdatum",
+      "isbn": "ISBN",
+      "author": "Autor/in",
+      "pages": "Seiten",
+      "read_status": "Lesestatus",
+      "serial_number": "Seriennummer",
+      "purchase_date": "Kaufdatum",
+      "warranty_months": "Garantiezeit in Monaten",
+      "has_insurance": "Versichert",
+      "brand": "Marke",
+      "size": "Größe",
+      "quantity": "Menge",
+      "pzn_barcode": "PZN-Barcode",
+      "expiry": "Ablaufdatum",
+      "prescription_required": "Verschreibung erforderlich"
+    }
+  },
   "settings": {
     "description": "Wähle aus, wie die Benutzeroberfläche dargestellt werden soll.",
     "themeDark": "Dunkel",

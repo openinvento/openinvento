@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router"
 import { Button } from "@/components/ui/button"
 import { removeFavorite } from "@/utils/favorites"
 import { inventoryApi, type Area, type Article, type ArticleCategory, type CategoryField, type Chest, type Shelf } from "@/utils/api/inventory"
+import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 
 export default function ArticlePage() {
   const { articleId } = useParams()
@@ -172,7 +173,7 @@ export default function ArticlePage() {
                 onChange={(event) => setSelectedCategory(event.target.value || null)}
               >
                 <option value="">No category</option>
-                {categories.map((category) => <option key={category.uuid} value={category.uuid}>{category.name}</option>)}
+                {categories.map((category) => <option key={category.uuid} value={category.uuid}>{getCategoryLabel(category.name)}</option>)}
               </select>
             </Field>
 
@@ -212,7 +213,7 @@ export default function ArticlePage() {
           </Field>
 
           {articleFields.map((field) => 
-            <Field key={field.uuid} label={field.label}>
+            <Field key={field.uuid} label={getFieldLabel(field)}>
               <input 
                 name={`custom_${field.key}`}
                 type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"} 

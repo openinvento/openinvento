@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 
 type CategoryModal = { category?: ArticleCategory } | null
 type FieldModal = { field?: CategoryField; category: string | null } | null
@@ -114,7 +115,7 @@ export default function ManageCategoriesAndFieldsPage() {
 
   async function removeCategory(category: ArticleCategory) {
     const confirmed = window.confirm(
-      t("categoriesAndFields.confirmDeleteCategory", { name: category.name }),
+      t("categoriesAndFields.confirmDeleteCategory", { name: getCategoryLabel(category.name) }),
     )
     if (!confirmed) return
 
@@ -123,7 +124,7 @@ export default function ManageCategoriesAndFieldsPage() {
 
   async function removeField(field: CategoryField) {
     const confirmed = window.confirm(
-      t("categoriesAndFields.confirmDeleteField", { name: field.label }),
+      t("categoriesAndFields.confirmDeleteField", { name: getFieldLabel(field) }),
     )
     if (!confirmed) return
 

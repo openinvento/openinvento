@@ -128,7 +128,8 @@ const data = {
     }
   ],
   areas: [
-    {
+    /* Coming later */
+   /*  {
       name: "Test room",
       emoji: "🏠",
       pages: [
@@ -169,7 +170,7 @@ const data = {
           emoji: "🤝",
         },
       ],
-    }
+    } */
   ],
 }
 
@@ -202,7 +203,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavFavorites favorites={favorites} onRemove={removeFavorite} />
-        <NavWorkspaces areas={data.areas} />
+        {/* Readding this later */}
+       {/*  <NavWorkspaces areas={data.areas} /> */}
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarRail />
