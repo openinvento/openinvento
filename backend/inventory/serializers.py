@@ -250,7 +250,7 @@ class CategoryFieldSerializer(InventoryScopedSerializer):
         model = CategoryField
         fields = (
             "uuid", "identifier", "inventory", "created_at", "updated_at",
-            "label", "field_type", "category",
+            "key", "label", "field_type", "category",
         )
         read_only_fields = ("uuid", "identifier", "created_at", "updated_at", "key")
 
