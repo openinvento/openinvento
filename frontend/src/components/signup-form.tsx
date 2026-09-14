@@ -14,13 +14,16 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { cn } from "cn"
+import { useTranslation } from "react-i18next"
 import { signup } from "@/utils/api/auth"
+import { getAuthErrorMessage } from "@/utils/api/auth-errors"
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [name, setName] = useState("")
@@ -34,7 +37,7 @@ export function SignupForm({
     setError(null)
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.")
+      setError(t("auth.errors.passwordMismatch"))
       return
     }
 
@@ -43,11 +46,7 @@ export function SignupForm({
       await signup(username.trim(), email.trim(), name.trim(), password)
       navigate("/app", { replace: true })
     } catch (submissionError) {
-      setError(
-        submissionError instanceof Error
-          ? submissionError.message
-          : "Signup failed. Please try again."
-      )
+      setError(getAuthErrorMessage(submissionError, t))
     } finally {
       setLoading(false)
     }

@@ -4,6 +4,24 @@ type RequestOptions = Omit<RequestInit, "body" | "method"> & {
   body?: unknown
 }
 
+export class ApiError extends Error {
+  readonly payload: unknown;
+  readonly status: number;
+
+  constructor(
+    message: string,
+    payload: unknown,
+    status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+    
+    this.payload = payload;
+    this.status = status;
+  }
+}
+
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ""
 
 function normalizeBaseUrl(baseUrl: string) {
@@ -92,7 +110,7 @@ async function request<T>(
           ? payload
           : `Request failed with status ${response.status}`
 
-    throw new Error(message)
+    throw new ApiError(message, payload, response.status)
   }
 
   return payload as T

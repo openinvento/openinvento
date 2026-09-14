@@ -14,14 +14,17 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { cn } from "cn"
+import { useTranslation } from "react-i18next"
 
 import { login } from "@/utils/api/auth"
+import { getAuthErrorMessage } from "@/utils/api/auth-errors"
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [identifier, setIdentifier] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -36,11 +39,7 @@ export function LoginForm({
       await login(identifier.trim(), password)
       navigate("/app", { replace: true })
     } catch (submissionError) {
-      setError(
-        submissionError instanceof Error
-          ? submissionError.message
-          : "Login failed. Please try again."
-      )
+      setError(getAuthErrorMessage(submissionError, t))
     } finally {
       setLoading(false)
     }

@@ -1,4 +1,30 @@
 {
+  "auth": {
+    "fields": {
+      "username": "username",
+      "email": "email",
+      "name": "name",
+      "password": "password"
+    },
+    "errors": {
+      "generic": "Authentication failed. Please try again.",
+      "invalidCredentials": "Invalid email, username, or password.",
+      "invalidRequest": "Please check the entered details.",
+      "invalidField": "Invalid {{field}}.",
+      "passwordMismatch": "Passwords do not match.",
+      "passwordTooShort": "Password is too short. It must contain at least 8 characters.",
+      "passwordCommon": "This password is too common.",
+      "passwordNumeric": "Password cannot be entirely numeric.",
+      "passwordSimilar": "Password is too similar to your personal information.",
+      "usernameTaken": "This username is already taken.",
+      "emailTaken": "This email address is already registered.",
+      "nameRequired": "Name is required.",
+      "usernameRequired": "Username is required.",
+      "emailRequired": "Email address is required.",
+      "passwordRequired": "Password is required.",
+      "emailInvalid": "Enter a valid email address."
+    }
+  },
   "accounts": {
     "logoutBtn": "Logout"
   },
