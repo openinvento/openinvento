@@ -1,18 +1,27 @@
 
-from pathlib import Path
-import os
-from django.core.management.utils import get_random_secret_key  
-from datetime import timedelta
 import logging
+import os
+from datetime import timedelta
+from pathlib import Path
+
+from .custom_logger import LOGGING
+
+from django.core.management.utils import get_random_secret_key
+
+logger = logging.getLogger(__name__)
+
 
 try:
     from dotenv import load_dotenv
 except ImportError:
+    if os.getenv("DEBUG"):
+        logger.warning(
+            "python-dotenv is not installed. Environment variables will not be loaded from a .env file."
+        )
     load_dotenv = None
 
 if load_dotenv is not None:
     load_dotenv()
-logger = logging.getLogger(__name__)
 
 try:
     import corsheaders  # noqa: F401
@@ -23,6 +32,12 @@ else:
 
 envDebugMode = os.getenv("DEBUG")
 envSecretKey = os.getenv("SECRET_KEY")
+
+APP_URL = os.getenv("APP_URL")
+if not APP_URL:
+    logger.warning(
+        "APP_URL environment variable is not set. This may cause issues with CSRF protection."
+    )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -108,17 +123,21 @@ MIDDLEWARE = [
 if HAS_CORSHEADERS:
     MIDDLEWARE.insert(1, 'corsheaders.middleware.CorsMiddleware')
 
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = _csv_env(
-    "CORS_ALLOWED_ORIGINS",
-    ["http://localhost:5173", "http://127.0.0.1:5173"],
-)
+# CORS is only needed when frontend and backend use different origins.
+if HAS_CORSHEADERS:
+    CORS_ALLOW_CREDENTIALS = True
+    CORS_ALLOWED_ORIGINS = _csv_env(
+        "CORS_ALLOWED_ORIGINS",
+        [],
+    )
 
-
-CSRF_TRUSTED_ORIGINS = _csv_env(
-    "CSRF_TRUSTED_ORIGINS",
-    ["http://localhost:5173", "http://127.0.0.1:5173"],
-)
+if APP_URL:
+    CSRF_TRUSTED_ORIGINS = [APP_URL]
+else:
+    CSRF_TRUSTED_ORIGINS = []
+    logger.warning(
+        "APP_URL is not set. This may cause issues with CSRF protection."
+    )
 
 
 

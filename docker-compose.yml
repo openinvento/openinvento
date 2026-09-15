@@ -12,6 +12,7 @@ services:
     restart: unless-stopped
     environment:
       DATA_DIRECTORY: /data
+      APP_URL: ${APP_URL} # Set this to the URL where the FRONTEND container will be accessible (e.g., http://localhost:80)
     volumes:
       - openinvento-data:/data
 
