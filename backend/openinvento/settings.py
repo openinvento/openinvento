@@ -27,6 +27,25 @@ envSecretKey = os.getenv("SECRET_KEY")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Data Dir where DB, user uploads, etc. will be stored. Can be set via environment variable DATA_DIR, otherwise defaults to BASE_DIR/data
+data_directory = os.getenv("DATA_DIRECTORY")
+
+if data_directory:
+    DATA_DIR = Path(data_directory)
+else:
+    DATA_DIR = BASE_DIR / "data"
+    logger.warning(
+        "DATA_DIRECTORY environment variable is not set. Using default: %s",
+        DATA_DIR,
+    )
+
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+# Database
+DATABASE_PATH = Path(
+    os.getenv("DATABASE_PATH", DATA_DIR / "db.sqlite3")
+)
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -107,7 +126,7 @@ ROOT_URLCONF = 'openinvento.urls'
 
 #media settings
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = DATA_DIR / "media"
 
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/login'
@@ -191,7 +210,7 @@ WSGI_APPLICATION = 'openinvento.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': DATABASE_PATH,
     }
 }
 
@@ -235,9 +254,9 @@ USE_X_FORWARDED_HOST = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = DATA_DIR / "staticfiles"
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(DATA_DIR, 'static'),
 ]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

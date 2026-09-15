@@ -1,0 +1,19 @@
+services:
+  frontend:
+    image: ghcr.io/openinvento/openinvento-frontend:${OPENINVENTO_VERSION}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  backend:
+    image: ghcr.io/openinvento/openinvento-backend:${OPENINVENTO_VERSION}
+    restart: unless-stopped
+    environment:
+      DATA_DIRECTORY: /data
+    volumes:
+      - openinvento-data:/data
+
+volumes:
+  openinvento-data:
