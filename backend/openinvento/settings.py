@@ -4,9 +4,10 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
-from .custom_logger import LOGGING
-
 from django.core.management.utils import get_random_secret_key
+from .custom_logger import LOGGING, configure_early_logging
+
+configure_early_logging()
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,7 @@ except ImportError:
 
 if load_dotenv is not None:
     load_dotenv()
+
 
 try:
     import corsheaders  # noqa: F401
