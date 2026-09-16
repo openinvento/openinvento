@@ -57,7 +57,7 @@ export function AccountSidebarManager({
           <DropdownMenuTrigger
             render={<SidebarMenuButton className="w-fit px-1.5" />}
           >
-            <div className="flex aspect-square size-5 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
+            <div className="flex aspect-square size-7.5 items-center justify-center rounded-md bg-none text-sidebar-primary-foreground">
               {activeTeam.logo}
             </div>
             <span className="truncate font-medium">{activeTeam.name}</span>

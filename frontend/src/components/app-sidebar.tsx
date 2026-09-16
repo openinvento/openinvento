@@ -24,7 +24,10 @@ const data = {
     {
       name: "Your Name",
       logo: (
-        <TerminalIcon
+        <img
+          src="/compact_icon.png"
+          alt="Icon"
+          className="rounded-xl"
         />
       ),
       plan: "Enterprise",
