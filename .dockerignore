@@ -1,0 +1,13 @@
+
+.git
+.gitignore
+.idea
+.vscode
+
+**.env
+**.env.*
+!frontend/.env.example
+
+**/node_modules
+**/dist
+**/.pnpm-store
