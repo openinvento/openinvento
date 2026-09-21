@@ -78,7 +78,6 @@ export function FieldRow({
   onEdit: () => void
   onDelete: () => void
 }) {
-  const { t } = useTranslation()
 
   const Icon = 
     field.field_type === "text" ? <SlidersHorizontal className="size-4 shrink-0 text-muted-foreground" />
