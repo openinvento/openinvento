@@ -25,8 +25,16 @@ nginx_pid=$!
 
 trap 'kill "$backend_pid" "$nginx_pid" 2>/dev/null || true' INT TERM EXIT
 
-wait -n "$backend_pid" "$nginx_pid"
 status=$?
+while kill -0 "$backend_pid" 2>/dev/null && kill -0 "$nginx_pid" 2>/dev/null; do
+    sleep 1
+done
+
+if ! kill -0 "$backend_pid" 2>/dev/null; then
+    wait "$backend_pid" || status=$?
+else
+    wait "$nginx_pid" || status=$?
+fi
 
 kill "$backend_pid" "$nginx_pid" 2>/dev/null || true
 wait "$backend_pid" "$nginx_pid" 2>/dev/null || true
