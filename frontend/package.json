@@ -12,6 +12,7 @@
     "license:check": "node scripts/check-licenses.js",
     "license:generate": "node scripts/generate-license-file.js"
   },
+  "packageManager": "pnpm@12.5.0",
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
