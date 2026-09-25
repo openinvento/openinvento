@@ -24,6 +24,8 @@ ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y nginx \
+    && rm -f /etc/nginx/sites-enabled/default \
+    && rm -f /etc/nginx/conf.d/*.conf \
     && rm -rf /var/lib/apt/lists/*
 
 COPY backend/pyproject.toml .
