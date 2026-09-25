@@ -9,6 +9,7 @@ license = { text = "PolyForm Shield License 1.0.0" }
 dependencies = [
     "django>=6.1.1",
     "uvicorn>=0.28.0",
+    "gunicorn==26.2.0",
     "djangorestframework==3.18.0",
     "Pillow==12.3.0",
     "django-ratelimit==4.1.0"
