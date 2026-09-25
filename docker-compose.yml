@@ -1,18 +1,12 @@
 services:
-  frontend:
-    image: ghcr.io/openinvento/openinvento-frontend:${OPENINVENTO_VERSION}
+  openinvento:
+    image: ghcr.io/openinvento/openinvento:${OPENINVENTO_VERSION}
     restart: unless-stopped
     ports:
       - "80:80"
-    depends_on:
-      - backend
-
-  backend:
-    image: ghcr.io/openinvento/openinvento-backend:${OPENINVENTO_VERSION}
-    restart: unless-stopped
     environment:
       DATA_DIRECTORY: /data
-      APP_URL: ${APP_URL} # Set this to the URL where the FRONTEND container will be accessible (e.g., http://localhost:80)
+      APP_URL: ${APP_URL} # Set this to the URL where the container will be accessible (e.g., http://localhost:80)
     volumes:
       - openinvento-data:/data
 
