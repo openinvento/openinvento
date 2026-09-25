@@ -44,66 +44,34 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Extract frontend metadata
-        id: frontend-meta
+      - name: Extract image metadata
+        id: image-meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.IMAGE_PREFIX }}/openinvento-frontend
+          images: ${{ env.IMAGE_PREFIX }}/openinvento
           tags: |
             type=raw,value=${{ env.VERSION }}
             type=raw,value=latest
             type=sha,format=short
 
-      - name: Extract backend metadata
-        id: backend-meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE_PREFIX }}/openinvento-backend
-          tags: |
-            type=raw,value=${{ env.VERSION }}
-            type=raw,value=latest
-            type=sha,format=short
-
-      - name: Build and push frontend
-        id: frontend-push
-        uses: docker/build-push-action@v6
-        with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.frontend-meta.outputs.tags }}
-          labels: ${{ steps.frontend-meta.outputs.labels }}
-          build-args: |
-            APP_VERSION=${{ env.VERSION }}
-          cache-from: type=gha,scope=frontend
-          cache-to: type=gha,mode=max,scope=frontend
-
-      - name: Build and push backend
-        id: backend-push
+      - name: Build and push image
+        id: image-push
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./backend/Dockerfile
+          file: ./Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.backend-meta.outputs.tags }}
-          labels: ${{ steps.backend-meta.outputs.labels }}
+          tags: ${{ steps.image-meta.outputs.tags }}
+          labels: ${{ steps.image-meta.outputs.labels }}
           build-args: |
             APP_VERSION=${{ env.VERSION }}
-          cache-from: type=gha,scope=backend
-          cache-to: type=gha,mode=max,scope=backend
+          cache-from: type=gha,scope=openinvento
+          cache-to: type=gha,mode=max,scope=openinvento
 
-      - name: Generate frontend attestation
-        uses: actions/attest-build-provenance@v3
+      - name: Generate image attestation
+        uses: actions/attest-build-provenance@v4
         with:
-          subject-name: ${{ env.IMAGE_PREFIX }}/openinvento-frontend
-          subject-digest: ${{ steps.frontend-push.outputs.digest }}
-          push-to-registry: true
-
-      - name: Generate backend attestation
-        uses: actions/attest-build-provenance@v3
-        with:
-          subject-name: ${{ env.IMAGE_PREFIX }}/openinvento-backend
-          subject-digest: ${{ steps.backend-push.outputs.digest }}
+          subject-name: ${{ env.IMAGE_PREFIX }}/openinvento
+          subject-digest: ${{ steps.image-push.outputs.digest }}
           push-to-registry: true
