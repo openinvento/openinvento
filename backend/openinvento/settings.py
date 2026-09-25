@@ -134,6 +134,8 @@ if HAS_CORSHEADERS:
     )
 
 if APP_URL:
+    if not APP_URL.startswith("http://") and not APP_URL.startswith("https://"):
+        APP_URL = "http://" + APP_URL
     CSRF_TRUSTED_ORIGINS = [APP_URL]
 else:
     CSRF_TRUSTED_ORIGINS = []
