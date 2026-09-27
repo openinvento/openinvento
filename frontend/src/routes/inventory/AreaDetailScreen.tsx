@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react"
-import { ArrowLeft, ChevronDown, Plus } from "lucide-react"
+import { ArrowLeft, ChevronDown, Pencil, Plus, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate, useParams } from "react-router"
 import { ArticleCard, ChestCard, ShelfCard } from "@/components/inventory/entity-cards"
@@ -136,7 +136,6 @@ export default function AreaDetailScreen() {
     <><div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       {/* Area header and creation actions */}
       <div>
-        <p className="text-sm text-muted-foreground">{inventory?.name}</p>
         <h1 className="text-3xl font-semibold tracking-tight">{area.name}</h1>
         <p className="mt-2 text-muted-foreground">{t("areas.detail.summary", { articles: articles.length, chests: chests.length, shelves: shelves.length })}</p>
       </div>
@@ -181,11 +180,26 @@ export default function AreaDetailScreen() {
               <ChevronDown className={`size-4 transition ${isOpen ? "" : "-rotate-90"}`} />
               <span className="font-semibold">{shelf.name}</span>
               <span className="text-sm text-muted-foreground">{t("areas.detail.itemCount", { count: sectionChests.length + sectionArticles.length })}</span>
+              <span className="ml-auto flex items-center gap-1">
+                <Button
+                  title={t("areas.detail.renameShelf")} aria-label={t("areas.detail.renameShelf")}
+                  variant="ghost" size="icon-xs" 
+                  onClick={(event) => { event.stopPropagation(); setModal({ kind: "shelf", item: shelf }) }}
+                >
+                  <Pencil />
+                </Button>
+                <Button
+                  title={t("areas.detail.deleteShelf")} aria-label={t("areas.detail.deleteShelf")}
+                  variant="ghost" size="icon-xs" 
+                  onClick={(event) => { event.stopPropagation(); void remove("shelves", shelf.uuid, shelf.name) }}
+                >
+                  <Trash2 />
+                </Button>
+              </span>
             </button>
 
             {isOpen && <div className="border-t p-4">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
-                <ShelfCard name={shelf.name} subtitle={t("areas.detail.actions.shelf")} onRename={() => setModal({ kind: "shelf", item: shelf })} onDelete={() => void remove("shelves", shelf.uuid, shelf.name)} />
                 {sectionChests.map((chest) => <ChestCard key={chest.uuid} name={chest.name} subtitle={t("areas.detail.articleCount", { count: articles.filter((article) => article.chest === chest.uuid).length })} onRename={() => setModal({ kind: "chest", item: chest })} onDelete={() => void remove("chests", chest.uuid, chest.name)} />)}
                 {sectionArticles.map((article) => <ArticleCard key={article.uuid} name={article.name} subtitle={t("areas.detail.inStock", { count: article.quantity })} badge={article.minimum_quantity !== null && article.quantity <= article.minimum_quantity ? t("areas.detail.lowStock") : undefined} onOpen={() => navigate(`/app/articles/${article.uuid}`)} onRename={() => navigate(`/app/articles/${article.uuid}`)} onDelete={() => void remove("articles", article.uuid, article.name)} />)}
               </div>
