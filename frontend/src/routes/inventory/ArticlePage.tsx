@@ -5,10 +5,13 @@ import { Button } from "@/components/ui/button"
 import { removeFavorite } from "@/utils/favorites"
 import { inventoryApi, type Area, type Article, type ArticleCategory, type CategoryField, type Chest, type Shelf } from "@/utils/api/inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
+import { useTranslation } from "react-i18next"
 
 export default function ArticlePage() {
   const { articleId } = useParams()
   const navigate = useNavigate()
+  const {t} = useTranslation()
+
   const [article, setArticle] = useState<Article | null>(null)
   const [areas, setAreas] = useState<Area[]>([])
   const [shelves, setShelves] = useState<Shelf[]>([])
@@ -41,7 +44,7 @@ export default function ArticlePage() {
       setGlobalFields(nextFields.filter((field) => field.category === null))
     } 
     catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Could not load article.") } })()
+      setError(reason instanceof Error ? reason.message : t("articles.page.errors.load")) } })()
     }, [articleId])
   
   
@@ -74,54 +77,54 @@ export default function ArticlePage() {
       setArticle(next);
 
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Could not save article.") 
+      setError(reason instanceof Error ? reason.message : t("articles.page.errors.save")) 
     }
     finally { setSaving(false) }
   }
 
   async function remove() {
-    if (!article || !window.confirm(`Delete “${article.name}”?`)) return;
+    if (!article || !window.confirm(t("articles.page.confirmDelete", { name: article.name }))) return;
     try {
       await inventoryApi.remove("articles", article.uuid); 
       removeFavorite(`article:${article.uuid}`); 
       navigate(article.area ? `/app/areas/${article.area}` : "/app/areas") 
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Could not delete article.") 
+      setError(reason instanceof Error ? reason.message : t("articles.page.errors.delete")) 
     } 
   }
 
 
-  if (!article) return <section><Link to="/app/areas" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="size-4" /> Areas</Link><p className="mt-6 text-muted-foreground">{error || "Loading article..."}</p></section>
+  if (!article) return <section><Link to="/app/areas" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="size-4" /> {t("articles.page.areas")}</Link><p className="mt-6 text-muted-foreground">{error || t("articles.page.loading")}</p></section>
   
   const relevantShelves = shelves.filter((shelf) => !selectedArea || shelf.area === selectedArea)
   const relevantChests = chests.filter((chest) => !selectedArea || chest.area === selectedArea)
   const articleFields = [...categoryFields.filter((field) => field.category === selectedCategory), ...globalFields]
 
   return (
-    <section className="mx-auto w-full max-w-3xl">
+    <section className="w-full">
       <Link 
         to={article.area ? `/app/areas/${article.area}` : "/app/areas"} 
-        className="mb-5 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
-        <ArrowLeft className="size-4" /> Back to area
+        <ArrowLeft className="size-4" /> {t("articles.page.backToArea")}
       </Link>
 
-      <div className="rounded-2xl border bg-card p-5 sm:p-7">
-        
-        <div className="mb-7 flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+      <div className="rounded-2xl sm:p-6 lg:p-8">
+        {/* Article Header */}
+        <div className="mb-8 flex flex-col gap-5 border-b pb-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary sm:size-12">
               <Package />
             </span>
-            <div>
-              <p className="text-sm text-muted-foreground">Article details</p>
-              <h1 className="text-2xl font-semibold">{article.name}</h1>
+            <div className="min-w-0">
+              <p className="text-sm text-muted-foreground">{t("articles.page.headings.articleDetails")}</p>
+              <h1 className="truncate text-2xl font-semibold tracking-tight">{article.name}</h1>
             </div>
           </div>
           
-          <div className="flex gap-2">
-            <Button variant="destructive" size="sm" onClick={() => void remove()}>
-              Delete
+          <div className="flex sm:shrink-0">
+            <Button className="w-full sm:w-auto" variant="destructive" size="sm" onClick={() => void remove()}>
+              {t("articles.page.delete")}
             </Button>
           </div>
         </div>
@@ -132,99 +135,114 @@ export default function ArticlePage() {
           </p>
         )}
 
-        <form className="grid gap-5" onSubmit={save}>
-          
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="Name">
-              <input name="name" defaultValue={article.name} required />
-            </Field>
+        <form className="flex flex-col gap-6" onSubmit={save}>
+          {/* Core Details and Location */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid content-start gap-4 rounded-xl border bg-muted/15 p-4 sm:p-5">
+              <h2 className="text-sm font-semibold">{t("articles.page.headings.general")}</h2>
+              <Field label={t("articles.page.fields.name")}>
+                <input name="name" defaultValue={article.name} required />
+              </Field>
 
-            <Field label="Quantity">
-              <input name="quantity" type="number" min="0" defaultValue={article.quantity} />
-            </Field>
+              <Field label={t("articles.page.fields.quantity")}>
+                <input name="quantity" type="number" min="0" defaultValue={article.quantity} />
+              </Field>
 
-            <Field label="Minimum quantity">
-              <input name="minimum_quantity" type="number" min="0" defaultValue={article.minimum_quantity ?? ""} />
-            </Field>
+{/*               <Field label="Minimum quantity">
+                <input name="minimum_quantity" type="number" min="0" defaultValue={article.minimum_quantity ?? ""} />
+              </Field> */}
+            </div>
 
-            <Field label="Area">
-              <select
-                name="area"
-                value={selectedArea ?? ""}
-                onChange={(event) => {
-                  setSelectedArea(event.target.value || null)
-                  setSelectedShelf(null)
-                  setSelectedChest(null)
-                }}
-              >
-                <option value="">No area</option>
-                {areas.map((area) => (
-                  <option key={area.uuid} value={area.uuid}>
-                    {area.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
+            <div className="grid content-start gap-4 rounded-xl border bg-muted/15 p-4 sm:p-5">
+              <h2 className="text-sm font-semibold">{t("articles.page.headings.locationAndCategory")}</h2>
+              <Field label={t("articles.page.fields.area")}>
+                <select
+                  name="area"
+                  value={selectedArea ?? ""}
+                  onChange={(event) => {
+                    setSelectedArea(event.target.value || null)
+                    setSelectedShelf(null)
+                    setSelectedChest(null)
+                  }}
+                >
+                  <option value="">{t("articles.page.noArea")}</option>
+                  {areas.map((area) => (
+                    <option key={area.uuid} value={area.uuid}>
+                      {area.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-            <Field label="Category">
-              <select
-                name="category"
-                value={selectedCategory ?? ""}
-                onChange={(event) => setSelectedCategory(event.target.value || null)}
-              >
-                <option value="">No category</option>
-                {categories.map((category) => <option key={category.uuid} value={category.uuid}>{getCategoryLabel(category.name)}</option>)}
-              </select>
-            </Field>
+              <Field label={t("articles.page.fields.category")}>
+                <select
+                  name="category"
+                  value={selectedCategory ?? ""}
+                  onChange={(event) => setSelectedCategory(event.target.value || null)}
+                >
+                  <option value="">{t("articles.page.noCategory")}</option>
+                  {categories.map((category) => <option key={category.uuid} value={category.uuid}>{getCategoryLabel(category.name)}</option>)}
+                </select>
+              </Field>
 
-            <Field label="Shelf">
-              <select
-                name="shelf"
-                value={selectedShelf ?? ""}
-                onChange={(event) => setSelectedShelf(event.target.value || null)}
-              >
-                <option value="">No shelf</option>
-                {relevantShelves.map((shelf) => (
-                  <option key={shelf.uuid} value={shelf.uuid}>
-                    {shelf.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
+              <Field label={t("articles.page.fields.shelf")}>
+                <select
+                  name="shelf"
+                  value={selectedShelf ?? ""}
+                  onChange={(event) => setSelectedShelf(event.target.value || null)}
+                >
+                  <option value="">{t("articles.page.noShelf")}</option>
+                  {relevantShelves.map((shelf) => (
+                    <option key={shelf.uuid} value={shelf.uuid}>
+                      {shelf.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-            <Field label="Chest">
-              <select
-                name="chest"
-                value={selectedChest ?? ""}
-                onChange={(event) => setSelectedChest(event.target.value || null)}
-              >
-                <option value="">No chest</option>
-                {relevantChests.map((chest) => (
-                  <option key={chest.uuid} value={chest.uuid}>
-                    {chest.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
+              <Field label={t("articles.page.fields.chest")}>
+                <select
+                  name="chest"
+                  value={selectedChest ?? ""}
+                  onChange={(event) => setSelectedChest(event.target.value || null)}
+                >
+                  <option value="">{t("articles.page.noChest")}</option>
+                  {relevantChests.map((chest) => (
+                    <option key={chest.uuid} value={chest.uuid}>
+                      {chest.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+
           </div>
 
-          <Field label="Description">
-            <textarea name="description" rows={5} defaultValue={article.description ?? ""} />
-          </Field>
+          {/* Additional Details */}
+          <div className="grid gap-5 rounded-xl border p-4 sm:p-5">
+            <Field label={t("articles.page.fields.description")}>
+              <textarea name="description" rows={5} defaultValue={article.description ?? ""} />
+            </Field>
 
-          {articleFields.map((field) => 
-            <Field key={field.uuid} label={getFieldLabel(field)}>
-              <input 
-                name={`custom_${field.key}`}
-                type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"} 
-                defaultValue={article.custom_fields[field.key]?.toString() ?? ""} 
-              />
-            </Field>)
-          }
+            {articleFields.length > 0 && (
+              <div className="grid gap-5 sm:grid-cols-2">
+                {articleFields.map((field) => 
+                  <Field key={field.uuid} label={getFieldLabel(field)}>
+                    <input 
+                      name={`custom_${field.key}`}
+                      type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"} 
+                      defaultValue={article.custom_fields[field.key]?.toString() ?? ""} 
+                    />
+                  </Field>)
+                }
+              </div>
+            )}
+          </div>
 
-          <div className="flex justify-end">
-            <Button type="submit" disabled={saving}>
-              <Save /> {saving ? "Saving..." : "Save changes"}
+          {/* Form Actions */}
+          <div className="flex justify-end border-t pt-6">
+            <Button className="w-full p-5 sm:w-auto" type="submit" disabled={saving}>
+              <Save /> {saving ? t("articles.page.saving") : t("articles.page.saveChanges")}
             </Button>
           </div>
 
@@ -238,7 +256,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   return (
     <label className="grid gap-1.5 text-sm font-medium">
       {label}
-      <span className="[&_input]:h-10 [&_input]:rounded-lg [&_input]:border [&_input]:bg-background [&_input]:px-3 [&_select]:h-10 [&_select]:rounded-lg [&_select]:border [&_select]:bg-background [&_select]:px-3 [&_textarea]:rounded-lg [&_textarea]:border [&_textarea]:bg-background [&_textarea]:p-3">
+      <span className="[&_input]:h-10 [&_input]:w-full [&_input]:rounded-lg [&_input]:border [&_input]:bg-background [&_input]:px-3 [&_select]:h-10 [&_select]:w-full [&_select]:rounded-lg [&_select]:border [&_select]:bg-background [&_select]:px-3 [&_textarea]:w-full [&_textarea]:rounded-lg [&_textarea]:border [&_textarea]:bg-background [&_textarea]:p-3">
         {children}
       </span>
     </label>
