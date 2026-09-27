@@ -17,6 +17,7 @@ import ErrorPage from './routes/Error.tsx'
 import SearchPage from './routes/inventory/SearchPage.tsx'
 import { SessionGuard } from './components/auth/session-guard.tsx'
 import ManageCategoriesAndFieldsPage from './routes/inventory/ManageCategoriesAndFields.tsx'
+import ManageCodes from './routes/inventory/ManageCodes.tsx'
 
 
 /* Dark / White mode handling */
@@ -86,7 +87,7 @@ const router = createBrowserRouter([
       },
       {
         path: "codemanagement", 
-        element: <SettingsPage />,
+        element: <ManageCodes />,
       },
       {
         path: "manage-categories-and-fields", 
