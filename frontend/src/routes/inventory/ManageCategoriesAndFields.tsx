@@ -148,7 +148,6 @@ export default function ManageCategoriesAndFieldsPage() {
 
   return (
     <BaseScreen
-      eyebrow={inventory?.name ?? t("categoriesAndFields.inventory")}
       title={t("categoriesAndFields.title")}
       description={t("categoriesAndFields.description")}
       actions={

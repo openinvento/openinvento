@@ -14,7 +14,7 @@ export default function BaseScreen({
 	description,
 	eyebrow,
 	actions,
-	fullWidth = false,
+	fullWidth = true,
 	children,
 }: BaseScreenProps) {
 	return (
