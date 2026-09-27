@@ -48,6 +48,7 @@ export default function AreasPage() {
 
   return (
     <BaseScreen
+      fullWidth
       eyebrow={inventory?.name ?? t("areas.inventoryFallback")}
       title={t("areas.title")}
       description={t("areas.description")}
