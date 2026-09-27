@@ -5,6 +5,7 @@ type BaseScreenProps = {
 	description?: string
 	eyebrow?: string
 	actions?: ReactNode
+	fullWidth?: boolean
 	children: ReactNode
 }
 
@@ -13,10 +14,11 @@ export default function BaseScreen({
 	description,
 	eyebrow,
 	actions,
+	fullWidth = false,
 	children,
 }: BaseScreenProps) {
 	return (
-		<section className="mx-auto w-full max-w-6xl">
+		<section className={`mx-auto w-full${fullWidth ? "" : " max-w-6xl"}`}>
 			<div className="mb-8 flex flex-wrap items-end justify-between gap-4">
 				<div>
 					{eyebrow && <p className="mb-1 text-sm font-medium text-muted-foreground">{eyebrow}</p>}

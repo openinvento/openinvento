@@ -1,30 +1,4 @@
 {
-  "auth": {
-    "fields": {
-      "username": "username",
-      "email": "email",
-      "name": "name",
-      "password": "password"
-    },
-    "errors": {
-      "generic": "Authentication failed. Please try again.",
-      "invalidCredentials": "Invalid email, username, or password.",
-      "invalidRequest": "Please check the entered details.",
-      "invalidField": "Invalid {{field}}.",
-      "passwordMismatch": "Passwords do not match.",
-      "passwordTooShort": "Password is too short. It must contain at least 8 characters.",
-      "passwordCommon": "This password is too common.",
-      "passwordNumeric": "Password cannot be entirely numeric.",
-      "passwordSimilar": "Password is too similar to your personal information.",
-      "usernameTaken": "This username is already taken.",
-      "emailTaken": "This email address is already registered.",
-      "nameRequired": "Name is required.",
-      "usernameRequired": "Username is required.",
-      "emailRequired": "Email address is required.",
-      "passwordRequired": "Password is required.",
-      "emailInvalid": "Enter a valid email address."
-    }
-  },
   "accounts": {
     "logoutBtn": "Logout"
   },
@@ -53,7 +27,179 @@
     "newArea": "New area",
     "openArea": "Open area",
     "renameArea": "Rename area",
-    "title": "Areas"
+    "title": "Areas",
+    "detail": {
+      "actions": {
+        "article": "Article",
+        "chest": "Chest",
+        "shelf": "Shelf"
+      },
+      "allAreas": "All areas",
+      "articleCount": "{{count}} articles",
+      "articles": "Articles",
+      "confirmDelete": "Delete {{name}}?",
+      "errors": {
+        "delete": "Could not delete item.",
+        "load": "Could not load this area.",
+        "save": "Could not save item."
+      },
+      "fields": {
+        "category": "Category",
+        "chest": "Chest",
+        "description": "Description",
+        "name": "Name",
+        "quantity": "Quantity",
+        "shelf": "Shelf"
+      },
+      "inStock": "{{count}} in stock",
+      "itemCount": "{{count}} items",
+      "loading": "Loading area...",
+      "lowStock": "Low stock",
+      "modal": {
+        "edit": "Edit {{kind}}",
+        "new": "New {{kind}}"
+      },
+      "noCategory": "No category",
+      "noChest": "No chest",
+      "nothingStored": "Nothing stored here yet.",
+      "notOnShelf": "Not on a shelf",
+      "otherFields": "Other fields",
+      "otherItems": "Other items",
+      "summary": "{{articles}} articles · {{chests}} chests · {{shelves}} shelves"
+    }
+  },
+  "articles": {
+    "page": {
+      "headings": {
+        "articleDetails": "Article Details",
+        "general": "General",
+        "locationAndCategory": "Location and Category"
+      },
+      "areas": "Areas",
+      "backToArea": "Back to area",
+      "confirmDelete": "Delete {{name}}?",
+      "delete": "Delete",
+      "errors": {
+        "delete": "Could not delete article.",
+        "load": "Could not load article.",
+        "save": "Could not save article."
+      },
+      "fields": {
+        "area": "Area",
+        "category": "Category",
+        "chest": "Chest",
+        "description": "Description",
+        "name": "Name",
+        "quantity": "Quantity",
+        "shelf": "Shelf"
+      },
+      "loading": "Loading article...",
+      "noArea": "No area",
+      "noCategory": "No category",
+      "noChest": "No chest",
+      "noShelf": "No shelf",
+      "saveChanges": "Save changes",
+      "saving": "Saving..."
+    }
+  },
+  "auth": {
+    "errors": {
+      "emailInvalid": "Enter a valid email address.",
+      "emailRequired": "Email address is required.",
+      "emailTaken": "This email address is already registered.",
+      "generic": "Authentication failed. Please try again.",
+      "invalidCredentials": "Invalid email, username, or password.",
+      "invalidField": "Invalid {{field}}.",
+      "invalidRequest": "Please check the entered details.",
+      "nameRequired": "Name is required.",
+      "passwordCommon": "This password is too common.",
+      "passwordMismatch": "Passwords do not match.",
+      "passwordNumeric": "Password cannot be entirely numeric.",
+      "passwordRequired": "Password is required.",
+      "passwordSimilar": "Password is too similar to your personal information.",
+      "passwordTooShort": "Password is too short. It must contain at least 8 characters.",
+      "usernameRequired": "Username is required.",
+      "usernameTaken": "This username is already taken."
+    },
+    "fields": {
+      "email": "email",
+      "name": "name",
+      "password": "password",
+      "username": "username"
+    }
+  },
+  "categoriesAndFields": {
+    "addCategory": "Add category",
+    "addField": "Add field",
+    "addGeneralField": "Add general field",
+    "categories": "Categories",
+    "category": "Category",
+    "categoryName": "Category name",
+    "confirmDeleteCategory": "Delete category {{name}} and its fields?",
+    "confirmDeleteField": "Delete field {{name}}?",
+    "createCategory": "Create category",
+    "delete": "Delete",
+    "description": "Define the information stored on each article.",
+    "edit": "Edit",
+    "editCategory": "Edit category",
+    "editField": "Edit field",
+    "errors": {
+      "delete": "Could not delete item.",
+      "load": "Could not load categories and fields.",
+      "saveCategory": "Could not save category.",
+      "saveField": "Could not save field."
+    },
+    "field": "field",
+    "fieldType": "Field type",
+    "fieldTypes": {
+      "barcode": "Barcode",
+      "boolean": "Yes / No",
+      "date": "Date",
+      "number": "Number",
+      "text": "Text"
+    },
+    "fields": "fields",
+    "generalField": "General field",
+    "generalFields": "General fields",
+    "inventory": "Inventory",
+    "key": "Key",
+    "label": "Label",
+    "newCategory": "New category",
+    "newField": "New field",
+    "noCategoriesText": "Create a category to group related article fields.",
+    "noCategoriesTitle": "No categories yet",
+    "noCategoryFields": "No category-specific fields.",
+    "noGeneralFields": "No fields apply to every category.",
+    "noInventoryText": "Ask an administrator to add you to an inventory before managing categories.",
+    "noInventoryTitle": "No inventory available",
+    "title": "Categories and fields"
+  },
+  "inventory": {
+    "categories": {
+      "books": "Books and media",
+      "clothing": "Clothing",
+      "electronics": "Electronics",
+      "food": "Food",
+      "medicine": "Medicine"
+    },
+    "fields": {
+      "author": "Author",
+      "barcode": "Barcode",
+      "brand": "Brand",
+      "expiration_date": "Expiration date",
+      "expiry": "Expiry date",
+      "has_insurance": "Has insurance",
+      "isbn": "ISBN",
+      "pages": "Pages",
+      "prescription_required": "Prescription required",
+      "purchase_date": "Purchase date",
+      "pzn_barcode": "PZN barcode",
+      "quantity": "Quantity",
+      "read_status": "Read status",
+      "serial_number": "Serial number",
+      "size": "Size",
+      "warranty_months": "Warranty period in months"
+    }
   },
   "search": {
     "empty": "No articles found.",
@@ -79,79 +225,6 @@
     "themePlaceholder": "Select theme",
     "themeSystem": "System",
     "title": "Settings"
-  },
-  "inventory": {
-    "categories": {
-      "food": "Food",
-      "books": "Books and media",
-      "electronics": "Electronics",
-      "clothing": "Clothing",
-      "medicine": "Medicine"
-    },
-    "fields": {
-      "barcode": "Barcode",
-      "expiration_date": "Expiration date",
-      "isbn": "ISBN",
-      "author": "Author",
-      "pages": "Pages",
-      "read_status": "Read status",
-      "serial_number": "Serial number",
-      "purchase_date": "Purchase date",
-      "warranty_months": "Warranty period in months",
-      "has_insurance": "Has insurance",
-      "brand": "Brand",
-      "size": "Size",
-      "quantity": "Quantity",
-      "pzn_barcode": "PZN barcode",
-      "expiry": "Expiry date",
-      "prescription_required": "Prescription required"
-    }
-  },
-  "categoriesAndFields": {
-    "title": "Categories and fields",
-    "description": "Define the information stored on each article.",
-    "inventory": "Inventory",
-    "newCategory": "New category",
-    "addCategory": "Add category",
-    "categories": "Categories",
-    "generalFields": "General fields",
-    "addGeneralField": "Add general field",
-    "addField": "Add field",
-    "editCategory": "Edit category",
-    "categoryName": "Category name",
-    "newField": "New field",
-    "editField": "Edit field",
-    "label": "Label",
-    "key": "Key",
-    "fieldType": "Field type",
-    "category": "Category",
-    "generalField": "General field",
-    "edit": "Edit",
-    "delete": "Delete",
-    "field": "field",
-    "fields": "fields",
-    "noInventoryTitle": "No inventory available",
-    "noInventoryText": "Ask an administrator to add you to an inventory before managing categories.",
-    "noCategoriesTitle": "No categories yet",
-    "noCategoriesText": "Create a category to group related article fields.",
-    "noCategoryFields": "No category-specific fields.",
-    "noGeneralFields": "No fields apply to every category.",
-    "createCategory": "Create category",
-    "confirmDeleteCategory": "Delete category {{name}} and its fields?",
-    "confirmDeleteField": "Delete field {{name}}?",
-    "errors": {
-      "load": "Could not load categories and fields.",
-      "saveCategory": "Could not save category.",
-      "saveField": "Could not save field.",
-      "delete": "Could not delete item."
-    },
-    "fieldTypes": {
-      "text": "Text",
-      "number": "Number",
-      "boolean": "Yes / No",
-      "date": "Date",
-      "barcode": "Barcode"
-    }
   },
   "sidebar": {
     "areas": "Areas",

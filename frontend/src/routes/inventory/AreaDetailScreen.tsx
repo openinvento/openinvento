@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react"
 import { ArrowLeft, ChevronDown, Plus } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Link, useNavigate, useParams } from "react-router"
 import { ArticleCard, ChestCard, ShelfCard } from "@/components/inventory/entity-cards"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
@@ -12,6 +13,7 @@ type CreateKind = "article" | "chest" | "shelf"
 export default function AreaDetailScreen() {
   const { areaId } = useParams()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const [inventory, setInventory] = useState<Inventory | null>(null)
   const [area, setArea] = useState<Area | null>(null)
@@ -46,11 +48,9 @@ export default function AreaDetailScreen() {
       setArticles(allArticles.filter((item) => item.area === areaId))
       setCategories(allCategories)
       setAllFields(loadedFields) 
-    } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not load this area.") }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t("areas.detail.errors.load")) }
   }
   useEffect(() => { void load() }, [areaId])
-
-  const shelfSections = useMemo(() => [{ uuid: "unassigned", name: "Not on a shelf" }, ...shelves], [shelves])
 
   // dynamic custom fields for articles based on selected category
   const articleFields = useMemo(() => {
@@ -113,65 +113,108 @@ export default function AreaDetailScreen() {
       }
     }
     catch (reason) { 
-      setError(reason instanceof Error ? reason.message : "Could not create item.") 
+      setError(reason instanceof Error ? reason.message : t("areas.detail.errors.save")) 
     }
     finally { setSaving(false) }
   }
   async function remove(kind: "articles" | "chests" | "shelves", uuid: string, name: string) {
-    if (!window.confirm(`Delete “${name}”?`)) return
-    try { await inventoryApi.remove(kind, uuid); await load() } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not delete item.") }
+    if (!window.confirm(t("areas.detail.confirmDelete", { name }))) return
+    try { await inventoryApi.remove(kind, uuid); await load() } catch (reason) { setError(reason instanceof Error ? reason.message : t("areas.detail.errors.delete")) }
   }
 
-  if (!area && !error) return <p className="text-muted-foreground">Loading area...</p>
+  if (!area && !error) return <p className="text-muted-foreground">{t("areas.detail.loading")}</p>
   return (
-  <section className="mx-auto w-full max-w-6xl">
+  <section className="w-full">
+    {/* Area navigation */}
     <Link to="/app/areas" className="mb-5 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
       <ArrowLeft className="size-4" />
-      All areas
+      {t("areas.detail.allAreas")}
     </Link>
     {error && <p className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
     {area && 
+    
     <><div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+      {/* Area header and creation actions */}
       <div>
         <p className="text-sm text-muted-foreground">{inventory?.name}</p>
         <h1 className="text-3xl font-semibold tracking-tight">{area.name}</h1>
-        <p className="mt-2 text-muted-foreground">{articles.length} articles · {chests.length} chests · {shelves.length} shelves</p>
+        <p className="mt-2 text-muted-foreground">{t("areas.detail.summary", { articles: articles.length, chests: chests.length, shelves: shelves.length })}</p>
       </div>
     
       <div className="flex flex-wrap gap-2">
-      <Button variant="outline" onClick={() => setModal({ kind: "shelf" })}><Plus /> Shelf</Button>
-      <Button variant="outline" onClick={() => setModal({ kind: "chest" })}><Plus /> Chest</Button>
-      <Button onClick={() => { setSelectedCategory(""); setModal({ kind: "article" }) }}><Plus /> Article</Button>
+      <Button className="p-4" variant="outline" onClick={() => setModal({ kind: "shelf" })}><Plus /> {t("areas.detail.actions.shelf")}</Button>
+      <Button className="p-4" variant="outline" onClick={() => setModal({ kind: "chest" })}><Plus /> {t("areas.detail.actions.chest")}</Button>
+      <Button className="p-4" onClick={() => { setSelectedCategory(""); setModal({ kind: "article" }) }}><Plus /> {t("areas.detail.actions.article")}</Button>
       </div>
     </div>
     
-    <div className="space-y-4">{shelfSections.map((shelf) => { const isOpen = openShelves[shelf.uuid] !== false; const sectionChests = chests.filter((chest) => (chest.shelf ?? "unassigned") === shelf.uuid); const sectionArticles = articles.filter((article) => (article.shelf ?? "unassigned") === shelf.uuid); return <div key={shelf.uuid} className="rounded-2xl border bg-muted/15">
-    <button className="flex w-full items-center gap-3 p-4 text-left" onClick={() => setOpenShelves((state) => ({ ...state, [shelf.uuid]: !isOpen }))}>
-      <ChevronDown className={`size-4 transition ${isOpen ? "" : "-rotate-90"}`} /><span className="font-semibold">{shelf.name}</span>
-      <span className="text-sm text-muted-foreground">{sectionChests.length + sectionArticles.length} items</span>
-    </button>
-      
-    {isOpen && <div className="border-t p-4">
-      
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{shelf.uuid !== "unassigned" && 
-      <ShelfCard name={shelf.name} subtitle="Shelf" onRename={() => setModal({ kind: "shelf", item: shelf as Shelf })} onDelete={() => void remove("shelves", shelf.uuid, shelf.name)} />}
-      
-      {sectionChests.map((chest) => <ChestCard key={chest.uuid} name={chest.name} subtitle={`${articles.filter((article) => article.chest === chest.uuid).length} articles`} onRename={() => setModal({ kind: "chest", item: chest })} onDelete={() => void remove("chests", chest.uuid, chest.name)} />)}
-        
-      {sectionArticles.map((article) => <ArticleCard key={article.uuid} name={article.name} subtitle={`${article.quantity} in stock`} badge={article.minimum_quantity !== null && article.quantity <= article.minimum_quantity ? "Low stock" : undefined} onOpen={() => navigate(`/app/articles/${article.uuid}`)} onRename={() => navigate(`/app/articles/${article.uuid}`)} onDelete={() => void remove("articles", article.uuid, article.name)} />)}
-    </div>
-      
-    {sectionChests.length + sectionArticles.length === 0 && <p className="py-3 text-sm text-muted-foreground">Nothing stored here yet.</p>}</div>}</div> })}</div></>}
+    {/* Inventory contents */}
+    <div className="space-y-6">
+      {/* Articles can live directly in an area without a shelf. */}
+      {articles.filter((article) => article.shelf === null).length > 0 && (
+        <div>
+          <h2 className="mb-3 text-lg font-semibold">{t("areas.detail.articles")}</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+            {articles.filter((article) => article.shelf === null).map((article) => (
+              <ArticleCard
+                key={article.uuid}
+                name={article.name}
+                subtitle={t("areas.detail.inStock", { count: article.quantity })}
+                badge={article.minimum_quantity !== null && article.quantity <= article.minimum_quantity ? t("areas.detail.lowStock") : undefined}
+                onOpen={() => navigate(`/app/articles/${article.uuid}`)}
+                onRename={() => navigate(`/app/articles/${article.uuid}`)}
+                onDelete={() => void remove("articles", article.uuid, article.name)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
+      {/* Shelves are optional containers for grouped inventory. */}
+      {shelves.map((shelf) => {
+        const isOpen = openShelves[shelf.uuid] !== false
+        const sectionChests = chests.filter((chest) => chest.shelf === shelf.uuid)
+        const sectionArticles = articles.filter((article) => article.shelf === shelf.uuid)
+        return (
+          <div key={shelf.uuid} className="rounded-2xl border bg-muted/15">
+            <button className="flex w-full items-center gap-3 p-4 text-left" onClick={() => setOpenShelves((state) => ({ ...state, [shelf.uuid]: !isOpen }))}>
+              <ChevronDown className={`size-4 transition ${isOpen ? "" : "-rotate-90"}`} />
+              <span className="font-semibold">{shelf.name}</span>
+              <span className="text-sm text-muted-foreground">{t("areas.detail.itemCount", { count: sectionChests.length + sectionArticles.length })}</span>
+            </button>
+
+            {isOpen && <div className="border-t p-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+                <ShelfCard name={shelf.name} subtitle={t("areas.detail.actions.shelf")} onRename={() => setModal({ kind: "shelf", item: shelf })} onDelete={() => void remove("shelves", shelf.uuid, shelf.name)} />
+                {sectionChests.map((chest) => <ChestCard key={chest.uuid} name={chest.name} subtitle={t("areas.detail.articleCount", { count: articles.filter((article) => article.chest === chest.uuid).length })} onRename={() => setModal({ kind: "chest", item: chest })} onDelete={() => void remove("chests", chest.uuid, chest.name)} />)}
+                {sectionArticles.map((article) => <ArticleCard key={article.uuid} name={article.name} subtitle={t("areas.detail.inStock", { count: article.quantity })} badge={article.minimum_quantity !== null && article.quantity <= article.minimum_quantity ? t("areas.detail.lowStock") : undefined} onOpen={() => navigate(`/app/articles/${article.uuid}`)} onRename={() => navigate(`/app/articles/${article.uuid}`)} onDelete={() => void remove("articles", article.uuid, article.name)} />)}
+              </div>
+              {sectionChests.length + sectionArticles.length === 0 && <p className="py-3 text-sm text-muted-foreground">{t("areas.detail.nothingStored")}</p>}
+            </div>}
+          </div>
+        )
+      })}
+
+      {chests.filter((chest) => chest.shelf === null).length > 0 && (
+        <div>
+          <h2 className="mb-3 text-lg font-semibold">{t("areas.detail.otherItems")}</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+            {chests.filter((chest) => chest.shelf === null).map((chest) => <ChestCard key={chest.uuid} name={chest.name} subtitle={t("areas.detail.articleCount", { count: articles.filter((article) => article.chest === chest.uuid).length })} onRename={() => setModal({ kind: "chest", item: chest })} onDelete={() => void remove("chests", chest.uuid, chest.name)} />)}
+          </div>
+        </div>
+      )}
+    </div></>}
+
+    {/* Create and edit inventory modal */}
     <InventoryModal
-      title={modal ? `${modal.item ? "Edit" : "New"} ${modal.kind}` : ""}
+      title={modal ? t(`areas.detail.modal.${modal.item ? "edit" : "new"}`, { kind: t(`areas.detail.actions.${modal.kind}`) }) : ""}
       open={modal !== null}
       submitting={saving}
       onClose={() => setModal(null)}
       onSubmit={save}
     >
       <label className="grid gap-1.5 text-sm font-medium">
-        Name
+        {t("areas.detail.fields.name")}
         <input
           autoFocus
           name="name"
@@ -183,14 +226,14 @@ export default function AreaDetailScreen() {
 
       {modal?.kind === "article" && (
         <label className="grid gap-1.5 text-sm font-medium">
-          Category
+          {t("areas.detail.fields.category")}
           <select
             name="category"
             value={selectedCategory}
             onChange={(event) => setSelectedCategory(event.target.value)}
             className="h-10 rounded-lg border bg-background px-3 font-normal"
           >
-            <option value="">No category</option>
+            <option value="">{t("areas.detail.noCategory")}</option>
             {categories.map((category) => (
               <option key={category.uuid} value={category.uuid}>
                 {getCategoryLabel(category.name)}
@@ -202,13 +245,13 @@ export default function AreaDetailScreen() {
 
       {modal?.kind !== "shelf" && (
         <label className="grid gap-1.5 text-sm font-medium">
-          Shelf
+          {t("areas.detail.fields.shelf")}
           <select
             name="shelf"
             defaultValue={modal?.item && "shelf" in modal.item ? modal.item.shelf ?? "" : ""}
             className="h-10 rounded-lg border bg-background px-3 font-normal"
           >
-            <option value="">Not on a shelf</option>
+            <option value="">{t("areas.detail.notOnShelf")}</option>
             {shelves.map((shelf) => (
               <option key={shelf.uuid} value={shelf.uuid}>
                 {shelf.name}
@@ -221,9 +264,9 @@ export default function AreaDetailScreen() {
       {modal?.kind === "article" && (
         <>
           <label className="grid gap-1.5 text-sm font-medium">
-            Chest
+            {t("areas.detail.fields.chest")}
             <select name="chest" className="h-10 rounded-lg border bg-background px-3 font-normal">
-              <option value="">No chest</option>
+              <option value="">{t("areas.detail.noChest")}</option>
               {chests.map((chest) => (
                 <option key={chest.uuid} value={chest.uuid}>
                   {chest.name}
@@ -233,7 +276,7 @@ export default function AreaDetailScreen() {
           </label>
 
           <label className="grid gap-1.5 text-sm font-medium">
-            Quantity
+            {t("areas.detail.fields.quantity")}
             <input
               name="quantity"
               type="number"
@@ -244,7 +287,7 @@ export default function AreaDetailScreen() {
           </label>
 
           <label className="grid gap-1.5 text-sm font-medium">
-            Description
+            {t("areas.detail.fields.description")}
             <textarea
               name="description"
               rows={3}
@@ -257,7 +300,7 @@ export default function AreaDetailScreen() {
       {/* Dynamic custom fields (Only for articles) */}
       {modal?.kind === "article" && articleFields.length > 0 && (
         <div>
-          <h1 className="mb-2 mt-5 text-lg font-semibold">Other Fields</h1>
+          <h1 className="mb-2 mt-5 text-lg font-semibold">{t("areas.detail.otherFields")}</h1>
           {articleFields.map((field) => (
             <label key={field.uuid} className="grid gap-1.5 text-sm font-medium">
               {getFieldLabel(field)}
