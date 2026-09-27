@@ -6,7 +6,7 @@ type CardProps = { name: string; subtitle: string; icon: LucideIcon; onOpen?: ()
 
 function EntityCard({ name, subtitle, icon: Icon, onOpen, onRename, onDelete, badge }: CardProps) {
   return (
-    <EntityContextMenu label={name} onRename={onRename} onDelete={onDelete}><article onClick={onOpen} className="group relative min-h-32 cursor-pointer rounded-2xl border bg-card p-4 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md">
+    <EntityContextMenu label={name} onRename={onRename} onDelete={onDelete}><article onClick={onOpen} className="group relative min-h-32 cursor-pointer rounded-2xl border bg-card p-4 transition hover:border-foreground/20">
       <div className="mb-5 flex items-start justify-between">
         <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
           <Icon className="size-5" />
