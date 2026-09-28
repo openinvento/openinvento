@@ -1,0 +1,36 @@
+name-template: 'v$RESOLVED_VERSION 🌈'
+tag-template: 'v$RESOLVED_VERSION'
+categories:
+  - title: 'Features'
+    semver-increment: minor
+    when:
+      labels:
+        - 'feature'
+        - 'enhancement'
+  - title: 'Bug Fixes'
+    when:
+      labels:
+        - 'fix'
+        - 'bugfix'
+        - 'bug'
+  - title: 'Maintenance'
+    when:
+      label: 'chore'
+  - type: 'pre-exclude'
+    when:
+      label: 'skip-changelog'
+  - type: 'version-resolver'
+    semver-increment: 'major'
+    when:
+      label: 'major'
+  - type: 'version-resolver'
+    semver-increment: 'patch'
+change-template: '- $TITLE (#$NUMBER) $AUTHORS'
+# Add # and @ to prevent mentions. Add ` to prevent code blocks.
+change-title-escapes: '\<*_&'
+header: ${RESOLVED_VERSION}
+footer: "Thank you for using Openinvento! If you like this project, please consider giving it a star on GitHub and spreading the word. Your support helps us continue to improve and maintain Openinvento for everyone!"
+template: |
+  ## Changes
+
+  $CHANGES
