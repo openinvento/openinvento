@@ -1,12 +1,13 @@
 services:
   openinvento:
-    image: ghcr.io/openinvento/openinvento:${OPENINVENTO_VERSION}
+    image: ghcr.io/openinvento/openinvento:${OPENINVENTO_VERSION:-latest}
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "${PORT-8080}:80"
     environment:
       DATA_DIRECTORY: /data
       APP_URL: ${APP_URL} # Set this to the URL where the container will be accessible (e.g., http://localhost:80)
+      SECRET_KEY: ${SECRET_KEY} # Set this to a random string for security purposes
     volumes:
       - openinvento-data:/data
 
