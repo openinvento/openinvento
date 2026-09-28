@@ -7,6 +7,7 @@ services:
     environment:
       DATA_DIRECTORY: /data
       APP_URL: ${APP_URL} # Set this to the URL where the container will be accessible (e.g., http://localhost:80)
+      #APP_URLS: ${APP_URLS} # Optional: Set this to a comma-separated list of additional URLs (e.g., http://localhost:80,http://example.com)
       SECRET_KEY: ${SECRET_KEY} # Set this to a random string for security purposes
     volumes:
       - openinvento-data:/data

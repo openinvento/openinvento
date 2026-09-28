@@ -35,11 +35,6 @@ else:
 envDebugMode = os.getenv("DEBUG")
 envSecretKey = os.getenv("SECRET_KEY")
 
-APP_URL = os.getenv("APP_URL")
-if not APP_URL:
-    logger.warning(
-        "APP_URL environment variable is not set. This may cause issues with CSRF protection."
-    )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -90,9 +85,6 @@ def _csv_env(name, default):
     return [item.strip() for item in raw_value.split(",") if item.strip()]
 
 
-ALLOWED_HOSTS = _csv_env("ALLOWED_HOSTS", ["localhost", "127.0.0.1", "[::1]", "testserver"])
-
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -122,6 +114,25 @@ MIDDLEWARE = [
     'django_ratelimit.middleware.RatelimitMiddleware',
 ]
 
+APP_URL = os.getenv("APP_URL")
+if not APP_URL:
+    logger.warning(
+        "APP_URL environment variable is not set. This may cause issues with CSRF protection."
+    )
+
+# Optional: Allow multiple app URLs (comma-separated) for CORS and CSRF trusted origins
+APP_URLS = _csv_env("APP_URLS", [])
+
+allowed_hosts_env = _csv_env("ALLOWED_HOSTS", ["localhost", "127.0.0.1", "[::1]", "testserver"])
+
+ALLOWED_HOSTS = allowed_hosts_env
+if APP_URLS:
+    for url in APP_URLS:
+        if url and url not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(url)
+if APP_URL and APP_URL not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(APP_URL)
+
 if HAS_CORSHEADERS:
     MIDDLEWARE.insert(1, 'corsheaders.middleware.CorsMiddleware')
 
@@ -133,9 +144,15 @@ if HAS_CORSHEADERS:
         [],
     )
 
-if APP_URL:
-    if not APP_URL.startswith("http://") and not APP_URL.startswith("https://"):
+if APP_URL or APP_URLS:
+    if APP_URL and not APP_URL.startswith("http://") and not APP_URL.startswith("https://"):
         APP_URL = "http://" + APP_URL
+
+    if APP_URLS:
+        CSRF_TRUSTED_ORIGINS = APP_URLS
+    else:
+        CSRF_TRUSTED_ORIGINS = [APP_URL]
+
     CSRF_TRUSTED_ORIGINS = [APP_URL]
 else:
     CSRF_TRUSTED_ORIGINS = []
