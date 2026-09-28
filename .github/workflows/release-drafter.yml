@@ -1,9 +1,12 @@
 name: Release Drafter
 
 on:
-  push:
-    branches:
-      - main
+    pull_request_target:
+        types: ["opened", "closed", "reopened", "synchronize"]
+    push:
+        branches:
+        - main
+
 
 # Permissions for the default token.
 permissions:
