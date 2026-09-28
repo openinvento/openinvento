@@ -28,7 +28,6 @@ categories:
 change-template: '- $TITLE (#$NUMBER) $AUTHORS'
 # Add # and @ to prevent mentions. Add ` to prevent code blocks.
 change-title-escapes: '\<*_&'
-header: OpenInvento
 footer: "Thank you for using Openinvento! If you like this project, please consider giving it a star on GitHub and spreading the word. Your support helps us continue to improve and maintain Openinvento for everyone!"
 template: |
   ## Changes
