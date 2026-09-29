@@ -1,15 +1,24 @@
+from django.db.models import Count
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Area, Article, ArticleCategory, CategoryField, Chest, Inventory, Shelf
+from .models import (
+    Area,
+    Article,
+    ArticleCategory,
+    CategoryField,
+    Chest,
+    Inventory,
+    Shelf,
+)
 from .permissions import IsInventoryMember
 from .serializers import (
     AreaSerializer,
     ArticleCategorySerializer,
-    CategoryFieldSerializer,
     ArticleSerializer,
+    CategoryFieldSerializer,
     ChestSerializer,
     InventorySerializer,
     ShelfSerializer,
@@ -75,6 +84,52 @@ class InventoryScopedAPIView(APIView):
         if self.request.user.is_superuser:
             return Inventory.objects.all()
         return self.request.user.inventories.all()
+
+
+class DashboardView(InventoryScopedAPIView):
+    def get(self, request, *args, **kwargs):
+        inventories = self.get_accessible_inventories()
+        scoped_models = (
+            (Area, "area", "name"),
+            (Shelf, "shelf", "name"),
+            (Chest, "chest", "name"),
+            (Article, "article", "name"),
+            (ArticleCategory, "category", "name"),
+            (CategoryField, "field", "label"),
+        )
+
+        counts = {
+            "areas": Area.objects.filter(inventory__in=inventories).count(),
+            "articles": Article.objects.filter(inventory__in=inventories).count(),
+            "categories": ArticleCategory.objects.filter(inventory__in=inventories).count(),
+        }
+        category_counts = (
+            Article.objects.filter(inventory__in=inventories)
+            .values("category__name")
+            .annotate(count=Count("uuid"))
+            .order_by("-count", "category__name")
+        )
+
+        last_added = []
+        for model, object_type, name_field in scoped_models:
+            fields = {"uuid", name_field, "created_at"}
+            for item in model.objects.filter(inventory__in=inventories).values(*fields).order_by("-created_at")[:10]:
+                last_added.append({
+                    "uuid": str(item["uuid"]),
+                    "name": item[name_field],
+                    "type": object_type,
+                    "created_at": item["created_at"],
+                })
+
+        last_added.sort(key=lambda item: item["created_at"], reverse=True)
+        return Response({
+            "counts": counts,
+            "category_counts": [
+                {"name": item["category__name"] or "No category", "count": item["count"]}
+                for item in category_counts
+            ],
+            "last_added": last_added[:4],
+        })
 
 
 class AreaViewSet(InventoryScopedViewSet):

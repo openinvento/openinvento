@@ -7,6 +7,7 @@ from .views import (
     ArticleViewSet,
     CategoryFieldViewSet,
     ChestViewSet,
+    DashboardView,
     InventoryViewSet,
     SearchView,
     ShelfViewSet,
@@ -22,5 +23,6 @@ router.register(r"category-fields", CategoryFieldViewSet, basename="category-fie
 router.register(r"articles", ArticleViewSet, basename="article")
 
 urlpatterns = router.urls + [
+    path("dashboard/", DashboardView.as_view(), name="dashboard"),
     path("search/", SearchView.as_view(), name="search"),
 ]
