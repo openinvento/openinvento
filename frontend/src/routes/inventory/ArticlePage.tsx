@@ -59,7 +59,11 @@ export default function ArticlePage() {
       const customFields = Object.fromEntries(
         articleFields.map((field) => [
           field.key, 
-          form.get(`custom_${field.key}`)?.toString() || ""
+          field.field_type === "boolean"
+            ? form.get(`custom_${field.key}`) === "true"
+            : field.field_type === "number"
+              ? (form.get(`custom_${field.key}`)?.toString() ? Number(form.get(`custom_${field.key}`)) : null)
+              : form.get(`custom_${field.key}`)?.toString() || ""
         ])
       );
 
@@ -67,7 +71,7 @@ export default function ArticlePage() {
         name: form.get("name")?.toString().trim(),
         description: form.get("description")?.toString() || "",
         quantity: Number(form.get("quantity") || 0),
-        minimum_quantity: value("minimum_quantity") ? Number(value("minimum_quantity")) : null,
+        stock_tracking: form.get("stock_tracking") === "true",
         area: value("area"),
         shelf: value("shelf"),
         chest: value("chest"),
@@ -149,9 +153,9 @@ export default function ArticlePage() {
                 <input name="quantity" type="number" min="0" defaultValue={article.quantity} />
               </Field>
 
-{/*               <Field label="Minimum quantity">
-                <input name="minimum_quantity" type="number" min="0" defaultValue={article.minimum_quantity ?? ""} />
-              </Field> */}
+              <Field label={t("articles.page.fields.stockTracking")}>
+                <input name="stock_tracking" type="checkbox" value="true" defaultChecked={article.stock_tracking} />
+              </Field>
             </div>
 
             <div className="grid content-start gap-4 rounded-xl border bg-muted/15 p-4 sm:p-5">
@@ -229,11 +233,25 @@ export default function ArticlePage() {
               <div className="grid gap-5 sm:grid-cols-2">
                 {articleFields.map((field) => 
                   <Field key={field.uuid} label={getFieldLabel(field)}>
-                    <input 
-                      name={`custom_${field.key}`}
-                      type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"} 
-                      defaultValue={article.custom_fields[field.key]?.toString() ?? ""} 
-                    />
+                    {field.field_type === "select" ? (
+                      <select name={`custom_${field.key}`} defaultValue={article.custom_fields[field.key]?.toString() ?? ""}>
+                        <option value="">{t("articles.page.fields.selectValue")}</option>
+                        {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
+                      </select>
+                    ) : field.field_type === "boolean" ? (
+                      <input
+                        name={`custom_${field.key}`}
+                        type="checkbox"
+                        value="true"
+                        defaultChecked={article.custom_fields[field.key] === true}
+                      />
+                    ) : (
+                      <input
+                        name={`custom_${field.key}`}
+                        type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"}
+                        defaultValue={article.custom_fields[field.key]?.toString() ?? ""}
+                      />
+                    )}
                   </Field>)
                 }
               </div>
