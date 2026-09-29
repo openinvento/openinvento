@@ -1,5 +1,6 @@
-import { Archive, Box, DoorOpen, Package, type LucideIcon } from "lucide-react"
+import { Archive, Box, DoorOpen, type LucideIcon } from "lucide-react"
 import { EntityContextMenu } from "./entity-context-menu"
+import { getArticleIcon } from "./article-icon-picker"
 
 type CardProps = { name: string; subtitle: string; icon: LucideIcon; onOpen?: () => void; onRename: () => void; onDelete: () => void; badge?: string }
 
@@ -18,6 +19,6 @@ function EntityCard({ name, subtitle, icon: Icon, onOpen, onRename, onDelete, ba
   )
 }
 export const AreaCard = (props: Omit<CardProps, "icon">) => <EntityCard {...props} icon={DoorOpen} />
-export const ArticleCard = (props: Omit<CardProps, "icon">) => <EntityCard {...props} icon={Package} />
+export const ArticleCard = ({ articleIcon, ...props }: Omit<CardProps, "icon"> & { articleIcon?: string | null }) => <EntityCard {...props} icon={getArticleIcon(articleIcon)} />
 export const ChestCard = (props: Omit<CardProps, "icon">) => <EntityCard {...props} icon={Box} />
 export const ShelfCard = (props: Omit<CardProps, "icon">) => <EntityCard {...props} icon={Archive} />
