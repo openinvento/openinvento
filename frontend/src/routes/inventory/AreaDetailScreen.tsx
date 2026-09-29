@@ -11,6 +11,13 @@ import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 
 type CreateKind = "article" | "chest" | "shelf"
 
+function getLowStockBadge(article: Article, label: string) {
+  const minimumQuantity = article.custom_fields.minimum_quantity
+  return article.stock_tracking && typeof minimumQuantity === "number" && article.quantity <= minimumQuantity
+    ? label
+    : undefined
+}
+
 export default function AreaDetailScreen() {
   const { areaId } = useParams()
   const navigate = useNavigate()
@@ -75,7 +82,14 @@ export default function AreaDetailScreen() {
     if (!name) return
     const optional = (key: string) => form.get(key)?.toString() || null
     const customFields = modal.kind === "article"
-      ? Object.fromEntries(articleFields.map((field) => [field.key, form.get(`custom_${field.key}`)?.toString() || ""]))
+      ? Object.fromEntries(articleFields.map((field) => [
+        field.key,
+        field.field_type === "boolean"
+          ? form.get(`custom_${field.key}`) === "true"
+          : field.field_type === "number"
+            ? (form.get(`custom_${field.key}`)?.toString() ? Number(form.get(`custom_${field.key}`)) : null)
+            : form.get(`custom_${field.key}`)?.toString() || "",
+      ]))
       : {}
     const basePayload = { 
       name, 
@@ -101,6 +115,7 @@ export default function AreaDetailScreen() {
         chest: optional("chest"),
         category: optional("category"),
         quantity: Number(form.get("quantity") || 1),
+        stock_tracking: form.get("stock_tracking") === "true",
         description: form.get("description")?.toString() || "",
         icon: selectedIcon,
         custom_fields: customFields
@@ -163,7 +178,7 @@ export default function AreaDetailScreen() {
                 name={article.name}
                 articleIcon={article.icon}
                 subtitle={t("areas.detail.inStock", { count: article.quantity })}
-                badge={article.minimum_quantity !== null && article.quantity <= article.minimum_quantity ? t("areas.detail.lowStock") : undefined}
+                badge={getLowStockBadge(article, t("areas.detail.lowStock"))}
                 onOpen={() => navigate(`/app/articles/${article.uuid}`)}
                 onRename={() => navigate(`/app/articles/${article.uuid}`)}
                 onDelete={() => void remove("articles", article.uuid, article.name)}
@@ -205,7 +220,7 @@ export default function AreaDetailScreen() {
             {isOpen && <div className="border-t p-4">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
                 {sectionChests.map((chest) => <ChestCard key={chest.uuid} name={chest.name} subtitle={t("areas.detail.articleCount", { count: articles.filter((article) => article.chest === chest.uuid).length })} onRename={() => setModal({ kind: "chest", item: chest })} onDelete={() => void remove("chests", chest.uuid, chest.name)} />)}
-                {sectionArticles.map((article) => <ArticleCard key={article.uuid} name={article.name} articleIcon={article.icon} subtitle={t("areas.detail.inStock", { count: article.quantity })} badge={article.minimum_quantity !== null && article.quantity <= article.minimum_quantity ? t("areas.detail.lowStock") : undefined} onOpen={() => navigate(`/app/articles/${article.uuid}`)} onRename={() => navigate(`/app/articles/${article.uuid}`)} onDelete={() => void remove("articles", article.uuid, article.name)} />)}
+                {sectionArticles.map((article) => <ArticleCard key={article.uuid} name={article.name} articleIcon={article.icon} subtitle={t("areas.detail.inStock", { count: article.quantity })} badge={getLowStockBadge(article, t("areas.detail.lowStock"))} onOpen={() => navigate(`/app/articles/${article.uuid}`)} onRename={() => navigate(`/app/articles/${article.uuid}`)} onDelete={() => void remove("articles", article.uuid, article.name)} />)}
               </div>
               {sectionChests.length + sectionArticles.length === 0 && <p className="py-3 text-sm text-muted-foreground">{t("areas.detail.nothingStored")}</p>}
             </div>}
@@ -308,6 +323,11 @@ export default function AreaDetailScreen() {
             />
           </label>
 
+          <label className="flex items-center gap-2 text-sm font-medium">
+            <input name="stock_tracking" type="checkbox" value="true" />
+            {t("areas.detail.fields.stockTracking")}
+          </label>
+
           <label className="grid gap-1.5 text-sm font-medium">
             {t("areas.detail.fields.description")}
             <textarea
@@ -326,17 +346,20 @@ export default function AreaDetailScreen() {
           {articleFields.map((field) => (
             <label key={field.uuid} className="grid gap-1.5 text-sm font-medium">
               {getFieldLabel(field)}
-              <input
-              name={`custom_${field.key}`}
-              type={
-                field.field_type === "number"
-                  ? "number"
-                  : field.field_type === "date"
-                  ? "date"
-                  : "text"
-              }
-              className="h-10 rounded-lg border bg-background px-3 font-normal"
-            />
+              {field.field_type === "select" ? (
+                <select name={`custom_${field.key}`} className="h-10 rounded-lg border bg-background px-3 font-normal">
+                  <option value="">{t("articles.page.fields.selectValue")}</option>
+                  {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
+                </select>
+              ) : field.field_type === "boolean" ? (
+                <input name={`custom_${field.key}`} type="checkbox" value="true" />
+              ) : (
+                <input
+                  name={`custom_${field.key}`}
+                  type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"}
+                  className="h-10 rounded-lg border bg-background px-3 font-normal"
+                />
+              )}
           </label>
         ))}
         </div>
