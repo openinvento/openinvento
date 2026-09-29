@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { useEffect, useState, type FormEvent, type ReactNode } from "react"
-import { Navigate, useNavigate } from "react-router"
+import { useNavigate } from "react-router"
 import BaseScreen from "@/layouts/BaseScreen"
 import { Button } from "@/components/ui/button"
 import { inventoryApi, type DashboardData } from "@/utils/api/inventory"
