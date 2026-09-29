@@ -30,7 +30,9 @@
         "icon": "Icon",
         "name": "Name",
         "quantity": "Quantity",
-        "shelf": "Shelf"
+        "shelf": "Shelf",
+        "selectValue": "Select a value",
+        "stockTracking": "Track stock"
       },
       "inStock": "{{count}} in stock",
       "itemCount": "{{count}} items",
@@ -159,6 +161,7 @@
       "boolean": "Yes / No",
       "date": "Date",
       "number": "Number",
+      "select": "Select",
       "text": "Text"
     },
     "fields": "fields",
@@ -167,6 +170,8 @@
     "inventory": "Inventory",
     "key": "Key",
     "label": "Label",
+    "options": "Options",
+    "optionsPlaceholder": "Comma-separated values",
     "newCategory": "New category",
     "newField": "New field",
     "noCategoriesText": "Create a category to group related article fields.",

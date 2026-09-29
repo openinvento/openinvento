@@ -23,7 +23,9 @@
       "quantity": "Menge",
       "pzn_barcode": "PZN-Barcode",
       "expiry": "Ablaufdatum",
-      "prescription_required": "Verschreibung erforderlich"
+      "prescription_required": "Verschreibung erforderlich",
+      "minimum_quantity": "Mindestbestand",
+      "stock_level": "Bestandsniveau"
     }
   },
   "settings": {
