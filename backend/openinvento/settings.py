@@ -3,8 +3,10 @@ import logging
 import os
 from datetime import timedelta
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from django.core.management.utils import get_random_secret_key
+
 from .custom_logger import LOGGING, configure_early_logging
 
 configure_early_logging()
@@ -85,6 +87,13 @@ def _csv_env(name, default):
     return [item.strip() for item in raw_value.split(",") if item.strip()]
 
 
+def _host_from_url(value):
+    if value.startswith(("http://", "https://")):
+        return urlsplit(value).netloc
+
+    return value.split("/", 1)[0]
+
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -125,13 +134,16 @@ APP_URLS = _csv_env("APP_URLS", [])
 
 allowed_hosts_env = _csv_env("ALLOWED_HOSTS", ["localhost", "127.0.0.1", "[::1]", "testserver"])
 
-ALLOWED_HOSTS = allowed_hosts_env
+ALLOWED_HOSTS = [_host_from_url(host) for host in allowed_hosts_env]
 if APP_URLS:
     for url in APP_URLS:
-        if url and url not in ALLOWED_HOSTS:
-            ALLOWED_HOSTS.append(url)
-if APP_URL and APP_URL not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append(APP_URL)
+        host = _host_from_url(url)
+        if host and host not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(host)
+if APP_URL:
+    host = _host_from_url(APP_URL)
+    if host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(host)
 
 if HAS_CORSHEADERS:
     MIDDLEWARE.insert(1, 'corsheaders.middleware.CorsMiddleware')
