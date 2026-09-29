@@ -19,6 +19,11 @@ export type Article = EntityBase & {
 }
 export type CategoryField = EntityBase & { key: string; label: string; field_type: string; category: string | null }
 export type ArticleCategory = EntityBase & { fields: CategoryField[]; category_fields?: CategoryField[] }
+export type DashboardData = {
+  counts: { areas: number; articles: number; categories: number }
+  category_counts: Array<{ name: string; count: number }>
+  last_added: Array<{ uuid: string; name: string; type: string; created_at: string }>
+}
 
 type EntityBase = {
   uuid: string
@@ -33,6 +38,7 @@ type EntityPath = "areas" | "shelves" | "chests" | "articles" | "article-categor
 type CreatePayload = Record<string, unknown>
 
 export const inventoryApi = {
+  getDashboard: () => fetchData<DashboardData>("/api/dashboard/"),
   listInventories: () => fetchData<Inventory[]>("/api/inventories/"),
   listAreas: () => fetchData<Area[]>("/api/areas/"),
   listShelves: () => fetchData<Shelf[]>("/api/shelves/"),
