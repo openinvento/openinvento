@@ -178,10 +178,7 @@
   },
   "dashboard": {
     "title": "Start",
-    "description": "A quick view of everything in your inventory.",
     "greeting": "Good morning!",
-    "welcomeTitle": "Keep your inventory in order.",
-    "welcomeDescription": "Find what you need, see what has changed, and keep your spaces organized.",
     "searchPlaceholder": "Search your articles...",
     "search": "Search",
     "overview": "Overview",
@@ -195,14 +192,26 @@
     "createAreaDescription": "Add a room, shelf, or storage space.",
     "addArticle": "Add an article",
     "addArticleDescription": "Save something new to your inventory.",
-    "recentActivity": "Recent activity",
+    "lastAdded": "Last added",
     "inventoryByCategory": "Inventory by category",
     "viewAll": "View all",
     "viewCategories": "Categories",
-    "noActivityTitle": "No activity yet",
-    "noActivityDescription": "Your latest inventory changes will appear here.",
+    "loading": "Loading dashboard...",
+    "noLastAddedTitle": "Nothing added yet",
+    "noLastAddedDescription": "New areas, articles, and other inventory objects will appear here.",
     "noCategoryTitle": "No categories yet",
-    "noCategoryDescription": "Create categories to see your inventory grouped here."
+    "noCategoryDescription": "Create categories to see your inventory grouped here.",
+    "errors": {
+      "load": "Could not load the dashboard."
+    },
+    "types": {
+      "area": "Area",
+      "shelf": "Shelf",
+      "chest": "Chest",
+      "article": "Article",
+      "category": "Category",
+      "field": "Field"
+    }
   },
   "inventory": {
     "categories": {
