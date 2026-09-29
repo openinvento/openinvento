@@ -3,6 +3,7 @@ import { ArrowLeft, ChevronDown, Pencil, Plus, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate, useParams } from "react-router"
 import { ArticleCard, ChestCard } from "@/components/inventory/entity-cards"
+import { ArticleIconPicker } from "@/components/inventory/article-icon-picker"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
 import { inventoryApi, type Area, type Article, type ArticleCategory, type CategoryField, type Chest, type Inventory, type Shelf } from "@/utils/api/inventory"
@@ -23,6 +24,7 @@ export default function AreaDetailScreen() {
   const [categories, setCategories] = useState<ArticleCategory[]>([])
   const [allFields, setAllFields] = useState<CategoryField[]>([]) // Save all fields
   const [selectedCategory, setSelectedCategory] = useState("")
+  const [selectedIcon, setSelectedIcon] = useState("Package")
   const [modal, setModal] = useState<{ kind: CreateKind; item?: Shelf | Chest } | null>(null)
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
@@ -100,6 +102,7 @@ export default function AreaDetailScreen() {
         category: optional("category"),
         quantity: Number(form.get("quantity") || 1),
         description: form.get("description")?.toString() || "",
+        icon: selectedIcon,
         custom_fields: customFields
       };
     }
@@ -143,7 +146,7 @@ export default function AreaDetailScreen() {
       <div className="flex flex-wrap gap-2">
       <Button className="p-4" variant="outline" onClick={() => setModal({ kind: "shelf" })}><Plus /> {t("areas.detail.actions.shelf")}</Button>
       <Button className="p-4" variant="outline" onClick={() => setModal({ kind: "chest" })}><Plus /> {t("areas.detail.actions.chest")}</Button>
-      <Button className="p-4" onClick={() => { setSelectedCategory(""); setModal({ kind: "article" }) }}><Plus /> {t("areas.detail.actions.article")}</Button>
+      <Button className="p-4" onClick={() => { setSelectedCategory(""); setSelectedIcon("Package"); setModal({ kind: "article" }) }}><Plus /> {t("areas.detail.actions.article")}</Button>
       </div>
     </div>
     
@@ -158,6 +161,7 @@ export default function AreaDetailScreen() {
               <ArticleCard
                 key={article.uuid}
                 name={article.name}
+                articleIcon={article.icon}
                 subtitle={t("areas.detail.inStock", { count: article.quantity })}
                 badge={article.minimum_quantity !== null && article.quantity <= article.minimum_quantity ? t("areas.detail.lowStock") : undefined}
                 onOpen={() => navigate(`/app/articles/${article.uuid}`)}
@@ -201,7 +205,7 @@ export default function AreaDetailScreen() {
             {isOpen && <div className="border-t p-4">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
                 {sectionChests.map((chest) => <ChestCard key={chest.uuid} name={chest.name} subtitle={t("areas.detail.articleCount", { count: articles.filter((article) => article.chest === chest.uuid).length })} onRename={() => setModal({ kind: "chest", item: chest })} onDelete={() => void remove("chests", chest.uuid, chest.name)} />)}
-                {sectionArticles.map((article) => <ArticleCard key={article.uuid} name={article.name} subtitle={t("areas.detail.inStock", { count: article.quantity })} badge={article.minimum_quantity !== null && article.quantity <= article.minimum_quantity ? t("areas.detail.lowStock") : undefined} onOpen={() => navigate(`/app/articles/${article.uuid}`)} onRename={() => navigate(`/app/articles/${article.uuid}`)} onDelete={() => void remove("articles", article.uuid, article.name)} />)}
+                {sectionArticles.map((article) => <ArticleCard key={article.uuid} name={article.name} articleIcon={article.icon} subtitle={t("areas.detail.inStock", { count: article.quantity })} badge={article.minimum_quantity !== null && article.quantity <= article.minimum_quantity ? t("areas.detail.lowStock") : undefined} onOpen={() => navigate(`/app/articles/${article.uuid}`)} onRename={() => navigate(`/app/articles/${article.uuid}`)} onDelete={() => void remove("articles", article.uuid, article.name)} />)}
               </div>
               {sectionChests.length + sectionArticles.length === 0 && <p className="py-3 text-sm text-muted-foreground">{t("areas.detail.nothingStored")}</p>}
             </div>}
@@ -277,6 +281,10 @@ export default function AreaDetailScreen() {
 
       {modal?.kind === "article" && (
         <>
+          <label className="grid gap-1.5 text-sm font-medium">
+            {t("areas.detail.fields.icon")}
+            <ArticleIconPicker value={selectedIcon} onChange={setSelectedIcon} />
+          </label>
           <label className="grid gap-1.5 text-sm font-medium">
             {t("areas.detail.fields.chest")}
             <select name="chest" className="h-10 rounded-lg border bg-background px-3 font-normal">

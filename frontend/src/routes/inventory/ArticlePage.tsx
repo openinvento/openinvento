@@ -1,8 +1,9 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { ArrowLeft, Package, Save } from "lucide-react"
+import { ArrowLeft, Save } from "lucide-react"
 import { Link, useNavigate, useParams } from "react-router"
 import { Button } from "@/components/ui/button"
 import { removeFavorite } from "@/utils/favorites"
+import { getArticleIcon } from "@/components/inventory/article-icon-picker"
 import { inventoryApi, type Area, type Article, type ArticleCategory, type CategoryField, type Chest, type Shelf } from "@/utils/api/inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 import { useTranslation } from "react-i18next"
@@ -114,7 +115,7 @@ export default function ArticlePage() {
         <div className="mb-8 flex flex-col gap-5 border-b pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary sm:size-12">
-              <Package />
+              {(() => { const Icon = getArticleIcon(article.icon); return <Icon /> })()}
             </span>
             <div className="min-w-0">
               <p className="text-sm text-muted-foreground">{t("articles.page.headings.articleDetails")}</p>

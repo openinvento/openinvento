@@ -1,11 +1,12 @@
 import BaseScreen from "@/layouts/BaseScreen"
 import { useEffect, useState, type FormEvent } from "react"
-import { LoaderCircle, Package, Search } from "lucide-react"
+import { LoaderCircle, Search } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link, useSearchParams } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { inventoryApi, type Article, type Inventory } from "@/utils/api/inventory"
+import { getArticleIcon } from "@/components/inventory/article-icon-picker"
 
 export default function SearchPage() {
   const { t } = useTranslation()
@@ -98,7 +99,7 @@ export default function SearchPage() {
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((article) => (
             <Link key={article.uuid} to={`/app/articles/${article.uuid}`} className="rounded-2xl border bg-card p-4 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md">
-              <div className="mb-4 grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Package className="size-5" /></div>
+              <div className="mb-4 grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">{(() => { const Icon = getArticleIcon(article.icon); return <Icon className="size-5" /> })()}</div>
               <h2 className="font-semibold">{article.name}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{article.identifier}</p>
               <p className="mt-3 text-sm">{t("search.quantity", { count: article.quantity })}</p>
