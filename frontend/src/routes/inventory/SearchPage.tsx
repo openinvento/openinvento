@@ -2,16 +2,18 @@ import BaseScreen from "@/layouts/BaseScreen"
 import { useEffect, useState, type FormEvent } from "react"
 import { LoaderCircle, Package, Search } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router"
+import { Link, useSearchParams } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { inventoryApi, type Article, type Inventory } from "@/utils/api/inventory"
 
 export default function SearchPage() {
   const { t } = useTranslation()
+  const [searchParams] = useSearchParams()
+  const initialQuery = searchParams.get("q")?.trim() ?? ""
   const [inventories, setInventories] = useState<Inventory[]>([])
   const [inventoryId, setInventoryId] = useState("")
-  const [query, setQuery] = useState("")
+  const [query, setQuery] = useState(initialQuery)
   const [results, setResults] = useState<Article[]>([])
   const [loading, setLoading] = useState(true)
   const [searching, setSearching] = useState(false)
@@ -21,17 +23,24 @@ export default function SearchPage() {
     async function loadInventories() {
       try {
         const nextInventories = await inventoryApi.listInventories()
+        const nextInventoryId = nextInventories[0]?.uuid ?? ""
         setInventories(nextInventories)
-        setInventoryId(nextInventories[0]?.uuid ?? "")
+        setInventoryId(nextInventoryId)
+
+        if (initialQuery && nextInventoryId) {
+          setSearching(true)
+          setResults(await inventoryApi.searchInventory(initialQuery, nextInventoryId))
+        }
       } catch (reason) {
         setError(reason instanceof Error ? reason.message : t("search.errors.load"))
       } finally {
         setLoading(false)
+        setSearching(false)
       }
     }
 
     void loadInventories()
-  }, [t])
+  }, [initialQuery, t])
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
