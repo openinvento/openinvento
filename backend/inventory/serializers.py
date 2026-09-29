@@ -181,7 +181,7 @@ class ArticleSerializer(InventoryScopedSerializer):
             "shelf",
             "chest",
             "quantity",
-            "minimum_quantity",
+            "stock_tracking",
             "image",
             "icon",
             "category",
@@ -251,6 +251,7 @@ class CategoryFieldSerializer(InventoryScopedSerializer):
         fields = (
             "uuid", "identifier", "inventory", "created_at", "updated_at",
             "key", "label", "field_type", "category",
+            "options",
         )
         read_only_fields = ("uuid", "identifier", "created_at", "updated_at", "key")
 
