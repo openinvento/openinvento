@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import permissions, status
@@ -18,6 +19,12 @@ class SignupView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        if not settings.ENABLE_SIGNUP:
+            # When public signup is disabled, return a 403 Forbidden response with an appropriate error message.
+            return Response(
+                {'error': 'Public signup is disabled for this instance'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
             # The serializer will create the user and assign an inventory - When a user is invited to an existing inventory, the inventory can be deleted later when the user accepts the invitation
@@ -81,7 +88,10 @@ class CredentialResetView(APIView):
 
 class InstanceSettingsView(APIView):
     def get(self, request):
-        return Response(InstanceSettingsSerializer(InstanceSettings.get_solo()).data)
+        return Response({
+            **InstanceSettingsSerializer(InstanceSettings.get_solo()).data,
+            'allow_signup': settings.ENABLE_SIGNUP,
+        })
 
     def patch(self, request):
         self.permission_classes = [permissions.IsAdminUser]

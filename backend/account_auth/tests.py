@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from inventory.models import Inventory
 from rest_framework.test import APIClient
 
@@ -11,6 +11,7 @@ from .models import CustomUser, InstanceSettings
 
 
 class SignupInventoryTests(TestCase):
+	@override_settings(ENABLE_SIGNUP=True)
 	def test_signup_creates_and_assigns_one_inventory(self):
 		response = APIClient().post(
 			'/api/signup/',
@@ -28,6 +29,11 @@ class SignupInventoryTests(TestCase):
 		self.assertEqual(Inventory.objects.count(), 1)
 		self.assertEqual(user.inventories.count(), 1)
 		self.assertEqual(user.inventories.get().name, "newuser's Inventory")
+
+	def test_signup_is_disabled_by_default(self):
+		response = APIClient().post('/api/signup/', {}, format='json')
+
+		self.assertEqual(response.status_code, 403)
 
 
 class InitialAdminCommandTests(TestCase):
