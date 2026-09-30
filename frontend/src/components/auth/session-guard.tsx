@@ -47,6 +47,7 @@ export function SessionGuard({ mode, redirectUnauthenticated = false }: SessionG
   }
 
   const authenticated = Boolean(sessionUser)
+  const navigationState = location.state as { credentialsReset?: boolean } | null
 
   if (mode === "guest" && authenticated) {
     return <Navigate to="/app" replace />
@@ -61,8 +62,14 @@ export function SessionGuard({ mode, redirectUnauthenticated = false }: SessionG
   }
 
   // Redirect to reset credentials page if the user is required to reset their credentials
-  if (mode === "protected" && sessionUser?.require_reset && location.pathname !== "/auth/reset") {
-    return <Navigate to="/auth/reset" replace />
+  if (
+    mode === "protected" &&
+    sessionUser?.require_reset &&
+    location.pathname !== "/auth/reset" &&
+    // Don't redirect if the user has already reset their credentials in this session
+    !navigationState?.credentialsReset
+  ) {
+    return <Navigate to="/auth/reset" replace state={{ from: location }} />
   }
 
   return <Outlet />

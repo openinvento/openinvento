@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useNavigate } from "react-router"
+import { useLocation } from "react-router"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ import { resetCredentials } from "@/utils/api/auth"
 import { getAuthErrorMessage } from "@/utils/api/auth-errors"
 
 export default function ResetCredentialsPage() {
-  const navigate = useNavigate()
+  const location = useLocation()
   const { t } = useTranslation()
   
   const [username, setUsername] = useState("")
@@ -29,7 +29,13 @@ export default function ResetCredentialsPage() {
     setError(null)
     try {
       await resetCredentials(username.trim(), password)
-      navigate("/app", { replace: true })
+      const returnTo = (location.state as {
+        from?: { pathname?: string; search?: string; hash?: string }
+      } | null)?.from
+      const destination = returnTo?.pathname
+        ? `${returnTo.pathname}${returnTo.search ?? ""}${returnTo.hash ?? ""}`
+        : "/app"
+      window.location.replace(destination)
     } catch (submissionError) {
       setError(getAuthErrorMessage(submissionError, t))
     } finally {
