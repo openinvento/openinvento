@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
 import { GalleryVerticalEndIcon } from "lucide-react"
 
@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import { cn } from "cn"
 import { useTranslation } from "react-i18next"
 
-import { login } from "@/utils/api/auth"
+import { getInstanceSettings, login } from "@/utils/api/auth"
 import { getAuthErrorMessage } from "@/utils/api/auth-errors"
 
 export function LoginForm({
@@ -29,6 +29,13 @@ export function LoginForm({
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [allowEmailLogin, setAllowEmailLogin] = useState(false)
+
+  useEffect(() => {
+    getInstanceSettings()
+      .then((settings) => setAllowEmailLogin(settings.allow_email_login))
+      .catch(() => undefined)
+  }, [])
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -61,17 +68,21 @@ export function LoginForm({
             </a>
             <h1 className="text-xl font-bold">Welcome to OpenInvento</h1>
             <FieldDescription>
-              Sign in with your email address or username.
+              {allowEmailLogin
+                ? "Sign in with your email address or username."
+                : "Sign in with your username."}
             </FieldDescription>
           </div>
 
           <Field>
-            <FieldLabel htmlFor="identifier">Email or username</FieldLabel>
+            <FieldLabel htmlFor="identifier">
+              {allowEmailLogin ? "Email or username" : "Username"}
+            </FieldLabel>
             <Input
               id="identifier"
               name="identifier"
               type="text"
-              placeholder="name@example.com"
+              placeholder={allowEmailLogin ? "name@example.com" : "Username"}
               autoComplete="username"
               value={identifier}
               onChange={(event) => setIdentifier(event.target.value)}
