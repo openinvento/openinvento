@@ -1,6 +1,10 @@
+""" Automatically create the initial administrator when the database has no users. """
+""" This command has to be triggered after initial start (e.g. in the docker entrypoint) """
+
 import os
 
 from account_auth.models import CustomUser
+from account_auth.services import create_user_inventory
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
@@ -38,5 +42,6 @@ class Command(BaseCommand):
                 name=username,
                 require_reset=True,
             )
+            create_user_inventory(user)
 
         self.stdout.write(self.style.SUCCESS(f'Created initial administrator "{user.username}".'))

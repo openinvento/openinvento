@@ -1,9 +1,8 @@
 from django.contrib.auth import password_validation
 from rest_framework import serializers
 
-from inventory.models import Inventory
-
 from .models import CustomUser, InstanceSettings
+from .services import create_user_inventory
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -27,9 +26,7 @@ class SignupSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = CustomUser.objects.create_user(**validated_data)
 
-        # Create a new inventory for the user and assign it
-        inventory = Inventory.objects.create(name=f"{user.username}'s Inventory")
-        user.inventories.add(inventory)
+        create_user_inventory(user)
         return user
 
 
