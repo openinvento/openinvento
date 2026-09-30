@@ -44,6 +44,8 @@ class InitialAdminCommandTests(TestCase):
 		self.assertTrue(user.is_staff)
 		self.assertTrue(user.require_reset)
 		self.assertTrue(user.check_password('StrongPassword!123'))
+		self.assertEqual(user.inventories.count(), 1)
+		self.assertEqual(user.inventories.get().name, "initial-admin's Inventory")
 
 	@patch.dict(os.environ, {
 		'INIT_ADMIN_USERNAME': 'initial-admin',
