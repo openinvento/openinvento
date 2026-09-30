@@ -28,6 +28,10 @@
   },
   "settings": {
     "description": "Wähle aus, wie die Benutzeroberfläche dargestellt werden soll.",
+    "languageLabel": "Sprache",
+    "tabsLabel": "Einstellungsbereiche",
+    "userTab": "Benutzereinstellungen",
+    "adminTab": "Administratoreinstellungen",
     "themeDark": "Dunkel",
     "themeLabel": "Design / Theme",
     "themeLight": "Hell",
