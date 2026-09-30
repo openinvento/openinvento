@@ -13,7 +13,7 @@ type SessionGuardProps = {
 export function SessionGuard({ mode, redirectUnauthenticated = false }: SessionGuardProps) {
   const location = useLocation()
   const [checking, setChecking] = useState(true)
-  const [authenticated, setAuthenticated] = useState(false)
+  const [sessionUser, setSessionUser] = useState<Awaited<ReturnType<typeof getCurrentSession>>["user"]>(null)
 
   useEffect(() => {
     let active = true
@@ -22,11 +22,11 @@ export function SessionGuard({ mode, redirectUnauthenticated = false }: SessionG
       try {
         const session = await getCurrentSession()
         if (active) {
-          setAuthenticated(session.authenticated)
+          setSessionUser(session.authenticated ? session.user : null)
         }
       } catch {
         if (active) {
-          setAuthenticated(false)
+          setSessionUser(null)
         }
       } finally {
         if (active) {
@@ -46,6 +46,8 @@ export function SessionGuard({ mode, redirectUnauthenticated = false }: SessionG
     return null
   }
 
+  const authenticated = Boolean(sessionUser)
+
   if (mode === "guest" && authenticated) {
     return <Navigate to="/app" replace />
   }
@@ -56,6 +58,11 @@ export function SessionGuard({ mode, redirectUnauthenticated = false }: SessionG
 
   if (mode === "protected" && !authenticated) {
     return <Navigate to="/auth/login" replace state={{ from: location }} />
+  }
+
+  // Redirect to reset credentials page if the user is required to reset their credentials
+  if (mode === "protected" && sessionUser?.require_reset && location.pathname !== "/auth/reset") {
+    return <Navigate to="/auth/reset" replace />
   }
 
   return <Outlet />
