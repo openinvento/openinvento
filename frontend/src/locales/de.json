@@ -33,7 +33,21 @@
     "themeLight": "Hell",
     "themePlaceholder": "Design wählen",
     "themeSystem": "System",
-    "title": "Einstellungen"
+    "title": "Einstellungen",
+    "allowEmailLogin": "Anmeldung mit E-Mail-Adresse erlauben",
+    "allowEmailLoginDescription": "Wenn aktiviert, können sich Benutzer zusätzlich mit ihrer E-Mail-Adresse anmelden.",
+    "instanceSettingsLoadError": "Instanzeinstellungen konnten nicht geladen werden.",
+    "instanceSettingsSaveError": "Instanzeinstellungen konnten nicht gespeichert werden."
+  },
+  "auth": {
+    "reset": {
+      "title": "Zugangsdaten aktualisieren",
+      "warning": "Aus Sicherheitsgründen musst du einen neuen Benutzernamen und ein neues Passwort festlegen.",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Neues Passwort bestätigen",
+      "saving": "Wird gespeichert...",
+      "submit": "Zugangsdaten aktualisieren"
+    }
   },
   "sidebar": {
     "home": "Home",
