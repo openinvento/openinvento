@@ -4,6 +4,7 @@ set -e
 
 echo "Running database migrations..."
 python manage.py migrate --noinput
+python manage.py create_initial_admin
 
 echo "Collecting static files..."
 python manage.py collectstatic --noinput

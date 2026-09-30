@@ -1,18 +1,30 @@
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import CustomUser
-from .serializers import SignupSerializer, UserSerializer
+from .models import CustomUser, InstanceSettings
+from .serializers import (
+    CredentialResetSerializer,
+    InstanceSettingsSerializer,
+    SignupSerializer,
+    UserSerializer,
+)
 
 
 class SignupView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        if not settings.ENABLE_SIGNUP:
+            # When public signup is disabled, return a 403 Forbidden response with an appropriate error message.
+            return Response(
+                {'error': 'Public signup is disabled for this instance'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
             # The serializer will create the user and assign an inventory - When a user is invited to an existing inventory, the inventory can be deleted later when the user accepts the invitation
@@ -38,6 +50,12 @@ class LoginView(APIView):
         if not identifier or not password:
             return Response({'error': 'Missing credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
+        if '@' in identifier and not InstanceSettings.get_solo().allow_email_login:
+            return Response(
+                {'error': 'Email login is disabled for this instance'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         username = identifier
         if '@' in identifier:
             user_obj = CustomUser.objects.filter(email__iexact=identifier).first()
@@ -53,6 +71,37 @@ class LoginView(APIView):
             })
         
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class CredentialResetView(APIView):
+    def post(self, request):
+        serializer = CredentialResetSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            user = serializer.save()
+            update_session_auth_hash(request, user)
+            return Response({
+                'detail': 'Credentials updated successfully',
+                'user': UserSerializer(user).data,
+            })
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class InstanceSettingsView(APIView):
+    def get(self, request):
+        return Response({
+            **InstanceSettingsSerializer(InstanceSettings.get_solo()).data,
+            'allow_signup': settings.ENABLE_SIGNUP,
+        })
+
+    def patch(self, request):
+        self.permission_classes = [permissions.IsAdminUser]
+        self.check_permissions(request)
+        instance_settings = InstanceSettings.get_solo()
+        serializer = InstanceSettingsSerializer(instance_settings, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LogoutView(APIView):
