@@ -30,10 +30,14 @@ export function LoginForm({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [allowEmailLogin, setAllowEmailLogin] = useState(false)
+  const [allowSignup, setAllowSignup] = useState(false)
 
   useEffect(() => {
     getInstanceSettings()
-      .then((settings) => setAllowEmailLogin(settings.allow_email_login))
+      .then((settings) => {
+        setAllowEmailLogin(settings.allow_email_login)
+        setAllowSignup(settings.allow_signup)
+      })
       .catch(() => undefined)
   }, [])
 
@@ -112,7 +116,7 @@ export function LoginForm({
         </FieldGroup>
       </form>
       <FieldDescription className="px-6 text-center">
-        Need an account? <a href="/auth/signup">Sign up</a>.{" "}
+        {allowSignup && <>Need an account? <a href="/auth/signup">Sign up</a>.{" "}</>}
         By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.
       </FieldDescription>

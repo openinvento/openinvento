@@ -11,6 +11,7 @@ export type SessionUser = {
 
 export type InstanceSettings = {
   allow_email_login: boolean
+  allow_signup: boolean
 }
 
 export async function login(identifier: string, password: string) {

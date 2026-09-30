@@ -32,10 +32,14 @@ export function SignupForm({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [allowEmailLogin, setAllowEmailLogin] = useState(false)
+  const [allowSignup, setAllowSignup] = useState(false)
 
   useEffect(() => {
     getInstanceSettings()
-      .then((settings) => setAllowEmailLogin(settings.allow_email_login))
+      .then((settings) => {
+        setAllowEmailLogin(settings.allow_email_login)
+        setAllowSignup(settings.allow_signup)
+      })
       .catch(() => undefined)
   }, [])
 
@@ -61,6 +65,9 @@ export function SignupForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      {!allowSignup ? (
+        <FieldDescription className="text-center">{t("auth.signupDisabled")}</FieldDescription>
+      ) : (
       <form onSubmit={handleSubmit} className="space-y-6">
         <FieldGroup>
           <div className="flex flex-col items-center gap-2 text-center">
@@ -151,6 +158,7 @@ export function SignupForm({
           </Field>
         </FieldGroup>
       </form>
+      )}
       <FieldDescription className="px-6 text-center">
         Already have an account? <a href="/auth/login">Log in</a>.
       </FieldDescription>
