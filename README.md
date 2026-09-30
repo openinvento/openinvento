@@ -16,6 +16,7 @@ The Docker deployment reads these variables from the environment or a `.env` fil
 | `INIT_ADMIN_USERNAME` | Required when enabled | None | Username for the initial administrator account. |
 | `INIT_ADMIN_PASSWORD` | Required when enabled | None | Password for the initial administrator account. It must be changed on first login. |
 | `CREATE_INIT_ADMIN` | No | `true` | Set to `false` to disable automatic initial administrator creation. |
+| `ENABLE_SIGNUP` | No | `false` | Set to `true` to enable public account signup. |
 
 The initial administrator is created after migrations only when the database contains no users. Its `require_reset` flag forces a credential change after the first successful login. Once any user exists, changing the initialization variables does not modify existing accounts.
 
