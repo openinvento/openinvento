@@ -51,7 +51,8 @@
       "confirmPassword": "Neues Passwort bestätigen",
       "saving": "Wird gespeichert...",
       "submit": "Zugangsdaten aktualisieren"
-    }
+    },
+    "signupDisabled": "Die öffentliche Kontoerstellung ist für diese Instanz derzeit deaktiviert."
   },
   "sidebar": {
     "home": "Home",

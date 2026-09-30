@@ -124,6 +124,7 @@
       "usernameRequired": "Username is required.",
       "usernameTaken": "This username is already taken."
     },
+    "signupDisabled": "Public account signup is currently disabled for this instance.",
     "fields": {
       "email": "email",
       "name": "name",
