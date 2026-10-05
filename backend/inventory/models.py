@@ -5,7 +5,7 @@ import uuid
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import FileExtensionValidator, MaxValueValidator
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils.text import slugify
 
@@ -92,7 +92,7 @@ class Article(InventoryComponent):
     chest = models.ForeignKey(Chest, on_delete=models.SET_NULL, null=True, blank=True, related_name='contained_articles')
     
     quantity = models.IntegerField(default=1)
-    minimum_quantity = models.IntegerField(null=True, blank=True, validators=[MaxValueValidator(9999)])
+    stock_tracking = models.BooleanField(default=False)
     
     image = models.ImageField(
         null=True, 
@@ -121,11 +121,13 @@ class CategoryField(InventoryComponent):
         ("boolean", "Boolean"),
         ("date", "Date"),
         ("barcode", "Barcode"),
+        ("select", "Select"),
     )
 
     key = models.SlugField(max_length=50)
     label = models.CharField(max_length=100)
     field_type = models.CharField(max_length=20, choices=FIELD_TYPES, default="text")
+    options = models.JSONField(default=list, blank=True)
     # A nullable category field represents a global field ("All categories")
     category = models.ForeignKey(
         ArticleCategory,

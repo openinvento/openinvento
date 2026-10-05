@@ -10,14 +10,14 @@ export type Article = EntityBase & {
   shelf: string | null
   chest: string | null
   quantity: number
-  minimum_quantity: number | null
+  stock_tracking: boolean
   image: string | null
   icon: string | null
   category: string | null
   custom_fields: Record<string, string | number | boolean | null>
   category_fields: CategoryField[]
 }
-export type CategoryField = EntityBase & { key: string; label: string; field_type: string; category: string | null }
+export type CategoryField = EntityBase & { key: string; label: string; field_type: string; options: string[]; category: string | null }
 export type ArticleCategory = EntityBase & { fields: CategoryField[]; category_fields?: CategoryField[] }
 export type DashboardData = {
   counts: { areas: number; articles: number; categories: number }

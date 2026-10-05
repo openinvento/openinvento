@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { ArrowLeft, Save } from "lucide-react"
+import { ArrowLeft, ChevronDown, Save } from "lucide-react"
 import { Link, useNavigate, useParams } from "react-router"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 import { removeFavorite } from "@/utils/favorites"
 import { getArticleIcon } from "@/components/inventory/article-icon-picker"
 import { inventoryApi, type Area, type Article, type ArticleCategory, type CategoryField, type Chest, type Shelf } from "@/utils/api/inventory"
@@ -22,6 +23,8 @@ export default function ArticlePage() {
   const [globalFields, setGlobalFields] = useState<CategoryField[]>([])
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
+  const [stockTracking, setStockTracking] = useState(false)
+  const [stockFieldsOpen, setStockFieldsOpen] = useState(false)
 
   const [selectedArea, setSelectedArea] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
@@ -33,6 +36,7 @@ export default function ArticlePage() {
       const [allArticles, nextAreas, nextShelves, nextChests, nextCategories, nextFields] = await Promise.all([inventoryApi.listArticles(), inventoryApi.listAreas(), inventoryApi.listShelves(), inventoryApi.listChests(), inventoryApi.listCategories(), inventoryApi.listCategoryFields()]); 
       const nextArticle = allArticles.find((item) => item.uuid === articleId) ?? null
       setArticle(nextArticle)
+      setStockTracking(nextArticle?.stock_tracking ?? false)
       setSelectedArea(nextArticle?.area ?? null)
       setSelectedCategory(nextArticle?.category ?? null)
       setSelectedShelf(nextArticle?.shelf ?? null)
@@ -59,7 +63,11 @@ export default function ArticlePage() {
       const customFields = Object.fromEntries(
         articleFields.map((field) => [
           field.key, 
-          form.get(`custom_${field.key}`)?.toString() || ""
+          field.field_type === "boolean"
+            ? form.get(`custom_${field.key}`) === "true"
+            : field.field_type === "number"
+              ? (form.get(`custom_${field.key}`)?.toString() ? Number(form.get(`custom_${field.key}`)) : null)
+              : form.get(`custom_${field.key}`)?.toString() || ""
         ])
       );
 
@@ -67,7 +75,7 @@ export default function ArticlePage() {
         name: form.get("name")?.toString().trim(),
         description: form.get("description")?.toString() || "",
         quantity: Number(form.get("quantity") || 0),
-        minimum_quantity: value("minimum_quantity") ? Number(value("minimum_quantity")) : null,
+        stock_tracking: form.get("stock_tracking") === "true",
         area: value("area"),
         shelf: value("shelf"),
         chest: value("chest"),
@@ -100,6 +108,8 @@ export default function ArticlePage() {
   const relevantShelves = shelves.filter((shelf) => !selectedArea || shelf.area === selectedArea)
   const relevantChests = chests.filter((chest) => !selectedArea || chest.area === selectedArea)
   const articleFields = [...categoryFields.filter((field) => field.category === selectedCategory), ...globalFields]
+  const stockFields = articleFields.filter((field) => field.key === "minimum_quantity" || field.key === "stock_level")
+  const otherFields = articleFields.filter((field) => field.key !== "minimum_quantity" && field.key !== "stock_level")
 
   return (
     <section className="w-full">
@@ -149,9 +159,18 @@ export default function ArticlePage() {
                 <input name="quantity" type="number" min="0" defaultValue={article.quantity} />
               </Field>
 
-{/*               <Field label="Minimum quantity">
-                <input name="minimum_quantity" type="number" min="0" defaultValue={article.minimum_quantity ?? ""} />
-              </Field> */}
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <Switch
+                  name="stock_tracking"
+                  value="true"
+                  checked={stockTracking}
+                  onCheckedChange={(checked) => {
+                    setStockTracking(checked)
+                    if (!checked) setStockFieldsOpen(false)
+                  }}
+                />
+                {t("articles.page.fields.stockTracking")}
+              </label>
             </div>
 
             <div className="grid content-start gap-4 rounded-xl border bg-muted/15 p-4 sm:p-5">
@@ -225,17 +244,72 @@ export default function ArticlePage() {
               <textarea name="description" rows={5} defaultValue={article.description ?? ""} />
             </Field>
 
-            {articleFields.length > 0 && (
+            {otherFields.length > 0 && (
               <div className="grid gap-5 sm:grid-cols-2">
-                {articleFields.map((field) => 
+                {otherFields.map((field) => 
                   <Field key={field.uuid} label={getFieldLabel(field)}>
-                    <input 
-                      name={`custom_${field.key}`}
-                      type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"} 
-                      defaultValue={article.custom_fields[field.key]?.toString() ?? ""} 
-                    />
+                    {field.field_type === "select" ? (
+                      <select name={`custom_${field.key}`} defaultValue={article.custom_fields[field.key]?.toString() ?? ""}>
+                        <option value="">{t("articles.page.fields.selectValue")}</option>
+                        {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
+                      </select>
+                    ) : field.field_type === "boolean" ? (
+                      <input
+                        name={`custom_${field.key}`}
+                        type="checkbox"
+                        value="true"
+                        defaultChecked={article.custom_fields[field.key] === true}
+                      />
+                    ) : (
+                      <input
+                        name={`custom_${field.key}`}
+                        type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"}
+                        defaultValue={article.custom_fields[field.key]?.toString() ?? ""}
+                      />
+                    )}
                   </Field>)
                 }
+              </div>
+            )}
+
+            {stockTracking && stockFields.length > 0 && (
+              <div>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between border-t pt-5 text-left text-sm font-semibold"
+                  aria-expanded={stockFieldsOpen}
+                  onClick={() => setStockFieldsOpen((open) => !open)}
+                >
+                  {t("articles.page.stockFields")}
+                  <ChevronDown className={`size-4 transition-transform ${stockFieldsOpen ? "rotate-180" : ""}`} />
+                </button>
+                {stockFieldsOpen && (
+                  <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                    {stockFields.map((field) => 
+                      <Field key={field.uuid} label={getFieldLabel(field)}>
+                        {field.field_type === "select" ? (
+                          <select name={`custom_${field.key}`} defaultValue={article.custom_fields[field.key]?.toString() ?? ""}>
+                            <option value="">{t("articles.page.fields.selectValue")}</option>
+                            {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
+                          </select>
+                        ) : field.field_type === "boolean" ? (
+                          <input
+                            name={`custom_${field.key}`}
+                            type="checkbox"
+                            value="true"
+                            defaultChecked={article.custom_fields[field.key] === true}
+                          />
+                        ) : (
+                          <input
+                            name={`custom_${field.key}`}
+                            type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"}
+                            defaultValue={article.custom_fields[field.key]?.toString() ?? ""}
+                          />
+                        )}
+                      </Field>)
+                    }
+                  </div>
+                )}
               </div>
             )}
           </div>

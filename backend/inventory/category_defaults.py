@@ -1,5 +1,15 @@
 """This module defines default categories and their associated fields for an inventory system."""
 
+DEFAULT_FIELDS = (
+    {"key": "minimum_quantity", "label": "minimum_quantity", "field_type": "number"},
+    {
+        "key": "stock_level",
+        "label": "stock_level",
+        "field_type": "select",
+        "options": ["low", "medium", "high"],
+    },
+)
+
 DEFAULT_CATEGORIES = {
     "food": (
         {"key": "barcode", "label": "barcode", "field_type": "barcode"},
@@ -45,3 +55,15 @@ def ensure_default_categories(inventory):
                 key=field["key"],
                 defaults={"label": field["label"], "field_type": field["field_type"]},
             )
+
+    for field in DEFAULT_FIELDS:
+        CategoryField.objects.get_or_create(
+            inventory=inventory,
+            category=None,
+            key=field["key"],
+            defaults={
+                "label": field["label"],
+                "field_type": field["field_type"],
+                "options": field.get("options", []),
+            },
+        )

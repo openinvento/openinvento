@@ -25,7 +25,7 @@ import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 type CategoryModal = { category?: ArticleCategory } | null
 type FieldModal = { field?: CategoryField; category: string | null } | null
 
-const fieldTypeOptions = ["text", "number", "boolean", "date", "barcode"] as const
+const fieldTypeOptions = ["text", "number", "boolean", "date", "barcode", "select"] as const
 
 export default function ManageCategoriesAndFieldsPage() {
   const { t } = useTranslation()
@@ -87,6 +87,7 @@ export default function ManageCategoriesAndFieldsPage() {
     const label = form.get("label")?.toString().trim()
     const category = form.get("category")?.toString() || null
     const fieldType = form.get("field_type")?.toString() || "text"
+    const options = form.get("options")?.toString().split(",").map((option) => option.trim()).filter(Boolean) ?? []
 
     if (!label || !fieldType || (!inventory && !fieldModal?.field)) {
       console.error("Missing required field data:", { label, fieldType, category, inventory, fieldModal })
@@ -95,7 +96,7 @@ export default function ManageCategoriesAndFieldsPage() {
 
     setSaving(true)
     try {
-      const payload = { label, field_type: fieldType, category }
+      const payload = { label, field_type: fieldType, category, options }
       if (fieldModal?.field) {
         await inventoryApi.update("category-fields", fieldModal.field.uuid, payload)
       } else {
@@ -353,6 +354,16 @@ function FieldModalForm({
             ))}
           </SelectContent>
         </Select>
+      </FormField>
+
+      <FormField label={t("categoriesAndFields.options")}>
+        <Input
+          name="options"
+          defaultValue={modal?.field?.options.join(", ")}
+          placeholder={t("categoriesAndFields.optionsPlaceholder")}
+          className="control"
+          disabled={fieldType !== "select"}
+        />
       </FormField>
 
     </InventoryModal>
