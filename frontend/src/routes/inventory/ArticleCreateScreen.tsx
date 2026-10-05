@@ -166,7 +166,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 function CustomField({ field, label, selectLabel }: { field: CategoryField; label: string; selectLabel: string }) {
   return <Field label={label}>
     {field.field_type === "select" ? <Select name={`custom_${field.key}`} defaultValue=""><SelectTrigger className="w-full"><SelectValue placeholder={selectLabel} /></SelectTrigger><SelectContent><SelectItem value="">{selectLabel}</SelectItem>{field.options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select>
-      : field.field_type === "boolean" ? <input name={`custom_${field.key}`} type="checkbox" value="true" />
+      : field.field_type === "boolean" ? <Switch name={`custom_${field.key}`} value="true" />
         : <Input name={`custom_${field.key}`} type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"} />}
   </Field>
 }

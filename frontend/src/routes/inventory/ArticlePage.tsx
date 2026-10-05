@@ -85,6 +85,9 @@ export default function ArticlePage() {
 
       setArticle(next);
 
+      // Redirect to the area page if the article was saved successfully
+      navigate(next.area ? `/app/areas/${next.area}` : "/app/areas")
+
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : t("articles.page.errors.save")) 
     }
@@ -254,9 +257,8 @@ export default function ArticlePage() {
                         {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
                       </select>
                     ) : field.field_type === "boolean" ? (
-                      <input
+                      <Switch
                         name={`custom_${field.key}`}
-                        type="checkbox"
                         value="true"
                         defaultChecked={article.custom_fields[field.key] === true}
                       />
@@ -293,9 +295,8 @@ export default function ArticlePage() {
                             {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
                           </select>
                         ) : field.field_type === "boolean" ? (
-                          <input
+                          <Switch
                             name={`custom_${field.key}`}
-                            type="checkbox"
                             value="true"
                             defaultChecked={article.custom_fields[field.key] === true}
                           />
