@@ -30,8 +30,8 @@
         "icon": "Icon",
         "name": "Name",
         "quantity": "Quantity",
-        "shelf": "Shelf",
         "selectValue": "Select a value",
+        "shelf": "Shelf",
         "stockTracking": "Track stock"
       },
       "inStock": "{{count}} in stock",
@@ -48,6 +48,7 @@
       "nothingStored": "Nothing stored here yet.",
       "otherFields": "Other fields",
       "otherItems": "Other items",
+      "stockFields": "Stock thresholds",
       "renameShelf": "Rename shelf",
       "summary": "{{articles}} articles · {{chests}} chests · {{shelves}} shelves"
     },
@@ -91,7 +92,9 @@
         "description": "Description",
         "name": "Name",
         "quantity": "Quantity",
-        "shelf": "Shelf"
+        "selectValue": "Select a value",
+        "shelf": "Shelf",
+        "stockTracking": "Stock tracking"
       },
       "headings": {
         "articleDetails": "Article Details",
@@ -103,6 +106,7 @@
       "noCategory": "No category",
       "noChest": "No chest",
       "noShelf": "No shelf",
+      "stockFields": "Stock thresholds",
       "saveChanges": "Save changes",
       "saving": "Saving..."
     }
@@ -126,7 +130,6 @@
       "usernameRequired": "Username is required.",
       "usernameTaken": "This username is already taken."
     },
-    "signupDisabled": "Public account signup is currently disabled for this instance.",
     "fields": {
       "email": "email",
       "name": "name",
@@ -134,13 +137,14 @@
       "username": "username"
     },
     "reset": {
-      "title": "Update your credentials",
-      "warning": "For security, you must choose a new username and password before continuing.",
-      "newPassword": "New password",
       "confirmPassword": "Confirm new password",
+      "newPassword": "New password",
       "saving": "Saving...",
-      "submit": "Update credentials"
-    }
+      "submit": "Update credentials",
+      "title": "Update your credentials",
+      "warning": "For security, you must choose a new username and password before continuing."
+    },
+    "signupDisabled": "Public account signup is currently disabled for this instance."
   },
   "categoriesAndFields": {
     "addCategory": "Add category",
@@ -179,8 +183,6 @@
     "inventory": "Inventory",
     "key": "Key",
     "label": "Label",
-    "options": "Options",
-    "optionsPlaceholder": "Comma-separated values",
     "newCategory": "New category",
     "newField": "New field",
     "noCategoriesText": "Create a category to group related article fields.",
@@ -189,44 +191,46 @@
     "noGeneralFields": "No fields apply to every category.",
     "noInventoryText": "Ask an administrator to add you to an inventory before managing categories.",
     "noInventoryTitle": "No inventory available",
+    "options": "Options",
+    "optionsPlaceholder": "Comma-separated values",
     "title": "Categories and fields"
   },
   "dashboard": {
-    "title": "Start",
-    "greeting": "Good morning!",
-    "searchPlaceholder": "Search your articles...",
-    "search": "Search",
-    "overview": "Overview",
-    "updatedNow": "Updated just now",
+    "addArticle": "Add an article",
+    "addArticleDescription": "Save something new to your inventory.",
     "areas": "Areas",
     "articles": "Articles",
     "categories": "Categories",
-    "recentUpdates": "Recent updates",
-    "quickActions": "Quick actions",
     "createArea": "Create an area",
     "createAreaDescription": "Add a room, shelf, or storage space.",
-    "addArticle": "Add an article",
-    "addArticleDescription": "Save something new to your inventory.",
-    "lastAdded": "Last added",
-    "inventoryByCategory": "Inventory by category",
-    "viewAll": "View all",
-    "viewCategories": "Categories",
-    "loading": "Loading dashboard...",
-    "noLastAddedTitle": "Nothing added yet",
-    "noLastAddedDescription": "New areas, articles, and other inventory objects will appear here.",
-    "noCategoryTitle": "No categories yet",
-    "noCategoryDescription": "Create categories to see your inventory grouped here.",
     "errors": {
       "load": "Could not load the dashboard."
     },
+    "greeting": "Good morning!",
+    "inventoryByCategory": "Inventory by category",
+    "lastAdded": "Last added",
+    "loading": "Loading dashboard...",
+    "noCategoryDescription": "Create categories to see your inventory grouped here.",
+    "noCategoryTitle": "No categories yet",
+    "noLastAddedDescription": "New areas, articles, and other inventory objects will appear here.",
+    "noLastAddedTitle": "Nothing added yet",
+    "overview": "Overview",
+    "quickActions": "Quick actions",
+    "recentUpdates": "Recent updates",
+    "search": "Search",
+    "searchPlaceholder": "Search your articles...",
+    "title": "Start",
     "types": {
       "area": "Area",
-      "shelf": "Shelf",
-      "chest": "Chest",
       "article": "Article",
       "category": "Category",
-      "field": "Field"
-    }
+      "chest": "Chest",
+      "field": "Field",
+      "shelf": "Shelf"
+    },
+    "updatedNow": "Updated just now",
+    "viewAll": "View all",
+    "viewCategories": "Categories"
   },
   "inventory": {
     "categories": {
@@ -272,21 +276,21 @@
     "submit": "Search"
   },
   "settings": {
-    "description": "Select how the user interface should be displayed.",
-    "languageLabel": "Language",
-    "tabsLabel": "Settings sections",
-    "userTab": "User settings",
     "adminTab": "Admin settings",
     "allowEmailLogin": "Allow email address login",
     "allowEmailLoginDescription": "When enabled, users can sign in with their email address in addition to their username.",
+    "description": "Select how the user interface should be displayed.",
     "instanceSettingsLoadError": "Could not load instance settings.",
     "instanceSettingsSaveError": "Could not save instance settings.",
+    "languageLabel": "Language",
+    "tabsLabel": "Settings sections",
     "themeDark": "Dark",
     "themeLabel": "Theme",
     "themeLight": "Light",
     "themePlaceholder": "Select theme",
     "themeSystem": "System",
-    "title": "Settings"
+    "title": "Settings",
+    "userTab": "User settings"
   },
   "sidebar": {
     "areas": "Areas",

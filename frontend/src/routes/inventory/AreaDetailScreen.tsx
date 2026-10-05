@@ -6,6 +6,7 @@ import { ArticleCard, ChestCard } from "@/components/inventory/entity-cards"
 import { ArticleIconPicker } from "@/components/inventory/article-icon-picker"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 import { inventoryApi, type Area, type Article, type ArticleCategory, type CategoryField, type Chest, type Inventory, type Shelf } from "@/utils/api/inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 
@@ -36,6 +37,8 @@ export default function AreaDetailScreen() {
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
   const [openShelves, setOpenShelves] = useState<Record<string, boolean>>({})
+  const [stockTracking, setStockTracking] = useState(false)
+  const [stockFieldsOpen, setStockFieldsOpen] = useState(false)
 
   async function load() {
     if (!areaId) return
@@ -73,6 +76,8 @@ export default function AreaDetailScreen() {
       ...categorySpecificFields.filter((field) => !globalFields.some((gf) => gf.key === field.key))
     ]
   }, [allFields, selectedCategory])
+  const stockFields = articleFields.filter((field) => field.key === "minimum_quantity" || field.key === "stock_level")
+  const otherFields = articleFields.filter((field) => field.key !== "minimum_quantity" && field.key !== "stock_level")
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -161,7 +166,7 @@ export default function AreaDetailScreen() {
       <div className="flex flex-wrap gap-2">
       <Button className="p-4" variant="outline" onClick={() => setModal({ kind: "shelf" })}><Plus /> {t("areas.detail.actions.shelf")}</Button>
       <Button className="p-4" variant="outline" onClick={() => setModal({ kind: "chest" })}><Plus /> {t("areas.detail.actions.chest")}</Button>
-      <Button className="p-4" onClick={() => { setSelectedCategory(""); setSelectedIcon("Package"); setModal({ kind: "article" }) }}><Plus /> {t("areas.detail.actions.article")}</Button>
+      <Button className="p-4" onClick={() => { setSelectedCategory(""); setSelectedIcon("Package"); setStockTracking(false); setStockFieldsOpen(false); setModal({ kind: "article" }) }}><Plus /> {t("areas.detail.actions.article")}</Button>
       </div>
     </div>
     
@@ -324,7 +329,15 @@ export default function AreaDetailScreen() {
           </label>
 
           <label className="flex items-center gap-2 text-sm font-medium">
-            <input name="stock_tracking" type="checkbox" value="true" />
+            <Switch
+              name="stock_tracking"
+              value="true"
+              checked={stockTracking}
+              onCheckedChange={(checked) => {
+                setStockTracking(checked)
+                if (!checked) setStockFieldsOpen(false)
+              }}
+            />
             {t("areas.detail.fields.stockTracking")}
           </label>
 
@@ -340,10 +353,10 @@ export default function AreaDetailScreen() {
       )}
 
       {/* Dynamic custom fields (Only for articles) */}
-      {modal?.kind === "article" && articleFields.length > 0 && (
+      {modal?.kind === "article" && otherFields.length > 0 && (
         <div>
           <h1 className="mb-2 mt-5 text-lg font-semibold">{t("areas.detail.otherFields")}</h1>
-          {articleFields.map((field) => (
+          {otherFields.map((field) => (
             <label key={field.uuid} className="grid gap-1.5 text-sm font-medium">
               {getFieldLabel(field)}
               {field.field_type === "select" ? (
@@ -362,6 +375,43 @@ export default function AreaDetailScreen() {
               )}
           </label>
         ))}
+        </div>
+      )}
+
+      {modal?.kind === "article" && stockTracking && stockFields.length > 0 && (
+        <div>
+          <button
+            type="button"
+            className="mt-5 flex w-full items-center justify-between border-t pt-5 text-left text-sm font-semibold"
+            aria-expanded={stockFieldsOpen}
+            onClick={() => setStockFieldsOpen((open) => !open)}
+          >
+            {t("articles.page.stockFields")}
+            <ChevronDown className={`size-4 transition-transform ${stockFieldsOpen ? "rotate-180" : ""}`} />
+          </button>
+          {stockFieldsOpen && (
+            <div className="mt-3 grid gap-3">
+              {stockFields.map((field) => (
+                <label key={field.uuid} className="grid gap-1.5 text-sm font-medium">
+                  {getFieldLabel(field)}
+                  {field.field_type === "select" ? (
+                    <select name={`custom_${field.key}`} className="h-10 rounded-lg border bg-background px-3 font-normal">
+                      <option value="">{t("articles.page.fields.selectValue")}</option>
+                      {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
+                    </select>
+                  ) : field.field_type === "boolean" ? (
+                    <input name={`custom_${field.key}`} type="checkbox" value="true" />
+                  ) : (
+                    <input
+                      name={`custom_${field.key}`}
+                      type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"}
+                      className="h-10 rounded-lg border bg-background px-3 font-normal"
+                    />
+                  )}
+                </label>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </InventoryModal>
