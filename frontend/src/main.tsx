@@ -18,6 +18,7 @@ import SearchPage from './routes/inventory/SearchPage.tsx'
 import { SessionGuard } from './components/auth/session-guard.tsx'
 import ManageCategoriesAndFieldsPage from './routes/inventory/ManageCategoriesAndFields.tsx'
 import ManageCodes from './routes/inventory/ManageCodes.tsx'
+import ResetCredentialsPage from './routes/auth/ResetCredentials.tsx'
 
 
 /* Dark / White mode handling */
@@ -96,6 +97,11 @@ const router = createBrowserRouter([
         ],
       },
     ],
+  },
+  {
+    path: "/auth/reset",
+    element: <SessionGuard mode="protected" />,
+    children: [{ index: true, element: <ResetCredentialsPage /> }],
   },
   {
     path: "/auth",
