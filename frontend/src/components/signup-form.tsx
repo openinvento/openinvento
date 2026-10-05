@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
 import { GalleryVerticalEndIcon } from "lucide-react"
 
@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { cn } from "cn"
 import { useTranslation } from "react-i18next"
-import { signup } from "@/utils/api/auth"
+import { getInstanceSettings, signup } from "@/utils/api/auth"
 import { getAuthErrorMessage } from "@/utils/api/auth-errors"
 
 export function SignupForm({
@@ -31,6 +31,17 @@ export function SignupForm({
   const [confirmPassword, setConfirmPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [allowEmailLogin, setAllowEmailLogin] = useState(false)
+  const [allowSignup, setAllowSignup] = useState(false)
+
+  useEffect(() => {
+    getInstanceSettings()
+      .then((settings) => {
+        setAllowEmailLogin(settings.allow_email_login)
+        setAllowSignup(settings.allow_signup)
+      })
+      .catch(() => undefined)
+  }, [])
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -43,7 +54,7 @@ export function SignupForm({
 
     setLoading(true)
     try {
-      await signup(username.trim(), email.trim(), name.trim(), password)
+      await signup(username.trim(), allowEmailLogin ? email.trim() : "", name.trim(), password)
       navigate("/app", { replace: true })
     } catch (submissionError) {
       setError(getAuthErrorMessage(submissionError, t))
@@ -54,6 +65,9 @@ export function SignupForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      {!allowSignup ? (
+        <FieldDescription className="text-center">{t("auth.signupDisabled")}</FieldDescription>
+      ) : (
       <form onSubmit={handleSubmit} className="space-y-6">
         <FieldGroup>
           <div className="flex flex-col items-center gap-2 text-center">
@@ -95,18 +109,20 @@ export function SignupForm({
             />
           </Field>
 
-          <Field>
-            <FieldLabel htmlFor="email">Email</FieldLabel>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-            />
-          </Field>
+          {allowEmailLogin && (
+            <Field>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+            </Field>
+          )}
 
           <Field>
             <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -142,6 +158,7 @@ export function SignupForm({
           </Field>
         </FieldGroup>
       </form>
+      )}
       <FieldDescription className="px-6 text-center">
         Already have an account? <a href="/auth/login">Log in</a>.
       </FieldDescription>

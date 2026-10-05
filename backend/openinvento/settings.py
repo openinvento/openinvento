@@ -74,6 +74,10 @@ else:
 
 AUTH_USER_MODEL = "account_auth.CustomUser"
 
+ENABLE_SIGNUP = os.getenv("ENABLE_SIGNUP", "false").strip().lower() in {
+    "1", "true", "yes", "on"
+}
+
 DEBUG = False
 if envDebugMode:
     DEBUG = True

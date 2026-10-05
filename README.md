@@ -1,6 +1,35 @@
 # openinvento
 OpenInvento - Selfhosted Inventory Manager
 
+# Installation
+
+## Env Variables
+
+The Docker deployment reads these variables from the environment or a `.env` file:
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `APP_URL` | Recommended | None | Public URL where OpenInvento is accessible, used for CSRF protection. |
+| `APP_URLS` | No | None | Comma-separated additional trusted application URLs. |
+| `SECRET_KEY` | Recommended | Unsafe fallback | Secret key used by Django. Set a long random value in production. |
+| `DATA_DIRECTORY` | No | `/data` in Docker | Directory for the database and uploaded files. |
+| `INIT_ADMIN_USERNAME` | Required when enabled | None | Username for the initial administrator account. |
+| `INIT_ADMIN_PASSWORD` | Required when enabled | None | Password for the initial administrator account. It must be changed on first login. |
+| `CREATE_INIT_ADMIN` | No | `true` | Set to `false` to disable automatic initial administrator creation. |
+| `ENABLE_SIGNUP` | No | `false` | Set to `true` to enable public account signup. |
+
+The initial administrator is created after migrations only when the database contains no users. Its `require_reset` flag forces a credential change after the first successful login. Once any user exists, changing the initialization variables does not modify existing accounts.
+
+Example `.env` values:
+
+```dotenv
+APP_URL=http://localhost:8080
+SECRET_KEY=replace-with-a-long-random-value
+INIT_ADMIN_USERNAME=admin
+INIT_ADMIN_PASSWORD=replace-with-a-strong-password
+CREATE_INIT_ADMIN=true
+```
+
 ## Data architecture
 "inventory" 
     -> "Users" (a user can be assigned to ONE inventory. So an inventory can be accessible by multiple users) Multi inventory per user may follow later

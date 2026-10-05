@@ -126,11 +126,20 @@
       "usernameRequired": "Username is required.",
       "usernameTaken": "This username is already taken."
     },
+    "signupDisabled": "Public account signup is currently disabled for this instance.",
     "fields": {
       "email": "email",
       "name": "name",
       "password": "password",
       "username": "username"
+    },
+    "reset": {
+      "title": "Update your credentials",
+      "warning": "For security, you must choose a new username and password before continuing.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "saving": "Saving...",
+      "submit": "Update credentials"
     }
   },
   "categoriesAndFields": {
@@ -264,6 +273,14 @@
   },
   "settings": {
     "description": "Select how the user interface should be displayed.",
+    "languageLabel": "Language",
+    "tabsLabel": "Settings sections",
+    "userTab": "User settings",
+    "adminTab": "Admin settings",
+    "allowEmailLogin": "Allow email address login",
+    "allowEmailLoginDescription": "When enabled, users can sign in with their email address in addition to their username.",
+    "instanceSettingsLoadError": "Could not load instance settings.",
+    "instanceSettingsSaveError": "Could not save instance settings.",
     "themeDark": "Dark",
     "themeLabel": "Theme",
     "themeLight": "Light",
