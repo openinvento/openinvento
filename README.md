@@ -1,7 +1,63 @@
-# openinvento
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/openinvento/openinvento/refs/heads/main/assets/banner_light.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/openinvento/openinvento/refs/heads/main/assets/banner_dark.png">
+  <!-- Default fallback -->
+  <img alt="Header" width="100%" src="https://raw.githubusercontent.com/openinvento/openinvento/refs/heads/main/assets/banner_light.png">
+</picture>
+
+# OpenInvento
+
+[![Release](https://img.shields.io/github/v/release/openinvento/openinvento)](https://github.com/openinvento/openinvento/releases/latest) 
+[![Build](https://github.com/openinvento/openinvento/actions/workflows/docker.yml/badge.svg)](https://github.com/openinvento/openinvento/actions/workflows/docker.yml) 
+[![Python](https://img.shields.io/badge/python-%3E%3D3.11-blue)](https://www.python.org/) 
+[![Stars](https://img.shields.io/github/stars/openinvento/openinvento?style=social)](https://github.com/openinvento/openinvento/stargazers)
+![GHCR Total downloads](https://ghcr-badge.elias.eu.org/shield/openinvento/openinvento/openinvento)
+
+
+
 OpenInvento - Selfhosted Inventory Manager
 
+
+## Features
+
+## App Screenshots
+-- Coming soon -- 
+<p align="center">
+  <img alt="Screenshot 1" src="docs/Screenshot_home_light.png" width="100%" />
+  <br / >
+  <img alt="Screenshot 2" src="docs/Screenshot_gallery_light.png" width="49.6%" />
+  <img alt="Screenshot 3y" src="docs/Screenshot_tv_gallery_light.png" width="49.6%" />
+</p>
+The UI is also available in dark mode and is fully responsive for mobile devices.
+Gallery example images from https://pixabay.com/
+
+
+
 # Installation
+
+## Docker
+docker volume create frametv_uploads
+docker volume create frametv_db
+
+docker run -d \
+  --name frametv \
+  -v frametv_uploads:/app/uploads \
+  -v frametv_db:/app/instance \
+  -p 8000:8000 \
+  ghcr.io/openinvento/openinvento:latest
+
+Or use the **docker-compose.yml** file: https://github.com/openinvento/openinvento/blob/main/docker-compose.yml
+
+# Update
+## Docker (docker run)
+Pull the latest image and restart the container while keeping your data (persists in volumes)
+
+Docker Compose (recommended):
+1. `docker compose pull`
+2. `docker compose up -d`
+
+
+# Configuration
 
 ## Env Variables
 
@@ -30,13 +86,7 @@ INIT_ADMIN_PASSWORD=replace-with-a-strong-password
 CREATE_INIT_ADMIN=true
 ```
 
-## Data architecture
-"inventory" 
-    -> "Users" (a user can be assigned to ONE inventory. So an inventory can be accessible by multiple users) Multi inventory per user may follow later
-    -> "Areas"
-        -> "Shelves"
-            -> "Chests"
-                -> "Articles"
+
 
 
 ## Fair-Code & License
@@ -44,6 +94,3 @@ OpenInvento is Source-Available and completely free for personal, educational, a
 
 **Why this license?** 
 We want to keep this project independent. This license ensures that large corporations and cloud providers cannot simply take OpenInvento, package it as a paid commercial service, and profit from my work without giving anything back. 
-
-* **Personal & Hobby Use:** 100% Free. Manage your home lab, tools, or private collections with full peace of mind.
-* **Commercial Use:** If you want to use OpenInvento for corporate operations or commercial warehouses, please contact us for an usage permission.
