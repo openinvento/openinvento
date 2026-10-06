@@ -15,7 +15,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { cn } from "cn"
 import { useTranslation } from "react-i18next"
-import { getInstanceSettings, signup } from "@/utils/api/auth"
+import { signup } from "@/utils/api/auth"
+import { getInstanceSettings } from "@/utils/api/settings"
 import { getAuthErrorMessage } from "@/utils/api/auth-errors"
 
 export function SignupForm({
