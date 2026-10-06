@@ -12,6 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class AdminUserSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=35, required=False)
     password = serializers.CharField(write_only=True, required=False, min_length=8)
 
     class Meta:
@@ -50,6 +51,8 @@ class AdminUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop('password')
         validated_data.setdefault('email', None)
+        # Use the username as the default (display) name
+        validated_data.setdefault('name', validated_data['username'])
         user = CustomUser.objects.create_user(password=password, **validated_data)
         user.require_reset = True
         user.save(update_fields=['require_reset'])
@@ -72,6 +75,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
 
 class SignupSerializer(serializers.ModelSerializer):
     """Validiert die Eingabe und erstellt den User"""
+    name = serializers.CharField(max_length=35, required=False)
     password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -89,6 +93,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.setdefault('email', None)
+        validated_data.setdefault('name', validated_data['username'])
         user = CustomUser.objects.create_user(**validated_data)
 
         create_user_inventory(user)
@@ -97,7 +102,8 @@ class SignupSerializer(serializers.ModelSerializer):
 
 class CredentialResetSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
-    password = serializers.CharField(write_only=True)
+    name = serializers.CharField(max_length=35, required=False)
+    password = serializers.CharField(write_only=True, required=False, min_length=8)
 
     def validate_username(self, value):
         user = self.context['request'].user
@@ -112,9 +118,15 @@ class CredentialResetSerializer(serializers.Serializer):
     def save(self, **kwargs):
         user = self.context['request'].user
         user.username = self.validated_data['username']
-        user.set_password(self.validated_data['password'])
+        if 'name' in self.validated_data:
+            user.name = self.validated_data['name']
+        if 'password' in self.validated_data:
+            user.set_password(self.validated_data['password'])
         user.require_reset = False
-        user.save(update_fields=['username', 'password', 'require_reset'])
+        update_fields = ['username', 'name', 'require_reset']
+        if 'password' in self.validated_data:
+            update_fields.append('password')
+        user.save(update_fields=update_fields)
         return user
 
 
