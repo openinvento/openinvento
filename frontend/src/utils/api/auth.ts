@@ -44,3 +44,15 @@ export async function resetCredentials(username: string, password: string) {
     password,
   })
 }
+
+export async function updatePersonalAccount(
+  username: string,
+  name: string,
+  password?: string,
+) {
+  return postData<{ detail: string; user: SessionUser }>('/api/credentials/reset/', {
+    username,
+    name,
+    ...(password ? { password } : {}),
+  })
+}
