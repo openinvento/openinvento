@@ -111,6 +111,7 @@ class EmailLoginSettingTests(TestCase):
 
 class AdminUserManagementTests(TestCase):
 	def setUp(self):
+		self.client = APIClient()
 		self.admin = CustomUser.objects.create_superuser(
 			username='admin', email='admin@example.com', password='StrongPassword!123', name='Admin',
 		)

@@ -54,6 +54,9 @@ class AdminUserSerializer(serializers.ModelSerializer):
         # Use the username as the default (display) name
         validated_data.setdefault('name', validated_data['username'])
         user = CustomUser.objects.create_user(password=password, **validated_data)
+        if not user.email:
+            user.email = None
+            user.save(update_fields=['email'])
         user.require_reset = True
         user.save(update_fields=['require_reset'])
         create_user_inventory(user)
@@ -95,6 +98,10 @@ class SignupSerializer(serializers.ModelSerializer):
         validated_data.setdefault('email', None)
         validated_data.setdefault('name', validated_data['username'])
         user = CustomUser.objects.create_user(**validated_data)
+        # When no email is provided, set it to None to avoid empty string issues
+        if not user.email:
+            user.email = None
+            user.save(update_fields=['email'])
 
         create_user_inventory(user)
         return user
