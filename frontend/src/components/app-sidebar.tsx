@@ -13,7 +13,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuestionIcon, QrCodeIcon, TextSearchIcon } from "lucide-react"
+import { SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuestionIcon, QrCodeIcon, TextSearchIcon, WarehouseIcon } from "lucide-react"
 import { FAVORITES_CHANGED_EVENT, getFavorites, removeFavorite, type Favorite } from "@/utils/favorites"
 import i18n from "@/i18n"
 import { getSidebarData, type SidebarData } from "@/utils/api/general"
@@ -95,6 +95,11 @@ const data = {
         <Settings2Icon
         />
       ),
+    },
+    {
+      title: i18n.t("sidebar.inventorySettings"),
+      url: "/app/inventory-settings",
+      icon: <WarehouseIcon />,
     },
     {
       title: "Help",
