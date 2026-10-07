@@ -108,6 +108,7 @@ class InstanceSettingsView(APIView):
 
 
 class UserListView(APIView):
+    """Listing and creating users (User management for instance admins)"""
     permission_classes = (permissions.IsAdminUser,)
 
     def get(self, request):
@@ -125,6 +126,7 @@ class UserListView(APIView):
 # high security relevance: These settings apply for the whole instance (not specific inventories)
 
 class UserDetailView(APIView):
+    """Retrieve, update, or delete a user (User management for instance admins)"""
     permission_classes = (permissions.IsAdminUser,)
 
     def patch(self, request, user_uuid):

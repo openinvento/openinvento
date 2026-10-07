@@ -12,6 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class AdminUserSerializer(serializers.ModelSerializer):
+    """ AdminUserSerializer is used for admin operations on CustomUser instances. It allows for the creation and updating of users, including setting passwords and superuser status. The serializer also handles validation for unique usernames and emails, as well as password strength requirements."""
     name = serializers.CharField(max_length=35, required=False)
     password = serializers.CharField(write_only=True, required=False, min_length=8)
 
