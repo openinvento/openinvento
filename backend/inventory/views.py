@@ -50,6 +50,9 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset().filter(inventory__in=self.get_accessible_inventories())
+        inventory_uuid = self.request.query_params.get("inventory")
+        if inventory_uuid:
+            queryset = queryset.filter(inventory__uuid=inventory_uuid)
         
         if self.select_related_fields:
             queryset = queryset.select_related(*self.select_related_fields)
@@ -89,6 +92,9 @@ class InventoryScopedAPIView(APIView):
 class DashboardView(InventoryScopedAPIView):
     def get(self, request, *args, **kwargs):
         inventories = self.get_accessible_inventories()
+        inventory_uuid = request.query_params.get("inventory")
+        if inventory_uuid:
+            inventories = inventories.filter(uuid=inventory_uuid)
         scoped_models = (
             (Area, "area", "name"),
             (Shelf, "shelf", "name"),

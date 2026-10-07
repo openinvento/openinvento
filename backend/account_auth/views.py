@@ -7,6 +7,8 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from inventory.models import Inventory
+from inventory.serializers import InventorySerializer
 
 from .models import CustomUser, InstanceSettings
 from .serializers import (
@@ -174,4 +176,19 @@ class MeView(APIView):
         return Response({
             'authenticated': True,
             'user': UserSerializer(request.user).data
+        })
+
+
+class SidebarView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        inventories = (
+            Inventory.objects.all()
+            if request.user.is_superuser
+            else request.user.inventories.all()
+        ).order_by('name')
+        return Response({
+            'user': {'name': request.user.name},
+            'inventories': InventorySerializer(inventories, many=True).data,
         })

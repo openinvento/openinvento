@@ -8,6 +8,7 @@ from .views import (
     LogoutView,
     MeView,
     SignupView,
+    SidebarView,
     UserDetailView,
     UserListView,
 )
@@ -18,6 +19,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('csrf/', GetCSRFTokenView.as_view(), name='csrf-token'),
     path('me/', MeView.as_view(), name='me'),
+    path('sidebar/', SidebarView.as_view(), name='sidebar'),
     path('credentials/reset/', CredentialResetView.as_view(), name='credentials-reset'),
     path('instance-settings/', InstanceSettingsView.as_view(), name='instance-settings'),
     path('users/', UserListView.as_view(), name='users'),
