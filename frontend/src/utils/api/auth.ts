@@ -1,4 +1,4 @@
-import { fetchData, patchData, postData } from "./base"
+import { fetchData, postData } from "./base"
 
 export type SessionUser = {
   username: string
@@ -7,11 +7,6 @@ export type SessionUser = {
   uuid: string
   is_superuser: boolean
   require_reset: boolean
-}
-
-export type InstanceSettings = {
-  allow_email_login: boolean
-  allow_signup: boolean
 }
 
 export async function login(identifier: string, password: string) {
@@ -50,10 +45,14 @@ export async function resetCredentials(username: string, password: string) {
   })
 }
 
-export async function getInstanceSettings() {
-  return fetchData<InstanceSettings>('/api/instance-settings/')
-}
-
-export async function updateInstanceSettings(settings: Partial<InstanceSettings>) {
-  return patchData<InstanceSettings>('/api/instance-settings/', settings)
+export async function updatePersonalAccount(
+  username: string,
+  name: string,
+  password?: string,
+) {
+  return postData<{ detail: string; user: SessionUser }>('/api/credentials/reset/', {
+    username,
+    name,
+    ...(password ? { password } : {}),
+  })
 }

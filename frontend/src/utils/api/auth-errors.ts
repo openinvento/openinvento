@@ -23,7 +23,12 @@ function translateFieldError(field: string, message: string, t: Translate) {
   const normalizedMessage = message.toLowerCase()
 
   if (field === "password") {
-    if (normalizedMessage.includes("too short")) return t("auth.errors.passwordTooShort")
+    if (
+      normalizedMessage.includes("too short") ||
+      normalizedMessage.includes("characters")
+    ) {
+      return t("auth.errors.passwordTooShort")
+    }
     if (normalizedMessage.includes("common password")) return t("auth.errors.passwordCommon")
     if (normalizedMessage.includes("entirely numeric")) return t("auth.errors.passwordNumeric")
     if (normalizedMessage.includes("similar")) return t("auth.errors.passwordSimilar")

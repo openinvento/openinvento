@@ -19,7 +19,7 @@ export default function SettingsPage() {
 
   return (
     <BaseScreen title={t("settings.title")}>
-      <div className="flex max-w-2xl flex-col gap-6">
+      <div className="flex flex-col gap-6">
       {isAdmin && (
         <div className="flex gap-1 border-b" role="tablist" aria-label={t("settings.tabsLabel")}>
           <button

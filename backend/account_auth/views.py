@@ -3,6 +3,8 @@ from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import permissions, status
+from django.db import transaction
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -12,6 +14,7 @@ from .serializers import (
     InstanceSettingsSerializer,
     SignupSerializer,
     UserSerializer,
+    AdminUserSerializer,
 )
 
 
@@ -94,7 +97,7 @@ class InstanceSettingsView(APIView):
         })
 
     def patch(self, request):
-        self.permission_classes = [permissions.IsAdminUser]
+        self.permission_classes = (permissions.IsAdminUser,)
         self.check_permissions(request)
         instance_settings = InstanceSettings.get_solo()
         serializer = InstanceSettingsSerializer(instance_settings, data=request.data, partial=True)
@@ -104,13 +107,55 @@ class InstanceSettingsView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserListView(APIView):
+    permission_classes = (permissions.IsAdminUser,)
+
+    def get(self, request):
+        users = CustomUser.objects.order_by('name', 'username')
+        return Response(AdminUserSerializer(users, many=True).data)
+
+    @transaction.atomic
+    def post(self, request):
+        serializer = AdminUserSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response(AdminUserSerializer(serializer.save()).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# high security relevance: These settings apply for the whole instance (not specific inventories)
+
+class UserDetailView(APIView):
+    permission_classes = (permissions.IsAdminUser,)
+
+    def patch(self, request, user_uuid):
+        user = get_object_or_404(CustomUser, uuid=user_uuid)
+        if user == request.user and request.data.get('is_superuser') is False:
+            return Response({'error': 'You cannot remove your own administrator access.'}, status=status.HTTP_400_BAD_REQUEST)
+        if user.is_superuser and request.data.get('is_superuser') is False and not CustomUser.objects.filter(is_superuser=True).exclude(pk=user.pk).exists():
+            return Response({'error': 'The instance must keep at least one administrator.'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = AdminUserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            return Response(AdminUserSerializer(serializer.save()).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @transaction.atomic
+    def delete(self, request, user_uuid):
+        user = get_object_or_404(CustomUser, uuid=user_uuid)
+        if user == request.user:
+            return Response({'error': 'You cannot delete your own account.'}, status=status.HTTP_400_BAD_REQUEST)
+        if user.is_superuser and not CustomUser.objects.filter(is_superuser=True).exclude(pk=user.pk).exists():
+            return Response({'error': 'The instance must keep at least one administrator.'}, status=status.HTTP_400_BAD_REQUEST)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class LogoutView(APIView):
     def post(self, request):
         logout(request)
         return Response({'detail': 'Successfully logged out'})
 
 class GetCSRFTokenView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = (permissions.AllowAny,)
 
     @method_decorator(ensure_csrf_cookie)
     def get(self, request):
@@ -118,7 +163,7 @@ class GetCSRFTokenView(APIView):
         return Response({'detail': 'CSRF cookie set'})
 
 class MeView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = (permissions.AllowAny,)
 
     def get(self, request):
         if not request.user.is_authenticated:

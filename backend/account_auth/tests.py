@@ -107,3 +107,73 @@ class EmailLoginSettingTests(TestCase):
 
 		self.assertEqual(response.status_code, 200)
 		self.assertTrue(InstanceSettings.get_solo().allow_email_login)
+
+
+class AdminUserManagementTests(TestCase):
+	def setUp(self):
+		self.client = APIClient()
+		self.admin = CustomUser.objects.create_superuser(
+			username='admin', email='admin@example.com', password='StrongPassword!123', name='Admin',
+		)
+		self.client.force_login(self.admin)
+
+	def test_non_admin_cannot_list_users(self):
+		self.client.force_login(CustomUser.objects.create_user(
+			username='member', password='StrongPassword!123', name='Member',
+		))
+
+		response = self.client.get('/api/users/')
+
+		self.assertEqual(response.status_code, 403)
+
+	def test_admin_can_create_user_and_inventory(self):
+		response = self.client.post('/api/users/', {
+			'username': 'new-user',
+			'email': 'new-user@example.com',
+			'name': 'New User',
+			'password': 'StrongPassword!123',
+		}, format='json')
+
+		self.assertEqual(response.status_code, 201)
+		user = CustomUser.objects.get(username='new-user')
+		self.assertTrue(user.require_reset)
+		self.assertEqual(user.inventories.count(), 1)
+
+	def test_admin_create_returns_password_validation_error(self):
+		response = self.client.post('/api/users/', {
+			'username': 'short-password-user',
+			'name': 'Short Password User',
+			'password': 'short',
+		}, format='json')
+
+		self.assertEqual(response.status_code, 400)
+		self.assertIn('password', response.data)
+
+	def test_email_is_ignored_when_email_login_is_disabled(self):
+		first_response = self.client.post('/api/users/', {
+			'username': 'no-email-user',
+			'email': 'not-an-email',
+			'name': 'No Email User',
+			'password': 'StrongPassword!123',
+		}, format='json')
+		second_response = self.client.post('/api/users/', {
+			'username': 'another-no-email-user',
+			'name': 'Another No Email User',
+			'password': 'StrongPassword!123',
+		}, format='json')
+
+		self.assertEqual(first_response.status_code, 201)
+		self.assertEqual(second_response.status_code, 201)
+		user = CustomUser.objects.get(username='no-email-user')
+		self.assertIsNone(user.email)
+		self.assertNotIn('email', first_response.data)
+
+	def test_admin_cannot_delete_or_demote_last_admin(self):
+		delete_response = self.client.delete(f'/api/users/{self.admin.uuid}/')
+		demote_response = self.client.patch(
+			f'/api/users/{self.admin.uuid}/', {'is_superuser': False}, format='json',
+		)
+
+		self.assertEqual(delete_response.status_code, 400)
+		self.assertEqual(demote_response.status_code, 400)
+		self.assertTrue(CustomUser.objects.filter(pk=self.admin.pk).exists())
