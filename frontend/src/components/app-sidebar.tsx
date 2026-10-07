@@ -6,7 +6,7 @@ import { useLocation } from "react-router"
 import { NavFavorites } from "@/components/nav-favorites"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
-import { AccountSidebarManager } from "@/components/account-sidebar"
+import { AccountSidebarManager } from "@/components/inventory-switch-sidebar"
 import {
   Sidebar,
   SidebarContent,
@@ -16,22 +16,10 @@ import {
 import { SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuestionIcon, QrCodeIcon, TextSearchIcon } from "lucide-react"
 import { FAVORITES_CHANGED_EVENT, getFavorites, removeFavorite, type Favorite } from "@/utils/favorites"
 import i18n from "@/i18n"
+import { getSidebarData, type SidebarData } from "@/utils/api/general"
 
 // This is sample data.
 const data = {
-  teams: [
-    {
-      name: "Your Name",
-      logo: (
-        <img
-          src="/compact_icon.png"
-          alt="Icon"
-          className="rounded-xl"
-        />
-      ),
-      plan: "Enterprise",
-    },
-  ],
   navMain: [
     {
       title: i18n.t("sidebar.search"),
@@ -179,6 +167,11 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation()
   const [favorites, setFavorites] = React.useState<Favorite[]>([])
+  const [sidebar, setSidebar] = React.useState<SidebarData | null>(null)
+
+  React.useEffect(() => {
+    void getSidebarData().then(setSidebar).catch(() => setSidebar(null))
+  }, [])
 
   React.useEffect(() => {
     const syncFavorites = () => setFavorites(getFavorites())
@@ -200,7 +193,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
-        <AccountSidebarManager teams={data.teams} />
+        {sidebar && <AccountSidebarManager userName={sidebar.user.name} inventories={sidebar.inventories} />}
         <NavMain items={dynamicNavMain} />
       </SidebarHeader>
       <SidebarContent>

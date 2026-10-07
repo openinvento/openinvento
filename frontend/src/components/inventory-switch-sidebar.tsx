@@ -9,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -21,26 +20,28 @@ import { ChevronDownIcon, LogOutIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { logout } from "@/utils/api/auth"
 import { useNavigate } from "react-router"
+import { getSelectedInventory, setSelectedInventory, type Inventory } from "@/utils/api/inventory"
 
 export function AccountSidebarManager({
-  teams,
+  userName,
+  inventories,
 }: {
-  teams: {
-    name: string
-    logo: React.ReactNode
-    plan: string
-  }[]
+  userName: string
+  inventories: Inventory[]
 }) {
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
-  if (!activeTeam) {
-    return null
-  }
-
+  const [activeInventory, setActiveInventory] = React.useState<Inventory | null>(null)
   const {t} = useTranslation()
   const navigate = useNavigate()
 
+  React.useEffect(() => {
+    setActiveInventory(getSelectedInventory(inventories))
+  }, [inventories])
+
+  if (!activeInventory) {
+    return null
+  }
+
   async function logoutUser() {
-    console.log("logout")
     try {
       await logout()
       console.log("Redirecting to login page...")
@@ -58,9 +59,9 @@ export function AccountSidebarManager({
             render={<SidebarMenuButton className="w-fit px-1.5" />}
           >
             <div className="flex aspect-square size-7.5 items-center justify-center rounded-md bg-none text-sidebar-primary-foreground">
-              {activeTeam.logo}
+              <img src="/compact_icon.png" alt="" className="rounded-xl" />
             </div>
-            <span className="truncate font-medium">{activeTeam.name}</span>
+            <span className="truncate font-medium">{`${userName} (${activeInventory.name})`}</span>
             <ChevronDownIcon className="opacity-50" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -71,19 +72,25 @@ export function AccountSidebarManager({
           >
             <DropdownMenuGroup>
               <DropdownMenuLabel className="text-xs text-muted-foreground">
-                Account
+                {userName}
               </DropdownMenuLabel>
-              {teams.map((team, index) => (
+              <DropdownMenuLabel className="text-xs text-muted-foreground">
+                Current Inventory
+              </DropdownMenuLabel>
+              {inventories.map((inventory) => (
                 <DropdownMenuItem
-                  key={team.name}
-                  onClick={() => setActiveTeam(team)}
+                  key={inventory.uuid}
+                  onClick={() => {
+                    setSelectedInventory(inventory.uuid)
+                    setActiveInventory(inventory)
+                    navigate(0)
+                  }}
                   className="gap-2 p-2"
                 >
                   <div className="flex size-6 items-center justify-center rounded-xs border">
-                    {team.logo}
+                    <img src="/compact_icon.png" alt="" className="rounded-xl" />
                   </div>
-                  {team.name}
-                  <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                  {inventory.name}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuGroup>
