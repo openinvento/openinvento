@@ -6,7 +6,7 @@ from django.db import models
 
 class CustomUser(AbstractUser):
     uuid = models.UUIDField(null=False, blank=False, default=uuid.uuid4, unique=True)
-    email = models.EmailField(unique=True, blank=True, null=True)
+    email = models.EmailField(unique=True, blank=True, null=True, default=None) # Depends on email login is enabled/ disabled
     password = models.CharField(max_length=300)
     name = models.CharField(max_length=35)
     require_reset = models.BooleanField(default=False) # For example used for init admin account

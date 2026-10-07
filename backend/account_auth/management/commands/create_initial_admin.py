@@ -38,6 +38,7 @@ class Command(BaseCommand):
 
             user = CustomUser.objects.create_superuser(
                 username=username,
+                email=None,
                 password=password,
                 name=username,
                 require_reset=True,
