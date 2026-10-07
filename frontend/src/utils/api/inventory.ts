@@ -27,6 +27,22 @@ export type DashboardData = {
 
 const SELECTED_INVENTORY_KEY = "selectedInventoryUuid"
 
+export type InventoryUser = {
+  uuid: string
+  username: string
+  email?: string
+  name: string
+  is_superuser: boolean
+  require_reset: boolean
+}
+
+export type InventoryMembership = {
+  inventory: Inventory
+  members: InventoryUser[]
+  available_users: InventoryUser[]
+  can_invite: boolean
+}
+
 export function getSelectedInventory(inventories: Inventory[]) {
   const storedUuid = localStorage.getItem(SELECTED_INVENTORY_KEY)
   const selected = inventories.find((inventory) => inventory.uuid === storedUuid)
@@ -39,6 +55,14 @@ export function getSelectedInventory(inventories: Inventory[]) {
 
 export function setSelectedInventory(uuid: string) {
   localStorage.setItem(SELECTED_INVENTORY_KEY, uuid)
+}
+
+export function getSelectedInventoryUuid() {
+  return localStorage.getItem(SELECTED_INVENTORY_KEY)
+}
+
+export function clearSelectedInventory() {
+  localStorage.removeItem(SELECTED_INVENTORY_KEY)
 }
 
 function scopedPath(path: string) {
@@ -73,6 +97,14 @@ export const inventoryApi = {
   remove: (kind: EntityPath, uuid: string) => deleteData<void>(`/api/${kind}/${uuid}/`),
   searchInventory: (query: string, inventory: string) =>
     fetchData<Article[]>(`/api/search/?q=${encodeURIComponent(query)}&inventory=${encodeURIComponent(inventory)}`),
+  getMembership: (inventory: string) =>
+    fetchData<InventoryMembership>(`/api/inventories/${inventory}/members/`),
+  addMember: (inventory: string, userUuid: string) =>
+    postData<InventoryUser>(`/api/inventories/${inventory}/members/`, { user_uuid: userUuid }),
+  removeMember: (inventory: string, userUuid: string) =>
+    deleteData<void>(`/api/inventories/${inventory}/members/${userUuid}/`),
+  deleteInventory: (inventory: string) =>
+    deleteData<void>(`/api/inventories/${inventory}/`),
 }
 
 export type { EntityPath }
