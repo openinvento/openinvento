@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { Link, useSearchParams } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { inventoryApi, type Article, type Inventory } from "@/utils/api/inventory"
+import { getSelectedInventory, inventoryApi, type Article, type Inventory } from "@/utils/api/inventory"
 import { getArticleIcon } from "@/components/inventory/article-icon-picker"
 
 export default function SearchPage() {
@@ -24,7 +24,7 @@ export default function SearchPage() {
     async function loadInventories() {
       try {
         const nextInventories = await inventoryApi.listInventories()
-        const nextInventoryId = nextInventories[0]?.uuid ?? ""
+        const nextInventoryId = getSelectedInventory(nextInventories)?.uuid ?? ""
         setInventories(nextInventories)
         setInventoryId(nextInventoryId)
 

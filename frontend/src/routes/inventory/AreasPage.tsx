@@ -6,7 +6,7 @@ import { AreaCard } from "@/components/inventory/entity-cards"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
-import { inventoryApi, type Area, type Inventory } from "@/utils/api/inventory"
+import { getSelectedInventory, inventoryApi, type Area, type Inventory } from "@/utils/api/inventory"
 
 export default function AreasPage() {
   const { t } = useTranslation()
@@ -21,7 +21,7 @@ export default function AreasPage() {
     setError("")
     try {
       const [inventories, nextAreas] = await Promise.all([inventoryApi.listInventories(), inventoryApi.listAreas()])
-      setInventory(inventories[0] ?? null)
+      setInventory(getSelectedInventory(inventories))
       setAreas(nextAreas)
     } catch (reason) { setError(reason instanceof Error ? reason.message : t("areas.errors.load")) }
   }

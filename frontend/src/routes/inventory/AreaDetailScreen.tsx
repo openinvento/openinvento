@@ -5,7 +5,7 @@ import { Link, useNavigate, useParams } from "react-router"
 import { ArticleCard, ChestCard } from "@/components/inventory/entity-cards"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
-import { inventoryApi, type Area, type Article, type Chest, type Inventory, type Shelf } from "@/utils/api/inventory"
+import { getSelectedInventory, inventoryApi, type Area, type Article, type Chest, type Inventory, type Shelf } from "@/utils/api/inventory"
 
 type CreateKind = "chest" | "shelf"
 
@@ -42,7 +42,7 @@ export default function AreaDetailScreen() {
         inventoryApi.listChests(),
         inventoryApi.listArticles(),
       ])
-      setInventory(inventories[0] ?? null)
+      setInventory(getSelectedInventory(inventories))
       setArea(allAreas.find((item) => item.uuid === areaId) ?? null)
       setShelves(allShelves.filter((item) => item.area === areaId))
       setChests(allChests.filter((item) => item.area === areaId))
