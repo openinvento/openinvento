@@ -25,6 +25,27 @@ export type DashboardData = {
   last_added: Array<{ uuid: string; name: string; type: string; created_at: string }>
 }
 
+const SELECTED_INVENTORY_KEY = "selectedInventoryUuid"
+
+export function getSelectedInventory(inventories: Inventory[]) {
+  const storedUuid = localStorage.getItem(SELECTED_INVENTORY_KEY)
+  const selected = inventories.find((inventory) => inventory.uuid === storedUuid)
+  const fallback = selected ?? inventories[0] ?? null
+  if (fallback && fallback.uuid !== storedUuid) {
+    localStorage.setItem(SELECTED_INVENTORY_KEY, fallback.uuid)
+  }
+  return fallback
+}
+
+export function setSelectedInventory(uuid: string) {
+  localStorage.setItem(SELECTED_INVENTORY_KEY, uuid)
+}
+
+function scopedPath(path: string) {
+  const uuid = localStorage.getItem(SELECTED_INVENTORY_KEY)
+  return uuid ? `${path}?inventory=${encodeURIComponent(uuid)}` : path
+}
+
 type EntityBase = {
   uuid: string
   identifier: string
@@ -38,14 +59,14 @@ type EntityPath = "areas" | "shelves" | "chests" | "articles" | "article-categor
 type CreatePayload = Record<string, unknown>
 
 export const inventoryApi = {
-  getDashboard: () => fetchData<DashboardData>("/api/dashboard/"),
+  getDashboard: () => fetchData<DashboardData>(scopedPath("/api/dashboard/")),
   listInventories: () => fetchData<Inventory[]>("/api/inventories/"),
-  listAreas: () => fetchData<Area[]>("/api/areas/"),
-  listShelves: () => fetchData<Shelf[]>("/api/shelves/"),
-  listChests: () => fetchData<Chest[]>("/api/chests/"),
-  listArticles: () => fetchData<Article[]>("/api/articles/"),
-  listCategories: () => fetchData<ArticleCategory[]>("/api/article-categories/"),
-  listCategoryFields: () => fetchData<CategoryField[]>("/api/category-fields/"),
+  listAreas: () => fetchData<Area[]>(scopedPath("/api/areas/")),
+  listShelves: () => fetchData<Shelf[]>(scopedPath("/api/shelves/")),
+  listChests: () => fetchData<Chest[]>(scopedPath("/api/chests/")),
+  listArticles: () => fetchData<Article[]>(scopedPath("/api/articles/")),
+  listCategories: () => fetchData<ArticleCategory[]>(scopedPath("/api/article-categories/")),
+  listCategoryFields: () => fetchData<CategoryField[]>(scopedPath("/api/category-fields/")),
   create: <T>(kind: EntityPath, payload: CreatePayload) => postData<T>(`/api/${kind}/`, payload),
   update: <T>(kind: EntityPath, uuid: string, payload: CreatePayload) =>
     patchData<T>(`/api/${kind}/${uuid}/`, payload),
