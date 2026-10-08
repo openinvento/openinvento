@@ -11,12 +11,15 @@ import {
   inventoryApi,
   type InventoryMembership,
 } from "@/utils/api/inventory"
+import { Input } from "@/components/ui/input"
 
 export default function InventorySettingsPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [membership, setMembership] = useState<InventoryMembership | null>(null)
+  const [inventoryName, setInventoryName] = useState("")
   const [selectedUser, setSelectedUser] = useState("")
+  const [nameChanged, setNameChanged] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
@@ -24,14 +27,17 @@ export default function InventorySettingsPage() {
   async function load() {
     setLoading(true)
     setError("")
+    const inventories = await inventoryApi.listInventories()
+
     try {
       let inventoryUuid = getSelectedInventoryUuid()
       if (!inventoryUuid) {
-        const inventories = await inventoryApi.listInventories()
         inventoryUuid = getSelectedInventory(inventories)?.uuid ?? null
       }
       if (!inventoryUuid) return
-      setMembership(await inventoryApi.getMembership(inventoryUuid))
+      const loadedMembership = await inventoryApi.getMembership(inventoryUuid)
+      setInventoryName(loadedMembership.inventory.name)
+      setMembership(loadedMembership)
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : t("settings.inventory.loadError"))
     } finally {
@@ -42,6 +48,26 @@ export default function InventorySettingsPage() {
   useEffect(() => {
     void load()
   }, [])
+
+  useEffect(() => {
+    if (!nameChanged || !membership) return
+
+    const timeout = window.setTimeout(async () => {
+      setSaving(true)
+      setError("")
+      try {
+        const updatedInventory = await inventoryApi.updateInventory(membership.inventory.uuid, inventoryName)
+        setMembership((current) => current ? { ...current, inventory: updatedInventory } : current)
+        setNameChanged(false)
+      } catch (reason) {
+        setError(reason instanceof Error ? reason.message : t("settings.inventory.saveError"))
+      } finally {
+        setSaving(false)
+      }
+    }, 1000)
+
+    return () => window.clearTimeout(timeout)
+  }, [inventoryName, membership, nameChanged, t])
 
   async function addMember() {
     if (!membership || !selectedUser) return
@@ -89,6 +115,13 @@ export default function InventorySettingsPage() {
       {loading ? <p className="text-sm text-muted-foreground">{t("settings.inventory.loading")}</p> : membership && (
         <div className="flex flex-col gap-8">
           <section>
+            <section className="mb-5">
+              <h2 className="text-xl mb-2 font-semibold">{t("settings.inventory.general")}</h2>
+              <label htmlFor="inventoryName" className="text-sm text-muted-foreground">{t("settings.inventory.name")}</label>
+              <br />
+              <Input value={inventoryName} onChange={(event) => { setInventoryName(event.target.value); setNameChanged(true) }} className="w-64" />
+            </section>
+
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
                 <h2 className="text-xl font-semibold">{t("settings.inventory.members")}</h2>

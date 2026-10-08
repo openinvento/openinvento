@@ -97,6 +97,8 @@ export const inventoryApi = {
   remove: (kind: EntityPath, uuid: string) => deleteData<void>(`/api/${kind}/${uuid}/`),
   searchInventory: (query: string, inventory: string) =>
     fetchData<Article[]>(`/api/search/?q=${encodeURIComponent(query)}&inventory=${encodeURIComponent(inventory)}`),
+  updateInventory: (inventory: string, name: string) =>
+    patchData<Inventory>(`/api/inventories/${inventory}/`, { name }),
   getMembership: (inventory: string) =>
     fetchData<InventoryMembership>(`/api/inventories/${inventory}/members/`),
   addMember: (inventory: string, userUuid: string) =>
