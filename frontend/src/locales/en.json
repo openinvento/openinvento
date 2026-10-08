@@ -326,7 +326,24 @@
     "themePlaceholder": "Select theme",
     "themeSystem": "System",
     "title": "Settings",
-    "userTab": "User settings"
+    "userTab": "User settings",
+    "inventory": {
+      "title": "Inventory Settings",
+      "members": "Shared with",
+      "addMember": "Add person",
+      "selectPerson": "Select a person",
+      "removeMember": "Remove person",
+      "removeMemberConfirm": "Remove {{name}} from this inventory?",
+      "loading": "Loading inventory settings...",
+      "loadError": "Could not load inventory settings.",
+      "saveError": "Could not update inventory members.",
+      "noMembers": "No members found.",
+      "dangerZone": "Danger zone",
+      "deleteInventory": "Delete inventory",
+      "deleteConfirm": "Delete {{name}}? All inventory contents will be permanently deleted.",
+      "deleteError": "Could not delete inventory.",
+      "invitesDisabled": "Adding people is disabled for this instance."
+    }
   },
   "sidebar": {
     "areas": "Areas",
@@ -334,6 +351,7 @@
     "codeManagement": "Code Management",
     "home": "Home",
     "search": "Search",
-    "settings": "Settings"
+    "settings": "Settings",
+    "inventorySettings": "Inventory Settings"
   }
 }

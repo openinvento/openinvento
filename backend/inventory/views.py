@@ -1,8 +1,12 @@
 from django.db.models import Count
+from django.conf import settings
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from account_auth.models import CustomUser
+from account_auth.serializers import UserSerializer
 
 from .models import (
     Area,
@@ -36,6 +40,51 @@ class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
         return Inventory.objects.filter(users=self.request.user).order_by("name")
 
 
+class InventoryMembersView(APIView):
+    """ API view for managing members of a specific inventory."""
+    permission_classes = (IsAuthenticated,)
+
+    def get_inventory(self, request, inventory_uuid):
+        inventories = Inventory.objects.all() if request.user.is_superuser else request.user.inventories.all()
+        return get_object_or_404(inventories, uuid=inventory_uuid)
+
+    def get(self, request, inventory_uuid):
+        inventory = self.get_inventory(request, inventory_uuid)
+        members = inventory.users.order_by("name", "username")
+        available_users = (
+            CustomUser.objects.exclude(inventories=inventory).order_by("name", "username")
+            if settings.ALLOW_INVENTORY_USER_INVITES
+            else CustomUser.objects.none()
+        )
+        return Response({
+            "inventory": InventorySerializer(inventory).data,
+            "members": UserSerializer(members, many=True).data,
+            "available_users": UserSerializer(available_users, many=True).data,
+            "can_invite": settings.ALLOW_INVENTORY_USER_INVITES,
+        })
+
+    def post(self, request, inventory_uuid):
+        if not settings.ALLOW_INVENTORY_USER_INVITES:
+            return Response({"error": "Inventory user invites are disabled."}, status=403)
+        inventory = self.get_inventory(request, inventory_uuid)
+        user = get_object_or_404(CustomUser, uuid=request.data.get("user_uuid"))
+        inventory.users.add(user)
+        return Response(UserSerializer(user).data, status=201)
+
+    def delete(self, request, inventory_uuid, user_uuid):
+        inventory = self.get_inventory(request, inventory_uuid)
+        user = get_object_or_404(CustomUser, uuid=user_uuid)
+        inventory.users.remove(user)
+        return Response(status=204)
+
+
+class InventoryDeleteView(InventoryMembersView):
+    def delete(self, request, inventory_uuid):
+        inventory = self.get_inventory(request, inventory_uuid)
+        inventory.delete()
+        return Response(status=204)
+
+
 class InventoryScopedViewSet(viewsets.ModelViewSet):
     """ Base class for viewsets that are scoped to a specific inventory.  (Handle inventory + authentication)"""
     permission_classes = (IsAuthenticated, IsInventoryMember)
@@ -50,6 +99,9 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset().filter(inventory__in=self.get_accessible_inventories())
+        inventory_uuid = self.request.query_params.get("inventory")
+        if inventory_uuid:
+            queryset = queryset.filter(inventory__uuid=inventory_uuid)
         
         if self.select_related_fields:
             queryset = queryset.select_related(*self.select_related_fields)
@@ -89,6 +141,9 @@ class InventoryScopedAPIView(APIView):
 class DashboardView(InventoryScopedAPIView):
     def get(self, request, *args, **kwargs):
         inventories = self.get_accessible_inventories()
+        inventory_uuid = request.query_params.get("inventory")
+        if inventory_uuid:
+            inventories = inventories.filter(uuid=inventory_uuid)
         scoped_models = (
             (Area, "area", "name"),
             (Shelf, "shelf", "name"),

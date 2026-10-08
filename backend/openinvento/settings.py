@@ -78,6 +78,11 @@ ENABLE_SIGNUP = os.getenv("ENABLE_SIGNUP", "false").strip().lower() in {
     "1", "true", "yes", "on"
 }
 
+# Set this to false to prevent exposing the instance user list through inventory sharing and allow users to be invited to inventories by other users
+ALLOW_INVENTORY_USER_INVITES = os.getenv("ALLOW_INVENTORY_USER_INVITES", "true").strip().lower() in {
+    "1", "true", "yes", "on"
+}
+
 DEBUG = False
 if envDebugMode:
     DEBUG = True

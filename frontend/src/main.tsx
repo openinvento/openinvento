@@ -7,6 +7,7 @@ import SignupPage from './routes/auth/Signup.tsx'
 import AppLayout from './layouts/AppLayout.tsx'
 import Dashboard from './routes/Dashboard.tsx'
 import SettingsPage from './routes/Settings.tsx'
+import InventorySettingsPage from './routes/InventorySettings.tsx'
 import AreasPage from './routes/inventory/AreasPage.tsx'
 import AreaDetailScreen from './routes/inventory/AreaDetailScreen.tsx'
 import ArticleCreateScreen from './routes/inventory/ArticleCreateScreen.tsx'
@@ -90,6 +91,10 @@ const router = createBrowserRouter([
       {
         path: "settings", 
         element: <SettingsPage />,
+      },
+      {
+        path: "inventory-settings",
+        element: <InventorySettingsPage />,
       },
       {
         path: "codemanagement", 

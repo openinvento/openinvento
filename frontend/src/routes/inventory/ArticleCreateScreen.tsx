@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { inventoryApi, type ArticleCategory, type CategoryField, type Chest, type Inventory, type Shelf } from "@/utils/api/inventory"
+import { getSelectedInventory, inventoryApi, type ArticleCategory, type CategoryField, type Chest, type Inventory, type Shelf } from "@/utils/api/inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 
 export default function ArticleCreateScreen() {
@@ -41,7 +41,7 @@ export default function ArticleCreateScreen() {
           inventoryApi.listCategories(),
           inventoryApi.listCategoryFields(),
         ])
-        setInventory(inventories[0] ?? null)
+        setInventory(getSelectedInventory(inventories))
         setAreaName(areas.find((area) => area.uuid === areaId)?.name ?? "")
         setShelves(nextShelves.filter((shelf) => shelf.area === areaId))
         setChests(nextChests.filter((chest) => chest.area === areaId))

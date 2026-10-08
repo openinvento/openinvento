@@ -51,7 +51,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        validated_data.setdefault('email', None)
+        validated_data['email'] = validated_data.get('email') or None
         # Use the username as the default (display) name
         validated_data.setdefault('name', validated_data['username'])
         user = CustomUser.objects.create_user(password=password, **validated_data)
@@ -67,6 +67,8 @@ class AdminUserSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password', None)
         is_superuser = validated_data.pop('is_superuser', instance.is_superuser)
         for field, value in validated_data.items():
+            if field == 'email':
+                value = value or None
             setattr(instance, field, value)
         instance.is_superuser = is_superuser
         instance.is_staff = is_superuser
@@ -96,7 +98,7 @@ class SignupSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        validated_data.setdefault('email', None)
+        validated_data['email'] = validated_data.get('email') or None
         validated_data.setdefault('name', validated_data['username'])
         user = CustomUser.objects.create_user(**validated_data)
         # When no email is provided, set it to None to avoid empty string issues

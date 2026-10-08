@@ -7,6 +7,7 @@ import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
 import {
+  getSelectedInventory,
   inventoryApi,
   type ArticleCategory,
   type CategoryField,
@@ -45,7 +46,7 @@ export default function ManageCategoriesAndFieldsPage() {
         inventoryApi.listCategories(),
         inventoryApi.listCategoryFields(),
       ])
-      setInventory(inventories[0] ?? null)
+      setInventory(getSelectedInventory(inventories))
       setCategories(nextCategories)
       setFields(nextFields)
     } catch (reason) {

@@ -9,6 +9,8 @@ from .views import (
     ChestViewSet,
     DashboardView,
     InventoryViewSet,
+    InventoryDeleteView,
+    InventoryMembersView,
     SearchView,
     ShelfViewSet,
 )
@@ -22,7 +24,10 @@ router.register(r"article-categories", ArticleCategoryViewSet, basename="article
 router.register(r"category-fields", CategoryFieldViewSet, basename="category-field")
 router.register(r"articles", ArticleViewSet, basename="article")
 
-urlpatterns = router.urls + [
+urlpatterns = [
+    path("inventories/<uuid:inventory_uuid>/members/", InventoryMembersView.as_view(), name="inventory-members"),
+    path("inventories/<uuid:inventory_uuid>/members/<uuid:user_uuid>/", InventoryMembersView.as_view(), name="inventory-member-delete"),
+    path("inventories/<uuid:inventory_uuid>/", InventoryDeleteView.as_view(), name="inventory-delete"),
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
     path("search/", SearchView.as_view(), name="search"),
-]
+] + router.urls
