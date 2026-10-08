@@ -40,13 +40,15 @@ class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
         return Inventory.objects.filter(users=self.request.user).order_by("name")
 
 
-class InventoryMembersView(APIView):
-    """ API view for managing members of a specific inventory."""
-    permission_classes = (IsAuthenticated,)
-
+class InventoryAccessMixin:
     def get_inventory(self, request, inventory_uuid):
         inventories = Inventory.objects.all() if request.user.is_superuser else request.user.inventories.all()
         return get_object_or_404(inventories, uuid=inventory_uuid)
+
+
+class InventoryMembersView(InventoryAccessMixin, APIView):
+    """ API view for managing members of a specific inventory."""
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, inventory_uuid):
         inventory = self.get_inventory(request, inventory_uuid)
@@ -78,7 +80,25 @@ class InventoryMembersView(APIView):
         return Response(status=204)
 
 
-class InventoryDeleteView(InventoryMembersView):
+class InventoryManageView(InventoryAccessMixin, APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, inventory_uuid):
+        inventory = self.get_inventory(request, inventory_uuid)
+        return Response(InventorySerializer(inventory).data)
+
+    def patch(self, request, inventory_uuid):
+        inventory = self.get_inventory(request, inventory_uuid)
+        serializer = InventorySerializer(
+            inventory,
+            data={"name": request.data.get("name")},
+            partial=True,
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
     def delete(self, request, inventory_uuid):
         inventory = self.get_inventory(request, inventory_uuid)
         inventory.delete()

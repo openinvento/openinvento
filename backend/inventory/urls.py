@@ -9,7 +9,7 @@ from .views import (
     ChestViewSet,
     DashboardView,
     InventoryViewSet,
-    InventoryDeleteView,
+    InventoryManageView,
     InventoryMembersView,
     SearchView,
     ShelfViewSet,
@@ -27,7 +27,7 @@ router.register(r"articles", ArticleViewSet, basename="article")
 urlpatterns = [
     path("inventories/<uuid:inventory_uuid>/members/", InventoryMembersView.as_view(), name="inventory-members"),
     path("inventories/<uuid:inventory_uuid>/members/<uuid:user_uuid>/", InventoryMembersView.as_view(), name="inventory-member-delete"),
-    path("inventories/<uuid:inventory_uuid>/", InventoryDeleteView.as_view(), name="inventory-delete"),
+    path("inventories/<uuid:inventory_uuid>/", InventoryManageView.as_view(), name="inventory-manage"),
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
     path("search/", SearchView.as_view(), name="search"),
 ] + router.urls

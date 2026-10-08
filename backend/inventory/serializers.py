@@ -7,7 +7,7 @@ class InventorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Inventory
         fields = ("uuid", "name", "identifier", "updated_at")
-        read_only_fields = fields
+        read_only_fields = ("uuid", "identifier", "updated_at")
 
 
 class InventoryScopedSerializer(serializers.ModelSerializer):
