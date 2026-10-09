@@ -7,6 +7,8 @@ from .views import (
     ArticleViewSet,
     CategoryFieldViewSet,
     ChestViewSet,
+    CodeLookupView,
+    CodePdfView,
     DashboardView,
     InventoryViewSet,
     InventoryManageView,
@@ -30,4 +32,6 @@ urlpatterns = [
     path("inventories/<uuid:inventory_uuid>/", InventoryManageView.as_view(), name="inventory-manage"),
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
     path("search/", SearchView.as_view(), name="search"),
+    path("codes/lookup/", CodeLookupView.as_view(), name="code-lookup"),
+    path("codes/pdf/", CodePdfView.as_view(), name="code-pdf"),
 ] + router.urls
