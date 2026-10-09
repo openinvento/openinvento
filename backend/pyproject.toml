@@ -12,7 +12,8 @@ dependencies = [
     "gunicorn==26.2.0",
     "djangorestframework==3.18.0",
     "Pillow==12.3.0",
-    "django-ratelimit==4.1.0"
+    "django-ratelimit==4.1.0",
+    "reportlab>=5.0.1"
 ]
 
 [tool.setuptools]
