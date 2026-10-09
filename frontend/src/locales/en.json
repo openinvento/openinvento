@@ -259,6 +259,9 @@
       "warranty_months": "Warranty period in months"
     }
   },
+  "manageCodes": {
+    "title": "QR & Barcodes"
+  },
   "search": {
     "empty": "No articles found.",
     "errors": {
