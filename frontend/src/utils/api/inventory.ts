@@ -25,6 +25,13 @@ export type DashboardData = {
   last_added: Array<{ uuid: string; name: string; type: string; created_at: string }>
 }
 
+export type CodePdfOptions = {
+  uuids: string[]
+  code_type: "qr" | "barcode"
+  size: "a4" | "a5" | "letter"
+  layout: "horizontal" | "vertical"
+}
+
 const SELECTED_INVENTORY_KEY = "selectedInventoryUuid"
 
 export type InventoryUser = {
@@ -107,6 +114,8 @@ export const inventoryApi = {
     deleteData<void>(`/api/inventories/${inventory}/members/${userUuid}/`),
   deleteInventory: (inventory: string) =>
     deleteData<void>(`/api/inventories/${inventory}/`),
+  generateCodesPdf: (options: CodePdfOptions) =>
+    postData<Blob>("/api/codes/pdf/", options),
 }
 
 export type { EntityPath }

@@ -100,6 +100,8 @@ async function request<T>(
   const contentType = response.headers.get("content-type") ?? ""
   const payload = contentType.includes("application/json")
     ? await response.json()
+    : contentType.includes("application/pdf")
+      ? await response.blob()
     : await response.text()
 
   if (!response.ok) {

@@ -16,13 +16,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Settings2Icon, FileTextIcon, LinkIcon, CopyIcon, CornerUpRightIcon, Trash2Icon, CornerUpLeftIcon, ChartLineIcon, GalleryVerticalEndIcon, TrashIcon, BellIcon, ArrowUpIcon, ArrowDownIcon, MoreHorizontalIcon, StarIcon, StarOffIcon } from "lucide-react"
+import { MoreHorizontalIcon, StarIcon, StarOffIcon } from "lucide-react"
 import { inventoryApi } from "@/utils/api/inventory"
 import { isFavorite, toggleFavorite, type Favorite } from "@/utils/favorites"
 
-const data = [
+const data: { label: string; icon: React.ReactNode }[][] = [
   [
-    {
+   /*  {
       label: "Customize Page",
       icon: (
         <Settings2Icon
@@ -118,9 +118,10 @@ const data = [
         <ArrowDownIcon
         />
       ),
-    },
-  ],
+    }, */
+  ], 
 ]
+
 export function NavActions() {
   const [isOpen, setIsOpen] = React.useState(false)
   const location = useLocation()
@@ -143,8 +144,8 @@ export function NavActions() {
         : (await inventoryApi.listArticles()).find((article) => article.uuid === articleId)
       if (!active || !item) return
       const nextFavorite: Favorite = areaId
-        ? { id: `area:${item.uuid}`, name: item.name, url: `/app/areas/${item.uuid}`, emoji: "🚪" }
-        : { id: `article:${item.uuid}`, name: item.name, url: `/app/articles/${item.uuid}`, emoji: "📦" }
+        ? { id: `area:${item.uuid}`, name: item.name, url: `/app/areas/${item.uuid}`, icon: "home" }
+        : { id: `article:${item.uuid}`, name: item.name, url: `/app/articles/${item.uuid}`, icon: "package" }
       setFavorite(nextFavorite)
       setFavorited(isFavorite(nextFavorite.id))
     })()

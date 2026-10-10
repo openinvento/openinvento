@@ -133,13 +133,14 @@ MIDDLEWARE = [
 ]
 
 APP_URL = os.getenv("APP_URL")
-if not APP_URL:
+# Optional: Allow multiple app URLs (comma-separated) for CORS and CSRF trusted origins
+
+APP_URLS = _csv_env("APP_URLS", [])
+if not APP_URL and not APP_URLS:
     logger.warning(
         "APP_URL environment variable is not set. This may cause issues with CSRF protection."
     )
 
-# Optional: Allow multiple app URLs (comma-separated) for CORS and CSRF trusted origins
-APP_URLS = _csv_env("APP_URLS", [])
 
 allowed_hosts_env = _csv_env("ALLOWED_HOSTS", ["localhost", "127.0.0.1", "[::1]", "testserver"])
 
@@ -166,20 +167,27 @@ if HAS_CORSHEADERS:
     )
 
 if APP_URL or APP_URLS:
-    if APP_URL and not APP_URL.startswith("http://") and not APP_URL.startswith("https://"):
+    if APP_URL and not APP_URL.startswith(("http://", "https://")):
         APP_URL = "http://" + APP_URL
 
+    origins = []
+    if APP_URL:
+        origins.append(APP_URL)
     if APP_URLS:
-        CSRF_TRUSTED_ORIGINS = APP_URLS
-    else:
-        CSRF_TRUSTED_ORIGINS = [APP_URL]
+        origins.extend(APP_URLS)
 
-    CSRF_TRUSTED_ORIGINS = [APP_URL]
+    CSRF_TRUSTED_ORIGINS = []
+    for url in origins:
+        if url:
+            if not url.startswith(("http://", "https://")):
+                url = "http://" + url
+            CSRF_TRUSTED_ORIGINS.append(url)
 else:
     CSRF_TRUSTED_ORIGINS = []
     logger.warning(
-        "APP_URL is not set. This may cause issues with CSRF protection."
+        "Neither APP_URL nor APP_URLS is set. This may cause issues with CSRF protection."
     )
+
 
 
 
