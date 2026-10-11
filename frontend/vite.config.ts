@@ -9,7 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "")
+  const env = loadEnv(mode, process.cwd(), '');
   const backendOrigin = env.VITE_BACKEND_ORIGIN || "http://localhost:8000"
   const proxy = {
     '/api': {
@@ -21,6 +21,8 @@ export default defineConfig(({ mode }) => {
       changeOrigin: true,
     },
   }
+
+  console.log(`Vite config: mode=${mode}, backendOrigin=${backendOrigin}, allowedHosts=${env.VITE_ALLOWED_HOSTS}`)
 
   return {
     plugins: [
@@ -35,6 +37,9 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       proxy,
+      allowedHosts: env.VITE_ALLOWED_HOSTS 
+        ? env.VITE_ALLOWED_HOSTS.split(',').map((h) => h.trim()) 
+        : [],
     },
     preview: {
       proxy,
