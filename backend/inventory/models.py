@@ -15,7 +15,9 @@ def validate_file_size(value):
         raise ValidationError(f"Die Datei darf maximal {settings.MAX_FILE_SIZE / (1024 * 1024)} MB groß sein.")
 
 def article_image_upload_path(instance, filename):
-    file_ext = os.path.splitext(filename)[1]
+    file_ext = os.path.splitext(os.path.basename(filename))[1].lower()
+    if file_ext not in {".jpg", ".jpeg", ".png"}:
+        file_ext = ".jpg"
     new_filename = f"{uuid.uuid4()}{file_ext}"  
     return os.path.join("articles", new_filename)
 

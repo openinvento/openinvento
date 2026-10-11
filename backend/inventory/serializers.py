@@ -1,6 +1,17 @@
-from rest_framework import serializers
+from urllib.parse import urlsplit
 
-from .models import Area, Article, ArticleCategory, CategoryField, Chest, Inventory, Shelf
+from rest_framework import serializers
+from rest_framework.reverse import reverse
+
+from .models import (
+    Area,
+    Article,
+    ArticleCategory,
+    CategoryField,
+    Chest,
+    Inventory,
+    Shelf,
+)
 
 
 class InventorySerializer(serializers.ModelSerializer):
@@ -167,6 +178,7 @@ class ArticleSerializer(InventoryScopedSerializer):
         queryset=ArticleCategory.objects.none(), required=False, allow_null=True
     )
     category_fields = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Article
@@ -204,6 +216,25 @@ class ArticleSerializer(InventoryScopedSerializer):
             ).data
         fields = CategoryField.objects.filter(inventory=obj.inventory, category__isnull=True) | obj.category.fields.all()
         return CategoryFieldSerializer(fields, many=True).data
+
+    def get_image(self, obj):
+        """ Return the URL for the article's image, using the protected media view if necessary. Expand this later for adding support for nginx or S3 storage buckets """
+        if not obj.image:
+            return None
+
+        # Use the frontend request URL for media serving
+
+        media_path = reverse("media", kwargs={"path": obj.image.name})
+
+        request = self.context.get("request")
+        origin = request.headers.get("Origin") if request is not None else None
+        if origin and origin != "null":
+            parsed_origin = urlsplit(origin)
+            if parsed_origin.scheme and parsed_origin.netloc:
+                print(f"Using origin {origin} for media URL")
+                return f"{parsed_origin.scheme}://{parsed_origin.netloc}{media_path}"
+
+        return media_path
 
     def validate(self, attrs):
         inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
