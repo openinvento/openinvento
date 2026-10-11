@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { MoreHorizontalIcon, StarOffIcon } from "lucide-react"
+import { HomeIcon, MoreHorizontalIcon, PackageIcon, StarOffIcon } from "lucide-react"
 import type { Favorite } from "@/utils/favorites"
 
 export function NavFavorites({
@@ -29,7 +29,9 @@ export function NavFavorites({
         {favorites.map((item) => (
           <SidebarMenuItem key={item.id}>
             <SidebarMenuButton render={<Link to={favoriteUrl(item)} title={item.name} />}>
-              <span>{item.emoji}</span>
+              {item.icon === "home" && <HomeIcon />}
+              {item.icon === "package" && <PackageIcon />}
+              
               <span>{item.name}</span>
             </SidebarMenuButton>
             <DropdownMenu>

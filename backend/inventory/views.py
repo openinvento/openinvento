@@ -1,13 +1,17 @@
-from django.db.models import Count
+import uuid
+
+from account_auth.models import CustomUser
+from account_auth.serializers import UserSerializer
 from django.conf import settings
+from django.db.models import Count
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from account_auth.models import CustomUser
-from account_auth.serializers import UserSerializer
 
+from .code_utils import generate_codes_pdf
 from .models import (
     Area,
     Article,
@@ -261,3 +265,87 @@ class SearchView(InventoryScopedAPIView):
 
         serializer = ArticleSerializer(articles, many=True)
         return Response(serializer.data)
+
+
+CODE_MODELS = (
+    (Article, "article"),
+    (Chest, "chest"),
+    (Shelf, "shelf"),
+    (Area, "area"),
+    (ArticleCategory, "category"),
+    (CategoryField, "field"),
+)
+
+
+class CodeLookupView(InventoryScopedAPIView):
+    def post(self, request, *args, **kwargs):
+        identifier = str(request.data.get("identifier", "")).strip()
+        if not identifier:
+            return Response({"error": "identifier is required."}, status=400)
+
+        for model, object_type in CODE_MODELS:
+            item = model.objects.filter(
+                inventory__in=self.get_accessible_inventories(),
+                identifier=identifier,
+            ).first()
+            if item is not None:
+                return Response({
+                    "uuid": str(item.uuid),
+                    "identifier": item.identifier,
+                    "name": getattr(item, "name", getattr(item, "label", str(item))),
+                    "type": object_type,
+                })
+
+        return Response({"error": "No inventory item was found for this code."}, status=404)
+
+
+class CodePdfView(InventoryScopedAPIView):
+    page_sizes = {
+        "a4": ("A4", 210, 297),
+        "a5": ("A5", 148, 210),
+        "letter": ("Letter", 216, 279),
+    }
+    code_types = ("qr", "barcode")
+    layouts = ("horizontal", "vertical")
+
+    def post(self, request, *args, **kwargs):
+        item_uuids = request.data.get("uuids")
+        code_type = request.data.get("code_type", "qr")
+        page_size_name = str(request.data.get("size", "a4")).lower()
+        layout = request.data.get("layout", "vertical")
+
+        if not isinstance(item_uuids, list) or not item_uuids:
+            return Response({"error": "uuids must be a non-empty list."}, status=400)
+        if code_type not in self.code_types:
+            return Response({"error": "code_type must be qr or barcode."}, status=400)
+        if page_size_name not in self.page_sizes:
+            return Response({"error": "size must be a4, a5, or letter."}, status=400)
+        if layout not in self.layouts:
+            return Response({"error": "layout must be horizontal or vertical."}, status=400)
+
+        accessible = self.get_accessible_inventories()
+        selected_items = []
+        invalid_uuids = []
+        for raw_uuid in item_uuids:
+            try:
+                item_uuid = uuid.UUID(str(raw_uuid))
+            except (ValueError, AttributeError):
+                invalid_uuids.append(str(raw_uuid))
+                continue
+
+            match = None
+            for model, object_type in CODE_MODELS:
+                match = model.objects.filter(uuid=item_uuid, inventory__in=accessible).first()
+                if match is not None:
+                    selected_items.append((match, object_type))
+                    break
+            if match is None:
+                invalid_uuids.append(str(raw_uuid))
+
+        if invalid_uuids:
+            return Response({"error": "Some selected items are invalid or inaccessible.", "uuids": invalid_uuids}, status=400)
+
+        pdf_buffer = generate_codes_pdf(selected_items, code_type, page_size_name, layout)
+        response = FileResponse(pdf_buffer, content_type="application/pdf")
+        response["Content-Disposition"] = 'attachment; filename="openinvento-codes.pdf"'
+        return response

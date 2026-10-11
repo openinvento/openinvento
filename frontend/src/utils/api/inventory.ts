@@ -25,6 +25,20 @@ export type DashboardData = {
   last_added: Array<{ uuid: string; name: string; type: string; created_at: string }>
 }
 
+export type CodePdfOptions = {
+  uuids: string[]
+  code_type: "qr" | "barcode"
+  size: "a4" | "a5" | "letter"
+  layout: "horizontal" | "vertical"
+}
+
+export type CodeLookupResult = {
+  uuid: string
+  identifier: string
+  name: string
+  type: "article" | "area" | "shelf" | "chest" | "category" | "field"
+}
+
 const SELECTED_INVENTORY_KEY = "selectedInventoryUuid"
 
 export type InventoryUser = {
@@ -97,6 +111,8 @@ export const inventoryApi = {
   remove: (kind: EntityPath, uuid: string) => deleteData<void>(`/api/${kind}/${uuid}/`),
   searchInventory: (query: string, inventory: string) =>
     fetchData<Article[]>(`/api/search/?q=${encodeURIComponent(query)}&inventory=${encodeURIComponent(inventory)}`),
+  lookupCode: (identifier: string) =>
+    postData<CodeLookupResult>("/api/codes/lookup/", { identifier }),
   updateInventory: (inventory: string, name: string) =>
     patchData<Inventory>(`/api/inventories/${inventory}/`, { name }),
   getMembership: (inventory: string) =>
@@ -107,6 +123,8 @@ export const inventoryApi = {
     deleteData<void>(`/api/inventories/${inventory}/members/${userUuid}/`),
   deleteInventory: (inventory: string) =>
     deleteData<void>(`/api/inventories/${inventory}/`),
+  generateCodesPdf: (options: CodePdfOptions) =>
+    postData<Blob>("/api/codes/pdf/", options),
 }
 
 export type { EntityPath }

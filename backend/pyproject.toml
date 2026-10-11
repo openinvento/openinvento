@@ -2,7 +2,7 @@
 name = "openinvento"
 version = "0.1.0"
 description = "Source available inventory app"
-requires-python = ">=3.12"
+requires-python = ">=3.12, <4"
 license = { text = "PolyForm Shield License 1.0.0" }
 
 # List all your production dependencies here
@@ -12,7 +12,8 @@ dependencies = [
     "gunicorn==26.2.0",
     "djangorestframework==3.18.0",
     "Pillow==12.3.0",
-    "django-ratelimit==4.1.0"
+    "django-ratelimit==4.1.0",
+    "reportlab>=5.0.1"
 ]
 
 [tool.setuptools]

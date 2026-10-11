@@ -1,8 +1,10 @@
+export type FavoriteIcon = "home" | "package"
+
 export type Favorite = {
   id: string
   name: string
   url: string
-  emoji: string
+  icon: FavoriteIcon
 }
 
 const STORAGE_KEY = "openinvento:favorites"
@@ -16,7 +18,7 @@ function readFavorites(): Favorite[] {
       (item): item is Favorite =>
         typeof item === "object" && item !== null &&
         typeof item.id === "string" && typeof item.name === "string" &&
-        typeof item.url === "string" && typeof item.emoji === "string",
+        typeof item.url === "string" && item.icon === "home" || item.icon === "package",
     )
   } catch {
     return []
