@@ -94,7 +94,7 @@ type EntityBase = {
 }
 
 type EntityPath = "areas" | "shelves" | "chests" | "articles" | "article-categories" | "category-fields"
-type CreatePayload = Record<string, unknown>
+type CreatePayload = Record<string, unknown> | FormData
 
 export const inventoryApi = {
   getDashboard: () => fetchData<DashboardData>(scopedPath("/api/dashboard/")),

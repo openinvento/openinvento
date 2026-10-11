@@ -132,6 +132,7 @@ export default function AreaDetailScreen() {
                 key={article.uuid}
                 name={article.name}
                 articleIcon={article.icon}
+                articleImage={article.image}
                 subtitle={t("areas.detail.inStock", { count: article.quantity })}
                 badge={getLowStockBadge(article, t("areas.detail.lowStock"))}
                 onOpen={() => navigate(`/app/articles/${article.uuid}`)}
@@ -175,7 +176,7 @@ export default function AreaDetailScreen() {
             {isOpen && <div className="border-t p-4">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
                 {sectionChests.map((chest) => <ChestCard key={chest.uuid} name={chest.name} subtitle={t("areas.detail.articleCount", { count: articles.filter((article) => article.chest === chest.uuid).length })} onRename={() => setModal({ kind: "chest", item: chest })} onDelete={() => void remove("chests", chest.uuid, chest.name)} />)}
-                {sectionArticles.map((article) => <ArticleCard key={article.uuid} name={article.name} articleIcon={article.icon} subtitle={t("areas.detail.inStock", { count: article.quantity })} badge={getLowStockBadge(article, t("areas.detail.lowStock"))} onOpen={() => navigate(`/app/articles/${article.uuid}`)} onRename={() => navigate(`/app/articles/${article.uuid}`)} onDelete={() => void remove("articles", article.uuid, article.name)} />)}
+                {sectionArticles.map((article) => <ArticleCard key={article.uuid} name={article.name} articleIcon={article.icon} articleImage={article.image} subtitle={t("areas.detail.inStock", { count: article.quantity })} badge={getLowStockBadge(article, t("areas.detail.lowStock"))} onOpen={() => navigate(`/app/articles/${article.uuid}`)} onRename={() => navigate(`/app/articles/${article.uuid}`)} onDelete={() => void remove("articles", article.uuid, article.name)} />)}
               </div>
               {sectionChests.length + sectionArticles.length === 0 && <p className="py-3 text-sm text-muted-foreground">{t("areas.detail.nothingStored")}</p>}
             </div>}

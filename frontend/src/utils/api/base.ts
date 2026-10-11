@@ -45,6 +45,11 @@ function buildUrl(path: string) {
   return `${baseUrl}${normalizedPath}`
 }
 
+export function getMediaUrl(path: string | null | undefined) {
+  if (!path) return null
+  return buildUrl(path)
+}
+
 function getCookie(name: string) {
   if (typeof document === "undefined") {
     return null
@@ -120,7 +125,9 @@ async function request<T>(
     }
 
     headers.set("X-CSRFToken", refreshedToken)
-    headers.set("Content-Type", "application/json")
+    if (!(options.body instanceof FormData)) {
+      headers.set("Content-Type", "application/json")
+    }
   }
 
   const response = await fetch(buildUrl(path), {
@@ -128,7 +135,9 @@ async function request<T>(
     method,
     credentials: "include",
     headers,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    body: options.body === undefined || options.body instanceof FormData
+      ? options.body as BodyInit | undefined
+      : JSON.stringify(options.body),
   })
 
   const contentType = response.headers.get("content-type") ?? ""
