@@ -23,6 +23,8 @@ export class ApiError extends Error {
 
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ""
+const CSRF_ERROR_MESSAGE = "Your session expired. Please refresh the page and try again."
+const CSRF_ORIGIN_ERROR_PREFIX = "CSRF configuration error: this origin is not trusted by the backend."
 
 function normalizeBaseUrl(baseUrl: string) {
   return baseUrl.replace(/\/+$/, "")
@@ -60,6 +62,37 @@ function getCookie(name: string) {
   return decodeURIComponent(cookie.slice(name.length + 1))
 }
 
+function isCsrfRejection(status: number, payload: unknown) {
+  if (status !== 403 || typeof payload !== "string") {
+    return false
+  }
+
+  return /csrf verification failed|csrf cookie not set|csrf token/i.test(payload)
+}
+
+function getPayloadMessage(payload: unknown) {
+  if (!payload || typeof payload !== "object") {
+    return null
+  }
+
+  const record = payload as Record<string, unknown>
+  return typeof record.error === "string"
+    ? record.error
+    : typeof record.detail === "string"
+      ? record.detail
+      : null
+}
+
+function getCsrfOriginErrorMessage(payload: unknown) {
+  const detail = getPayloadMessage(payload)
+
+  if (!detail || !/^csrf failed:\s*origin checking failed/i.test(detail)) {
+    return null
+  }
+
+  return `${CSRF_ORIGIN_ERROR_PREFIX}\n\n${detail}\n\nAdd the frontend URL to the APP_URLS`
+}
+
 async function ensureCsrfCookie() {
   await fetch(buildUrl("/api/csrf/"), {
     credentials: "include",
@@ -69,7 +102,8 @@ async function ensureCsrfCookie() {
 async function request<T>(
   method: ApiMethod,
   path: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
+  csrfRetried = false,
 ): Promise<T> {
   const headers = new Headers(options.headers)
 
@@ -104,13 +138,24 @@ async function request<T>(
       ? await response.blob()
     : await response.text()
 
+  if (isCsrfRejection(response.status, payload) && !csrfRetried) {
+    await ensureCsrfCookie()
+    return request<T>(method, path, options, true)
+  }
+
   if (!response.ok) {
-    const message =
-      payload && typeof payload === "object" && "error" in payload
-        ? String((payload as Record<string, unknown>).error)
-        : typeof payload === "string" && payload
-          ? payload
-          : `Request failed with status ${response.status}`
+    const csrfOriginErrorMessage = getCsrfOriginErrorMessage(payload)
+    const message = csrfOriginErrorMessage
+      ?? (isCsrfRejection(response.status, payload)
+        ? CSRF_ERROR_MESSAGE
+        : getPayloadMessage(payload)
+          ?? (typeof payload === "string" && payload
+            ? payload
+            : `Request failed with status ${response.status}`))
+
+    if (csrfOriginErrorMessage && typeof window !== "undefined") {
+      window.alert(csrfOriginErrorMessage)
+    }
 
     throw new ApiError(message, payload, response.status)
   }
