@@ -6,14 +6,15 @@ import { Button } from "@/components/ui/button"
 
 type ScannerProps = {
 	onClose: () => void
+	onCodeDetected: (identifier: string) => Promise<void>
 }
 
-export default function Scanner({ onClose }: ScannerProps) {
+export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const streamRef = useRef<MediaStream | null>(null)
 	const frameRef = useRef<number | null>(null)
 	const hasDetectedCodeRef = useRef(false)
-	const [status, setStatus] = useState<"starting" | "scanning" | "error">("starting")
+	const [status, setStatus] = useState<"starting" | "scanning" | "looking-up" | "error">("starting")
 	const [error, setError] = useState<string | null>(null)
 
 	useEffect(() => {
@@ -37,11 +38,15 @@ export default function Scanner({ onClose }: ScannerProps) {
 				if (detectedCode) {
 					hasDetectedCodeRef.current = true
 					stopScanner()
-					window.alert(
-						`Code detected\n\nFormat: ${detectedCode.format}\nValue: ${detectedCode.rawValue}`,
-
-					)
-					onClose()
+					setStatus("looking-up")
+					try {
+						await onCodeDetected(detectedCode.rawValue)
+					} catch (lookupError) {
+						if (isActive) {
+							setStatus("error")
+							setError(lookupError instanceof Error ? lookupError.message : "Unable to find the scanned item.")
+						}
+					}
 					return
 				}
 			} catch {
@@ -88,7 +93,7 @@ export default function Scanner({ onClose }: ScannerProps) {
 			isActive = false
 			stopScanner()
 		}
-	}, [onClose])
+	}, [onCodeDetected, onClose])
 
 	return (
 		<div className="w-full max-w-2xl rounded-xl border bg-card p-4 shadow-sm">
@@ -99,7 +104,7 @@ export default function Scanner({ onClose }: ScannerProps) {
 						Scan a code
 					</h2>
 					<p className="mt-1 text-sm text-muted-foreground">
-						{status === "scanning" ? "Point your camera at a barcode or QR code." : "Preparing the camera..."}
+						{status === "scanning" ? "Point your camera at a barcode or QR code." : status === "looking-up" ? "Finding the inventory item..." : "Preparing the camera..."}
 					</p>
 				</div>
 				<Button aria-label="Close scanner" size="icon" variant="ghost" onClick={onClose}>
@@ -107,12 +112,12 @@ export default function Scanner({ onClose }: ScannerProps) {
 				</Button>
 			</div>
 
-			<div className="relative aspect-video overflow-hidden rounded-lg bg-slate-950">
+			<div className="relative aspect-square overflow-hidden rounded-lg bg-slate-950">
 				<video ref={videoRef} className="size-full object-cover" muted playsInline />
-				{status === "starting" && (
+				{(status === "starting" || status === "looking-up") && (
 					<div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/80 text-white">
 						<LoaderCircle className="size-7 animate-spin" />
-						<span className="text-sm">Starting camera...</span>
+						<span className="text-sm">{status === "looking-up" ? "Finding item..." : "Starting camera..."}</span>
 					</div>
 				)}
 				{status === "error" && (

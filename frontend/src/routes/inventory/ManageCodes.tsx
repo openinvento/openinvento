@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { Eye, Printer, ScanLine } from "lucide-react"
+import { useNavigate } from "react-router"
+import { Printer, ScanLine } from "lucide-react"
 
 import Scanner from "@/components/qr-bar-code/Scanner"
 import { Button } from "@/components/ui/button"
@@ -21,6 +22,7 @@ const codeTypes: Array<{ value: CodePdfOptions["code_type"]; label: string }> = 
 
 export default function ManageCodes() {
     const { t } = useTranslation()
+	const navigate = useNavigate()
 
 	const [items, setItems] = useState<CodeItem[]>([])
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -33,6 +35,19 @@ export default function ManageCodes() {
 	const [isLoading, setIsLoading] = useState(true)
 	const [isGenerating, setIsGenerating] = useState(false)
 	const [error, setError] = useState("")
+
+	async function handleCodeDetected(identifier: string) {
+		const result = await inventoryApi.lookupCode(identifier)
+		const paths: Record<typeof result.type, string> = {
+			article: `/app/articles/${result.uuid}`,
+			area: `/app/areas/${result.uuid}`,
+			shelf: "/app/areas",
+			chest: "/app/areas",
+			category: "/app/manage-categories-and-fields",
+			field: "/app/manage-categories-and-fields",
+		}
+		navigate(paths[result.type])
+	}
 
 	useEffect(() => {
 		void (async () => {
@@ -108,7 +123,7 @@ export default function ManageCodes() {
                 </Button>
             </div>
 			{isScannerOpen ? (
-				<Scanner onClose={() => setIsScannerOpen(false)} />
+				<Scanner onClose={() => setIsScannerOpen(false)} onCodeDetected={handleCodeDetected} />
 			) : (
 				<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
 					<section className="min-w-0 rounded-xl border bg-card">

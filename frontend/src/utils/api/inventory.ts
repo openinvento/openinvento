@@ -32,6 +32,13 @@ export type CodePdfOptions = {
   layout: "horizontal" | "vertical"
 }
 
+export type CodeLookupResult = {
+  uuid: string
+  identifier: string
+  name: string
+  type: "article" | "area" | "shelf" | "chest" | "category" | "field"
+}
+
 const SELECTED_INVENTORY_KEY = "selectedInventoryUuid"
 
 export type InventoryUser = {
@@ -104,6 +111,8 @@ export const inventoryApi = {
   remove: (kind: EntityPath, uuid: string) => deleteData<void>(`/api/${kind}/${uuid}/`),
   searchInventory: (query: string, inventory: string) =>
     fetchData<Article[]>(`/api/search/?q=${encodeURIComponent(query)}&inventory=${encodeURIComponent(inventory)}`),
+  lookupCode: (identifier: string) =>
+    postData<CodeLookupResult>("/api/codes/lookup/", { identifier }),
   updateInventory: (inventory: string, name: string) =>
     patchData<Inventory>(`/api/inventories/${inventory}/`, { name }),
   getMembership: (inventory: string) =>
