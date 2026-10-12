@@ -35,22 +35,29 @@ Gallery example images from https://pixabay.com/
 
 # Installation
 
-## Docker
+## Docker Compose (recommended)
+Use the **docker-compose.yml** file: https://github.com/openinvento/openinvento/blob/main/docker-compose.yml
+
+An example `.env` file is [provided in the repository](https://github.com/openinvento/openinvento/blob/main/.env.example). 
+
+
+## Manual Docker Installation
 docker volume create frametv_uploads
 docker volume create frametv_db
 
+```
 docker run -d \
   --name frametv \
   -v frametv_uploads:/app/uploads \
   -v frametv_db:/app/instance \
   -p 8000:8000 \
   ghcr.io/openinvento/openinvento:latest
+```
 
-Or use the **docker-compose.yml** file: https://github.com/openinvento/openinvento/blob/main/docker-compose.yml
 
 # Update
 ## Docker (docker run)
-Pull the latest image and restart the container while keeping your data (persists in volumes)
+Pull the latest image and restart the container while keeping your data (persists in volumes).
 
 Docker Compose (recommended):
 1. `docker compose pull`
@@ -74,18 +81,7 @@ The Docker deployment reads these variables from the environment or a `.env` fil
 | `CREATE_INIT_ADMIN` | No | `true` | Set to `false` to disable automatic initial administrator creation. |
 | `ENABLE_SIGNUP` | No | `false` | Set to `true` to enable public account signup. |
 
-The initial administrator is created after migrations only when the database contains no users. Its `require_reset` flag forces a credential change after the first successful login. Once any user exists, changing the initialization variables does not modify existing accounts.
-
-Example `.env` values:
-
-```dotenv
-APP_URL=http://localhost:8080
-SECRET_KEY=replace-with-a-long-random-value
-INIT_ADMIN_USERNAME=admin
-INIT_ADMIN_PASSWORD=replace-with-a-strong-password
-CREATE_INIT_ADMIN=true
-```
-
+The initial administrator is created after migrations only when the database contains no users. After the first login, the user will be prompted to change their password.
 
 
 
