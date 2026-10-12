@@ -1,6 +1,6 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
 import { ArrowLeft, ChevronDown, Save } from "lucide-react"
-import { Link, useNavigate, useParams } from "react-router"
+import { Link, useBlocker, useNavigate, useParams } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { removeFavorite } from "@/utils/favorites"
@@ -37,6 +37,31 @@ export default function ArticlePage() {
   const [image, setImage] = useState<File | null>(null)
   const [imageChanged, setImageChanged] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [unsavedChanges, setUnsavedChanges] = useState(false)
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
+  const blocker = useBlocker(unsavedChanges)
+
+  useEffect(() => {
+    if (blocker.state !== "blocked") return
+    setError(t("articles.page.errors.unsavedChanges"))
+    blocker.reset()
+  }, [blocker, t])
+
+  useEffect(() => {
+    if (!unsavedChanges) return
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+      event.returnValue = ""
+    }
+    window.addEventListener("beforeunload", warnBeforeUnload)
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload)
+  }, [unsavedChanges])
+
+  useEffect(() => {
+    if (!pendingNavigation || unsavedChanges) return
+    navigate(pendingNavigation)
+    setPendingNavigation(null)
+  }, [navigate, pendingNavigation, unsavedChanges])
 
   useEffect(() => { void (async () => { 
     try {
@@ -93,10 +118,11 @@ export default function ArticlePage() {
 
       const next = await inventoryApi.update<Article>("articles", article.uuid, payload)
 
+      setUnsavedChanges(false)
       setArticle(next);
 
       // Redirect to the area page if the article was saved successfully
-      navigate(next.area ? `/app/areas/${next.area}` : "/app/areas")
+      setPendingNavigation(next.area ? `/app/areas/${next.area}` : "/app/areas")
 
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : t("articles.page.errors.save")) 
@@ -130,7 +156,8 @@ export default function ArticlePage() {
     try {
       await inventoryApi.remove("articles", article.uuid); 
       removeFavorite(`article:${article.uuid}`); 
-      navigate(article.area ? `/app/areas/${article.area}` : "/app/areas") 
+      setUnsavedChanges(false)
+      setPendingNavigation(article.area ? `/app/areas/${article.area}` : "/app/areas") 
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : t("articles.page.errors.delete")) 
     } 
@@ -188,7 +215,7 @@ export default function ArticlePage() {
           </p>
         )}
 
-        <form className="flex flex-col gap-6" onSubmit={save}>
+        <form className="flex flex-col gap-6" onChange={() => setUnsavedChanges(true)} onSubmit={save}>
           {/* Core Details and Location */}
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="grid content-start gap-4 rounded-xl border bg-muted/15 p-4 sm:p-5">

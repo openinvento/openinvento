@@ -94,7 +94,8 @@
       "errors": {
         "delete": "Could not delete article.",
         "load": "Could not load article.",
-        "save": "Could not save article."
+        "save": "Could not save article.",
+        "unsavedChanges": "You have unsaved changes. Save them before leaving this page."
       },
       "fields": {
         "area": "Area",
