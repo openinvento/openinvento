@@ -52,6 +52,24 @@ class InventoryScopedSerializer(serializers.ModelSerializer):
         self.fields["inventory"].queryset = self._accessible_inventories()
 
 
+class ProtectedImageField(serializers.ImageField):
+    """ Custom ImageField that returns a full URL for the image """
+    """Expand this later for adding support for nginx or S3 storage buckets """
+    def to_representation(self, value):
+        if not value:
+            return None
+
+        media_path = reverse("media", kwargs={"path": value.name})
+        request = self.context.get("request")
+        origin = request.headers.get("Origin") if request is not None else None
+        if origin and origin != "null":
+            parsed_origin = urlsplit(origin)
+            if parsed_origin.scheme and parsed_origin.netloc:
+                return f"{parsed_origin.scheme}://{parsed_origin.netloc}{media_path}"
+
+        return media_path
+
+
 class AreaSerializer(InventoryScopedSerializer):
     class Meta:
         model = Area
@@ -178,7 +196,7 @@ class ArticleSerializer(InventoryScopedSerializer):
         queryset=ArticleCategory.objects.none(), required=False, allow_null=True
     )
     category_fields = serializers.SerializerMethodField()
-    image = serializers.SerializerMethodField()
+    image = ProtectedImageField(required=False, allow_null=True) # Use the custom ProtectedImageField for the image field
 
     class Meta:
         model = Article
@@ -218,7 +236,6 @@ class ArticleSerializer(InventoryScopedSerializer):
         return CategoryFieldSerializer(fields, many=True).data
 
     def get_image(self, obj):
-        """ Return the URL for the article's image, using the protected media view if necessary. Expand this later for adding support for nginx or S3 storage buckets """
         if not obj.image:
             return None
 
