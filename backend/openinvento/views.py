@@ -1,21 +1,31 @@
-import os
+from pathlib import Path
 
-from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponse
+from django.conf import settings
+from django.http import FileResponse, Http404
+from inventory.models import Article
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
-from .settings import MEDIA_ROOT
-
+#TODO: Add option to serve user uploads through Nginx or a connected S3 storage bucket
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated]) #
+@permission_classes([IsAuthenticated])
 def protected_media_view(request, path):
-    print(f'{"/protected_media/"}{path}')
-    file_path = os.path.join(MEDIA_ROOT, path)
-    if os.path.exists(file_path):
-        response = HttpResponse()
-        response['Content-Disposition'] = f'inline; filename={os.path.basename(file_path)}'
-        response['X-Accel-Redirect'] = f'{"/protected_media/"}{path}'
-        return response
-    raise Http404("File not found")
+    media_root = Path(settings.MEDIA_ROOT).resolve()
+    file_path = (media_root / path).resolve()
+    if media_root not in file_path.parents or not file_path.is_file():
+        raise Http404("File not found")
+
+    accessible_inventories = (
+        Article.objects.filter(inventory__users=request.user)
+        if not request.user.is_superuser
+        else Article.objects.all()
+    )
+    if not accessible_inventories.filter(image=path).exists():
+        raise Http404("File not found")
+
+    response = FileResponse(file_path.open("rb"), as_attachment=False, filename=file_path.name)
+    response["Content-Disposition"] = f'inline; filename="{file_path.name}"'
+    if settings.DEBUG:
+        response["Cache-Control"] = "no-store"
+    return response

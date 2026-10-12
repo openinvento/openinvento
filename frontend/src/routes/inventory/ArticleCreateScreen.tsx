@@ -1,15 +1,17 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react"
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react"
 import { ArrowLeft, Save } from "lucide-react"
 import { Link, useNavigate, useParams } from "react-router"
 import { useTranslation } from "react-i18next"
 import BaseScreen from "@/layouts/BaseScreen"
 import { ArticleIconPicker } from "@/components/inventory/article-icon-picker"
+import { ImageUploadField } from "@/components/inventory/image-upload-field"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { getSelectedInventory, inventoryApi, type ArticleCategory, type CategoryField, type Chest, type Inventory, type Shelf } from "@/utils/api/inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
+import { compressArticleImage } from "@/utils/article-image"
 
 export default function ArticleCreateScreen() {
   const { areaId } = useParams()
@@ -25,6 +27,8 @@ export default function ArticleCreateScreen() {
   const [selectedShelf, setSelectedShelf] = useState("")
   const [selectedChest, setSelectedChest] = useState("")
   const [selectedIcon, setSelectedIcon] = useState("Package")
+  const [image, setImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [stockTracking, setStockTracking] = useState(false)
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
@@ -79,24 +83,40 @@ export default function ArticleCreateScreen() {
             ? (form.get(`custom_${field.key}`)?.toString() ? Number(form.get(`custom_${field.key}`)) : null)
             : form.get(`custom_${field.key}`)?.toString() || "",
       ]))
-      const article = await inventoryApi.create<{ area: string }>("articles", {
-        name,
-        inventory: inventory.uuid,
-        area: areaId,
-        shelf: selectedShelf || null,
-        chest: selectedChest || null,
-        category: form.get("category")?.toString() || null,
-        quantity: Number(form.get("quantity") || 1),
-        stock_tracking: form.get("stock_tracking") === "true",
-        description: form.get("description")?.toString() || "",
-        icon: selectedIcon,
-        custom_fields: customFields,
-      })
+      const payload = new FormData()
+      payload.append("name", name)
+      payload.append("inventory", inventory.uuid)
+      payload.append("area", areaId)
+      payload.append("shelf", selectedShelf)
+      payload.append("chest", selectedChest)
+      payload.append("category", selectedCategory)
+      payload.append("quantity", form.get("quantity")?.toString() || "1")
+      payload.append("stock_tracking", String(stockTracking))
+      payload.append("description", form.get("description")?.toString() || "")
+      payload.append("icon", selectedIcon)
+      payload.append("custom_fields", JSON.stringify(customFields))
+      if (image) payload.append("image", image)
+
+      const article = await inventoryApi.create<{ area: string }>("articles", payload)
       navigate(article.area ? `/app/areas/${article.area}` : "/app/areas")
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : t("areas.detail.errors.save"))
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function chooseImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    try {
+      const compressed = await compressArticleImage(file)
+      setImage(compressed)
+      setImagePreview(URL.createObjectURL(compressed))
+      setError("")
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not process the selected image.")
+      event.target.value = ""
     }
   }
 
@@ -120,6 +140,18 @@ export default function ArticleCreateScreen() {
             {t("areas.detail.fields.stockTracking")}
           </label>
           <Field label={t("areas.detail.fields.icon")}><ArticleIconPicker value={selectedIcon} onChange={setSelectedIcon} /></Field>
+          <Field label={t("articles.page.fields.image")}>
+            <ImageUploadField
+              imageSrc={imagePreview}
+              fileName={image?.name}
+              alt={t("articles.page.fields.image")}
+              chooseLabel={t("articles.page.fields.chooseImage")}
+              replaceLabel={t("articles.page.fields.replaceImage")}
+              removeLabel={t("articles.page.fields.removeImage")}
+              onChange={(event) => void chooseImage(event)}
+              onRemove={() => { setImage(null); setImagePreview(null) }}
+            />
+          </Field>
         </section>
         <section className="grid content-start gap-5 rounded-xl border bg-muted/15 p-5">
           <h2 className="text-sm font-semibold">{t("articles.page.headings.locationAndCategory")}</h2>

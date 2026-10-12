@@ -1,13 +1,17 @@
-import { useEffect, useState, type FormEvent } from "react"
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
 import { ArrowLeft, ChevronDown, Save } from "lucide-react"
 import { Link, useNavigate, useParams } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { removeFavorite } from "@/utils/favorites"
 import { getArticleIcon } from "@/components/inventory/article-icon-picker"
+import { ImageUploadField } from "@/components/inventory/image-upload-field"
+import { FullscreenImagePreview } from "@/components/inventory/fullscreen-image-preview"
 import { inventoryApi, type Area, type Article, type ArticleCategory, type CategoryField, type Chest, type Shelf } from "@/utils/api/inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 import { useTranslation } from "react-i18next"
+import { compressArticleImage } from "@/utils/article-image"
+import { getMediaUrl } from "@/utils/api/base"
 
 export default function ArticlePage() {
   const { articleId } = useParams()
@@ -30,6 +34,9 @@ export default function ArticlePage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedShelf, setSelectedShelf] = useState<string | null>(null)
   const [selectedChest, setSelectedChest] = useState<string | null>(null)
+  const [image, setImage] = useState<File | null>(null)
+  const [imageChanged, setImageChanged] = useState(false)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   useEffect(() => { void (async () => { 
     try {
@@ -71,17 +78,20 @@ export default function ArticlePage() {
         ])
       );
 
-      const next = await inventoryApi.update<Article>("articles", article.uuid, {
-        name: form.get("name")?.toString().trim(),
-        description: form.get("description")?.toString() || "",
-        quantity: Number(form.get("quantity") || 0),
-        stock_tracking: form.get("stock_tracking") === "true",
-        area: value("area"),
-        shelf: value("shelf"),
-        chest: value("chest"),
-        category: value("category"),
-        custom_fields: customFields
-      });
+      const payload = new FormData()
+      payload.append("name", form.get("name")?.toString().trim() || "")
+      payload.append("description", form.get("description")?.toString() || "")
+      payload.append("quantity", form.get("quantity")?.toString() || "0")
+      payload.append("stock_tracking", String(stockTracking))
+      payload.append("area", value("area") || "")
+      payload.append("shelf", value("shelf") || "")
+      payload.append("chest", value("chest") || "")
+      payload.append("category", value("category") || "")
+      payload.append("custom_fields", JSON.stringify(customFields))
+      if (image) payload.append("image", image)
+      else if (imageChanged) payload.append("image", "")
+
+      const next = await inventoryApi.update<Article>("articles", article.uuid, payload)
 
       setArticle(next);
 
@@ -92,6 +102,27 @@ export default function ArticlePage() {
       setError(reason instanceof Error ? reason.message : t("articles.page.errors.save")) 
     }
     finally { setSaving(false) }
+  }
+
+  async function chooseImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    try {
+      const compressed = await compressArticleImage(file)
+      setImage(compressed)
+      setImagePreview(URL.createObjectURL(compressed))
+      setImageChanged(true)
+      setError("")
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Could not process the selected image.")
+      event.target.value = ""
+    }
+  }
+
+  function removeImage() {
+    setImage(null)
+    setImagePreview(null)
+    setImageChanged(true)
   }
 
   async function remove() {
@@ -127,9 +158,17 @@ export default function ArticlePage() {
         {/* Article Header */}
         <div className="mb-8 flex flex-col gap-5 border-b pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary sm:size-12">
-              {(() => { const Icon = getArticleIcon(article.icon); return <Icon /> })()}
-            </span>
+            {imagePreview || getMediaUrl(article.image) ? (
+              <FullscreenImagePreview
+                imageSrc={imagePreview || getMediaUrl(article.image) || ""}
+                alt={article.name}
+                className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-primary/10 text-primary focus-visible:ring-3 focus-visible:ring-ring/50 sm:size-12"
+              />
+            ) : (
+              <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-primary/10 text-primary sm:size-12">
+                {(() => { const Icon = getArticleIcon(article.icon); return <Icon /> })()}
+              </span>
+            )}
             <div className="min-w-0">
               <p className="text-sm text-muted-foreground">{t("articles.page.headings.articleDetails")}</p>
               <h1 className="truncate text-2xl font-semibold tracking-tight">{article.name}</h1>
@@ -174,6 +213,18 @@ export default function ArticlePage() {
                 />
                 {t("articles.page.fields.stockTracking")}
               </label>
+              <Field label={t("articles.page.fields.image")}>
+                <ImageUploadField
+                  imageSrc={imagePreview || getMediaUrl(article.image) || null}
+                  fileName={image?.name}
+                  alt={t("articles.page.fields.image")}
+                  chooseLabel={t("articles.page.fields.chooseImage")}
+                  replaceLabel={t("articles.page.fields.replaceImage")}
+                  removeLabel={t("articles.page.fields.removeImage")}
+                  onChange={(event) => void chooseImage(event)}
+                  onRemove={removeImage}
+                />
+              </Field>
             </div>
 
             <div className="grid content-start gap-4 rounded-xl border bg-muted/15 p-4 sm:p-5">

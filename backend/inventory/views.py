@@ -7,6 +7,7 @@ from django.db.models import Count
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -35,7 +36,7 @@ from .serializers import (
 
 class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = InventorySerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsInventoryMember)
     http_method_names = ("get", "head", "options")
 
     def get_queryset(self):
@@ -52,7 +53,7 @@ class InventoryAccessMixin:
 
 class InventoryMembersView(InventoryAccessMixin, APIView):
     """ API view for managing members of a specific inventory."""
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsInventoryMember)
 
     def get(self, request, inventory_uuid):
         inventory = self.get_inventory(request, inventory_uuid)
@@ -81,11 +82,15 @@ class InventoryMembersView(InventoryAccessMixin, APIView):
         inventory = self.get_inventory(request, inventory_uuid)
         user = get_object_or_404(CustomUser, uuid=user_uuid)
         inventory.users.remove(user)
+
+        if not inventory.users.exists():
+            inventory.delete()
+            return Response({"message": "Inventory deleted as it has no remaining members."}, status=204)
         return Response(status=204)
 
 
 class InventoryManageView(InventoryAccessMixin, APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsInventoryMember)
 
     def get(self, request, inventory_uuid):
         inventory = self.get_inventory(request, inventory_uuid)
@@ -122,6 +127,7 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
         return self.request.user.inventories.all()
 
     def get_queryset(self):
+        # Basic scoping for GET, PUT, PATCH, DELETE
         queryset = super().get_queryset().filter(inventory__in=self.get_accessible_inventories())
         inventory_uuid = self.request.query_params.get("inventory")
         if inventory_uuid:
@@ -131,25 +137,24 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
             queryset = queryset.select_related(*self.select_related_fields)
         if self.prefetch_related_fields:
             queryset = queryset.prefetch_related(*self.prefetch_related_fields)
-            
-        if self.ordering:
-            model_fields = {f.name for f in queryset.model._meta.get_fields()}
-            
-            valid_ordering = []
-            for field in self.ordering:
-                clean_field = field.lstrip('-')
-                
-                if clean_field in model_fields:
-                    valid_ordering.append(field)
-                elif clean_field == "name" and "label" in model_fields:
-                    fallback = field.replace("name", "label")
-                    valid_ordering.append(fallback)
-                elif "id" in model_fields:
-                    valid_ordering.append(field.replace(clean_field, "pk"))
-            if valid_ordering:
-                queryset = queryset.order_by(*valid_ordering)
                 
         return queryset
+
+    def perform_create(self, serializer):
+        inventory = serializer.validated_data.get('inventory')
+        
+        if inventory and inventory not in self.get_accessible_inventories():
+            raise PermissionDenied("You do not have permission to create objects in this inventory.")
+            
+        serializer.save()
+
+    def perform_update(self, serializer):
+        inventory = serializer.validated_data.get('inventory')
+        
+        if inventory and inventory not in self.get_accessible_inventories():
+            raise PermissionDenied("You do not have permission to update objects in this inventory.")
+            
+        serializer.save()
 
 
 class InventoryScopedAPIView(APIView):
