@@ -74,6 +74,17 @@
     "renameArea": "Rename area",
     "title": "Areas"
   },
+  "chests": {
+    "articleCount": "{{count}} articles",
+    "backToArea": "Back to area",
+    "confirmDelete": "Delete {{name}}?",
+    "empty": "No articles are stored in this chest yet.",
+    "errors": {
+      "delete": "Could not delete article.",
+      "load": "Could not load this chest."
+    },
+    "loading": "Loading chest..."
+  },
   "articles": {
     "page": {
       "areas": "Areas",
