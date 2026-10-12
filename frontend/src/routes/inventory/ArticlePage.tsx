@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch"
 import { removeFavorite } from "@/utils/favorites"
 import { getArticleIcon } from "@/components/inventory/article-icon-picker"
 import { ImageUploadField } from "@/components/inventory/image-upload-field"
+import { FullscreenImagePreview } from "@/components/inventory/fullscreen-image-preview"
 import { inventoryApi, type Area, type Article, type ArticleCategory, type CategoryField, type Chest, type Shelf } from "@/utils/api/inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 import { useTranslation } from "react-i18next"
@@ -157,9 +158,17 @@ export default function ArticlePage() {
         {/* Article Header */}
         <div className="mb-8 flex flex-col gap-5 border-b pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-primary/10 text-primary sm:size-12">
-              {imagePreview || getMediaUrl(article.image) ? <img src={imagePreview || getMediaUrl(article.image) || undefined} alt="" className="size-full object-cover" /> : (() => { const Icon = getArticleIcon(article.icon); return <Icon /> })()}
-            </span>
+            {imagePreview || getMediaUrl(article.image) ? (
+              <FullscreenImagePreview
+                imageSrc={imagePreview || getMediaUrl(article.image) || ""}
+                alt={article.name}
+                className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-primary/10 text-primary focus-visible:ring-3 focus-visible:ring-ring/50 sm:size-12"
+              />
+            ) : (
+              <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-primary/10 text-primary sm:size-12">
+                {(() => { const Icon = getArticleIcon(article.icon); return <Icon /> })()}
+              </span>
+            )}
             <div className="min-w-0">
               <p className="text-sm text-muted-foreground">{t("articles.page.headings.articleDetails")}</p>
               <h1 className="truncate text-2xl font-semibold tracking-tight">{article.name}</h1>

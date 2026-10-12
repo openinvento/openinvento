@@ -1,6 +1,7 @@
 import { useId, type ChangeEvent } from "react"
 import { FileImage, ImagePlus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { FullscreenImagePreview } from "@/components/inventory/fullscreen-image-preview"
 
 type ImageUploadFieldProps = {
   imageSrc: string | null
@@ -26,11 +27,20 @@ export function ImageUploadField({
   const inputId = useId()
 
   return (
-    <div className="overflow-hidden rounded-xl border border-dashed bg-muted/10">
+    <>
+      <div className="overflow-hidden rounded-xl border border-dashed bg-muted/10">
       <div className="flex items-center gap-3 p-2.5">
-        <div className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-lg border bg-background">
-          {imageSrc ? <img src={imageSrc} alt={alt} className="size-full object-cover" /> : <FileImage className="size-7 text-muted-foreground" />}
-        </div>
+        {imageSrc ? (
+          <FullscreenImagePreview
+            imageSrc={imageSrc}
+            alt={alt}
+            className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-lg border bg-background focus-visible:ring-3 focus-visible:ring-ring/50"
+          />
+        ) : (
+          <div className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-lg border bg-background">
+            <FileImage className="size-7 text-muted-foreground" />
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-2 justify-between pr-2">
             <p className="min-w-0 truncate text-sm font-medium">{fileName || (imageSrc ? alt : chooseLabel)}</p>
@@ -53,6 +63,7 @@ export function ImageUploadField({
         </div>
       </div>
       <input id={inputId} type="file" accept="image/jpeg,image/png" onChange={onChange} className="sr-only" />
-    </div>
+      </div>
+    </>
   )
 }
