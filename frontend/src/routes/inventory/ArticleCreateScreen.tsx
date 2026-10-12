@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router"
 import { useTranslation } from "react-i18next"
 import BaseScreen from "@/layouts/BaseScreen"
 import { ArticleIconPicker } from "@/components/inventory/article-icon-picker"
+import { ImageUploadField } from "@/components/inventory/image-upload-field"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -139,14 +140,17 @@ export default function ArticleCreateScreen() {
             {t("areas.detail.fields.stockTracking")}
           </label>
           <Field label={t("areas.detail.fields.icon")}><ArticleIconPicker value={selectedIcon} onChange={setSelectedIcon} /></Field>
-          <Field label="Image (optional)">
-            <input type="file" accept="image/jpeg,image/png" onChange={(event) => void chooseImage(event)} className="block w-full text-sm" />
-            {imagePreview && 
-            <div className="flex items-center gap-3">
-              <img src={imagePreview} alt="Selected article" className="size-16 rounded-lg border object-cover" />
-              <button type="button" className="text-sm text-muted-foreground hover:text-foreground" onClick={() => { setImage(null); setImagePreview(null) }}>Remove image</button>
-            </div>
-            }
+          <Field label={t("articles.page.fields.image")}>
+            <ImageUploadField
+              imageSrc={imagePreview}
+              fileName={image?.name}
+              alt={t("articles.page.fields.image")}
+              chooseLabel={t("articles.page.fields.chooseImage")}
+              replaceLabel={t("articles.page.fields.replaceImage")}
+              removeLabel={t("articles.page.fields.removeImage")}
+              onChange={(event) => void chooseImage(event)}
+              onRemove={() => { setImage(null); setImagePreview(null) }}
+            />
           </Field>
         </section>
         <section className="grid content-start gap-5 rounded-xl border bg-muted/15 p-5">

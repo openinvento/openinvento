@@ -89,9 +89,13 @@
         "area": "Area",
         "category": "Category",
         "chest": "Chest",
+        "chooseImage": "Choose image",
         "description": "Description",
+        "image": "Image (optional)",
         "name": "Name",
         "quantity": "Quantity",
+        "removeImage": "Remove",
+        "replaceImage": "Replace",
         "selectValue": "Select a value",
         "shelf": "Shelf",
         "stockTracking": "Stock tracking"

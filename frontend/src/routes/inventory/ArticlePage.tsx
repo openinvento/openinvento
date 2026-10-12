@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { removeFavorite } from "@/utils/favorites"
 import { getArticleIcon } from "@/components/inventory/article-icon-picker"
+import { ImageUploadField } from "@/components/inventory/image-upload-field"
 import { inventoryApi, type Area, type Article, type ArticleCategory, type CategoryField, type Chest, type Shelf } from "@/utils/api/inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 import { useTranslation } from "react-i18next"
@@ -203,9 +204,17 @@ export default function ArticlePage() {
                 />
                 {t("articles.page.fields.stockTracking")}
               </label>
-              <Field label="Image (optional)">
-                <input type="file" accept="image/jpeg,image/png" onChange={(event) => void chooseImage(event)} className="block w-full text-sm" />
-                {(imagePreview || article.image) && <div className="flex items-center gap-3"><img src={imagePreview || getMediaUrl(article.image) || undefined} alt="Article" className="size-16 rounded-lg border object-cover" /><button type="button" className="text-sm text-muted-foreground hover:text-foreground" onClick={removeImage}>Remove image</button></div>}
+              <Field label={t("articles.page.fields.image")}>
+                <ImageUploadField
+                  imageSrc={imagePreview || getMediaUrl(article.image) || null}
+                  fileName={image?.name}
+                  alt={t("articles.page.fields.image")}
+                  chooseLabel={t("articles.page.fields.chooseImage")}
+                  replaceLabel={t("articles.page.fields.replaceImage")}
+                  removeLabel={t("articles.page.fields.removeImage")}
+                  onChange={(event) => void chooseImage(event)}
+                  onRemove={removeImage}
+                />
               </Field>
             </div>
 
