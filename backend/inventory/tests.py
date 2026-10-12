@@ -1,6 +1,7 @@
 import base64
 import tempfile
 
+from django.test.client import MULTIPART_CONTENT, encode_multipart
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 
@@ -68,4 +69,22 @@ class ArticleImageTests(TestCase):
 
 		self.client.force_login(self.user)
 		self.assertEqual(self.client.get("/media/../db.sqlite3").status_code, 404)
+
+	def test_article_image_can_be_updated(self):
+		self.client.force_login(self.user)
+		article = Article.objects.create(name="Editable article", inventory=self.inventory)
+
+		response = self.client.patch(
+			f"/api/articles/{article.uuid}/",
+			encode_multipart(
+				"BoUnDaRyStRiNg",
+				{"image": SimpleUploadedFile("updated.png", ONE_PIXEL_PNG, content_type="image/png")},
+			),
+			content_type=MULTIPART_CONTENT,
+		)
+
+		self.assertEqual(response.status_code, 200)
+		article.refresh_from_db()
+		self.assertTrue(article.image.name.startswith("articles/"))
+		self.assertEqual(response.json()["image"], f"/media/{article.image.name}")
 
