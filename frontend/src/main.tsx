@@ -10,6 +10,7 @@ import SettingsPage from './routes/Settings.tsx'
 import InventorySettingsPage from './routes/InventorySettings.tsx'
 import AreasPage from './routes/inventory/AreasPage.tsx'
 import AreaDetailScreen from './routes/inventory/AreaDetailScreen.tsx'
+import ChestPage from './routes/inventory/ChestPage.tsx'
 import ArticleCreateScreen from './routes/inventory/ArticleCreateScreen.tsx'
 import ArticlePage from './routes/inventory/ArticlePage.tsx'
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -83,6 +84,10 @@ const router = createBrowserRouter([
       {
         path: "areas/:areaId",
         element: <AreaDetailScreen />,
+      },
+      {
+        path: "chests/:chestId",
+        element: <ChestPage />,
       },
       {
         path: "articles/:articleId",

@@ -148,7 +148,7 @@ export default function AreaDetailScreen() {
       {shelves.map((shelf) => {
         const isOpen = openShelves[shelf.uuid] !== false
         const sectionChests = chests.filter((chest) => chest.shelf === shelf.uuid)
-        const sectionArticles = articles.filter((article) => article.shelf === shelf.uuid)
+        const sectionArticles = articles.filter((article) => article.shelf === shelf.uuid && article.chest === null)
         return (
           <div key={shelf.uuid} className="rounded-2xl border bg-muted/15">
             <button className="flex w-full items-center gap-3 p-4 text-left" onClick={() => setOpenShelves((state) => ({ ...state, [shelf.uuid]: !isOpen }))}>
@@ -175,7 +175,7 @@ export default function AreaDetailScreen() {
 
             {isOpen && <div className="border-t p-4">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
-                {sectionChests.map((chest) => <ChestCard key={chest.uuid} name={chest.name} subtitle={t("areas.detail.articleCount", { count: articles.filter((article) => article.chest === chest.uuid).length })} onRename={() => setModal({ kind: "chest", item: chest })} onDelete={() => void remove("chests", chest.uuid, chest.name)} />)}
+                {sectionChests.map((chest) => <ChestCard key={chest.uuid} name={chest.name} subtitle={t("areas.detail.articleCount", { count: articles.filter((article) => article.chest === chest.uuid).length })} onOpen={() => navigate(`/app/chests/${chest.uuid}`)} onRename={() => setModal({ kind: "chest", item: chest })} onDelete={() => void remove("chests", chest.uuid, chest.name)} />)}
                 {sectionArticles.map((article) => <ArticleCard key={article.uuid} name={article.name} articleIcon={article.icon} articleImage={article.image} subtitle={t("areas.detail.inStock", { count: article.quantity })} badge={getLowStockBadge(article, t("areas.detail.lowStock"))} onOpen={() => navigate(`/app/articles/${article.uuid}`)} onRename={() => navigate(`/app/articles/${article.uuid}`)} onDelete={() => void remove("articles", article.uuid, article.name)} />)}
               </div>
               {sectionChests.length + sectionArticles.length === 0 && <p className="py-3 text-sm text-muted-foreground">{t("areas.detail.nothingStored")}</p>}
@@ -188,7 +188,13 @@ export default function AreaDetailScreen() {
         <div>
           <h2 className="mb-3 text-lg font-semibold">{t("areas.detail.otherItems")}</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
-            {chests.filter((chest) => chest.shelf === null).map((chest) => <ChestCard key={chest.uuid} name={chest.name} subtitle={t("areas.detail.articleCount", { count: articles.filter((article) => article.chest === chest.uuid).length })} onRename={() => setModal({ kind: "chest", item: chest })} onDelete={() => void remove("chests", chest.uuid, chest.name)} />)}
+            {chests.filter((chest) => chest.shelf === null).map((chest) => 
+            <ChestCard key={chest.uuid} name={chest.name} 
+              subtitle={t("areas.detail.articleCount", { count: articles.filter((article) => article.chest === chest.uuid).length })} 
+              onOpen={() => navigate(`/app/chests/${chest.uuid}`)} 
+              onRename={() => setModal({ kind: "chest", item: chest })} 
+              onDelete={() => void remove("chests", chest.uuid, chest.name)} 
+            />)}
           </div>
         </div>
       )}
