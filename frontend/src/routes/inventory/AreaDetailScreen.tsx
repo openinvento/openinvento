@@ -82,8 +82,10 @@ export default function AreaDetailScreen() {
         await inventoryApi.update(modal.kind === "shelf" ? "shelves" : "chests", modal.item.uuid, payload)
       }
       else {
-        await inventoryApi.create(modal.kind === "shelf" ? "shelves" : modal.kind === "chest" ? "chests" : "articles", payload); setModal(null); await load() 
+        await inventoryApi.create(modal.kind === "shelf" ? "shelves" : modal.kind === "chest" ? "chests" : "articles", payload)
       }
+      setModal(null)
+      await load()
     }
     catch (reason) { 
       setError(reason instanceof Error ? reason.message : t("areas.detail.errors.save")) 
