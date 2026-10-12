@@ -170,7 +170,11 @@ export default function ArticleCreateScreen() {
           </Field>
           <Field label={t("areas.detail.fields.shelf")}>
             <Select name="shelf" value={selectedShelf} onValueChange={(value) => setSelectedShelf(value ?? "")}>
-              <SelectTrigger className="w-full"><SelectValue placeholder={t("areas.detail.notOnShelf")} /></SelectTrigger>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={t("areas.detail.notOnShelf")}>
+                  {selectedShelf ? shelves.find((shelf) => shelf.uuid === selectedShelf)?.name ?? selectedShelf : t("areas.detail.notOnShelf")}
+                </SelectValue>
+              </SelectTrigger>
               <SelectContent><SelectItem value="">{t("areas.detail.notOnShelf")}</SelectItem>{shelves.map((shelf) => <SelectItem key={shelf.uuid} value={shelf.uuid}>{shelf.name}</SelectItem>)}</SelectContent>
             </Select>
           </Field>
