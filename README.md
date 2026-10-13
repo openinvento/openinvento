@@ -20,18 +20,31 @@ OpenInvento - Selfhosted Inventory Manager
 
 ## Features
 
-## App Screenshots
--- Coming soon -- 
+## Screenshots
+
+Here are some example screenshots:
+
+### Desktop Views
+
 <p align="center">
-  <img alt="Screenshot 1" src="docs/Screenshot_home_light.png" width="100%" />
-  <br / >
-  <img alt="Screenshot 2" src="docs/Screenshot_gallery_light.png" width="49.6%" />
-  <img alt="Screenshot 3y" src="docs/Screenshot_tv_gallery_light.png" width="49.6%" />
+  <img src="https://raw.githubusercontent.com/openinvento/openinvento/refs/heads/main/assets/screenshots/start_screen.png" width="45%" alt="Start Screen" />
+  <img src="https://raw.githubusercontent.com/openinvento/openinvento/refs/heads/main/assets/screenshots/areas_screen.png" width="45%" alt="Areas Overview" />
 </p>
-The UI is also available in dark mode and is fully responsive for mobile devices.
-Gallery example images from https://pixabay.com/
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/openinvento/openinvento/refs/heads/main/assets/screenshots/areadetail_screen.png" width="45%" alt="Area Details" />
+  <img src="https://raw.githubusercontent.com/openinvento/openinvento/refs/heads/main/assets/screenshots/article_screen.png" width="45%" alt="Article Details" />
+</p>
 
+---
+
+### Mobile Views
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/openinvento/openinvento/refs/heads/main/assets/screenshots/start_mobile_screen.png" width="30%" alt="Start Screen Mobile" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://raw.githubusercontent.com/openinvento/openinvento/refs/heads/main/assets/screenshots/areas_mobile_screen.png" width="30%" alt="Areas Mobile" />
+</p>
 
 # Installation
 
