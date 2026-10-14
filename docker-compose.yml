@@ -7,7 +7,7 @@ services:
     environment:
       DATA_DIRECTORY: /data
       APP_URL: ${APP_URL} # Public origin (e.g. example.com or https://example.com:8443) -> Include the scheme (http/s) and a port if you are not using the default ports (80 and 443)
-      #APP_URLS: ${APP_URLS} # Optional comma-separated origins, same format as APP_URL
+      #APP_URLS: ${APP_URLS} # Optional comma-separated origins, same format as APP_URL - Use only APP_URL OR APP_URLS, not both
       INIT_ADMIN_USERNAME: ${INIT_ADMIN_USERNAME} # Initial administrator username; required when CREATE_INIT_ADMIN is true
       INIT_ADMIN_PASSWORD: ${INIT_ADMIN_PASSWORD} # Initial administrator password; change it on first login
       CREATE_INIT_ADMIN: ${CREATE_INIT_ADMIN:-true} # Set to false to disable initial administrator creation
