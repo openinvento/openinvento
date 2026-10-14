@@ -112,6 +112,16 @@
         "shelf": "Shelf",
         "stockTracking": "Stock tracking"
       },
+      "attachments": {
+        "title": "Files and attachments",
+        "add": "Add file",
+        "uploading": "Uploading...",
+        "empty": "No files attached yet.",
+        "uploadError": "Could not upload the file.",
+        "deleteError": "Could not remove the file.",
+        "download": "Download {{name}}",
+        "remove": "Remove {{name}}"
+      },
       "headings": {
         "articleDetails": "Article Details",
         "general": "General",
