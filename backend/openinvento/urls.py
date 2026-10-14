@@ -4,9 +4,10 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from inventory import urls as inventory_api_urls
 
-from .views import protected_media_view
+from .views import health_view, protected_media_view
 
 urlpatterns = [
+    path("api/health", health_view, name="health"),
     path('admin/', admin.site.urls),
     
     path("api/", include(inventory_api_urls)),
