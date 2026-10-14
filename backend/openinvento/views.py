@@ -1,12 +1,16 @@
 from pathlib import Path
 
 from django.conf import settings
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, JsonResponse
 from inventory.models import Article, ArticleAttachment
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 #TODO: Add option to serve user uploads through Nginx or a connected S3 storage bucket
+
+def health_view(request):
+    """Return HTTP 200 for health checks."""
+    return JsonResponse({'status': 'healthy'}, status=200)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
