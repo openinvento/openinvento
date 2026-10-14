@@ -7,6 +7,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.utils.text import slugify
 
 
@@ -126,6 +128,18 @@ class ArticleAttachment(models.Model):
 
     def __str__(self):
         return self.original_name
+
+
+@receiver(pre_delete, sender=Article)
+def delete_article_image_file(sender, instance, **kwargs):
+    if instance.image:
+        instance.image.delete(save=False)
+
+
+@receiver(pre_delete, sender=ArticleAttachment)
+def delete_article_attachment_file(sender, instance, **kwargs):
+    if instance.file:
+        instance.file.delete(save=False)
 
 class ArticleCategory(InventoryComponent):
     name = models.CharField(max_length=100)
