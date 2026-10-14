@@ -55,17 +55,24 @@ An example `.env` file is [provided in the repository](https://github.com/openin
 
 
 ## Manual Docker Installation
-docker volume create frametv_uploads
-docker volume create frametv_db
+docker volume create openinvento-data
 
 ```
 docker run -d \
-  --name frametv \
-  -v frametv_uploads:/app/uploads \
-  -v frametv_db:/app/instance \
-  -p 8000:8000 \
+  --name openinvento \
+  --restart unless-stopped \
+  -v openinvento-data:/data \
+  -p 8080:80 \
+  -e DATA_DIRECTORY=/data \
+  -e APP_URL=http://localhost:8080 \
+  -e INIT_ADMIN_USERNAME=admin \
+  -e INIT_ADMIN_PASSWORD=change-this-password \
+  -e CREATE_INIT_ADMIN=true \
+  -e ENABLE_SIGNUP=false \
+  -e SECRET_KEY=replace-with-a-long-random-secret \
   ghcr.io/openinvento/openinvento:latest
 ```
+Once the container is running, open [http://localhost:8080](http://localhost:8080) in your browser and log in with your initial administrator credentials.
 
 
 # Update
@@ -87,7 +94,7 @@ The Docker deployment reads these variables from the environment or a `.env` fil
 | --- | --- | --- | --- |
 | `APP_URL` | Recommended | None | Public URL where OpenInvento is accessible, used for CSRF protection. |
 | `APP_URLS` | No | None | Comma-separated additional trusted application URLs. |
-| `SECRET_KEY` | Recommended | Unsafe fallback | Secret key used by Django. Set a long random value in production. |
+| `SECRET_KEY` | Recommended | Unsafe fallback | Secret key used by Django. Set a long random value in production. You can generate one with `openssl rand -hex 32`. |
 | `DATA_DIRECTORY` | No | `/data` in Docker | Directory for the database and uploaded files. |
 | `INIT_ADMIN_USERNAME` | Required when enabled | None | Username for the initial administrator account. |
 | `INIT_ADMIN_PASSWORD` | Required when enabled | None | Password for the initial administrator account. It must be changed on first login. |
