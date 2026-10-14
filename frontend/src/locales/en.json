@@ -1,4 +1,19 @@
 {
+  "navActions": {
+    "area": "area",
+    "chest": "chest",
+    "confirmDelete": "Delete {{name}}? Its contents may be deleted too.",
+    "delete": "Delete",
+    "errors": {
+      "delete": "Could not delete this item.",
+      "rename": "Could not rename this item."
+    },
+    "name": "Name",
+    "moreActions": "More actions",
+    "noActions": "No actions available.",
+    "rename": "Rename",
+    "renameTitle": "Rename {{kind}}"
+  },
   "accounts": {
     "logoutBtn": "Logout"
   },

@@ -1,4 +1,19 @@
 {
+  "navActions": {
+    "area": "Bereich",
+    "chest": "Kiste",
+    "confirmDelete": "{{name}} löschen? Der Inhalt kann ebenfalls gelöscht werden.",
+    "delete": "Löschen",
+    "errors": {
+      "delete": "Element konnte nicht gelöscht werden.",
+      "rename": "Element konnte nicht umbenannt werden."
+    },
+    "name": "Name",
+    "moreActions": "Weitere Aktionen",
+    "noActions": "Keine Aktionen verfügbar.",
+    "rename": "Umbenennen",
+    "renameTitle": "{{kind}} umbenennen"
+  },
   "inventory": {
     "categories": {
       "food": "Lebensmittel",
