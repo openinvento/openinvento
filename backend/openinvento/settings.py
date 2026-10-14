@@ -34,7 +34,7 @@ except ImportError:
 else:
     HAS_CORSHEADERS = True
 
-envDebugMode = os.getenv("DEBUG")
+DEBUG = os.getenv("DEBUG", "false").strip().lower() in {"1", "true", "yes", "on"}
 envSecretKey = os.getenv("SECRET_KEY")
 
 
@@ -82,10 +82,6 @@ ENABLE_SIGNUP = os.getenv("ENABLE_SIGNUP", "false").strip().lower() in {
 ALLOW_INVENTORY_USER_INVITES = os.getenv("ALLOW_INVENTORY_USER_INVITES", "true").strip().lower() in {
     "1", "true", "yes", "on"
 }
-
-DEBUG = False
-if envDebugMode:
-    DEBUG = True
 
 
 def _csv_env(name, default):
