@@ -3,10 +3,12 @@ import uuid
 from account_auth.models import CustomUser
 from account_auth.serializers import UserSerializer
 from django.conf import settings
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Count
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -16,6 +18,7 @@ from .code_utils import generate_codes_pdf
 from .models import (
     Area,
     Article,
+    ArticleAttachment,
     ArticleCategory,
     CategoryField,
     Chest,
@@ -27,6 +30,7 @@ from .serializers import (
     AreaSerializer,
     ArticleCategorySerializer,
     ArticleSerializer,
+    ArticleAttachmentSerializer,
     CategoryFieldSerializer,
     ChestSerializer,
     InventorySerializer,
@@ -248,6 +252,53 @@ class ArticleViewSet(InventoryScopedViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     select_related_fields = ("inventory", "area", "shelf", "chest", "category")
+
+
+class ArticleAttachmentsView(InventoryScopedAPIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get_article(self, request):
+        article_uuid = request.query_params.get("article")
+        if not article_uuid:
+            return None
+        return get_object_or_404(
+            Article.objects.filter(inventory__in=self.get_accessible_inventories()), uuid=article_uuid
+        )
+
+    def get(self, request):
+        article = self.get_article(request)
+        if article is None:
+            return Response({"article": "An article UUID is required."}, status=400)
+        items = article.attachments.order_by("created_at")
+        return Response(ArticleAttachmentSerializer(items, many=True, context={"request": request}).data)
+
+    def post(self, request):
+        article = self.get_article(request)
+        if article is None:
+            return Response({"article": "An article UUID is required."}, status=400)
+        uploaded = request.FILES.get("file")
+        if uploaded is None:
+            return Response({"file": "A file is required."}, status=400)
+        attachment = ArticleAttachment(article=article, original_name=uploaded.name[:255], file=uploaded)
+        try:
+            attachment.full_clean()
+        except DjangoValidationError as error:
+            return Response({"file": error.messages}, status=400)
+        attachment.save()
+        return Response(ArticleAttachmentSerializer(attachment, context={"request": request}).data, status=201)
+
+
+    def delete(self, request):
+        attachment_id = request.query_params.get("id")
+        if not attachment_id:
+            return Response({"id": "An attachment ID is required."}, status=400)
+        attachment = get_object_or_404(
+            ArticleAttachment.objects.filter(article__inventory__in=self.get_accessible_inventories()),
+            pk=attachment_id,
+        )
+        attachment.file.delete(save=False)
+        attachment.delete()
+        return Response(status=204)
 
 
 class SearchView(InventoryScopedAPIView):

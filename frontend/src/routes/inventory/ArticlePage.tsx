@@ -1,5 +1,5 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react"
-import { ArrowLeft, ChevronDown, Save } from "lucide-react"
+import { useEffect, useId, useState, type ChangeEvent, type FormEvent } from "react"
+import { ArrowLeft, ChevronDown, Download, FileText, Paperclip, Save, Trash2, Upload } from "lucide-react"
 import { Link, useBlocker, useNavigate, useParams } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -7,7 +7,7 @@ import { removeFavorite } from "@/utils/favorites"
 import { getArticleIcon } from "@/components/inventory/article-icon-picker"
 import { ImageUploadField } from "@/components/inventory/image-upload-field"
 import { FullscreenImagePreview } from "@/components/inventory/fullscreen-image-preview"
-import { inventoryApi, type Area, type Article, type ArticleCategory, type CategoryField, type Chest, type Shelf } from "@/utils/api/inventory"
+import { inventoryApi, type Area, type Article, type ArticleAttachment, type ArticleCategory, type CategoryField, type Chest, type Shelf } from "@/utils/api/inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 import { useTranslation } from "react-i18next"
 import { compressArticleImage } from "@/utils/article-image"
@@ -37,6 +37,9 @@ export default function ArticlePage() {
   const [image, setImage] = useState<File | null>(null)
   const [imageChanged, setImageChanged] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [attachments, setAttachments] = useState<ArticleAttachment[]>([])
+  const [attachmentBusy, setAttachmentBusy] = useState(false)
+  const attachmentInputId = useId()
   const [unsavedChanges, setUnsavedChanges] = useState(false)
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
   const blocker = useBlocker(unsavedChanges)
@@ -68,6 +71,7 @@ export default function ArticlePage() {
       const [allArticles, nextAreas, nextShelves, nextChests, nextCategories, nextFields] = await Promise.all([inventoryApi.listArticles(), inventoryApi.listAreas(), inventoryApi.listShelves(), inventoryApi.listChests(), inventoryApi.listCategories(), inventoryApi.listCategoryFields()]); 
       const nextArticle = allArticles.find((item) => item.uuid === articleId) ?? null
       setArticle(nextArticle)
+      if (nextArticle) setAttachments(await inventoryApi.listArticleAttachments(nextArticle.uuid))
       setStockTracking(nextArticle?.stock_tracking ?? false)
       setSelectedArea(nextArticle?.area ?? null)
       setSelectedCategory(nextArticle?.category ?? null)
@@ -151,6 +155,31 @@ export default function ArticlePage() {
     setImageChanged(true)
   }
 
+  async function uploadAttachment(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ""
+    if (!file || !article) return
+    setAttachmentBusy(true)
+    setError("")
+    try {
+      const uploaded = await inventoryApi.uploadArticleAttachment(article.uuid, file)
+      setAttachments((current) => [...current, uploaded])
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : t("articles.page.attachments.uploadError"))
+    } finally {
+      setAttachmentBusy(false)
+    }
+  }
+
+  async function deleteAttachment(attachment: ArticleAttachment) {
+    try {
+      await inventoryApi.removeArticleAttachment(attachment.id)
+      setAttachments((current) => current.filter((item) => item.id !== attachment.id))
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : t("articles.page.attachments.deleteError"))
+    }
+  }
+
   async function remove() {
     if (!article || !window.confirm(t("articles.page.confirmDelete", { name: article.name }))) return;
     try {
@@ -202,10 +231,14 @@ export default function ArticlePage() {
             </div>
           </div>
           
-          <div className="flex sm:shrink-0">
-            <Button className="w-full sm:w-auto" variant="destructive" size="sm" onClick={() => void remove()}>
+          <div className="flex gap-2 sm:shrink-0">
+            <Button className="flex-1 sm:flex-none px-4 py-4" variant="destructive" onClick={() => void remove()}>
               {t("articles.page.delete")}
             </Button>
+            <Button className="flex-1 sm:flex-none px-8 py-4" type="submit" form="article-details-form" disabled={saving}>
+              <Save /> {saving ? t("articles.page.saving") : t("articles.page.saveChanges")}
+            </Button>
+
           </div>
         </div>
 
@@ -215,7 +248,7 @@ export default function ArticlePage() {
           </p>
         )}
 
-        <form className="flex flex-col gap-6" onChange={() => setUnsavedChanges(true)} onSubmit={save}>
+        <form id="article-details-form" className="flex flex-col gap-6" onChange={() => setUnsavedChanges(true)} onSubmit={save}>
           {/* Core Details and Location */}
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="grid content-start gap-4 rounded-xl border bg-muted/15 p-4 sm:p-5">
@@ -393,14 +426,29 @@ export default function ArticlePage() {
             )}
           </div>
 
-          {/* Form Actions */}
-          <div className="flex justify-end border-t pt-6">
-            <Button className="w-full p-5 sm:w-auto" type="submit" disabled={saving}>
-              <Save /> {saving ? t("articles.page.saving") : t("articles.page.saveChanges")}
-            </Button>
-          </div>
-
         </form>
+
+        <section className="mt-8 grid gap-4 rounded-xl border bg-muted/15 p-4 sm:p-5" aria-labelledby="article-attachments-heading">
+          <div className="flex items-center justify-between gap-3">
+            <h2 id="article-attachments-heading" className="flex items-center gap-2 text-sm font-semibold"><Paperclip className="size-4" />{t("articles.page.attachments.title")}</h2>
+            <label htmlFor={attachmentInputId} className="inline-flex h-8 cursor-pointer items-center gap-2 rounded-lg bg-secondary px-3 text-sm font-medium text-secondary-foreground hover:bg-secondary/80">
+              <Upload className="size-4" />{attachmentBusy ? t("articles.page.attachments.uploading") : t("articles.page.attachments.add")}
+            </label>
+            <input id={attachmentInputId} type="file" accept=".pdf,.doc,.docx,.odt,.txt,.rtf,.xls,.xlsx,.csv,.ppt,.pptx,.zip" onChange={(event) => void uploadAttachment(event)} className="sr-only" disabled={attachmentBusy} />
+          </div>
+          {attachments.length === 0 ? <p className="text-sm text-muted-foreground">{t("articles.page.attachments.empty")}</p> : (
+            <ul className="grid gap-2">
+              {attachments.map((attachment) => (
+                <li key={attachment.id} className="flex min-w-0 items-center gap-3 rounded-lg border bg-background p-3">
+                  <FileText className="size-5 shrink-0 text-muted-foreground" />
+                  <span className="min-w-0 flex-1 truncate text-sm">{attachment.original_name}<span className="ml-2 text-xs text-muted-foreground">{(attachment.size / 1024).toFixed(0)} KB</span></span>
+                  <a className="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground" href={getMediaUrl(attachment.url) ?? undefined} download aria-label={t("articles.page.attachments.download", { name: attachment.original_name })}><Download className="size-4" /></a>
+                  <button type="button" className="rounded-md p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={() => void deleteAttachment(attachment)} aria-label={t("articles.page.attachments.remove", { name: attachment.original_name })}><Trash2 className="size-4" /></button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
     </section>
   );

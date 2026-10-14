@@ -17,6 +17,7 @@ export type Article = EntityBase & {
   custom_fields: Record<string, string | number | boolean | null>
   category_fields: CategoryField[]
 }
+export type ArticleAttachment = { id: number; original_name: string; url: string; size: number; created_at: string }
 export type CategoryField = EntityBase & { key: string; label: string; field_type: string; options: string[]; category: string | null }
 export type ArticleCategory = EntityBase & { fields: CategoryField[]; category_fields?: CategoryField[] }
 export type DashboardData = {
@@ -103,6 +104,13 @@ export const inventoryApi = {
   listShelves: () => fetchData<Shelf[]>(scopedPath("/api/shelves/")),
   listChests: () => fetchData<Chest[]>(scopedPath("/api/chests/")),
   listArticles: () => fetchData<Article[]>(scopedPath("/api/articles/")),
+  listArticleAttachments: (article: string) => fetchData<ArticleAttachment[]>(`/api/article-attachments/?article=${encodeURIComponent(article)}`),
+  uploadArticleAttachment: (article: string, file: File) => {
+    const payload = new FormData()
+    payload.append("file", file)
+    return postData<ArticleAttachment>(`/api/article-attachments/?article=${encodeURIComponent(article)}`, payload)
+  },
+  removeArticleAttachment: (id: number) => deleteData<void>(`/api/article-attachments/?id=${id}`),
   listCategories: () => fetchData<ArticleCategory[]>(scopedPath("/api/article-categories/")),
   listCategoryFields: () => fetchData<CategoryField[]>(scopedPath("/api/category-fields/")),
   create: <T>(kind: EntityPath, payload: CreatePayload) => postData<T>(`/api/${kind}/`, payload),

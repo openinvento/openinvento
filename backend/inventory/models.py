@@ -7,6 +7,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.utils.text import slugify
 
 
@@ -20,6 +22,11 @@ def article_image_upload_path(instance, filename):
         file_ext = ".jpg"
     new_filename = f"{uuid.uuid4()}{file_ext}"  
     return os.path.join("articles", new_filename)
+
+def article_attachment_upload_path(instance, filename):
+    file_ext = os.path.splitext(os.path.basename(filename))[1].lower()
+    safe_name = slugify(os.path.splitext(os.path.basename(filename))[0])[:80] or "attachment"
+    return os.path.join("article-attachments", str(instance.article.uuid), f"{uuid.uuid4()}-{safe_name}{file_ext}")
 
 def generate_random_code(length=10):
     characters = string.ascii_letters + string.digits
@@ -108,6 +115,31 @@ class Article(InventoryComponent):
 
     def __str__(self):
         return f"{self.name} ({self.quantity}x)"
+
+
+class ArticleAttachment(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="attachments")
+    file = models.FileField(
+        upload_to=article_attachment_upload_path,
+        validators=[FileExtensionValidator(allowed_extensions=["pdf", "doc", "docx", "odt", "txt", "rtf", "xls", "xlsx", "csv", "ppt", "pptx", "zip"]), validate_file_size],
+    )
+    original_name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.original_name
+
+
+@receiver(pre_delete, sender=Article)
+def delete_article_image_file(sender, instance, **kwargs):
+    if instance.image:
+        instance.image.delete(save=False)
+
+
+@receiver(pre_delete, sender=ArticleAttachment)
+def delete_article_attachment_file(sender, instance, **kwargs):
+    if instance.file:
+        instance.file.delete(save=False)
 
 class ArticleCategory(InventoryComponent):
     name = models.CharField(max_length=100)
