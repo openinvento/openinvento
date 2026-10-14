@@ -300,7 +300,7 @@ class ArticleAttachmentSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_url(self, obj):
-        return reverse("media", kwargs={"path": obj.file.name})
+        return reverse("media", kwargs={"path": obj.file.name}) # Use the media view to serve the file
 
 
 class CategoryFieldSerializer(InventoryScopedSerializer):
