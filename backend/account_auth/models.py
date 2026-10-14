@@ -1,10 +1,21 @@
 import uuid
 
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 
 
+class CustomUserManager(UserManager):
+    @classmethod
+    def normalize_email(cls, email):
+        # Django's BaseUserManager.normalize_email() converts None to ''.
+        # Preserve NULL for this nullable, unique field.
+        normalized_email = super().normalize_email(email)
+        return normalized_email or None
+
+
 class CustomUser(AbstractUser):
+    objects = CustomUserManager()
+
     uuid = models.UUIDField(null=False, blank=False, default=uuid.uuid4, unique=True)
     email = models.EmailField(unique=True, blank=True, null=True, default=None) # Depends on email login is enabled/ disabled
     password = models.CharField(max_length=300)
