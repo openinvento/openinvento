@@ -6,6 +6,7 @@ from rest_framework.reverse import reverse
 from .models import (
     Area,
     Article,
+    ArticleAttachment,
     ArticleCategory,
     CategoryField,
     Chest,
@@ -287,6 +288,19 @@ class ArticleSerializer(InventoryScopedSerializer):
             raise serializers.ValidationError({"custom_fields": "Expected an object."})
 
         return attrs
+
+
+class ArticleAttachmentSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+    size = serializers.IntegerField(source="file.size", read_only=True)
+
+    class Meta:
+        model = ArticleAttachment
+        fields = ("id", "original_name", "url", "size", "created_at")
+        read_only_fields = fields
+
+    def get_url(self, obj):
+        return reverse("media", kwargs={"path": obj.file.name})
 
 
 class CategoryFieldSerializer(InventoryScopedSerializer):
