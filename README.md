@@ -86,6 +86,11 @@ Docker Compose (recommended):
 
 # Configuration
 
+## Documentation
+
+#### Health check endpoint
+The application provides a health check endpoint at `/api/health`. It returns a JSON response with status 200 indicating the health of the OpenInvento installation.
+
 ## Env Variables
 
 The Docker deployment reads these variables from the environment or a `.env` file:
