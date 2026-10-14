@@ -92,8 +92,8 @@ The Docker deployment reads these variables from the environment or a `.env` fil
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
-| `APP_URL` | Recommended | None | Public URL where OpenInvento is accessible, used for CSRF protection. |
-| `APP_URLS` | No | None | Comma-separated additional trusted application URLs. |
+| `APP_URL` | Recommended | None | Main public application URL. Accepts `https://example.com`, `http://localhost:8080`, or a bare `example.com[:port]` host. Bare hosts default to `http://`. |
+| `APP_URLS` | No | None | Comma-separated additional application URLs, with the same format as `APP_URL`. |
 | `SECRET_KEY` | Recommended | Unsafe fallback | Secret key used by Django. Set a long random value in production. You can generate one with `openssl rand -hex 32`. |
 | `DATA_DIRECTORY` | No | `/data` in Docker | Directory for the database and uploaded files. |
 | `INIT_ADMIN_USERNAME` | Required when enabled | None | Username for the initial administrator account. |
@@ -102,6 +102,8 @@ The Docker deployment reads these variables from the environment or a `.env` fil
 | `ENABLE_SIGNUP` | No | `false` | Set to `true` to enable public account signup. |
 
 The initial administrator is created after migrations only when the database contains no users. After the first login, the user will be prompted to change their password.
+
+`APP_URL` and `APP_URLS` are used to configure both Django `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`. Include a port in the value when the public address uses a non-standard port; the port is kept for CSRF origin checks and automatically omitted from `ALLOWED_HOSTS`. Use `https://` for HTTPS addresses so Django receives the correct CSRF origin scheme. Paths are ignored; supply the site origin only. For example: `APP_URL=example.com` or `APP_URLS=example.com,https://admin.example.com:8443`.
 
 
 

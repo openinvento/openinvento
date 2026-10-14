@@ -96,11 +96,34 @@ def _csv_env(name, default):
     return [item.strip() for item in raw_value.split(",") if item.strip()]
 
 
-def _host_from_url(value):
-    if value.startswith(("http://", "https://")):
-        return urlsplit(value).netloc
+def _normalize_app_url(value):
+    """Return an origin from a URL or host[:port], defaulting bare hosts to HTTP."""
+    value = value.strip()
+    if not value:
+        return ""
 
-    return value.split("/", 1)[0]
+    if "://" not in value:
+        value = "http://" + value
+    parsed = urlsplit(value)
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        raise ValueError(
+            f"Invalid application URL {value!r}: use a hostname with optional http:// or https://"
+        )
+    # An origin has no path, query, or fragment. Keep an explicitly supplied port.
+    return f"{parsed.scheme}://{parsed.netloc}"
+
+
+def _host_from_url(value):
+    """Return the host Django expects in ALLOWED_HOSTS (no scheme or port)."""
+    candidate = value if "://" in value else "//" + value
+    parsed = urlsplit(candidate)
+    hostname = parsed.hostname
+    if hostname is None:
+        return value.split("/", 1)[0]
+    # Django expects IPv6 hosts in ALLOWED_HOSTS to retain their brackets.
+    if ":" in hostname:
+        return f"[{hostname}]"
+    return hostname
 
 
 INSTALLED_APPS = [
@@ -132,9 +155,10 @@ MIDDLEWARE = [
     'django_ratelimit.middleware.RatelimitMiddleware',
 ]
 
-APP_URL = os.getenv("APP_URL")
-# Optional: Allow multiple app URLs (comma-separated) for CORS and CSRF trusted origins
-
+# APP_URL and APP_URLS accept full http(s) URLs or bare host[:port] values.
+# Bare hosts default to http; ports are retained for CSRF origins and removed
+# when deriving ALLOWED_HOSTS, which matches request Host values by hostname.
+APP_URL = os.getenv("APP_URL", "").strip()
 APP_URLS = _csv_env("APP_URLS", [])
 if not APP_URL and not APP_URLS:
     logger.warning(
@@ -145,14 +169,12 @@ if not APP_URL and not APP_URLS:
 allowed_hosts_env = _csv_env("ALLOWED_HOSTS", ["localhost", "127.0.0.1", "[::1]", "testserver"])
 
 ALLOWED_HOSTS = [_host_from_url(host) for host in allowed_hosts_env]
-if APP_URLS:
-    for url in APP_URLS:
-        host = _host_from_url(url)
-        if host and host not in ALLOWED_HOSTS:
-            ALLOWED_HOSTS.append(host)
-if APP_URL:
-    host = _host_from_url(APP_URL)
-    if host not in ALLOWED_HOSTS:
+
+APP_URLS = [url for url in (_normalize_app_url(item) for item in APP_URLS) if url]
+APP_URL = _normalize_app_url(APP_URL) if APP_URL else ""
+for url in ([APP_URL] if APP_URL else []) + APP_URLS:
+    host = _host_from_url(url)
+    if host and host not in ALLOWED_HOSTS:
         ALLOWED_HOSTS.append(host)
 
 if HAS_CORSHEADERS:
@@ -167,21 +189,7 @@ if HAS_CORSHEADERS:
     )
 
 if APP_URL or APP_URLS:
-    if APP_URL and not APP_URL.startswith(("http://", "https://")):
-        APP_URL = "http://" + APP_URL
-
-    origins = []
-    if APP_URL:
-        origins.append(APP_URL)
-    if APP_URLS:
-        origins.extend(APP_URLS)
-
-    CSRF_TRUSTED_ORIGINS = []
-    for url in origins:
-        if url:
-            if not url.startswith(("http://", "https://")):
-                url = "http://" + url
-            CSRF_TRUSTED_ORIGINS.append(url)
+    CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(([APP_URL] if APP_URL else []) + APP_URLS))
 else:
     CSRF_TRUSTED_ORIGINS = []
     logger.warning(
