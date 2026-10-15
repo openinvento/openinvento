@@ -1,6 +1,7 @@
 from urllib.parse import urlsplit
 
 from django.conf import settings
+from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
@@ -98,11 +99,6 @@ class AreaSerializer(InventoryScopedSerializer):
         fields = ("uuid", "identifier", "inventory", "created_at", "updated_at", "name")
         read_only_fields = ("uuid", "created_at", "updated_at")
 
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        return attrs
-
-
 class ShelfSerializer(InventoryScopedSerializer):
     area = serializers.PrimaryKeyRelatedField(queryset=Area.objects.none())
 
@@ -165,13 +161,20 @@ class ChestSerializer(InventoryScopedSerializer):
         if area is None:
             raise serializers.ValidationError({"area": "Area is required."})
 
-        if shelf is not None:
-            if shelf.area_id != area.uuid:
-                raise serializers.ValidationError({"shelf": "Shelf must belong to the selected area."})
+        if shelf is not None and shelf.area_id != area.uuid:
+            raise serializers.ValidationError({"shelf": "Shelf must belong to the selected area."})
 
         if parent_chest is not None:
-            if self.instance is not None and parent_chest.pk == self.instance.pk:
-                raise serializers.ValidationError({"parent_chest": "A chest cannot be its own parent."})
+            if self.instance is not None:
+                ancestor = parent_chest
+                visited = set()
+                while ancestor is not None and ancestor.pk not in visited:
+                    if ancestor.pk == self.instance.pk:
+                        raise serializers.ValidationError(
+                            {"parent_chest": "A chest cannot be its own ancestor."}
+                        )
+                    visited.add(ancestor.pk)
+                    ancestor = ancestor.parent_chest
             if parent_chest.area_id != area.uuid:
                 raise serializers.ValidationError(
                     {"parent_chest": "Parent chest must belong to the selected area."}
@@ -189,12 +192,8 @@ class ArticleCategorySerializer(InventoryScopedSerializer):
         read_only_fields = ("uuid", "identifier", "created_at", "updated_at")
 
     def get_category_fields(self, obj):
-        return CategoryFieldSerializer(obj.fields.all(), many=True).data
-
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        return attrs
-
+        fields = CategoryField.objects.filter(inventory=obj.inventory, category=obj)
+        return CategoryFieldSerializer(fields, many=True).data
 
 class ArticleSerializer(InventoryScopedSerializer):
     identifier = serializers.CharField(required=False, allow_blank=True, max_length=30)
@@ -241,7 +240,9 @@ class ArticleSerializer(InventoryScopedSerializer):
             return CategoryFieldSerializer(
                 CategoryField.objects.filter(inventory=obj.inventory, category__isnull=True), many=True
             ).data
-        fields = CategoryField.objects.filter(inventory=obj.inventory, category__isnull=True) | obj.category.fields.all()
+        fields = CategoryField.objects.filter(inventory=obj.inventory).filter(
+            Q(category__isnull=True) | Q(category=obj.category)
+        )
         return CategoryFieldSerializer(fields, many=True).data
 
     def get_image(self, obj):
@@ -260,9 +261,8 @@ class ArticleSerializer(InventoryScopedSerializer):
         shelf = attrs.get("shelf") if "shelf" in attrs else getattr(self.instance, "shelf", None)
         chest = attrs.get("chest") if "chest" in attrs else getattr(self.instance, "chest", None)
 
-        if shelf is not None:
-            if area is not None and shelf.area_id != area.uuid:
-                raise serializers.ValidationError({"shelf": "Shelf must belong to the selected area."})
+        if shelf is not None and area is not None and shelf.area_id != area.uuid:
+            raise serializers.ValidationError({"shelf": "Shelf must belong to the selected area."})
 
         if chest is not None:
             if area is not None and chest.area_id != area.uuid:
@@ -287,7 +287,8 @@ class ArticleAttachmentSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_url(self, obj):
-        return reverse("media", kwargs={"path": obj.file.name}) # Use the media view to serve the file
+        media_path = reverse("media", kwargs={"path": obj.file.name})
+        return _trusted_media_url(self.context.get("request"), media_path)
 
 
 class CategoryFieldSerializer(InventoryScopedSerializer):
@@ -308,6 +309,3 @@ class CategoryFieldSerializer(InventoryScopedSerializer):
         super().__init__(*args, **kwargs)
         self.fields["category"].queryset = self._inventory_queryset(ArticleCategory)
 
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        return attrs

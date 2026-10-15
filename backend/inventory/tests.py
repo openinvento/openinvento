@@ -1,14 +1,14 @@
 import base64
 import tempfile
 
-from django.test.client import MULTIPART_CONTENT, encode_multipart
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
+from django.test.client import MULTIPART_CONTENT, encode_multipart
 from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser
 
-from .models import Article, ArticleAttachment, ArticleCategory, Area, CategoryField, Chest, Inventory, Shelf
+from .models import Article, ArticleAttachment, ArticleCategory, Area, Chest, Inventory, Shelf
 
 
 ONE_PIXEL_PNG = base64.b64decode(
