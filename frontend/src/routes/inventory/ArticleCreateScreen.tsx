@@ -85,6 +85,7 @@ export default function ArticleCreateScreen() {
       ]))
       const payload = new FormData()
       payload.append("name", name)
+      /* payload.append("identifier", form.get("identifier")?.toString().trim() || "") */
       payload.append("inventory", inventory.uuid)
       payload.append("area", areaId)
       payload.append("shelf", selectedShelf)
@@ -155,6 +156,7 @@ export default function ArticleCreateScreen() {
         </section>
         <section className="grid content-start gap-5 rounded-xl border bg-muted/15 p-5">
           <h2 className="text-sm font-semibold">{t("articles.page.headings.locationAndCategory")}</h2>
+          {/* <Field label={t("articles.page.fields.identifier")}><Input name="identifier" maxLength={30} /></Field> */}
           <Field label={t("areas.detail.fields.category")}>
             <Select name="category" value={selectedCategory} onValueChange={(value) => setSelectedCategory(value ?? "")}>
               <SelectTrigger className="w-full">

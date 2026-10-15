@@ -118,6 +118,7 @@
         "chest": "Chest",
         "chooseImage": "Choose image",
         "description": "Description",
+        "identifier": "Identifier",
         "image": "Image (optional)",
         "name": "Name",
         "quantity": "Quantity",
