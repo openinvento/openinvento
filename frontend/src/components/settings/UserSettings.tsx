@@ -5,7 +5,7 @@ import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { getAuthErrorMessage } from "@/utils/api/auth-errors"
-import { getCurrentSession, updatePersonalAccount } from "@/utils/api/auth"
+import { getCurrentSession, logout, updatePersonalAccount } from "@/utils/api/auth"
 import {
   Select,
   SelectContent,
@@ -13,11 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useNavigate } from "react-router"
 
 type ThemeOption = "light" | "dark" | "system"
 
 export default function UserSettings() {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
+  
   const [username, setUsername] = useState("")
   const [name, setName] = useState("")
   const [password, setPassword] = useState("")
@@ -69,6 +72,16 @@ export default function UserSettings() {
     }
   }
 
+  async function handleLogout() {
+    try {
+      await logout()
+      console.log("Redirecting to login page...")
+      navigate("/auth/login", { replace: true })
+    } catch (error) {
+      console.error("Error during logout:", error)
+    }
+  }
+  
   function handleThemeChange(newTheme: ThemeOption | null) {
     if (!newTheme) {
       return
@@ -84,15 +97,20 @@ export default function UserSettings() {
   }
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <section className="border-b pb-7">
-        <div className="mb-5">
-          <h2 className="text-xl font-semibold">
-            {t("settings.personalAccount")}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {t("settings.personalAccountDescription")}
-          </p>
+        <div className="flex items-center justify-between">
+          <div className="mb-5">
+            <h2 className="text-xl font-semibold">
+              {t("settings.personalAccount")}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {t("settings.personalAccountDescription")}
+            </p>
+          </div>
+          <Button variant="outline" className="px-10" onClick={handleLogout}>
+            Logout
+          </Button>
         </div>
 
         <form onSubmit={handleAccountSubmit} className="grid gap-4 sm:grid-cols-2">
