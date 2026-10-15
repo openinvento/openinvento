@@ -43,6 +43,38 @@
       "stock_level": "Bestandsniveau"
     }
   },
+  "manageCodes": {
+    "clearSelection": "Auswahl aufheben",
+    "codeType": "Codetyp",
+    "codeTypes": {
+      "barcode": "Barcode",
+      "qr": "QR-Code"
+    },
+    "description": "Inventarelemente auswählen, um QR-Codes und Barcodes zu drucken.",
+    "errors": {
+      "generate": "Codes konnten nicht erstellt werden.",
+      "load": "Inventarelemente konnten nicht geladen werden.",
+      "selectItem": "Wähle zuerst mindestens ein Element aus."
+    },
+    "inventoryItems": "Inventarelemente",
+    "layout": "Layout",
+    "loading": "Inventarelemente werden geladen...",
+    "noItems": "Keine Inventarelemente gefunden.",
+    "options": "Codeoptionen",
+    "paperSize": "Papierformat",
+    "print": "Codes drucken",
+    "scan": "Code scannen",
+    "searchPlaceholder": "Elemente suchen",
+    "selectedCount": "{{selected}} von {{total}} ausgewählt",
+    "selectAll": "Alle auswählen",
+    "title": "QR-Codes und Barcodes",
+    "types": {
+      "area": "Bereich",
+      "article": "Artikel",
+      "chest": "Kiste",
+      "shelf": "Regal"
+    }
+  },
   "settings": {
     "admin": {
       "addUser": "Benutzer hinzufügen",
