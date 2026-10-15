@@ -6,8 +6,12 @@
     "delete": "Delete",
     "errors": {
       "delete": "Could not delete this item.",
-      "rename": "Could not rename this item."
+      "rename": "Could not rename this item.",
+      "identifier": "Could not update the identifier."
     },
+    "editIdentifier": "Edit identifier",
+    "identifier": "Identifier",
+    "identifierTitle": "Edit {{kind}} identifier",
     "name": "Name",
     "moreActions": "More actions",
     "noActions": "No actions available.",
@@ -93,11 +97,14 @@
     "articleCount": "{{count}} articles",
     "backToArea": "Back to area",
     "confirmDelete": "Delete {{name}}?",
+    "editIdentifier": "Edit identifier",
     "empty": "No articles are stored in this chest yet.",
     "errors": {
       "delete": "Could not delete article.",
+      "identifier": "Could not update the identifier.",
       "load": "Could not load this chest."
     },
+    "identifierTitle": "Edit chest identifier",
     "loading": "Loading chest..."
   },
   "articles": {
