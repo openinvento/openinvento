@@ -52,6 +52,23 @@ class InventoryScopedSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
         self.fields["inventory"].queryset = self._accessible_inventories()
 
+    def validate(self, attrs):
+        """ Validates that the inventory is accessible to the user and that all related objects belong to the same inventory. """
+        inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
+        if inventory is None:
+            raise serializers.ValidationError({"inventory": "Inventory is required."})
+        self._validate_inventory_belongs_to_user(inventory)
+
+        for field_name, related_obj in attrs.items():
+            if field_name == "inventory" or related_obj is None:
+                continue
+            related_inventory = getattr(related_obj, "inventory", None)
+            if related_inventory is not None and related_inventory.pk != inventory.pk:
+                raise serializers.ValidationError(
+                    {field_name: "This object must belong to the same inventory."}
+                )
+        return attrs
+
 
 class ProtectedImageField(serializers.ImageField):
     """ Custom ImageField that returns a full URL for the image """
@@ -79,10 +96,8 @@ class AreaSerializer(InventoryScopedSerializer):
         read_only_fields = ("uuid", "created_at", "updated_at")
 
     def validate(self, attrs):
+        super().validate(attrs)
         inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
-        if inventory is None:
-            raise serializers.ValidationError({"inventory": "Inventory is required."})
-        self._validate_inventory_belongs_to_user(inventory)
         return attrs
 
 
@@ -99,14 +114,11 @@ class ShelfSerializer(InventoryScopedSerializer):
         self.fields["area"].queryset = self._inventory_queryset(Area)
 
     def validate(self, attrs):
+        super().validate(attrs)
         inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
         area = attrs.get("area") or getattr(self.instance, "area", None)
-        if inventory is None:
-            raise serializers.ValidationError({"inventory": "Inventory is required."})
-        self._validate_inventory_belongs_to_user(inventory)
         if area is None:
             raise serializers.ValidationError({"area": "Area is required."})
-        self._validate_same_inventory("area", area, inventory)
         return attrs
 
 
@@ -140,6 +152,7 @@ class ChestSerializer(InventoryScopedSerializer):
         self.fields["parent_chest"].queryset = self._inventory_queryset(Chest)
 
     def validate(self, attrs):
+        super().validate(attrs)
         inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
         area = attrs.get("area") or getattr(self.instance, "area", None)
         shelf = attrs.get("shelf") if "shelf" in attrs else getattr(self.instance, "shelf", None)
@@ -149,21 +162,14 @@ class ChestSerializer(InventoryScopedSerializer):
             else getattr(self.instance, "parent_chest", None)
         )
 
-        if inventory is None:
-            raise serializers.ValidationError({"inventory": "Inventory is required."})
-        self._validate_inventory_belongs_to_user(inventory)
-
         if area is None:
             raise serializers.ValidationError({"area": "Area is required."})
-        self._validate_same_inventory("area", area, inventory)
 
         if shelf is not None:
-            self._validate_same_inventory("shelf", shelf, inventory)
             if shelf.area_id != area.uuid:
                 raise serializers.ValidationError({"shelf": "Shelf must belong to the selected area."})
 
         if parent_chest is not None:
-            self._validate_same_inventory("parent_chest", parent_chest, inventory)
             if parent_chest.area_id != area.uuid:
                 raise serializers.ValidationError(
                     {"parent_chest": "Parent chest must belong to the selected area."}
@@ -184,10 +190,8 @@ class ArticleCategorySerializer(InventoryScopedSerializer):
         return CategoryFieldSerializer(obj.fields.all(), many=True).data
 
     def validate(self, attrs):
+        super().validate(attrs)
         inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
-        if inventory is None:
-            raise serializers.ValidationError({"inventory": "Inventory is required."})
-        self._validate_inventory_belongs_to_user(inventory)
         return attrs
 
 
@@ -258,33 +262,28 @@ class ArticleSerializer(InventoryScopedSerializer):
         return media_path
 
     def validate(self, attrs):
+        super().validate(attrs)
         inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
         area = attrs.get("area") if "area" in attrs else getattr(self.instance, "area", None)
         shelf = attrs.get("shelf") if "shelf" in attrs else getattr(self.instance, "shelf", None)
         chest = attrs.get("chest") if "chest" in attrs else getattr(self.instance, "chest", None)
         category = attrs.get("category") if "category" in attrs else getattr(self.instance, "category", None)
 
-        if inventory is None:
-            raise serializers.ValidationError({"inventory": "Inventory is required."})
-        self._validate_inventory_belongs_to_user(inventory)
-
         if area is not None:
-            self._validate_same_inventory("area", area, inventory)
+            pass
 
         if shelf is not None:
-            self._validate_same_inventory("shelf", shelf, inventory)
             if area is not None and shelf.area_id != area.uuid:
                 raise serializers.ValidationError({"shelf": "Shelf must belong to the selected area."})
 
         if chest is not None:
-            self._validate_same_inventory("chest", chest, inventory)
             if area is not None and chest.area_id != area.uuid:
                 raise serializers.ValidationError({"chest": "Chest must belong to the selected area."})
             if shelf is not None and chest.shelf_id is not None and chest.shelf_id != shelf.uuid:
                 raise serializers.ValidationError({"chest": "Chest must belong to the selected shelf."})
 
         if category is not None:
-            self._validate_same_inventory("category", category, inventory)
+            pass
 
         custom_fields = attrs.get("custom_fields")
         if custom_fields is not None and not isinstance(custom_fields, dict):
@@ -325,11 +324,7 @@ class CategoryFieldSerializer(InventoryScopedSerializer):
         self.fields["category"].queryset = self._inventory_queryset(ArticleCategory)
 
     def validate(self, attrs):
+        super().validate(attrs)
         inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
         category = attrs.get("category") if "category" in attrs else getattr(self.instance, "category", None)
-        if inventory is None:
-            raise serializers.ValidationError({"inventory": "Inventory is required."})
-        self._validate_inventory_belongs_to_user(inventory)
-        if category is not None:
-            self._validate_same_inventory("category", category, inventory)
         return attrs
