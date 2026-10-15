@@ -109,6 +109,7 @@ export default function ArticlePage() {
 
       const payload = new FormData()
       payload.append("name", form.get("name")?.toString().trim() || "")
+      payload.append("identifier", form.get("identifier")?.toString().trim() || "")
       payload.append("description", form.get("description")?.toString() || "")
       payload.append("quantity", form.get("quantity")?.toString() || "0")
       payload.append("stock_tracking", String(stockTracking))
@@ -347,6 +348,10 @@ export default function ArticlePage() {
                     </option>
                   ))}
                 </select>
+              </Field>
+              
+              <Field label={t("articles.page.fields.identifier")}>
+                <input name="identifier" maxLength={30} defaultValue={article.identifier} />
               </Field>
             </div>
 

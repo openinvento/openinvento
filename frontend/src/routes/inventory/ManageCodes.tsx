@@ -7,17 +7,18 @@ import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
 import { inventoryApi, type CodePdfOptions } from "@/utils/api/inventory"
 import { useTranslation } from "react-i18next"
+import { Input } from "@/components/ui/input"
 
 type CodeItem = {
 	uuid: string
 	identifier: string
 	name: string
-	type: string
+	type: "area" | "shelf" | "chest" | "article"
 }
 
-const codeTypes: Array<{ value: CodePdfOptions["code_type"]; label: string }> = [
-	{ value: "qr", label: "QR code" },
-	{ value: "barcode", label: "Barcode" },
+const codeTypes: CodePdfOptions["code_type"][] = [
+	"qr",
+	"barcode",
 ]
 
 export default function ManageCodes() {
@@ -25,6 +26,8 @@ export default function ManageCodes() {
 	const navigate = useNavigate()
 
 	const [items, setItems] = useState<CodeItem[]>([])
+	const [filteredItems, setFilteredItems] = useState<CodeItem[]>([])
+	const [searchQuery, setSearchQuery] = useState("")
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 	const [options, setOptions] = useState<Omit<CodePdfOptions, "uuids">>({
 		code_type: "qr",
@@ -58,19 +61,30 @@ export default function ManageCodes() {
 					inventoryApi.listChests(),
 					inventoryApi.listArticles(),
 				])
-				setItems([
-					...areas.map((item) => ({ ...item, type: "Area" })),
-					...shelves.map((item) => ({ ...item, type: "Shelf" })),
-					...chests.map((item) => ({ ...item, type: "Chest" })),
-					...articles.map((item) => ({ ...item, type: "Article" })),
-				])
+				const allItems = [
+					...areas.map((item) => ({ ...item, type: "area" as const })),
+					...shelves.map((item) => ({ ...item, type: "shelf" as const })),
+					...chests.map((item) => ({ ...item, type: "chest" as const })),
+					...articles.map((item) => ({ ...item, type: "article" as const })),
+				]
+				setFilteredItems(allItems)
+				setItems(allItems)
 			} catch (reason) {
-				setError(reason instanceof Error ? reason.message : "Unable to load inventory items.")
+				setError(reason instanceof Error ? reason.message : t("manageCodes.errors.load"))
 			} finally {
 				setIsLoading(false)
 			}
 		})()
 	}, [])
+
+	useEffect(() => {
+		if (searchQuery.trim() === "") {
+			setFilteredItems([])
+		} else {
+			const filtered = items.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+			setFilteredItems(filtered)
+		}
+	}, [searchQuery])
 
 	function toggleSelected(uuid: string) {
 		setSelectedIds((current) => {
@@ -87,7 +101,7 @@ export default function ManageCodes() {
 
 	async function openCodes(print: boolean) {
 		if (selectedIds.size === 0) {
-			setError("Select at least one item first.")
+			setError(t("manageCodes.errors.selectItem"))
 			return
 		}
 
@@ -105,7 +119,7 @@ export default function ManageCodes() {
 			}
 			window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
 		} catch (reason) {
-			setError(reason instanceof Error ? reason.message : "Unable to generate the codes.")
+			setError(reason instanceof Error ? reason.message : t("manageCodes.errors.generate"))
 		} finally {
 			setIsGenerating(false)
 		}
@@ -115,11 +129,11 @@ export default function ManageCodes() {
 		<BaseScreen
 			fullWidth
 			title={t("manageCodes.title")}
-			description="Select inventory items to print QR codes and barcodes."
+			description={t("manageCodes.description")}
 		>
             <div className="mb-6 flex items-center justify-center gap-3">
                 <Button className="w-full py-6 mb-5" onClick={() => setIsScannerOpen(true)}>
-                    <ScanLine /> Scan a code
+                    <ScanLine /> {t("manageCodes.scan")}
                 </Button>
             </div>
 			{isScannerOpen ? (
@@ -127,28 +141,31 @@ export default function ManageCodes() {
 			) : (
 				<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
 					<section className="min-w-0 rounded-xl border bg-card">
-						<div className="flex flex-wrap items-center justify-between gap-3 border-b p-4">
+						<div className="flex flex-wrap items-center justify-between gap-3 p-4 pb-0">
 							<div>
-								<h2 className="font-semibold">Inventory items</h2>
-								<p className="text-sm text-muted-foreground">{selectedIds.size} of {items.length} selected</p>
+								<h2 className="font-semibold">{t("manageCodes.inventoryItems")}</h2>
+								<p className="text-sm text-muted-foreground">{t("manageCodes.selectedCount", { selected: selectedIds.size, total: items.length })}</p>
 							</div>
 							<Button variant="outline" size="sm" onClick={toggleAll} disabled={items.length === 0}>
-								{selectedIds.size === items.length ? "Clear selection" : "Select all"}
+								{selectedIds.size === items.length ? t("manageCodes.clearSelection") : t("manageCodes.selectAll")}
 							</Button>
+						</div>
+						<div className="flex items-center justify-between gap-3 border-b p-4">
+							<Input placeholder={t("manageCodes.searchPlaceholder")} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
 						</div>
 						{error && <p className="border-b bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
 						{isLoading ? (
-							<p className="p-6 text-sm text-muted-foreground">Loading inventory items...</p>
+							<p className="p-6 text-sm text-muted-foreground">{t("manageCodes.loading")}</p>
 						) : items.length === 0 ? (
-							<p className="p-6 text-sm text-muted-foreground">No inventory items found.</p>
+							<p className="p-6 text-sm text-muted-foreground">{t("manageCodes.noItems")}</p>
 						) : (
 							<div className="divide-y">
-								{items.map((item) => (
+								{filteredItems.map((item) => (
 									<label key={item.uuid} className="flex cursor-pointer items-center gap-3 p-4 transition-colors hover:bg-muted/50">
 										<input type="checkbox" checked={selectedIds.has(item.uuid)} onChange={() => toggleSelected(item.uuid)} />
 										<span className="min-w-0 flex-1">
 											<span className="block truncate font-medium">{item.name}</span>
-											<span className="block text-xs text-muted-foreground">{item.type} · {item.identifier}</span>
+											<span className="block text-xs text-muted-foreground">{t(`manageCodes.types.${item.type}`)} · {item.identifier}</span>
 										</span>
 									</label>
 								))}
@@ -157,29 +174,29 @@ export default function ManageCodes() {
 					</section>
 
 					<aside className="h-fit rounded-xl border bg-card p-4">
-						<h2 className="font-semibold">Code options</h2>
+						<h2 className="font-semibold">{t("manageCodes.options")}</h2>
 						<div className="mt-4 grid gap-4">
 							<label className="grid gap-1.5 text-sm font-medium">
-								Code type
+								{t("manageCodes.codeType")}
 								<select className="h-9 rounded-lg border bg-background px-2" value={options.code_type} onChange={(event) => setOptions({ ...options, code_type: event.target.value as CodePdfOptions["code_type"] })}>
-									{codeTypes.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}
+									{codeTypes.map((type) => <option key={type} value={type}>{t(`manageCodes.codeTypes.${type}`)}</option>)}
 								</select>
 							</label>
 							<label className="grid gap-1.5 text-sm font-medium">
-								Paper size
+								{t("manageCodes.paperSize")}
 								<select className="h-9 rounded-lg border bg-background px-2" value={options.size} onChange={(event) => setOptions({ ...options, size: event.target.value as CodePdfOptions["size"] })}>
 									<option value="a4">A4</option><option value="a5">A5</option><option value="letter">Letter</option>
 								</select>
 							</label>
 							<label className="grid gap-1.5 text-sm font-medium">
-								Layout
+								{t("manageCodes.layout")}
 								<select className="h-9 rounded-lg border bg-background px-2" value={options.layout} onChange={(event) => setOptions({ ...options, layout: event.target.value as CodePdfOptions["layout"] })}>
 									<option value="vertical">Vertical</option><option value="horizontal">Horizontal</option>
 								</select>
 							</label>
 							<div className="grid gap-2 pt-2">
 								<Button variant="outline" onClick={() => void openCodes(true)} disabled={isGenerating || selectedIds.size === 0}>
-									<Printer /> Print codes
+									<Printer /> {t("manageCodes.print")}
 								</Button>
 							</div>
 						</div>

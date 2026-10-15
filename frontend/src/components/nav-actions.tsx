@@ -1,6 +1,6 @@
 import * as React from "react"
 import { useLocation, useNavigate } from "react-router"
-import { MoreHorizontalIcon, PencilIcon, StarIcon, StarOffIcon, Trash2Icon } from "lucide-react"
+import { MoreHorizontalIcon, PencilIcon, QrCodeIcon, StarIcon, StarOffIcon, Trash2Icon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
@@ -9,7 +9,7 @@ import { inventoryApi, type Area, type Chest } from "@/utils/api/inventory"
 import { isFavorite, toggleFavorite, type Favorite } from "@/utils/favorites"
 import { useTranslation } from "react-i18next"
 
-type PageEntity = { uuid: string; name: string; kind: "areas" | "chests" }
+type PageEntity = { uuid: string; name: string; identifier: string; kind: "areas" | "chests" }
 
 export function NavActions() {
   const location = useLocation()
@@ -20,6 +20,7 @@ export function NavActions() {
   const [favorite, setFavorite] = React.useState<Favorite | null>(null)
   const [favorited, setFavorited] = React.useState(false)
   const [renameOpen, setRenameOpen] = React.useState(false)
+  const [identifierOpen, setIdentifierOpen] = React.useState(false)
   const [menuOpen, setMenuOpen] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
   const [error, setError] = React.useState("")
@@ -40,7 +41,7 @@ export function NavActions() {
           : (await inventoryApi.listChests()).find((chest) => chest.uuid === chestId)
         if (!active || !item) return
         const kind = areaId ? "areas" : "chests"
-        setEntity({ uuid: item.uuid, name: item.name, kind })
+        setEntity({ uuid: item.uuid, name: item.name, identifier: item.identifier, kind })
         if (areaId) {
           const nextFavorite: Favorite = { id: `area:${item.uuid}`, name: item.name, url: `/app/areas/${item.uuid}`, icon: "home" }
           setFavorite(nextFavorite)
@@ -93,6 +94,24 @@ export function NavActions() {
     }
   }
 
+  async function updateIdentifier(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!entity) return
+    const identifier = new FormData(event.currentTarget).get("identifier")?.toString().trim()
+    if (!identifier) return
+    setSaving(true)
+    setError("")
+    try {
+      await inventoryApi.update(entity.kind, entity.uuid, { identifier })
+      setIdentifierOpen(false)
+      window.location.reload()
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : t("navActions.errors.identifier"))
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="flex items-center gap-2 text-sm">
       {entity?.kind === "areas" && (
@@ -111,6 +130,9 @@ export function NavActions() {
             <Button variant="ghost" className="justify-start" onClick={() => { setError(""); setMenuOpen(false); setRenameOpen(true) }}>
               <PencilIcon /> {t("navActions.rename")}
             </Button>
+            {entity.kind === "areas" && <Button variant="ghost" className="justify-start" onClick={() => { setError(""); setMenuOpen(false); setIdentifierOpen(true) }}>
+              <QrCodeIcon /> {t("navActions.editIdentifier")}
+            </Button>}
             <Button variant="ghost" className="justify-start text-destructive hover:text-destructive" onClick={() => { setMenuOpen(false); void remove() }}>
               <Trash2Icon /> {t("navActions.delete")}
             </Button>
@@ -123,6 +145,14 @@ export function NavActions() {
         <label className="grid gap-1.5 text-sm font-medium">
           {t("navActions.name")}
           <input autoFocus name="name" defaultValue={entity?.name} required className="h-10 rounded-lg border bg-background px-3 font-normal" />
+        </label>
+      </InventoryModal>
+      <InventoryModal title={t("navActions.identifierTitle", { kind: entity?.kind === "areas" ? t("navActions.area") : t("navActions.chest") })}
+        open={identifierOpen} submitting={saving} onClose={() => setIdentifierOpen(false)} onSubmit={updateIdentifier}>
+        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+        <label className="grid gap-1.5 text-sm font-medium">
+          {t("navActions.identifier")}
+          <input autoFocus name="identifier" maxLength={30} defaultValue={entity?.identifier ?? ""} required className="h-10 rounded-lg border bg-background px-3 font-normal" />
         </label>
       </InventoryModal>
       {error && !renameOpen && <span role="alert" className="text-xs text-destructive">{error}</span>}

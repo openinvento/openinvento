@@ -72,10 +72,11 @@ class ProtectedImageField(serializers.ImageField):
 
 
 class AreaSerializer(InventoryScopedSerializer):
+    identifier = serializers.CharField(required=False, allow_blank=True, max_length=30)
     class Meta:
         model = Area
         fields = ("uuid", "identifier", "inventory", "created_at", "updated_at", "name")
-        read_only_fields = ("uuid", "identifier", "created_at", "updated_at")
+        read_only_fields = ("uuid", "created_at", "updated_at")
 
     def validate(self, attrs):
         inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
@@ -110,6 +111,7 @@ class ShelfSerializer(InventoryScopedSerializer):
 
 
 class ChestSerializer(InventoryScopedSerializer):
+    identifier = serializers.CharField(required=False, allow_blank=True, max_length=30)
     area = serializers.PrimaryKeyRelatedField(queryset=Area.objects.none())
     shelf = serializers.PrimaryKeyRelatedField(queryset=Shelf.objects.none(), required=False, allow_null=True)
     parent_chest = serializers.PrimaryKeyRelatedField(
@@ -129,7 +131,7 @@ class ChestSerializer(InventoryScopedSerializer):
             "shelf",
             "parent_chest",
         )
-        read_only_fields = ("uuid", "identifier", "created_at", "updated_at")
+        read_only_fields = ("uuid", "created_at", "updated_at")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -190,6 +192,7 @@ class ArticleCategorySerializer(InventoryScopedSerializer):
 
 
 class ArticleSerializer(InventoryScopedSerializer):
+    identifier = serializers.CharField(required=False, allow_blank=True, max_length=30)
     area = serializers.PrimaryKeyRelatedField(queryset=Area.objects.none(), required=False, allow_null=True)
     shelf = serializers.PrimaryKeyRelatedField(queryset=Shelf.objects.none(), required=False, allow_null=True)
     chest = serializers.PrimaryKeyRelatedField(queryset=Chest.objects.none(), required=False, allow_null=True)
@@ -219,7 +222,7 @@ class ArticleSerializer(InventoryScopedSerializer):
             "custom_fields",
             "category_fields",
         )
-        read_only_fields = ("uuid", "identifier", "created_at", "updated_at")
+        read_only_fields = ("uuid", "created_at", "updated_at")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

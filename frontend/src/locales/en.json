@@ -1,19 +1,4 @@
 {
-  "navActions": {
-    "area": "area",
-    "chest": "chest",
-    "confirmDelete": "Delete {{name}}? Its contents may be deleted too.",
-    "delete": "Delete",
-    "errors": {
-      "delete": "Could not delete this item.",
-      "rename": "Could not rename this item."
-    },
-    "name": "Name",
-    "moreActions": "More actions",
-    "noActions": "No actions available.",
-    "rename": "Rename",
-    "renameTitle": "Rename {{kind}}"
-  },
   "accounts": {
     "logoutBtn": "Logout"
   },
@@ -89,20 +74,19 @@
     "renameArea": "Rename area",
     "title": "Areas"
   },
-  "chests": {
-    "articleCount": "{{count}} articles",
-    "backToArea": "Back to area",
-    "confirmDelete": "Delete {{name}}?",
-    "empty": "No articles are stored in this chest yet.",
-    "errors": {
-      "delete": "Could not delete article.",
-      "load": "Could not load this chest."
-    },
-    "loading": "Loading chest..."
-  },
   "articles": {
     "page": {
       "areas": "Areas",
+      "attachments": {
+        "add": "Add file",
+        "deleteError": "Could not remove the file.",
+        "download": "Download {{name}}",
+        "empty": "No files attached yet.",
+        "remove": "Remove {{name}}",
+        "title": "Files and attachments",
+        "uploadError": "Could not upload the file.",
+        "uploading": "Uploading..."
+      },
       "backToArea": "Back to area",
       "confirmDelete": "Delete {{name}}?",
       "delete": "Delete",
@@ -118,6 +102,7 @@
         "chest": "Chest",
         "chooseImage": "Choose image",
         "description": "Description",
+        "identifier": "Identifier",
         "image": "Image (optional)",
         "name": "Name",
         "quantity": "Quantity",
@@ -126,16 +111,6 @@
         "selectValue": "Select a value",
         "shelf": "Shelf",
         "stockTracking": "Stock tracking"
-      },
-      "attachments": {
-        "title": "Files and attachments",
-        "add": "Add file",
-        "uploading": "Uploading...",
-        "empty": "No files attached yet.",
-        "uploadError": "Could not upload the file.",
-        "deleteError": "Could not remove the file.",
-        "download": "Download {{name}}",
-        "remove": "Remove {{name}}"
       },
       "headings": {
         "articleDetails": "Article Details",
@@ -236,6 +211,20 @@
     "optionsPlaceholder": "Comma-separated values",
     "title": "Categories and fields"
   },
+  "chests": {
+    "articleCount": "{{count}} articles",
+    "backToArea": "Back to area",
+    "confirmDelete": "Delete {{name}}?",
+    "editIdentifier": "Edit identifier",
+    "empty": "No articles are stored in this chest yet.",
+    "errors": {
+      "delete": "Could not delete article.",
+      "identifier": "Could not update the identifier.",
+      "load": "Could not load this chest."
+    },
+    "identifierTitle": "Edit chest identifier",
+    "loading": "Loading chest..."
+  },
   "dashboard": {
     "addArticle": "Add an article",
     "addArticleDescription": "Save something new to your inventory.",
@@ -301,7 +290,55 @@
     }
   },
   "manageCodes": {
-    "title": "QR & Barcodes"
+    "clearSelection": "Clear selection",
+    "codeType": "Code type",
+    "codeTypes": {
+      "barcode": "Barcode",
+      "qr": "QR code"
+    },
+    "description": "Select inventory items to print QR codes and barcodes.",
+    "errors": {
+      "generate": "Unable to generate the codes.",
+      "load": "Unable to load inventory items.",
+      "selectItem": "Select at least one item first."
+    },
+    "inventoryItems": "Inventory Items",
+    "layout": "Layout",
+    "loading": "Loading inventory items...",
+    "noItems": "No inventory items found.",
+    "options": "Code options",
+    "paperSize": "Paper size",
+    "print": "Print codes",
+    "scan": "Scan a code",
+    "searchPlaceholder": "Search items",
+    "selectedCount": "{{selected}} of {{total}} selected",
+    "selectAll": "Select all",
+    "title": "QR & Barcodes",
+    "types": {
+      "area": "Area",
+      "article": "Article",
+      "chest": "Chest",
+      "shelf": "Shelf"
+    }
+  },
+  "navActions": {
+    "area": "area",
+    "chest": "chest",
+    "confirmDelete": "Delete {{name}}? Its contents may be deleted too.",
+    "delete": "Delete",
+    "editIdentifier": "Edit identifier",
+    "errors": {
+      "delete": "Could not delete this item.",
+      "identifier": "Could not update the identifier.",
+      "rename": "Could not rename this item."
+    },
+    "identifier": "Identifier",
+    "identifierTitle": "Edit {{kind}} identifier",
+    "moreActions": "More actions",
+    "name": "Name",
+    "noActions": "No actions available.",
+    "rename": "Rename",
+    "renameTitle": "Rename {{kind}}"
   },
   "search": {
     "empty": "No articles found.",

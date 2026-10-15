@@ -35,6 +35,7 @@ def generate_random_code(length=10):
 class Inventory(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     name = models.CharField(max_length=100)
+    # The identifier is only used for inventory-internal identification for users - not system relevant. Users can change it any time by themselves
     identifier = models.CharField(unique=True, max_length=30, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
