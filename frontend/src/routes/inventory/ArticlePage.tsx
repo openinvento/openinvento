@@ -1,7 +1,8 @@
 import { useEffect, useId, useState, type ChangeEvent, type FormEvent } from "react"
-import { ArrowLeft, ChevronDown, Download, FileText, Paperclip, Save, Trash2, Upload } from "lucide-react"
+import { ArrowLeft, ChevronDown, Download, FileText, Info, Paperclip, Save, Trash2, Upload } from "lucide-react"
 import { Link, useBlocker, useNavigate, useParams } from "react-router"
 import { Button } from "@/components/ui/button"
+import { Popover, PopoverContent, PopoverDescription, PopoverTrigger } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
 import { removeFavorite } from "@/utils/favorites"
 import { getArticleIcon } from "@/components/inventory/article-icon-picker"
@@ -350,7 +351,19 @@ export default function ArticlePage() {
                 </select>
               </Field>
               
-              <Field label={t("articles.page.fields.identifier")}>
+              <Field label={
+                <span className="inline-flex items-center gap-1">
+                  {t("articles.page.fields.identifier")}
+                  <Popover>
+                    <PopoverTrigger render={<Button variant="ghost" size="icon-xs" aria-label={t("articles.page.fields.identifierHelpLabel")} />}>
+                      <Info />
+                    </PopoverTrigger>
+                    <PopoverContent align="start">
+                      <PopoverDescription>{t("articles.page.fields.identifierHelp")}</PopoverDescription>
+                    </PopoverContent>
+                  </Popover>
+                </span>
+              }>
                 <input name="identifier" maxLength={30} defaultValue={article.identifier} />
               </Field>
             </div>
@@ -459,7 +472,7 @@ export default function ArticlePage() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) { 
+function Field({ label, children }: { label: React.ReactNode; children: React.ReactNode }) { 
   return (
     <label className="grid gap-1.5 text-sm font-medium">
       {label}

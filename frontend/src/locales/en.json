@@ -103,6 +103,8 @@
         "chooseImage": "Choose image",
         "description": "Description",
         "identifier": "Identifier",
+        "identifierHelp": "The identifier helps identify items in your inventory and is mainly used for barcodes and QR codes.",
+        "identifierHelpLabel": "About identifiers",
         "image": "Image (optional)",
         "name": "Name",
         "quantity": "Quantity",
