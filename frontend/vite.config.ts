@@ -5,6 +5,10 @@ import { defineConfig, loadEnv } from 'vite'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+// Using vite-plugin-pwa to manage PWA support
+import { VitePWA } from 'vite-plugin-pwa';
+import { pwaConfig } from './pwa.config.ts' // import custom config for PWA
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // https://vite.dev/config/
@@ -22,12 +26,11 @@ export default defineConfig(({ mode }) => {
     },
   }
 
-  console.log(`Vite config: mode=${mode}, backendOrigin=${backendOrigin}, allowedHosts=${env.VITE_ALLOWED_HOSTS}`)
-
   return {
     plugins: [
       react(),
       tailwindcss(),
+      VitePWA(pwaConfig),
       babel({ presets: [reactCompilerPreset()] })
     ],
     resolve: {
