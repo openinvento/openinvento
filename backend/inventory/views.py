@@ -147,15 +147,15 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         inventory = serializer.validated_data.get('inventory')
         
-        if inventory and inventory not in self.get_accessible_inventories():
+        if inventory is None or not self.get_accessible_inventories().filter(pk=inventory.pk).exists():
             raise PermissionDenied("You do not have permission to create objects in this inventory.")
             
         serializer.save()
 
     def perform_update(self, serializer):
-        inventory = serializer.validated_data.get('inventory')
+        inventory = serializer.validated_data.get('inventory', serializer.instance.inventory)
         
-        if inventory and inventory not in self.get_accessible_inventories():
+        if inventory is None or not self.get_accessible_inventories().filter(pk=inventory.pk).exists():
             raise PermissionDenied("You do not have permission to update objects in this inventory.")
             
         serializer.save()

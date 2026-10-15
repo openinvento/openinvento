@@ -1,5 +1,6 @@
 from urllib.parse import urlsplit
 
+from django.conf import settings
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
@@ -13,6 +14,17 @@ from .models import (
     Inventory,
     Shelf,
 )
+
+
+def _trusted_media_url(request, media_path):
+    configured_origins = set(getattr(settings, "APP_URLS", []))
+    if getattr(settings, "APP_URL", ""):
+        configured_origins.add(settings.APP_URL)
+    origin = request.headers.get("Origin") if request is not None else None
+    if origin and origin in configured_origins:
+        parsed_origin = urlsplit(origin)
+        return f"{parsed_origin.scheme}://{parsed_origin.netloc}{media_path}"
+    return media_path
 
 
 class InventorySerializer(serializers.ModelSerializer):
@@ -42,25 +54,23 @@ class InventoryScopedSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"inventory": "You do not have access to this inventory."})
         return inventory
 
-    def _validate_same_inventory(self, field_name, related_obj, inventory):
-        if related_obj is not None and related_obj.inventory_id != inventory.uuid:
-            raise serializers.ValidationError(
-                {field_name: "This object must belong to the same inventory."}
-            )
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["inventory"].queryset = self._accessible_inventories()
 
     def validate(self, attrs):
-        """ Validates that the inventory is accessible to the user and that all related objects belong to the same inventory. """
+        """Validate access and ownership for submitted and existing relations."""
         inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
         if inventory is None:
             raise serializers.ValidationError({"inventory": "Inventory is required."})
         self._validate_inventory_belongs_to_user(inventory)
 
-        for field_name, related_obj in attrs.items():
-            if field_name == "inventory" or related_obj is None:
+        for model_field in self.Meta.model._meta.get_fields():
+            if not model_field.is_relation or model_field.auto_created or model_field.name == "inventory":
+                continue
+            field_name = model_field.name
+            related_obj = attrs.get(field_name, getattr(self.instance, field_name, None))
+            if related_obj is None:
                 continue
             related_inventory = getattr(related_obj, "inventory", None)
             if related_inventory is not None and related_inventory.pk != inventory.pk:
@@ -78,14 +88,7 @@ class ProtectedImageField(serializers.ImageField):
             return None
 
         media_path = reverse("media", kwargs={"path": value.name})
-        request = self.context.get("request")
-        origin = request.headers.get("Origin") if request is not None else None
-        if origin and origin != "null":
-            parsed_origin = urlsplit(origin)
-            if parsed_origin.scheme and parsed_origin.netloc:
-                return f"{parsed_origin.scheme}://{parsed_origin.netloc}{media_path}"
-
-        return media_path
+        return _trusted_media_url(self.context.get("request"), media_path)
 
 
 class AreaSerializer(InventoryScopedSerializer):
@@ -96,8 +99,7 @@ class AreaSerializer(InventoryScopedSerializer):
         read_only_fields = ("uuid", "created_at", "updated_at")
 
     def validate(self, attrs):
-        super().validate(attrs)
-        inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
+        attrs = super().validate(attrs)
         return attrs
 
 
@@ -114,8 +116,7 @@ class ShelfSerializer(InventoryScopedSerializer):
         self.fields["area"].queryset = self._inventory_queryset(Area)
 
     def validate(self, attrs):
-        super().validate(attrs)
-        inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
+        attrs = super().validate(attrs)
         area = attrs.get("area") or getattr(self.instance, "area", None)
         if area is None:
             raise serializers.ValidationError({"area": "Area is required."})
@@ -152,8 +153,7 @@ class ChestSerializer(InventoryScopedSerializer):
         self.fields["parent_chest"].queryset = self._inventory_queryset(Chest)
 
     def validate(self, attrs):
-        super().validate(attrs)
-        inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
+        attrs = super().validate(attrs)
         area = attrs.get("area") or getattr(self.instance, "area", None)
         shelf = attrs.get("shelf") if "shelf" in attrs else getattr(self.instance, "shelf", None)
         parent_chest = (
@@ -170,6 +170,8 @@ class ChestSerializer(InventoryScopedSerializer):
                 raise serializers.ValidationError({"shelf": "Shelf must belong to the selected area."})
 
         if parent_chest is not None:
+            if self.instance is not None and parent_chest.pk == self.instance.pk:
+                raise serializers.ValidationError({"parent_chest": "A chest cannot be its own parent."})
             if parent_chest.area_id != area.uuid:
                 raise serializers.ValidationError(
                     {"parent_chest": "Parent chest must belong to the selected area."}
@@ -190,8 +192,7 @@ class ArticleCategorySerializer(InventoryScopedSerializer):
         return CategoryFieldSerializer(obj.fields.all(), many=True).data
 
     def validate(self, attrs):
-        super().validate(attrs)
-        inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
+        attrs = super().validate(attrs)
         return attrs
 
 
@@ -251,26 +252,13 @@ class ArticleSerializer(InventoryScopedSerializer):
 
         media_path = reverse("media", kwargs={"path": obj.image.name})
 
-        request = self.context.get("request")
-        origin = request.headers.get("Origin") if request is not None else None
-        if origin and origin != "null":
-            parsed_origin = urlsplit(origin)
-            if parsed_origin.scheme and parsed_origin.netloc:
-                print(f"Using origin {origin} for media URL")
-                return f"{parsed_origin.scheme}://{parsed_origin.netloc}{media_path}"
-
-        return media_path
+        return _trusted_media_url(self.context.get("request"), media_path)
 
     def validate(self, attrs):
-        super().validate(attrs)
-        inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
+        attrs = super().validate(attrs)
         area = attrs.get("area") if "area" in attrs else getattr(self.instance, "area", None)
         shelf = attrs.get("shelf") if "shelf" in attrs else getattr(self.instance, "shelf", None)
         chest = attrs.get("chest") if "chest" in attrs else getattr(self.instance, "chest", None)
-        category = attrs.get("category") if "category" in attrs else getattr(self.instance, "category", None)
-
-        if area is not None:
-            pass
 
         if shelf is not None:
             if area is not None and shelf.area_id != area.uuid:
@@ -281,9 +269,6 @@ class ArticleSerializer(InventoryScopedSerializer):
                 raise serializers.ValidationError({"chest": "Chest must belong to the selected area."})
             if shelf is not None and chest.shelf_id is not None and chest.shelf_id != shelf.uuid:
                 raise serializers.ValidationError({"chest": "Chest must belong to the selected shelf."})
-
-        if category is not None:
-            pass
 
         custom_fields = attrs.get("custom_fields")
         if custom_fields is not None and not isinstance(custom_fields, dict):
@@ -324,7 +309,5 @@ class CategoryFieldSerializer(InventoryScopedSerializer):
         self.fields["category"].queryset = self._inventory_queryset(ArticleCategory)
 
     def validate(self, attrs):
-        super().validate(attrs)
-        inventory = attrs.get("inventory") or getattr(self.instance, "inventory", None)
-        category = attrs.get("category") if "category" in attrs else getattr(self.instance, "category", None)
+        attrs = super().validate(attrs)
         return attrs
