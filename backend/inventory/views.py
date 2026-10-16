@@ -1,6 +1,3 @@
-import csv
-import io
-import json
 import uuid
 
 from account_auth.models import CustomUser
@@ -8,7 +5,7 @@ from account_auth.serializers import UserSerializer
 from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Count
-from django.http import FileResponse, HttpResponse
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
@@ -18,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .code_utils import generate_codes_pdf
+from .export_utils import generate_inventory_csv_export
 from .models import (
     Area,
     Article,
@@ -179,44 +177,15 @@ class InventoryManageView(InventoryAccessMixin, APIView):
         inventory.delete()
         return Response(status=204)
 
-# Critical: Exports the whole data directory!
 class ExportInventoryView(InventoryAccessMixin, APIView):
     permission_classes = (IsAuthenticated, IsInventoryMember)
 
     def get(self, request, inventory_uuid):
         inventory = self.get_inventory(request, inventory_uuid)
-        output = io.StringIO(newline="")
-        writer = csv.writer(output)
-        writer.writerow((
-            "uuid", "identifier", "name", "description", "quantity", "stock_tracking",
-            "area", "shelf", "chest", "category", "custom_fields", "image", "attachments",
-            "created_at", "updated_at",
-        ))
-
-        articles = Article.objects.filter(inventory=inventory).select_related(
-            "area", "shelf", "chest", "category"
-        ).prefetch_related("attachments").order_by("created_at")
-        for article in articles:
-            writer.writerow((
-                article.uuid,
-                article.identifier,
-                article.name,
-                article.description or "",
-                article.quantity,
-                article.stock_tracking,
-                article.area.name if article.area else "",
-                article.shelf.name if article.shelf else "",
-                article.chest.name if article.chest else "",
-                article.category.name if article.category else "",
-                json.dumps(article.custom_fields, ensure_ascii=False),
-                article.image.name if article.image else "",
-                json.dumps([attachment.original_name for attachment in article.attachments.all()], ensure_ascii=False),
-                article.created_at.isoformat(),
-                article.updated_at.isoformat(),
-            ))
-
-        response = HttpResponse(output.getvalue(), content_type="text/csv; charset=utf-8")
-        response["Content-Disposition"] = f'attachment; filename="inventory-{inventory.uuid}-articles.csv"'
+        archive_file = generate_inventory_csv_export(inventory)
+        archive_file.seek(0)
+        response = FileResponse(archive_file, content_type="application/zip")
+        response["Content-Disposition"] = f'attachment; filename="inventory-{inventory.uuid}-csv-export.zip"'
         return response
 
 # endregion Inventory Settings/ Management Views
