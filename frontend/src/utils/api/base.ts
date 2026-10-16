@@ -176,6 +176,25 @@ export async function fetchData<T>(path: string, options?: RequestOptions) {
   return request<T>("GET", path, options)
 }
 
+export async function downloadFile(path: string, filename: string) {
+  const response = await fetch(buildUrl(path), { credentials: "include" })
+  if (!response.ok) {
+    const contentType = response.headers.get("content-type") ?? ""
+    const payload = contentType.includes("application/json") ? await response.json() : await response.text()
+    const message = getPayloadMessage(payload) ?? (typeof payload === "string" && payload ? payload : `Request failed with status ${response.status}`)
+    throw new ApiError(message, payload, response.status)
+  }
+
+  const objectUrl = URL.createObjectURL(await response.blob())
+  const link = document.createElement("a")
+  link.href = objectUrl
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0)
+}
+
 export async function postData<T>(path: string, body?: unknown, options?: RequestOptions) {
   return request<T>("POST", path, {
     ...options,
