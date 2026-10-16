@@ -1,16 +1,45 @@
+import os
+import tempfile
+import zipfile
 from pathlib import Path
 
 from django.conf import settings
 from django.http import FileResponse, Http404, JsonResponse
 from inventory.models import Article, ArticleAttachment
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.views import APIView
 
 #TODO: Add option to serve user uploads through Nginx or a connected S3 storage bucket
 
 def health_view(request):
     """Return HTTP 200 for health checks."""
     return JsonResponse({'status': 'healthy'}, status=200)
+
+
+# General Endpoints for instance settings
+
+# Attention: This endpoint return the whole data directory
+class InstanceBackupView(APIView):
+    """Download a ZIP archive of the complete instance data directory."""
+    permission_classes = (IsAdminUser,)
+
+    def get(self, request):
+        data_dir = os.path.realpath(settings.DATA_DIR)
+        archive_file = tempfile.TemporaryFile()
+        with zipfile.ZipFile(archive_file, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            for root, directories, filenames in os.walk(data_dir, followlinks=False):
+                directories[:] = [name for name in directories if not os.path.islink(os.path.join(root, name))]
+                for filename in filenames:
+                    source_path = os.path.join(root, filename)
+                    if os.path.islink(source_path):
+                        continue
+                    archive.write(source_path, os.path.relpath(source_path, data_dir))
+
+        archive_file.seek(0)
+        response = FileResponse(archive_file, content_type="application/zip")
+        response["Content-Disposition"] = 'attachment; filename="openinvento-instance-backup.zip"'
+        return response
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
