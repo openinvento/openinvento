@@ -313,8 +313,8 @@
     "print": "Print codes",
     "scan": "Scan a code",
     "searchPlaceholder": "Search items",
-    "selectedCount": "{{selected}} of {{total}} selected",
     "selectAll": "Select all",
+    "selectedCount": "{{selected}} of {{total}} selected",
     "title": "QR & Barcodes",
     "types": {
       "area": "Area",
@@ -378,6 +378,7 @@
       "confirmDelete": "Delete {{name}}?",
       "deleteUser": "Delete user",
       "deleteUserError": "Could not delete user.",
+      "downloadBackup": "Download backup",
       "editUser": "Edit user",
       "email": "Email",
       "enableEmailLogin": "Enable email login",
@@ -395,7 +396,6 @@
       "saveUser": "Save user",
       "saveUserError": "Could not save user.",
       "userManagement": "User Management",
-      "downloadBackup": "Download backup",
       "username": "Username"
     },
     "adminTab": "Admin settings (instance)",
@@ -413,8 +413,8 @@
       "exportCsv": "Export CSV files",
       "exportDescription": "Download inventory records and related files as a ZIP of CSV tables.",
       "exportError": "Could not export this inventory.",
-      "exporting": "Preparing CSV...",
       "exportTitle": "Export inventory data",
+      "exporting": "Preparing CSV...",
       "general": "General",
       "invitesDisabled": "Adding people is disabled for this instance.",
       "loadError": "Could not load inventory settings.",
@@ -427,6 +427,9 @@
       "saveError": "Could not update inventory members.",
       "selectPerson": "Select a person",
       "title": "Inventory Settings"
+    },
+    "language": {
+      "description": "Select which language do you prefer"
     },
     "languageLabel": "Language",
     "personalAccount": "Personal account",

@@ -180,32 +180,36 @@ export default function UserSettings() {
         </form>
       </section>
 
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">{t("settings.languageLabel")}</label>
-        <Select value={i18n.resolvedLanguage ?? "en"} onValueChange={(language) => language && i18n.changeLanguage(language)}>
-          <SelectTrigger className="w-45">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="de">Deutsch</SelectItem>
-            <SelectItem value="en">English</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <div className="flex flex-row justify-between gap-6 ">
+        <div className="flex flex-1 flex-col gap-2">
+          <label className="text-sm font-medium">{t("settings.languageLabel")}</label>
+          <Select value={i18n.resolvedLanguage ?? "en"} onValueChange={(language) => language && i18n.changeLanguage(language)}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="de">Deutsch</SelectItem>
+              <SelectItem value="en">English</SelectItem>
+            </SelectContent>
+          </Select>
+          <FieldDescription>{t("settings.language.description")}</FieldDescription>
+        </div>
 
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium">{t("settings.themeLabel")}</label>
-        <Select value={theme} onValueChange={handleThemeChange}>
-          <SelectTrigger className="w-45">
-            <SelectValue placeholder={t("settings.themePlaceholder")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="light">{t("settings.themeLight")}</SelectItem>
-            <SelectItem value="dark">{t("settings.themeDark")}</SelectItem>
-            <SelectItem value="system">{t("settings.themeSystem")}</SelectItem>
-          </SelectContent>
-        </Select>
-        <FieldDescription>{t("settings.description")}</FieldDescription>
+        <div className="flex flex-1 flex-col gap-2">
+          <label className="text-sm font-medium">{t("settings.themeLabel")}</label>
+          <Select value={theme} onValueChange={handleThemeChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t("settings.themePlaceholder")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="light">{t("settings.themeLight")}</SelectItem>
+              <SelectItem value="dark">{t("settings.themeDark")}</SelectItem>
+              <SelectItem value="system">{t("settings.themeSystem")}</SelectItem>
+            </SelectContent>
+          </Select>
+          <FieldDescription>{t("settings.description")}</FieldDescription>
+        </div>
+
       </div>
     </div>
   )
