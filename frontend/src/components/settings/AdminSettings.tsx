@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Pencil, Plus, ShieldCheck, Trash2, X } from "lucide-react"
+import { Download, Pencil, Plus, ShieldCheck, Trash2, X } from "lucide-react"
 
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {
   addUser,
+  downloadInstanceBackup,
   deleteUser,
   getInstanceSettings,
   getUsers,
@@ -38,6 +39,8 @@ export default function AdminSettings() {
   const [allowEmailLogin, setAllowEmailLogin] = useState(false)
   const [settingsError, setSettingsError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [backupLoading, setBackupLoading] = useState(false)
+  const [backupError, setBackupError] = useState<string | null>(null)
   const [users, setUsers] = useState<AdminUser[]>([])
   const [usersLoading, setUsersLoading] = useState(true)
   const [userError, setUserError] = useState<string | null>(null)
@@ -70,6 +73,18 @@ export default function AdminSettings() {
       setSettingsError(t("settings.instanceSettingsSaveError"))
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleInstanceBackup() {
+    setBackupLoading(true)
+    setBackupError(null)
+    try {
+      await downloadInstanceBackup()
+    } catch {
+      setBackupError(t("settings.admin.backupError"))
+    } finally {
+      setBackupLoading(false)
     }
   }
 
@@ -169,6 +184,17 @@ export default function AdminSettings() {
           </FieldLabel>
           <FieldError>{settingsError}</FieldError>
         </Field>
+      </section>
+
+      <section className="flex items-center justify-between gap-4 border-b pb-7">
+        <div>
+          <h2 className="font-semibold">{t("settings.admin.backupTitle")}</h2>
+          <p className="text-sm text-muted-foreground">{t("settings.admin.backupDescription")}</p>
+          {backupError && <p className="mt-2 text-sm text-destructive">{backupError}</p>}
+        </div>
+        <Button type="button" variant="outline" onClick={() => void handleInstanceBackup()} disabled={backupLoading}>
+          <Download /> {backupLoading ? t("settings.admin.backupLoading") : t("settings.admin.downloadBackup")}
+        </Button>
       </section>
 
       <section>

@@ -13,7 +13,6 @@ from inventory.serializers import InventorySerializer
 from .models import CustomUser, InstanceSettings
 from .serializers import (
     CredentialResetSerializer,
-    InstanceSettingsSerializer,
     SignupSerializer,
     UserSerializer,
     AdminUserSerializer,
@@ -88,24 +87,6 @@ class CredentialResetView(APIView):
                 'detail': 'Credentials updated successfully',
                 'user': UserSerializer(user).data,
             })
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class InstanceSettingsView(APIView):
-    def get(self, request):
-        return Response({
-            **InstanceSettingsSerializer(InstanceSettings.get_solo()).data,
-            'allow_signup': settings.ENABLE_SIGNUP,
-        })
-
-    def patch(self, request):
-        self.permission_classes = (permissions.IsAdminUser,)
-        self.check_permissions(request)
-        instance_settings = InstanceSettings.get_solo()
-        serializer = InstanceSettingsSerializer(instance_settings, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

@@ -8,13 +8,14 @@ from django.db.models import Count
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
-from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .code_utils import generate_codes_pdf
+from .export_utils import generate_inventory_csv_export
 from .models import (
     Area,
     Article,
@@ -28,9 +29,9 @@ from .models import (
 from .permissions import IsInventoryMember
 from .serializers import (
     AreaSerializer,
+    ArticleAttachmentSerializer,
     ArticleCategorySerializer,
     ArticleSerializer,
-    ArticleAttachmentSerializer,
     CategoryFieldSerializer,
     ChestSerializer,
     InventorySerializer,
@@ -39,6 +40,7 @@ from .serializers import (
 
 
 class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """ Viewset for listing and retrieving inventories. """
     serializer_class = InventorySerializer
     permission_classes = (IsAuthenticated, IsInventoryMember)
     http_method_names = ("get", "head", "options")
@@ -50,11 +52,69 @@ class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class InventoryAccessMixin:
+    """ Mixin to provide inventory access methods for API views. """
     def get_inventory(self, request, inventory_uuid):
         inventories = Inventory.objects.all() if request.user.is_superuser else request.user.inventories.all()
         return get_object_or_404(inventories, uuid=inventory_uuid)
 
 
+# region Base classses
+class InventoryScopedViewSet(viewsets.ModelViewSet):
+    """ Base class for viewsets that are scoped to a specific inventory.  (Handle inventory + authentication)"""
+    permission_classes = (IsAuthenticated, IsInventoryMember)
+    select_related_fields = ("inventory",)
+    prefetch_related_fields = ()
+    ordering = ("name",)
+
+    def get_accessible_inventories(self):
+        if self.request.user.is_superuser:
+            return Inventory.objects.all()
+        return self.request.user.inventories.all()
+
+    def get_queryset(self):
+        # Basic scoping for GET, PUT, PATCH, DELETE
+        queryset = super().get_queryset().filter(inventory__in=self.get_accessible_inventories())
+        inventory_uuid = self.request.query_params.get("inventory")
+        if inventory_uuid:
+            queryset = queryset.filter(inventory__uuid=inventory_uuid)
+        
+        if self.select_related_fields:
+            queryset = queryset.select_related(*self.select_related_fields)
+        if self.prefetch_related_fields:
+            queryset = queryset.prefetch_related(*self.prefetch_related_fields)
+                
+        return queryset
+
+    def perform_create(self, serializer):
+        inventory = serializer.validated_data.get('inventory')
+        
+        if inventory is None or not self.get_accessible_inventories().filter(pk=inventory.pk).exists():
+            raise PermissionDenied("You do not have permission to create objects in this inventory.")
+            
+        serializer.save()
+
+    def perform_update(self, serializer):
+        inventory = serializer.validated_data.get('inventory', serializer.instance.inventory)
+        
+        if inventory is None or not self.get_accessible_inventories().filter(pk=inventory.pk).exists():
+            raise PermissionDenied("You do not have permission to update objects in this inventory.")
+            
+        serializer.save()
+
+
+class InventoryScopedAPIView(APIView):
+    """ Base class for API views that are scoped to a specific inventory.  (Handle inventory + authentication)"""
+    permission_classes = (IsAuthenticated, IsInventoryMember)
+
+    def get_accessible_inventories(self):
+        if self.request.user.is_superuser:
+            return Inventory.objects.all()
+        return self.request.user.inventories.all()
+
+# endregion Base classes
+
+
+# region Inventory Settings/ Management Views
 class InventoryMembersView(InventoryAccessMixin, APIView):
     """ API view for managing members of a specific inventory."""
     permission_classes = (IsAuthenticated, IsInventoryMember)
@@ -117,58 +177,18 @@ class InventoryManageView(InventoryAccessMixin, APIView):
         inventory.delete()
         return Response(status=204)
 
-
-class InventoryScopedViewSet(viewsets.ModelViewSet):
-    """ Base class for viewsets that are scoped to a specific inventory.  (Handle inventory + authentication)"""
-    permission_classes = (IsAuthenticated, IsInventoryMember)
-    select_related_fields = ("inventory",)
-    prefetch_related_fields = ()
-    ordering = ("name",)
-
-    def get_accessible_inventories(self):
-        if self.request.user.is_superuser:
-            return Inventory.objects.all()
-        return self.request.user.inventories.all()
-
-    def get_queryset(self):
-        # Basic scoping for GET, PUT, PATCH, DELETE
-        queryset = super().get_queryset().filter(inventory__in=self.get_accessible_inventories())
-        inventory_uuid = self.request.query_params.get("inventory")
-        if inventory_uuid:
-            queryset = queryset.filter(inventory__uuid=inventory_uuid)
-        
-        if self.select_related_fields:
-            queryset = queryset.select_related(*self.select_related_fields)
-        if self.prefetch_related_fields:
-            queryset = queryset.prefetch_related(*self.prefetch_related_fields)
-                
-        return queryset
-
-    def perform_create(self, serializer):
-        inventory = serializer.validated_data.get('inventory')
-        
-        if inventory is None or not self.get_accessible_inventories().filter(pk=inventory.pk).exists():
-            raise PermissionDenied("You do not have permission to create objects in this inventory.")
-            
-        serializer.save()
-
-    def perform_update(self, serializer):
-        inventory = serializer.validated_data.get('inventory', serializer.instance.inventory)
-        
-        if inventory is None or not self.get_accessible_inventories().filter(pk=inventory.pk).exists():
-            raise PermissionDenied("You do not have permission to update objects in this inventory.")
-            
-        serializer.save()
-
-
-class InventoryScopedAPIView(APIView):
-    """ Base class for API views that are scoped to a specific inventory.  (Handle inventory + authentication)"""
+class ExportInventoryView(InventoryAccessMixin, APIView):
     permission_classes = (IsAuthenticated, IsInventoryMember)
 
-    def get_accessible_inventories(self):
-        if self.request.user.is_superuser:
-            return Inventory.objects.all()
-        return self.request.user.inventories.all()
+    def get(self, request, inventory_uuid):
+        inventory = self.get_inventory(request, inventory_uuid)
+        archive_file = generate_inventory_csv_export(inventory)
+        archive_file.seek(0)
+        response = FileResponse(archive_file, content_type="application/zip")
+        response["Content-Disposition"] = f'attachment; filename="inventory-{inventory.uuid}-csv-export.zip"'
+        return response
+
+# endregion Inventory Settings/ Management Views
 
 
 class DashboardView(InventoryScopedAPIView):

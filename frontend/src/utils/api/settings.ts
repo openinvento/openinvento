@@ -1,4 +1,4 @@
-import { deleteData, fetchData, patchData, postData } from "./base"
+import { deleteData, downloadFile, fetchData, patchData, postData } from "./base"
 
 
 export type InstanceSettings = {
@@ -13,6 +13,10 @@ export async function getInstanceSettings() {
 
 export async function updateInstanceSettings(settings: Partial<InstanceSettings>) {
   return patchData<InstanceSettings>('/api/instance-settings/', settings)
+}
+
+export async function downloadInstanceBackup() {
+  return downloadFile('/api/instance-settings/backup/', 'openinvento-instance-backup.zip')
 }
 
 export type AdminUser = {
