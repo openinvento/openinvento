@@ -1,18 +1,18 @@
+import csv
 import io
 import json
 import uuid
-import zipfile
 
 from account_auth.models import CustomUser
 from account_auth.serializers import UserSerializer
 from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Count
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
-from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -31,9 +31,9 @@ from .models import (
 from .permissions import IsInventoryMember
 from .serializers import (
     AreaSerializer,
+    ArticleAttachmentSerializer,
     ArticleCategorySerializer,
     ArticleSerializer,
-    ArticleAttachmentSerializer,
     CategoryFieldSerializer,
     ChestSerializer,
     InventorySerializer,
@@ -179,63 +179,44 @@ class InventoryManageView(InventoryAccessMixin, APIView):
         inventory.delete()
         return Response(status=204)
 
-class InventoryBackupView(InventoryAccessMixin, APIView):
+# Critical: Exports the whole data directory!
+class ExportInventoryView(InventoryAccessMixin, APIView):
     permission_classes = (IsAuthenticated, IsInventoryMember)
 
     def get(self, request, inventory_uuid):
         inventory = self.get_inventory(request, inventory_uuid)
-        inventory_filter = {"inventory": inventory}
-        areas = Area.objects.filter(**inventory_filter).order_by("created_at")
-        shelves = Shelf.objects.filter(**inventory_filter).order_by("created_at")
-        chests = Chest.objects.filter(**inventory_filter).order_by("created_at")
-        categories = ArticleCategory.objects.filter(**inventory_filter).order_by("created_at")
-        fields = CategoryField.objects.filter(**inventory_filter).order_by("created_at")
-        articles = Article.objects.filter(**inventory_filter).order_by("created_at")
-        attachments = ArticleAttachment.objects.filter(article__inventory=inventory).select_related("article").order_by("id")
+        output = io.StringIO(newline="")
+        writer = csv.writer(output)
+        writer.writerow((
+            "uuid", "identifier", "name", "description", "quantity", "stock_tracking",
+            "area", "shelf", "chest", "category", "custom_fields", "image", "attachments",
+            "created_at", "updated_at",
+        ))
 
-        backup_data = {
-            "format": "openinvento-inventory-backup",
-            "version": 1,
-            "inventory": InventorySerializer(inventory).data,
-            "areas": AreaSerializer(areas, many=True).data,
-            "shelves": ShelfSerializer(shelves, many=True).data,
-            "chests": ChestSerializer(chests, many=True).data,
-            "categories": ArticleCategorySerializer(categories, many=True).data,
-            "category_fields": CategoryFieldSerializer(fields, many=True).data,
-            "articles": ArticleSerializer(articles, many=True).data,
-            "attachments": [],
-        }
+        articles = Article.objects.filter(inventory=inventory).select_related(
+            "area", "shelf", "chest", "category"
+        ).prefetch_related("attachments").order_by("created_at")
+        for article in articles:
+            writer.writerow((
+                article.uuid,
+                article.identifier,
+                article.name,
+                article.description or "",
+                article.quantity,
+                article.stock_tracking,
+                article.area.name if article.area else "",
+                article.shelf.name if article.shelf else "",
+                article.chest.name if article.chest else "",
+                article.category.name if article.category else "",
+                json.dumps(article.custom_fields, ensure_ascii=False),
+                article.image.name if article.image else "",
+                json.dumps([attachment.original_name for attachment in article.attachments.all()], ensure_ascii=False),
+                article.created_at.isoformat(),
+                article.updated_at.isoformat(),
+            ))
 
-        archive_buffer = io.BytesIO()
-        with zipfile.ZipFile(archive_buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-            for model_name, model_items in (
-                ("articles", articles),
-                ("attachments", attachments),
-            ):
-                for item in model_items:
-                    file_field = item.image if model_name == "articles" else item.file
-                    if not file_field:
-                        continue
-                    archive_path = f"files/{file_field.name}"
-                    with file_field.open("rb") as stored_file:
-                        archive.writestr(archive_path, stored_file.read())
-                    if model_name == "attachments":
-                        backup_data["attachments"].append({
-                            "id": item.pk,
-                            "article": str(item.article_id),
-                            "original_name": item.original_name,
-                            "file": archive_path,
-                            "created_at": item.created_at.isoformat(),
-                        })
-
-            archive.writestr(
-                "backup.json",
-                json.dumps(backup_data, ensure_ascii=False, indent=2, default=str),
-            )
-
-        archive_buffer.seek(0)
-        response = FileResponse(archive_buffer, content_type="application/zip")
-        response["Content-Disposition"] = f'attachment; filename="inventory-{inventory.uuid}-backup.zip"'
+        response = HttpResponse(output.getvalue(), content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="inventory-{inventory.uuid}-articles.csv"'
         return response
 
 # endregion Inventory Settings/ Management Views
