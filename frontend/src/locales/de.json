@@ -81,6 +81,11 @@
       "userManagement": "Benutzerverwaltung",
       "actions": "Aktionen",
       "administrator": "Administrator",
+      "backupDescription": "Datenbank und alle von dieser Instanz gespeicherten Dateien herunterladen.",
+      "backupError": "Instanz-Backup konnte nicht heruntergeladen werden.",
+      "backupLoading": "Backup wird erstellt...",
+      "backupTitle": "Instanz-Backup",
+      "downloadBackup": "Backup herunterladen",
       "cancel": "Abbrechen",
       "confirmDelete": "{{name}} löschen?",
       "deleteUser": "Benutzer löschen",
@@ -126,7 +131,14 @@
     "allowEmailLogin": "Anmeldung mit E-Mail-Adresse erlauben",
     "allowEmailLoginDescription": "Wenn aktiviert, können sich Benutzer zusätzlich mit ihrer E-Mail-Adresse anmelden.",
     "instanceSettingsLoadError": "Instanzeinstellungen konnten nicht geladen werden.",
-    "instanceSettingsSaveError": "Instanzeinstellungen konnten nicht gespeichert werden."
+    "instanceSettingsSaveError": "Instanzeinstellungen konnten nicht gespeichert werden.",
+    "inventory": {
+      "exportCsv": "CSV-Dateien exportieren",
+      "exportDescription": "Inventardaten und zugehörige Dateien als ZIP-Archiv mit CSV-Tabellen herunterladen.",
+      "exportError": "Inventar konnte nicht exportiert werden.",
+      "exporting": "CSV wird erstellt...",
+      "exportTitle": "Inventardaten exportieren"
+    }
   },
   "auth": {
     "reset": {
