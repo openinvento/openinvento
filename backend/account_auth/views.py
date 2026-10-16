@@ -1,3 +1,6 @@
+import os
+from importlib.metadata import PackageNotFoundError, version as package_version
+
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.conf import settings
 from django.utils.decorators import method_decorator
@@ -164,6 +167,13 @@ class SidebarView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
+        app_version = os.environ.get('APP_VERSION')
+        if not app_version:
+            try:
+                app_version = package_version('openinvento')
+            except PackageNotFoundError:
+                app_version = '0.1.0'
+
         inventories = (
             Inventory.objects.all()
             if request.user.is_superuser
@@ -172,4 +182,5 @@ class SidebarView(APIView):
         return Response({
             'user': {'name': request.user.name},
             'inventories': InventorySerializer(inventories, many=True).data,
+            'version': app_version,
         })

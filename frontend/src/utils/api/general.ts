@@ -5,6 +5,7 @@ import type { Inventory } from "./inventory"
 export type SidebarData = {
 	user: { name: string }
 	inventories: Inventory[]
+	version: string
 }
 
 export function getSidebarData() {

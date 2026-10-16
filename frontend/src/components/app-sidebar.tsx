@@ -208,6 +208,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarRail />
+      <div className="">
+        <VersionNumber version={sidebar?.version} />
+      </div>
     </Sidebar>
+  )
+}
+
+
+export function VersionNumber({ version }: { version?: string }) {
+  const displayVersion = version
+    ? (version.startsWith("v") ? version : `v${version}`)
+    : null
+
+  return (
+    <div className="text-sm text-muted-foreground text-center mb-2">
+      {displayVersion}
+    </div>
   )
 }
