@@ -1,4 +1,4 @@
-import { deleteData, fetchData, patchData, postData } from "./base"
+import { deleteData, downloadFile, fetchData, patchData, postData } from "./base"
 
 export type Inventory = { uuid: string; name: string; identifier: string; updated_at: string }
 export type Area = EntityBase
@@ -123,6 +123,8 @@ export const inventoryApi = {
     postData<CodeLookupResult>("/api/codes/lookup/", { identifier }),
   updateInventory: (inventory: string, name: string) =>
     patchData<Inventory>(`/api/inventories/${inventory}/`, { name }),
+  exportInventoryCsv: (inventory: string) =>
+    downloadFile(`/api/inventories/${inventory}/export/`, `inventory-${inventory}-csv-export.zip`),
   getMembership: (inventory: string) =>
     fetchData<InventoryMembership>(`/api/inventories/${inventory}/members/`),
   addMember: (inventory: string, userUuid: string) =>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
-import { TriangleAlert, UserMinus, UserPlus } from "lucide-react"
+import { Download, TriangleAlert, UserMinus, UserPlus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import BaseScreen from "@/layouts/BaseScreen"
 import { Button } from "@/components/ui/button"
@@ -22,6 +22,7 @@ export default function InventorySettingsPage() {
   const [nameChanged, setNameChanged] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [error, setError] = useState("")
 
   async function load() {
@@ -109,6 +110,19 @@ export default function InventorySettingsPage() {
     }
   }
 
+  async function exportInventory() {
+    if (!membership) return
+    setExporting(true)
+    setError("")
+    try {
+      await inventoryApi.exportInventoryCsv(membership.inventory.uuid)
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : t("settings.inventory.exportError"))
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <BaseScreen title={t("settings.inventory.title")} description={membership?.inventory.name}>
       {error && <p className="mb-5 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
@@ -120,6 +134,16 @@ export default function InventorySettingsPage() {
               <label htmlFor="inventoryName" className="text-sm text-muted-foreground">{t("settings.inventory.name")}</label>
               <br />
               <Input value={inventoryName} onChange={(event) => { setInventoryName(event.target.value); setNameChanged(true) }} className="w-64" />
+            </section>
+
+            <section className="mb-8 flex items-center justify-between gap-4 my-8 mb-12 py-5">
+              <div>
+                <h2 className="text-xl font-semibold">{t("settings.inventory.exportTitle")}</h2>
+                <p className="text-sm text-muted-foreground">{t("settings.inventory.exportDescription")}</p>
+              </div>
+              <Button type="button" variant="outline" onClick={() => void exportInventory()} disabled={exporting}>
+                <Download /> {exporting ? t("settings.inventory.exporting") : t("settings.inventory.exportCsv")}
+              </Button>
             </section>
 
             <div className="mb-4 flex items-end justify-between gap-4">
