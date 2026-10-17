@@ -23,6 +23,8 @@ export default function AreaDetailScreen() {
 
   const [inventory, setInventory] = useState<Inventory | null>(null)
   const [area, setArea] = useState<Area | null>(null)
+  const [allAreas, setAllAreas] = useState<Area[]>([])
+  const [editAreaId, setEditAreaId] = useState("")
   const [shelves, setShelves] = useState<Shelf[]>([])
   const [chests, setChests] = useState<Chest[]>([])
   const [articles, setArticles] = useState<Article[]>([])
@@ -44,6 +46,7 @@ export default function AreaDetailScreen() {
       ])
       setInventory(getSelectedInventory(inventories))
       setArea(allAreas.find((item) => item.uuid === areaId) ?? null)
+      setAllAreas(allAreas)
       setShelves(allShelves.filter((item) => item.area === areaId))
       setChests(allChests.filter((item) => item.area === areaId))
       setArticles(allArticles.filter((item) => item.area === areaId))
@@ -58,10 +61,12 @@ export default function AreaDetailScreen() {
     const name = form.get("name")?.toString().trim()
     if (!name) return
     const optional = (key: string) => form.get(key)?.toString() || null
+    const selectedArea = modal.item ? editAreaId : areaId
+    if (!selectedArea) return
     const basePayload = { 
       name, 
       inventory: inventory.uuid, 
-      area: areaId 
+      area: selectedArea
     };
 
     let payload: Record<string, unknown> = basePayload
@@ -77,6 +82,7 @@ export default function AreaDetailScreen() {
       };
     }
 
+    setSaving(true)
     try { 
       if (modal.item) {
         await inventoryApi.update(modal.kind === "shelf" ? "shelves" : "chests", modal.item.uuid, payload)
@@ -161,7 +167,7 @@ export default function AreaDetailScreen() {
                 <Button
                   title={t("areas.detail.renameShelf")} aria-label={t("areas.detail.renameShelf")}
                   variant="ghost" size="icon-xs" 
-                  onClick={(event) => { event.stopPropagation(); setModal({ kind: "shelf", item: shelf }) }}
+                  onClick={(event) => { event.stopPropagation(); setEditAreaId(shelf.area); setModal({ kind: "shelf", item: shelf }) }}
                 >
                   <Pencil />
                 </Button>
@@ -177,7 +183,8 @@ export default function AreaDetailScreen() {
 
             {isOpen && <div className="border-t p-4">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
-                {sectionChests.map((chest) => <ChestCard key={chest.uuid} name={chest.name} subtitle={t("areas.detail.articleCount", { count: articles.filter((article) => article.chest === chest.uuid).length })} onOpen={() => navigate(`/app/chests/${chest.uuid}`)} onRename={() => setModal({ kind: "chest", item: chest })} onDelete={() => void remove("chests", chest.uuid, chest.name)} />)}
+                {sectionChests.map((chest) => 
+                <ChestCard key={chest.uuid} name={chest.name} subtitle={t("areas.detail.articleCount", { count: articles.filter((article) => article.chest === chest.uuid).length })} onOpen={() => navigate(`/app/chests/${chest.uuid}`)} onRename={() => { setEditAreaId(chest.area); setModal({ kind: "chest", item: chest }) }} onDelete={() => void remove("chests", chest.uuid, chest.name)} />)}
                 {sectionArticles.map((article) => <ArticleCard key={article.uuid} name={article.name} articleIcon={article.icon} articleImage={article.image} subtitle={t("areas.detail.inStock", { count: article.quantity })} badge={getLowStockBadge(article, t("areas.detail.lowStock"))} onOpen={() => navigate(`/app/articles/${article.uuid}`)} onRename={() => navigate(`/app/articles/${article.uuid}`)} onDelete={() => void remove("articles", article.uuid, article.name)} />)}
               </div>
               {sectionChests.length + sectionArticles.length === 0 && <p className="py-3 text-sm text-muted-foreground">{t("areas.detail.nothingStored")}</p>}
@@ -194,7 +201,7 @@ export default function AreaDetailScreen() {
             <ChestCard key={chest.uuid} name={chest.name} 
               subtitle={t("areas.detail.articleCount", { count: articles.filter((article) => article.chest === chest.uuid).length })} 
               onOpen={() => navigate(`/app/chests/${chest.uuid}`)} 
-              onRename={() => setModal({ kind: "chest", item: chest })} 
+              onRename={() => { setEditAreaId(chest.area); setModal({ kind: "chest", item: chest }) }}
               onDelete={() => void remove("chests", chest.uuid, chest.name)} 
             />)}
           </div>
@@ -221,6 +228,13 @@ export default function AreaDetailScreen() {
         />
       </label>
 
+      {modal?.item && <label className="grid gap-1.5 text-sm font-medium">
+        {t("areas.detail.fields.area")}
+        <select name="area" value={editAreaId} onChange={(event) => setEditAreaId(event.target.value)} className="h-10 rounded-lg border bg-background px-3 font-normal">
+          {allAreas.map((option) => <option key={option.uuid} value={option.uuid}>{option.name}</option>)}
+        </select>
+      </label>}
+
       {modal?.kind !== "shelf" && (
         <label className="grid gap-1.5 text-sm font-medium">
           {t("areas.detail.fields.shelf")}
@@ -230,7 +244,7 @@ export default function AreaDetailScreen() {
             className="h-10 rounded-lg border bg-background px-3 font-normal"
           >
             <option value="">{t("areas.detail.notOnShelf")}</option>
-            {shelves.map((shelf) => (
+            {shelves.filter((shelf) => shelf.area === (modal?.item ? editAreaId : areaId)).map((shelf) => (
               <option key={shelf.uuid} value={shelf.uuid}>
                 {shelf.name}
               </option>

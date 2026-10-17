@@ -19,6 +19,16 @@
     "rename": "Umbenennen",
     "renameTitle": "{{kind}} umbenennen"
   },
+  "chests": {
+    "editChest": "Kiste bearbeiten",
+    "editTitle": "Kiste bearbeiten",
+    "errors": { "edit": "Kiste konnte nicht bearbeitet werden." }
+  },
+  "areas": {
+    "detail": {
+      "fields": { "area": "Bereich" }
+    }
+  },
   "inventory": {
     "categories": {
       "food": "Lebensmittel",
