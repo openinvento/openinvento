@@ -4,7 +4,7 @@ import {
   useDroppable,
   type DragEndEvent,
 } from "@dnd-kit/react"
-import { PointerActivationConstraints, PointerSensor } from "@dnd-kit/dom"
+import { Feedback, PointerActivationConstraints, PointerSensor } from "@dnd-kit/dom"
 import { useCallback, useEffect, useState, type ReactNode } from "react"
 import { useLocation } from "react-router"
 import { useTranslation } from "react-i18next"
@@ -103,6 +103,10 @@ export function InventoryDndProvider({
 
   return (
     <DragDropProvider
+      plugins={(defaults) => [
+        ...defaults,
+        Feedback.configure({ dropAnimation: null }),
+      ]}
       sensors={(defaults) => defaults.map((sensor) => (
         sensor === PointerSensor
           ? PointerSensor.configure({
