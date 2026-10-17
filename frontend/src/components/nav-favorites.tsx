@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 import { ChevronDownIcon, HomeIcon, MoreHorizontalIcon, PackageIcon, StarOffIcon } from "lucide-react"
 import type { Favorite } from "@/utils/favorites"
+import { InventoryDropTarget } from "@/components/inventory/inventory-dnd"
 
 export function NavFavorites({
   favorites,
@@ -37,38 +38,40 @@ export function NavFavorites({
             {favorites.map((item) => {
               const areaId = favoriteAreaId(item)
               return (
-                <SidebarMenuItem
+                <InventoryDropTarget
                   key={item.id}
-                  data-inventory-drop={areaId ? `area:${areaId}` : undefined}
+                  target={areaId ? { kind: "area", id: areaId } : undefined}
                 >
-                  <SidebarMenuButton render={<Link to={favoriteUrl(item)} title={item.name} />}>
-                    {item.icon === "home" && <HomeIcon />}
-                    {item.icon === "package" && <PackageIcon />}
-                    <span>{item.name}</span>
-                  </SidebarMenuButton>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      render={
-                        <SidebarMenuAction showOnHover className="aria-expanded:bg-muted" />
-                      }
-                    >
-                      <MoreHorizontalIcon />
-                      <span className="sr-only">More</span>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      className="w-56 rounded-lg"
-                      side={isMobile ? "bottom" : "right"}
-                      align={isMobile ? "end" : "start"}
-                    >
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem onClick={() => onRemove(item.id)}>
-                          <StarOffIcon className="text-muted-foreground" />
-                          <span>{t("sidebar.removeFavorite")}</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton render={<Link to={favoriteUrl(item)} title={item.name} />}>
+                      {item.icon === "home" && <HomeIcon />}
+                      {item.icon === "package" && <PackageIcon />}
+                      <span>{item.name}</span>
+                    </SidebarMenuButton>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <SidebarMenuAction showOnHover className="aria-expanded:bg-muted" />
+                        }
+                      >
+                        <MoreHorizontalIcon />
+                        <span className="sr-only">More</span>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        className="w-56 rounded-lg"
+                        side={isMobile ? "bottom" : "right"}
+                        align={isMobile ? "end" : "start"}
+                      >
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem onClick={() => onRemove(item.id)}>
+                            <StarOffIcon className="text-muted-foreground" />
+                            <span>{t("sidebar.removeFavorite")}</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </SidebarMenuItem>
+                </InventoryDropTarget>
               )
             })}
             {favorites.length === 0 && (

@@ -10,6 +10,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import type { Area } from "@/utils/api/inventory"
+import { InventoryDropTarget } from "@/components/inventory/inventory-dnd"
 
 export function NavAreasList({ areas }: { areas: Area[] }) {
   const { t } = useTranslation()
@@ -26,17 +27,16 @@ export function NavAreasList({ areas }: { areas: Area[] }) {
         <CollapsibleContent>
           <SidebarMenu>
             {areas.map((area) => (
-              <SidebarMenuItem
-                key={area.uuid}
-                data-inventory-drop={`area:${area.uuid}`}
-              >
-                <SidebarMenuButton
-                  render={<Link to={`/app/areas/${area.uuid}`} title={area.name} />}
-                >
-                  <DoorOpen />
-                  <span>{area.name}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <InventoryDropTarget key={area.uuid} target={{ kind: "area", id: area.uuid }}>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    render={<Link to={`/app/areas/${area.uuid}`} title={area.name} />}
+                  >
+                    <DoorOpen />
+                    <span>{area.name}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </InventoryDropTarget>
             ))}
             {areas.length === 0 && (
               <p className="px-2 py-1 text-sm text-sidebar-foreground/70">
