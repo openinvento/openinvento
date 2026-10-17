@@ -164,7 +164,11 @@ export function NavActions() {
                         setNotificationsOpen(false)
                         const inventoryUuid = notification.metadata.inventory_uuid
                         if (typeof inventoryUuid === "string") setSelectedInventory(inventoryUuid)
-                        navigate(notification.link)
+                        if (/^https?:\/\//i.test(notification.link)) {
+                          window.open(notification.link, "_blank", "noopener,noreferrer")
+                        } else {
+                          navigate(notification.link)
+                        }
                       }}>
                         <span className="block font-medium">{notification.kind === "low_stock" ? t("navActions.lowStock", { name: notification.metadata.article_name }) : notification.title}</span>
                         {notification.kind === "low_stock" ? (

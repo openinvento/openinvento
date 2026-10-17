@@ -4,9 +4,11 @@ import BaseScreen from "@/layouts/BaseScreen";
 import AdminSettings from "@/components/settings/AdminSettings";
 import UserSettings from "@/components/settings/UserSettings";
 import { getCurrentSession } from "@/utils/api/auth";
+import { useLocation } from "react-router";
 
 export default function SettingsPage() {
   const { t } = useTranslation();
+  const location = useLocation();
 
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [activeTab, setActiveTab] = useState<"user" | "admin">("user");
@@ -16,6 +18,12 @@ export default function SettingsPage() {
       .then((session) => setIsAdmin(Boolean(session.user?.is_superuser)))
       .catch(() => setIsAdmin(false));
   }, []);
+
+  useEffect(() => {
+    if (isAdmin && new URLSearchParams(location.search).get("tab") === "admin") {
+      setActiveTab("admin");
+    }
+  }, [isAdmin, location.search]);
 
   return (
     <BaseScreen title={t("settings.title")}>
