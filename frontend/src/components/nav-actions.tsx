@@ -151,7 +151,7 @@ export function NavActions() {
           <PopoverTrigger render={<Button variant="ghost" size="icon" className="rounded-lg" aria-label={t("navActions.notifications")} />}>
             {notifications.length > 0 ? <BellDotIcon /> : <BellIcon />}
           </PopoverTrigger>
-          <PopoverContent className="w-72 p-3" align="end">
+          <PopoverContent className="w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] p-3 sm:w-72" align="end">
             <p className="mb-2 text-sm font-medium">{t("navActions.notifications")}</p>
             {notifications.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t("navActions.noNotifications")}</p>
