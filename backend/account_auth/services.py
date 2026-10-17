@@ -19,7 +19,7 @@ def create_notification(user, *, kind, title, message="", link="", metadata=None
         "metadata": metadata or {},
     }
     if source_key:
-        notification, _ = Notification.objects.get_or_create(
+        notification, _ = Notification.objects.update_or_create(
             user=user,
             source_key=source_key,
             defaults=defaults,
