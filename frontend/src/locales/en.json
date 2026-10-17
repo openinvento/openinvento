@@ -24,6 +24,7 @@
         "save": "Could not save item."
       },
       "fields": {
+        "area": "Area",
         "category": "Category",
         "chest": "Chest",
         "description": "Description",
@@ -218,10 +219,13 @@
     "backToArea": "Back to area",
     "confirmDelete": "Delete {{name}}?",
     "editIdentifier": "Edit identifier",
+    "editChest": "Edit chest",
+    "editTitle": "Edit chest",
     "empty": "No articles are stored in this chest yet.",
     "errors": {
       "delete": "Could not delete article.",
       "identifier": "Could not update the identifier.",
+      "edit": "Could not update this chest.",
       "load": "Could not load this chest."
     },
     "identifierTitle": "Edit chest identifier",
