@@ -1,4 +1,5 @@
 import { fetchData, postData } from "./base"
+import { resetNotificationsCache } from "./notifications"
 
 export type SessionUser = {
   username: string
@@ -10,10 +11,12 @@ export type SessionUser = {
 }
 
 export async function login(identifier: string, password: string) {
-  return postData<{ detail: string; user: SessionUser }>("/api/login/", {
+  const result = await postData<{ detail: string; user: SessionUser }>("/api/login/", {
     identifier,
     password,
   })
+  resetNotificationsCache()
+  return result
 }
 
 export async function signup(
@@ -22,16 +25,20 @@ export async function signup(
   name: string,
   password: string,
 ) {
-  return postData<{ detail: string; user: SessionUser }>('/api/signup/', {
+  const result = await postData<{ detail: string; user: SessionUser }>('/api/signup/', {
     username,
     email,
     name,
     password,
   })
+  resetNotificationsCache()
+  return result
 }
 
 export async function logout() {
-  return postData<{ detail: string }>("/api/logout/", {})
+  const result = await postData<{ detail: string }>("/api/logout/", {})
+  resetNotificationsCache()
+  return result
 }
 
 export async function getCurrentSession() {
