@@ -9,11 +9,12 @@ from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from inventory.models import Inventory
-from inventory.notification_services import sync_low_stock_notifications
 from inventory.serializers import InventorySerializer
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from inventory.inventory_notifications import sync_low_stock_notifications
 
 from .models import CustomUser, InstanceSettings, Notification
 from .serializers import (
