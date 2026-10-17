@@ -1,7 +1,7 @@
 from django.contrib.auth import password_validation
 from rest_framework import serializers
 
-from .models import CustomUser, InstanceSettings
+from .models import CustomUser, InstanceSettings, Notification
 from .services import create_user_inventory
 
 
@@ -9,6 +9,13 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('uuid', 'username', 'email', 'name', 'is_superuser', 'require_reset')
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ('uuid', 'kind', 'title', 'message', 'link', 'metadata', 'read', 'created_at')
+        read_only_fields = fields
 
 
 class AdminUserSerializer(serializers.ModelSerializer):

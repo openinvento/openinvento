@@ -13,13 +13,15 @@ from rest_framework.views import APIView
 from inventory.models import Inventory
 from inventory.serializers import InventorySerializer
 
-from .models import CustomUser, InstanceSettings
+from .models import CustomUser, InstanceSettings, Notification
 from .serializers import (
     CredentialResetSerializer,
     SignupSerializer,
     UserSerializer,
     AdminUserSerializer,
+    NotificationSerializer,
 )
+from inventory.notification_services import sync_low_stock_notifications
 
 
 class SignupView(APIView):
@@ -184,3 +186,28 @@ class SidebarView(APIView):
             'inventories': InventorySerializer(inventories, many=True).data,
             'version': app_version,
         })
+
+
+class NotificationListView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        sync_low_stock_notifications(request.user)
+        notifications = Notification.objects.filter(user=request.user, read=False)
+        return Response(NotificationSerializer(notifications, many=True).data)
+
+
+class NotificationDetailView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def patch(self, request, notification_uuid):
+        notification = get_object_or_404(
+            Notification,
+            uuid=notification_uuid,
+            user=request.user,
+        )
+        if request.data.get("read") is not True:
+            return Response({"read": "Set read to true to dismiss this notification."}, status=status.HTTP_400_BAD_REQUEST)
+        notification.read = True
+        notification.save(update_fields=("read",))
+        return Response(NotificationSerializer(notification).data)
