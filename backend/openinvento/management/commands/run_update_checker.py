@@ -8,6 +8,8 @@ from openinvento.instance_notifications import create_update_notifications
 
 logger = logging.getLogger(__name__)
 
+# This command is called on startup - for example by the docker entrypoint (for docker installations)
+# Run it manually with `python manage.py run_update_checker` to check for updates in a loop and notify instance admins.
 
 class Command(BaseCommand):
     help = "Periodically check for OpenInvento releases and notify instance admins."
