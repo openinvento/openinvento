@@ -339,6 +339,11 @@
     "moreActions": "More actions",
     "name": "Name",
     "noActions": "No actions available.",
+    "noNotifications": "No notifications.",
+    "lowStock": "Low stock: {{name}}",
+    "stockLevel": "{{quantity}} left (minimum {{minimum}})",
+    "notifications": "Notifications",
+    "dismiss": "Dismiss",
     "rename": "Rename",
     "renameTitle": "Rename {{kind}}"
   },

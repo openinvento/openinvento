@@ -1,13 +1,14 @@
 import * as React from "react"
 import { useLocation, useNavigate } from "react-router"
-import { MoreHorizontalIcon, PencilIcon, QrCodeIcon, StarIcon, StarOffIcon, Trash2Icon } from "lucide-react"
+import { BellDotIcon, BellIcon, MoreHorizontalIcon, PencilIcon, QrCodeIcon, StarIcon, StarOffIcon, Trash2Icon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { inventoryApi, type Area, type Chest } from "@/utils/api/inventory"
+import { inventoryApi, setSelectedInventory, type Area, type Chest } from "@/utils/api/inventory"
 import { isFavorite, toggleFavorite, type Favorite } from "@/utils/favorites"
 import { useTranslation } from "react-i18next"
+import { dismissNotification, getNotificationsOnce, type Notification } from "@/utils/api/notifications"
 
 type PageEntity = { uuid: string; name: string; identifier: string; kind: "areas" | "chests" }
 
@@ -24,6 +25,30 @@ export function NavActions() {
   const [menuOpen, setMenuOpen] = React.useState(false)
   const [saving, setSaving] = React.useState(false)
   const [error, setError] = React.useState("")
+
+  const [notifications, setNotifications] = React.useState<Notification[]>([])
+  const [notificationsOpen, setNotificationsOpen] = React.useState(false)
+  const [dismissingNotification, setDismissingNotification] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    let active = true
+    void getNotificationsOnce().then((items) => {
+      if (active) setNotifications(items)
+    }).catch(() => {})
+    return () => { active = false }
+  }, [])
+
+  async function dismissNotificationFromList(notification: Notification) {
+    setDismissingNotification(notification.uuid)
+    try {
+      await dismissNotification(notification.uuid)
+      setNotifications((items) => items.filter((item) => item.uuid !== notification.uuid))
+    } catch {
+      // Keep the notification visible if the dismiss request fails.
+    } finally {
+      setDismissingNotification(null)
+    }
+  }
 
   React.useEffect(() => {
     const areaId = location.pathname.match(/^\/app\/areas\/([^/]+)$/)?.[1]
@@ -113,16 +138,60 @@ export function NavActions() {
   }
 
   return (
-    <div className="flex items-center gap-2 text-sm">
-      {entity?.kind === "areas" && (
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => favorite && setFavorited(toggleFavorite(favorite))}
-          aria-pressed={favorited} aria-label={favorite ? (favorited ? `Remove ${favorite.name} from favorites` : `Add ${favorite.name} to favorites`) : "Favorite"}>
-          {favorited ? <StarOffIcon /> : <StarIcon />}
-        </Button>
-      )}
+    <div className="flex items-center gap-0 text-sm">
+      <div className="flex items-center gap-0">
+        {entity?.kind === "areas" && (
+          <Button variant="ghost" size="icon" className="rounded-lg" onClick={() => favorite && setFavorited(toggleFavorite(favorite))}
+            aria-pressed={favorited} aria-label={favorite ? (favorited ? `Remove ${favorite.name} from favorites` : `Add ${favorite.name} to favorites`) : "Favorite"}>
+            {favorited ? <StarOffIcon /> : <StarIcon />}
+          </Button>
+        )}
+
+        <Popover open={notificationsOpen} onOpenChange={setNotificationsOpen}>
+          <PopoverTrigger render={<Button variant="ghost" size="icon" className="rounded-lg" aria-label={t("navActions.notifications")} />}>
+            {notifications.length > 0 ? <BellDotIcon /> : <BellIcon />}
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-3" align="end">
+            <p className="mb-2 text-sm font-medium">{t("navActions.notifications")}</p>
+            {notifications.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{t("navActions.noNotifications")}</p>
+            ) : (
+              <ul className="grid gap-2">
+                {notifications.map((notification) => (
+                  <li key={notification.uuid} className="rounded-md p-2 text-sm hover:bg-muted">
+                    {notification.link ? (
+                      <button className="block w-full text-left" onClick={() => {
+                        setNotificationsOpen(false)
+                        const inventoryUuid = notification.metadata.inventory_uuid
+                        if (typeof inventoryUuid === "string") setSelectedInventory(inventoryUuid)
+                        navigate(notification.link)
+                      }}>
+                        <span className="block font-medium">{notification.kind === "low_stock" ? t("navActions.lowStock", { name: notification.metadata.article_name }) : notification.title}</span>
+                        {notification.kind === "low_stock" ? (
+                          <span className="text-muted-foreground">{notification.metadata.inventory_name} · {t("navActions.stockLevel", { quantity: notification.metadata.quantity, minimum: notification.metadata.minimum_quantity })}</span>
+                        ) : notification.message ? (
+                          <span className="text-muted-foreground">{notification.message}</span>
+                        ) : null}
+                      </button>
+                    ) : (
+                      <div>
+                        <span className="block font-medium">{notification.title}</span>
+                        {notification.message && <span className="text-muted-foreground">{notification.message}</span>}
+                      </div>
+                    )}
+                    <Button variant="ghost" size="sm" className="mt-1 h-7 px-2" disabled={dismissingNotification === notification.uuid} onClick={() => void dismissNotificationFromList(notification)}>
+                      {t("navActions.dismiss")}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </PopoverContent>
+        </Popover>
+      </div>
       
       <Popover open={menuOpen} onOpenChange={setMenuOpen}>
-        <PopoverTrigger render={<Button variant="ghost" size="icon" className="h-7 w-7 data-open:bg-accent" aria-label={t("navActions.moreActions")} />}>
+        <PopoverTrigger render={<Button variant="ghost" size="icon" className="rounded-lg data-open:bg-accent" aria-label={t("navActions.moreActions")} />}>
           <MoreHorizontalIcon />
         </PopoverTrigger>
         <PopoverContent className="w-48 p-1" align="end">

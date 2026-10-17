@@ -11,6 +11,11 @@
     "name": "Name",
     "moreActions": "Weitere Aktionen",
     "noActions": "Keine Aktionen verfügbar.",
+    "noNotifications": "Keine Benachrichtigungen.",
+    "lowStock": "Niedriger Bestand: {{name}}",
+    "stockLevel": "Noch {{quantity}} vorhanden (Minimum {{minimum}})",
+    "notifications": "Benachrichtigungen",
+    "dismiss": "Ausblenden",
     "rename": "Umbenennen",
     "renameTitle": "{{kind}} umbenennen"
   },
