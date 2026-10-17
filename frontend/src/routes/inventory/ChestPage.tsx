@@ -124,17 +124,20 @@ export default function ChestPage() {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
             {articles.map((article) => 
-            <InventoryDraggable key={article.uuid} item={{ kind: "article", id: article.uuid }}><ArticleCard name={article.name} articleIcon={article.icon} articleImage={article.image}
-                subtitle={t("areas.detail.inStock", { count: article.quantity })} 
-                badge={getLowStockBadge(article, t("areas.detail.lowStock"))} 
-                onOpen={() => navigate(`/app/articles/${article.uuid}`)} 
-                onRename={() => navigate(`/app/articles/${article.uuid}`)} 
-                onDelete={() => void remove(article)} 
-            /></InventoryDraggable>)}
+            <InventoryDraggable key={article.uuid} item={{ kind: "article", id: article.uuid }}>
+                <ArticleCard name={article.name} articleIcon={article.icon} articleImage={article.image}
+                  subtitle={t("areas.detail.inStock", { count: article.quantity })} 
+                  badge={getLowStockBadge(article, t("areas.detail.lowStock"))} 
+                  onOpen={() => navigate(`/app/articles/${article.uuid}`)} 
+                  onRename={() => navigate(`/app/articles/${article.uuid}`)} 
+                  onDelete={() => void remove(article)} 
+                />
+            </InventoryDraggable>)}
           </div>
         )}
       </>}
-      {chest && <InventoryModal title={t("chests.identifierTitle")} open={identifierOpen} submitting={saving}
+      {chest && 
+      <InventoryModal title={t("chests.identifierTitle")} open={identifierOpen} submitting={saving}
         onClose={() => setIdentifierOpen(false)} onSubmit={updateIdentifier}>
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         <label className="grid gap-1.5 text-sm font-medium">
