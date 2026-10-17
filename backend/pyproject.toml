@@ -13,7 +13,8 @@ dependencies = [
     "djangorestframework==3.18.0",
     "Pillow==12.3.0",
     "django-ratelimit==4.1.0",
-    "reportlab>=5.0.1"
+    "reportlab>=5.0.1",
+    "requests==2.34.2"
 ]
 
 [tool.setuptools]
