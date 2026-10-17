@@ -26,7 +26,8 @@
   },
   "areas": {
     "detail": {
-      "fields": { "area": "Bereich" }
+      "fields": { "area": "Bereich" },
+      "errors": { "move": "Element konnte nicht verschoben werden." }
     }
   },
   "inventory": {
@@ -179,6 +180,11 @@
   },
   "sidebar": {
     "home": "Home",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "areas": "Bereiche",
+    "favorites": "Favoriten",
+    "noAreas": "Noch keine Bereiche.",
+    "noFavorites": "Noch keine Favoriten.",
+    "removeFavorite": "Aus Favoriten entfernen"
   }
 }

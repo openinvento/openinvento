@@ -21,6 +21,7 @@
       "errors": {
         "delete": "Could not delete item.",
         "load": "Could not load this area.",
+        "move": "Could not move this item.",
         "save": "Could not save item."
       },
       "fields": {
@@ -470,6 +471,10 @@
     "home": "Home",
     "inventorySettings": "Inventory Settings",
     "search": "Search",
-    "settings": "Settings"
+    "settings": "Settings",
+    "favorites": "Favorites",
+    "noAreas": "No areas yet.",
+    "noFavorites": "No favorites yet.",
+    "removeFavorite": "Remove from Favorites"
   }
 }
