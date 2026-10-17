@@ -126,6 +126,7 @@ export default function ArticlePage() {
 
       setUnsavedChanges(false)
       setArticle(next);
+      window.dispatchEvent(new Event("openinvento:inventory-moved"))
 
       // Redirect to the area page if the article was saved successfully
       setPendingNavigation(next.area ? `/app/areas/${next.area}` : "/app/areas")
@@ -186,6 +187,7 @@ export default function ArticlePage() {
     if (!article || !window.confirm(t("articles.page.confirmDelete", { name: article.name }))) return;
     try {
       await inventoryApi.remove("articles", article.uuid); 
+      window.dispatchEvent(new Event("openinvento:inventory-moved"))
       removeFavorite(`article:${article.uuid}`); 
       setUnsavedChanges(false)
       setPendingNavigation(article.area ? `/app/areas/${article.area}` : "/app/areas") 

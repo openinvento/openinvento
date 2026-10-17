@@ -1,6 +1,10 @@
 
 ## Documentation
 
+## Drag and Drop
+To use drag and drop functionality, you can click and HOLD on an item to drag it to a new location. The application will provide visual feedback during the drag operation, and you can drop the item in a valid target area.
+Via Drag and drop you can move articles and chests between shelves and areas. You can also move articles in chests.
+
 
 #### Health check endpoint
 The application provides a health check endpoint at `/api/health`. It returns a JSON response with status 200 indicating the health of the OpenInvento installation.

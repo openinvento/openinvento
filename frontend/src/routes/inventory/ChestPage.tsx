@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from "react-router"
 import { ArticleCard } from "@/components/inventory/entity-cards"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
+import { InventoryDraggable } from "@/components/inventory/inventory-dnd"
 import { inventoryApi, type Area, type Article, type Chest, type Shelf } from "@/utils/api/inventory"
 
 function getLowStockBadge(article: Article, label: string) {
@@ -58,6 +59,7 @@ export default function ChestPage() {
       setChest(updated)
       setEditOpen(false)
       await load()
+      window.dispatchEvent(new Event("openinvento:inventory-moved"))
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : t("chests.errors.edit"))
     } finally {
@@ -65,13 +67,18 @@ export default function ChestPage() {
     }
   }
 
-  useEffect(() => { void load() }, [chestId])
+  useEffect(() => {
+    void load()
+    window.addEventListener("openinvento:inventory-moved", load)
+    return () => window.removeEventListener("openinvento:inventory-moved", load)
+  }, [chestId])
 
   async function remove(article: Article) {
     if (!window.confirm(t("chests.confirmDelete", { name: article.name }))) return
     try {
       await inventoryApi.remove("articles", article.uuid)
       await load()
+      window.dispatchEvent(new Event("openinvento:inventory-moved"))
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : t("chests.errors.delete"))
     }
@@ -117,17 +124,20 @@ export default function ChestPage() {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
             {articles.map((article) => 
-            <ArticleCard key={article.uuid} name={article.name} articleIcon={article.icon} articleImage={article.image} 
-                subtitle={t("areas.detail.inStock", { count: article.quantity })} 
-                badge={getLowStockBadge(article, t("areas.detail.lowStock"))} 
-                onOpen={() => navigate(`/app/articles/${article.uuid}`)} 
-                onRename={() => navigate(`/app/articles/${article.uuid}`)} 
-                onDelete={() => void remove(article)} 
-            />)}
+            <InventoryDraggable key={article.uuid} item={{ kind: "article", id: article.uuid }}>
+                <ArticleCard name={article.name} articleIcon={article.icon} articleImage={article.image}
+                  subtitle={t("areas.detail.inStock", { count: article.quantity })} 
+                  badge={getLowStockBadge(article, t("areas.detail.lowStock"))} 
+                  onOpen={() => navigate(`/app/articles/${article.uuid}`)} 
+                  onRename={() => navigate(`/app/articles/${article.uuid}`)} 
+                  onDelete={() => void remove(article)} 
+                />
+            </InventoryDraggable>)}
           </div>
         )}
       </>}
-      {chest && <InventoryModal title={t("chests.identifierTitle")} open={identifierOpen} submitting={saving}
+      {chest && 
+      <InventoryModal title={t("chests.identifierTitle")} open={identifierOpen} submitting={saving}
         onClose={() => setIdentifierOpen(false)} onSubmit={updateIdentifier}>
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         <label className="grid gap-1.5 text-sm font-medium">

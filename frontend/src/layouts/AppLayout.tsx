@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from "react-router"
 import { AppSidebar } from "@/components/app-sidebar"
+import { InventoryDndBoundary } from "@/components/inventory/inventory-dnd"
 import { NavActions } from "@/components/nav-actions"
 import {
   Breadcrumb,
@@ -18,6 +19,7 @@ export default function DashboardLayout() {
   const location = useLocation()
   const pageName = location.pathname.includes("/areas") ? "Inventory areas" : location.pathname.includes("/articles") ? "Article" : "Dashboard"
   return (
+    <InventoryDndBoundary>
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
@@ -49,5 +51,6 @@ export default function DashboardLayout() {
         </div>
       </SidebarInset>
     </SidebarProvider>
+    </InventoryDndBoundary>
   )
 }
