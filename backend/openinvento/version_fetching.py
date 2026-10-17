@@ -15,7 +15,7 @@ class VersionFetcher:
 
     def fetch_latest_release(self):
         """Fetch the latest release from the GitHub API."""
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
         response.raise_for_status()  # Throws an error if the request failed
         releases = response.json()
 
@@ -45,7 +45,7 @@ class VersionFetcher:
         version = self.current_version
         if not version:
             raise ValueError("Current version must be set to fetch changelog.")
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
         response.raise_for_status()
         releases = response.json()
 

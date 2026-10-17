@@ -21,15 +21,14 @@ def get_current_version():
         return "0.1.0"
 
 
-def create_update_notifications(release=None, current_version=None):
+def create_update_notifications():
     """Check GitHub for a newer release and notify every instance admin once."""
-    current_version = current_version or get_current_version()
-    if release is None:
-        try:
-            release = VersionFetcher(current_version=current_version).fetch_latest_release()
-        except Exception:
-            logger.exception("Could not check for OpenInvento updates")
-            return []
+    current_version = get_current_version()
+    try:
+        release = VersionFetcher(current_version=current_version).fetch_latest_release()
+    except Exception:
+        logger.exception("Could not check for OpenInvento updates")
+        return []
 
     if not release or not release.get("tag_name"):
         return []
