@@ -37,12 +37,17 @@ export default function AreasPage() {
       else await inventoryApi.create("areas", { name, inventory: inventory.uuid })
       setModal(null); 
       await load()
+      window.dispatchEvent(new Event("openinvento:inventory-moved"))
     } catch (reason) { setError(reason instanceof Error ? reason.message : t("areas.errors.save")) }
     finally { setSaving(false) }
   }
   async function remove(area: Area) {
     if (!window.confirm(t("areas.confirmDelete", { name: area.name }))) return
-    try { await inventoryApi.remove("areas", area.uuid); await load() }
+    try {
+      await inventoryApi.remove("areas", area.uuid)
+      await load()
+      window.dispatchEvent(new Event("openinvento:inventory-moved"))
+    }
     catch (reason) { setError(reason instanceof Error ? reason.message : t("areas.errors.delete")) }
   }
 
