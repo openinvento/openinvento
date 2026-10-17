@@ -74,8 +74,8 @@ jobs:
     - name: Commit and Push Updated License Files
       if: github.event_name == 'push'
       run: |
-        git config --global user.name "openinvento-bot[bot]"
-        git config --global user.email "openinvento-bot[bot]@://github.com"
+        git config user.name "openinvento-bot"
+        git config user.email "343908301+openinvento-bot[bot]@users.noreply.github.com"
         
         if [ -n "$(git status --porcelain backend/THIRD-PARTY-NOTICES-PYTHON.txt frontend/THIRD_PARTY_LICENSES.md)" ]; then
           echo "📝 License files changed. Committing updates..."
