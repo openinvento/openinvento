@@ -1,6 +1,7 @@
 import os
 import tempfile
 import zipfile
+import logging
 from pathlib import Path
 
 from django.conf import settings
@@ -13,6 +14,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from .instance_notifications import create_update_notifications, get_current_version
+from .version_fetching import VersionFetcher
 
 #TODO: Add option to serve user uploads through Nginx or a connected S3 storage bucket
 
@@ -22,6 +25,35 @@ def health_view(request):
 
 
 # General Endpoints for instance settings
+
+logger = logging.getLogger(__name__)
+
+
+class VersionCheckView(APIView):
+    """Check for the latest release of OpenInvento and notify instance admins if a newer version is available."""
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        if not request.user.is_superuser:
+            return Response({"detail": "Administrator access is required."}, status=status.HTTP_403_FORBIDDEN)
+
+        current_version = get_current_version()
+        fetcher = VersionFetcher(current_version=current_version)
+        try:
+            latest_release = fetcher.fetch_latest_release()
+            changelog = fetcher.fetch_changelog_since_version()
+            create_update_notifications(latest_release, current_version)
+        except Exception:
+            logger.exception("Could not fetch the OpenInvento release information")
+            return Response({"detail": "Could not fetch release information."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        return Response({
+            "current_version": current_version,
+            "newer_version_available": bool(latest_release and latest_release.get("newer_version_available")),
+            "latest_release": latest_release,
+            "changelog": changelog or [],
+        })
+
 
 # Attention: This endpoint return the whole data directory
 class InstanceBackupView(APIView):
