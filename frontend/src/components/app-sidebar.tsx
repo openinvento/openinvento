@@ -4,6 +4,7 @@ import * as React from "react"
 import { useLocation } from "react-router"
 
 import { NavFavorites } from "@/components/nav-favorites"
+import { NavAreasList } from "@/components/nav-areas-list"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { AccountSidebarManager } from "@/components/inventory-switch-sidebar"
@@ -17,6 +18,7 @@ import { SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuest
 import { FAVORITES_CHANGED_EVENT, getFavorites, removeFavorite, type Favorite } from "@/utils/favorites"
 import i18n from "@/i18n"
 import { getSidebarData, type SidebarData } from "@/utils/api/general"
+import { inventoryApi, type Area } from "@/utils/api/inventory"
 
 // This is sample data.
 const data = {
@@ -173,9 +175,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation()
   const [favorites, setFavorites] = React.useState<Favorite[]>([])
   const [sidebar, setSidebar] = React.useState<SidebarData | null>(null)
+  const [areas, setAreas] = React.useState<Area[]>([])
 
   React.useEffect(() => {
     void getSidebarData().then(setSidebar).catch(() => setSidebar(null))
+  }, [])
+
+  React.useEffect(() => {
+    const loadAreas = () => void inventoryApi.listAreas().then(setAreas).catch(() => setAreas([]))
+    loadAreas()
+    window.addEventListener("openinvento:inventory-moved", loadAreas)
+    return () => window.removeEventListener("openinvento:inventory-moved", loadAreas)
   }, [])
 
   React.useEffect(() => {
@@ -203,6 +213,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavFavorites favorites={favorites} onRemove={removeFavorite} />
+        <NavAreasList areas={areas} />
         {/* Readding this later */}
        {/*  <NavWorkspaces areas={data.areas} /> */}
         <NavSecondary items={data.navSecondary} className="mt-auto" />
