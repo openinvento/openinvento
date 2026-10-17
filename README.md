@@ -91,6 +91,10 @@ Docker Compose (recommended):
 #### Health check endpoint
 The application provides a health check endpoint at `/api/health`. It returns a JSON response with status 200 indicating the health of the OpenInvento installation.
 
+#### Update check
+The application periodically checks for new releases and notifies instance administrators. It fetches all 24 hours the Github API for the latest release and compares it with the current version. If a new release is available, it sends an notification to the instance administrators.
+Set the env variable `ENABLE_UPDATE_CHECKER` to `false` in the environment variables to disable this feature.
+
 ## Env Variables
 
 The Docker deployment reads these variables from the environment or a `.env` file:
@@ -105,6 +109,7 @@ The Docker deployment reads these variables from the environment or a `.env` fil
 | `INIT_ADMIN_PASSWORD` | Required when enabled | None | Password for the initial administrator account. It must be changed on first login. |
 | `CREATE_INIT_ADMIN` | No | `true` | Set to `false` to disable automatic initial administrator creation. |
 | `ENABLE_SIGNUP` | No | `false` | Set to `true` to enable public account signup. |
+| `ENABLE_UPDATE_CHECKER` | No | `true` | Set to `false` to disable automatic update notifications. |
 
 The initial administrator is created after migrations only when the database contains no users. After the first login, the user will be prompted to change their password.
 
