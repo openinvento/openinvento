@@ -3,10 +3,11 @@
 
 import os
 
-from account_auth.models import CustomUser
-from account_auth.services import create_user_inventory
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+
+from account_auth.models import CustomUser
+from account_auth.services import create_user_inventory
 
 
 def env_flag(name, default=True):

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Download, Pencil, Plus, ShieldCheck, Trash2, X } from "lucide-react"
+import { Download, Pencil, Plus, RefreshCw, ShieldCheck, Trash2, X } from "lucide-react"
 
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -8,15 +8,18 @@ import {
   addUser,
   downloadInstanceBackup,
   deleteUser,
+  fetchVersionCheck,
   getInstanceSettings,
   getUsers,
   type AdminUser,
   updateInstanceSettings,
   updateUser,
+  type VersionCheck,
 } from "@/utils/api/settings"
 import { Button } from "../ui/button"
 import { getAuthErrorMessage } from "@/utils/api/auth-errors"
 import { Switch } from "../ui/switch"
+import { MarkdownContent } from "@/components/ui/markdown-content"
 
 type UserForm = {
   username: string
@@ -41,6 +44,9 @@ export default function AdminSettings() {
   const [saving, setSaving] = useState(false)
   const [backupLoading, setBackupLoading] = useState(false)
   const [backupError, setBackupError] = useState<string | null>(null)
+  const [versionCheck, setVersionCheck] = useState<VersionCheck | null>(null)
+  const [versionLoading, setVersionLoading] = useState(false)
+  const [versionError, setVersionError] = useState<string | null>(null)
   const [users, setUsers] = useState<AdminUser[]>([])
   const [usersLoading, setUsersLoading] = useState(true)
   const [userError, setUserError] = useState<string | null>(null)
@@ -85,6 +91,18 @@ export default function AdminSettings() {
       setBackupError(t("settings.admin.backupError"))
     } finally {
       setBackupLoading(false)
+    }
+  }
+
+  async function handleVersionCheck() {
+    setVersionLoading(true)
+    setVersionError(null)
+    try {
+      setVersionCheck(await fetchVersionCheck())
+    } catch {
+      setVersionError(t("settings.admin.version.checkError"))
+    } finally {
+      setVersionLoading(false)
     }
   }
 
@@ -195,6 +213,48 @@ export default function AdminSettings() {
         <Button type="button" variant="outline" onClick={() => void handleInstanceBackup()} disabled={backupLoading}>
           <Download /> {backupLoading ? t("settings.admin.backupLoading") : t("settings.admin.downloadBackup")}
         </Button>
+      </section>
+
+      <section className="border-b pb-7">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="font-semibold">{t("settings.admin.version.title")}</h2>
+            <p className="text-sm text-muted-foreground">{t("settings.admin.version.description")}</p>
+          </div>
+          <Button type="button" variant="outline" onClick={() => void handleVersionCheck()} disabled={versionLoading}>
+            <RefreshCw className={versionLoading ? "animate-spin" : ""} />
+            {versionLoading ? t("settings.admin.version.checking") : t("settings.admin.version.checkButton")}
+          </Button>
+        </div>
+        {versionError && <p role="alert" className="mt-3 text-sm text-destructive">{versionError}</p>}
+        
+        {versionCheck && (
+          <div className="mt-4 grid gap-4 rounded-xl border bg-muted/20 p-4">
+            <p className="text-sm">
+              {versionCheck.newer_version_available
+                ? t("settings.admin.version.updateAvailable", { version: versionCheck.latest_release?.tag_name ?? "" })
+                : t("settings.admin.version.upToDate", { version: versionCheck.current_version })}
+            </p>
+            {versionCheck.changelog.map((release) => (
+              <article key={release.tag_name} className="grid gap-2 border-t pt-4 first:border-0 first:pt-0">
+                <div>
+                  <h3 className="font-semibold">{release.name || release.tag_name}</h3>
+                  {release.published_at && (
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(release.published_at).toLocaleString(undefined, {
+                        dateStyle: "medium",
+                      })}
+                    </p>
+                  )}
+                </div>
+                {release.body ? <MarkdownContent source={release.body} /> : <p className="text-sm text-muted-foreground">{t("settings.admin.version.noNotes")}</p>}
+              </article>
+            ))}
+            {versionCheck.changelog.length === 0 && (
+              <p className="text-sm text-muted-foreground">{t("settings.admin.version.noChangelog")}</p>
+            )}
+          </div>
+        )}
       </section>
 
       <section>

@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
+from django.db.models import Q
 
 
 class CustomUserManager(UserManager):
@@ -33,3 +34,29 @@ class InstanceSettings(models.Model):
     def get_solo(cls):
         settings, _ = cls.objects.get_or_create(pk=1)
         return settings
+
+
+class Notification(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="notifications")
+    kind = models.CharField(max_length=40)
+    title = models.CharField(max_length=160)
+    message = models.TextField(blank=True)
+    link = models.CharField(max_length=300, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    source_key = models.CharField(max_length=255, blank=True)
+    read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=("user", "source_key"),
+                condition=Q(source_key__gt=""),
+                name="unique_notification_source_per_user",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.title} ({self.user})"

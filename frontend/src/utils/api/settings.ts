@@ -19,6 +19,25 @@ export async function downloadInstanceBackup() {
   return downloadFile('/api/instance-settings/backup/', 'openinvento-instance-backup.zip')
 }
 
+export type ReleaseEntry = {
+  tag_name: string | null
+  name: string | null
+  body?: string | null
+  published_at?: string | null
+  html_url?: string | null
+}
+
+export type VersionCheck = {
+  current_version: string
+  newer_version_available: boolean
+  latest_release: ReleaseEntry | null
+  changelog: ReleaseEntry[]
+}
+
+export async function fetchVersionCheck() {
+  return fetchData<VersionCheck>('/api/instance-settings/version-check/')
+}
+
 export type AdminUser = {
   uuid: string
   username: string

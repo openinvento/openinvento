@@ -134,6 +134,7 @@ INSTALLED_APPS = [
 
     "inventory",
     "account_auth",
+    "openinvento.apps.OpenInventoConfig",
 ]
 
 if HAS_CORSHEADERS:

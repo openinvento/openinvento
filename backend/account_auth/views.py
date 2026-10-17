@@ -1,21 +1,28 @@
-from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+import os
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as package_version
+
 from django.conf import settings
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import ensure_csrf_cookie
-from rest_framework import permissions, status
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.db import transaction
 from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from inventory.models import Inventory
 from inventory.serializers import InventorySerializer
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .models import CustomUser, InstanceSettings
+from inventory.inventory_notifications import sync_low_stock_notifications
+
+from .models import CustomUser, InstanceSettings, Notification
 from .serializers import (
+    AdminUserSerializer,
     CredentialResetSerializer,
+    NotificationSerializer,
     SignupSerializer,
     UserSerializer,
-    AdminUserSerializer,
 )
 
 
@@ -164,6 +171,13 @@ class SidebarView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
+        app_version = os.environ.get('APP_VERSION')
+        if not app_version:
+            try:
+                app_version = package_version('openinvento')
+            except PackageNotFoundError:
+                app_version = '0.1.0'
+
         inventories = (
             Inventory.objects.all()
             if request.user.is_superuser
@@ -172,4 +186,30 @@ class SidebarView(APIView):
         return Response({
             'user': {'name': request.user.name},
             'inventories': InventorySerializer(inventories, many=True).data,
+            'version': app_version,
         })
+
+
+class NotificationListView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        sync_low_stock_notifications(request.user)
+        notifications = Notification.objects.filter(user=request.user, read=False)
+        return Response(NotificationSerializer(notifications, many=True).data)
+
+
+class NotificationDetailView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def patch(self, request, notification_uuid):
+        notification = get_object_or_404(
+            Notification,
+            uuid=notification_uuid,
+            user=request.user,
+        )
+        if request.data.get("read") is not True:
+            return Response({"read": "Set read to true to dismiss this notification."}, status=status.HTTP_400_BAD_REQUEST)
+        notification.read = True
+        notification.save(update_fields=("read",))
+        return Response(NotificationSerializer(notification).data)
