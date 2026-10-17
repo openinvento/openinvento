@@ -17,7 +17,16 @@ jobs:
   update_release_draft:
     runs-on: ubuntu-slim
     steps:
+      - name: Generate Bot Token
+        id: get-bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.BOT_CLIENT_ID }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
+
       - uses: release-drafter/release-drafter@v7
+        env:
+          GITHUB_TOKEN: ${{ steps.get-bot-token.outputs.token }}
         with:
           # This default loads .github/release-drafter.yml.
           config-name: release-drafter.yml
