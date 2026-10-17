@@ -91,6 +91,17 @@
       "backupLoading": "Backup wird erstellt...",
       "backupTitle": "Instanz-Backup",
       "downloadBackup": "Backup herunterladen",
+      "version": {
+        "title": "OpenInvento-Updates",
+        "description": "Nach einer neuen Version suchen und das Änderungsprotokoll ansehen.",
+        "checkButton": "Nach Updates suchen",
+        "checking": "Suche läuft...",
+        "checkError": "Release-Informationen konnten nicht abgerufen werden.",
+        "updateAvailable": "Version {{version}} ist verfügbar.",
+        "upToDate": "Diese Instanz verwendet die neueste Version ({{version}}).",
+        "noNotes": "Für dieses Release gibt es keine Änderungsnotizen.",
+        "noChangelog": "Seit dieser Version sind keine Änderungsnotizen verfügbar."
+      },
       "cancel": "Abbrechen",
       "confirmDelete": "{{name}} löschen?",
       "deleteUser": "Benutzer löschen",

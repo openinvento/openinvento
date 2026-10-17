@@ -384,6 +384,17 @@
       "deleteUser": "Delete user",
       "deleteUserError": "Could not delete user.",
       "downloadBackup": "Download backup",
+      "version": {
+        "title": "OpenInvento updates",
+        "description": "Check for a new version and review its changelog.",
+        "checkButton": "Check for updates",
+        "checking": "Checking...",
+        "checkError": "Could not fetch release information.",
+        "updateAvailable": "Version {{version}} is available.",
+        "upToDate": "This instance is running the latest version ({{version}}).",
+        "noNotes": "No release notes were provided.",
+        "noChangelog": "No changelog entries are available since this version."
+      },
       "editUser": "Edit user",
       "email": "Email",
       "enableEmailLogin": "Enable email login",
