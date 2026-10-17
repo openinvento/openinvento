@@ -14,7 +14,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .instance_notifications import create_update_notifications, get_current_version
+from .instance_notifications import get_current_version
 from .version_fetching import VersionFetcher
 
 #TODO: Add option to serve user uploads through Nginx or a connected S3 storage bucket
@@ -42,7 +42,6 @@ class VersionCheckView(APIView):
         try:
             latest_release = fetcher.fetch_latest_release()
             changelog = fetcher.fetch_changelog_since_version()
-            create_update_notifications(latest_release, current_version)
         except Exception:
             logger.exception("Could not fetch the OpenInvento release information")
             return Response({"detail": "Could not fetch release information."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
