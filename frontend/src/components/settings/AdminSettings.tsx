@@ -239,7 +239,13 @@ export default function AdminSettings() {
               <article key={release.tag_name} className="grid gap-2 border-t pt-4 first:border-0 first:pt-0">
                 <div>
                   <h3 className="font-semibold">{release.name || release.tag_name}</h3>
-                  {release.published_at && <p className="text-xs text-muted-foreground">{release.published_at}</p>}
+                  {release.published_at && (
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(release.published_at).toLocaleString(undefined, {
+                        dateStyle: "medium",
+                      })}
+                    </p>
+                  )}
                 </div>
                 {release.body ? <MarkdownContent source={release.body} /> : <p className="text-sm text-muted-foreground">{t("settings.admin.version.noNotes")}</p>}
               </article>
