@@ -131,6 +131,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "rest_framework",
     'rest_framework.authtoken',
+    "rest_framework_api_key",
 
     "inventory",
     "account_auth",
@@ -230,6 +231,8 @@ REST_FRAMEWORK = {
     ),
      'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES
 }
+
+API_KEY_MODEL = "account_auth.UserAPIKey"
 
 SIMPLE_JWT= {
    'SIGNING_KEY': SECRET_KEY,
