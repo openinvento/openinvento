@@ -55,13 +55,13 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ("-created_at",)
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
                 fields=("user", "source_key"),
                 condition=Q(source_key__gt=""),
                 name="unique_notification_source_per_user",
             ),
-        ]
+        )
 
     def __str__(self):
         return f"{self.title} ({self.user})"
