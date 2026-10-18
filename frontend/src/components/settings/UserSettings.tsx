@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useNavigate } from "react-router"
+import { createAPIKey, getAPIKeys, renameAPIKey, revokeAPIKey, type APIKey } from "@/utils/api/settings"
 
 type ThemeOption = "light" | "dark" | "system"
 
@@ -27,6 +28,13 @@ export default function UserSettings() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [accountError, setAccountError] = useState<string | null>(null)
   const [accountSaving, setAccountSaving] = useState(false)
+  const [apiKeys, setApiKeys] = useState<APIKey[]>([])
+  const [apiKeyName, setApiKeyName] = useState("")
+  const [apiKeyValue, setApiKeyValue] = useState<string | null>(null)
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null)
+  const [apiKeysLoading, setApiKeysLoading] = useState(true)
+  const [apiKeysSaving, setApiKeysSaving] = useState(false)
+  
   const [theme, setTheme] = useState<ThemeOption>(() => {
     if (typeof window !== "undefined") {
       return (localStorage.getItem("theme") as ThemeOption) || "system"
@@ -44,6 +52,52 @@ export default function UserSettings() {
       })
       .catch(() => setAccountError(t("settings.accountLoadError")))
   }, [t])
+
+  useEffect(() => {
+    getAPIKeys()
+      .then(setApiKeys)
+      .catch(() => setApiKeyError(t("settings.apiKeys.loadError")))
+      .finally(() => setApiKeysLoading(false))
+  }, [t])
+
+  async function handleCreateAPIKey(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setApiKeyError(null)
+    setApiKeysSaving(true)
+    try {
+      const created = await createAPIKey(apiKeyName.trim())
+      setApiKeys((current) => [created, ...current])
+      setApiKeyValue(created.key)
+      setApiKeyName("")
+    } catch (error) {
+      setApiKeyError(error instanceof Error ? error.message : t("settings.apiKeys.createError"))
+    } finally {
+      setApiKeysSaving(false)
+    }
+  }
+
+  async function handleRenameAPIKey(key: APIKey) {
+    const name = window.prompt(t("settings.apiKeys.renamePrompt"), key.name)?.trim()
+    if (!name || name === key.name) return
+    setApiKeyError(null)
+    try {
+      const updated = await renameAPIKey(key.id, name)
+      setApiKeys((current) => current.map((item) => item.id === key.id ? updated : item))
+    } catch (error) {
+      setApiKeyError(error instanceof Error ? error.message : t("settings.apiKeys.updateError"))
+    }
+  }
+
+  async function handleRevokeAPIKey(key: APIKey) {
+    if (!window.confirm(t("settings.apiKeys.revokeConfirm", { name: key.name }))) return
+    setApiKeyError(null)
+    try {
+      await revokeAPIKey(key.id)
+      setApiKeys((current) => current.map((item) => item.id === key.id ? { ...item, revoked: true } : item))
+    } catch (error) {
+      setApiKeyError(error instanceof Error ? error.message : t("settings.apiKeys.revokeError"))
+    }
+  }
 
   async function handleAccountSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -178,6 +232,48 @@ export default function UserSettings() {
             </Button>
           </div>
         </form>
+      </section>
+
+      <section className="border-b pb-7">
+        <div className="mb-5">
+          <h2 className="text-xl font-semibold">{t("settings.apiKeys.title")}</h2>
+          <p className="text-sm text-muted-foreground">{t("settings.apiKeys.description")}</p>
+        </div>
+        {apiKeyValue && (
+          <div className="mb-4 rounded-md border bg-muted/30 p-4">
+            <p className="mb-2 text-sm font-medium">{t("settings.apiKeys.createdOnce")}</p>
+            <code className="block break-all text-sm">{apiKeyValue}</code>
+            <Button type="button" variant="outline" className="mt-3" onClick={() => void navigator.clipboard?.writeText(apiKeyValue)}>
+              {t("settings.apiKeys.copy")}
+            </Button>
+            <Button type="button" variant="ghost" className="ml-2 mt-3" onClick={() => setApiKeyValue(null)}>
+              {t("settings.apiKeys.dismiss")}
+            </Button>
+          </div>
+        )}
+        <form onSubmit={handleCreateAPIKey} className="mb-4 flex flex-col gap-3 sm:flex-row">
+          <Input value={apiKeyName} onChange={(event) => setApiKeyName(event.target.value)} maxLength={50} placeholder={t("settings.apiKeys.namePlaceholder")} required aria-label={t("settings.apiKeys.nameLabel")} />
+          <Button type="submit" disabled={apiKeysSaving}>{apiKeysSaving ? t("settings.apiKeys.creating") : t("settings.apiKeys.create")}</Button>
+        </form>
+        <FieldError>{apiKeyError}</FieldError>
+        {apiKeysLoading ? <p className="text-sm text-muted-foreground">{t("settings.apiKeys.loading")}</p> : apiKeys.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("settings.apiKeys.empty")}</p>
+        ) : (
+          <ul className="divide-y rounded-md border">
+            {apiKeys.map((key) => (
+              <li key={key.id} className="flex flex-col justify-between gap-3 p-4 sm:flex-row sm:items-center">
+                <div>
+                  <p className="font-medium">{key.name} {key.revoked && <span className="text-xs text-muted-foreground">({t("settings.apiKeys.revoked")})</span>}</p>
+                  <p className="text-sm text-muted-foreground">{t("settings.apiKeys.prefix", { prefix: key.prefix })}</p>
+                </div>
+                {!key.revoked && <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={() => void handleRenameAPIKey(key)}>{t("settings.apiKeys.rename")}</Button>
+                  <Button type="button" variant="destructive" onClick={() => void handleRevokeAPIKey(key)}>{t("settings.apiKeys.revoke")}</Button>
+                </div>}
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <div className="flex flex-row justify-between gap-6 ">
