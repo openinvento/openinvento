@@ -232,6 +232,7 @@ REST_FRAMEWORK = {
      'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES
 }
 
+# Register custom model for API keys, so the default model is not created
 API_KEY_MODEL = "account_auth.UserAPIKey"
 
 SIMPLE_JWT= {

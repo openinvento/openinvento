@@ -37,3 +37,7 @@ class StandardOrAPIKeyAuthMixin:
     """Opt a view into API-key authentication while retaining session auth."""
 
     authentication_classes = (SessionAuthentication, UserAPIKeyAuthentication)
+
+    def get_authenticate_header(self, request):
+        """Advertise the API-key challenge so anonymous API requests get 401."""
+        return UserAPIKeyAuthentication().authenticate_header(request)
