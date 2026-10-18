@@ -1,5 +1,5 @@
 from rest_framework import exceptions
-from rest_framework.authentication import BaseAuthentication
+from rest_framework.authentication import BaseAuthentication, SessionAuthentication
 
 from .models import UserAPIKey
 
@@ -31,3 +31,9 @@ class UserAPIKeyAuthentication(BaseAuthentication):
 
     def authenticate_header(self, request):
         return "Api-Key"
+
+
+class StandardOrAPIKeyAuthMixin:
+    """Opt a view into API-key authentication while retaining session auth."""
+
+    authentication_classes = (SessionAuthentication, UserAPIKeyAuthentication)
