@@ -177,11 +177,7 @@ class SidebarView(APIView):
             except PackageNotFoundError:
                 app_version = '0.1.0'
 
-        inventories = (
-            Inventory.objects.all()
-            if request.user.is_superuser
-            else request.user.inventories.all()
-        ).order_by('name')
+        inventories = request.user.inventories.all().order_by('name')
         return Response({
             'user': {'name': request.user.name},
             'inventories': InventorySerializer(inventories, many=True).data,

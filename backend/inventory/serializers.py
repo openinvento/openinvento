@@ -43,8 +43,6 @@ class InventoryScopedSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request is None or not request.user.is_authenticated:
             return Inventory.objects.none()
-        if request.user.is_superuser:
-            return Inventory.objects.all()
         return request.user.inventories.all()
 
     def _inventory_queryset(self, model):

@@ -48,16 +48,13 @@ class InventoryViewSet(StandardOrAPIKeyAuthMixin, viewsets.ReadOnlyModelViewSet)
     http_method_names = ("get", "head", "options")
 
     def get_queryset(self):
-        if self.request.user.is_superuser:
-            return Inventory.objects.all().order_by("name")
         return Inventory.objects.filter(users=self.request.user).order_by("name")
 
 
 class InventoryAccessMixin:
     """ Mixin to provide inventory access methods for API views. """
     def get_inventory(self, request, inventory_uuid):
-        inventories = Inventory.objects.all() if request.user.is_superuser else request.user.inventories.all()
-        return get_object_or_404(inventories, uuid=inventory_uuid)
+        return get_object_or_404(request.user.inventories.all(), uuid=inventory_uuid)
 
 
 # region Base classses
@@ -69,8 +66,6 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
     ordering = ("name",)
 
     def get_accessible_inventories(self):
-        if self.request.user.is_superuser:
-            return Inventory.objects.all()
         return self.request.user.inventories.all()
 
     def get_queryset(self):
@@ -109,8 +104,6 @@ class InventoryScopedAPIView(APIView):
     permission_classes = (IsAuthenticated, IsInventoryMember)
 
     def get_accessible_inventories(self):
-        if self.request.user.is_superuser:
-            return Inventory.objects.all()
         return self.request.user.inventories.all()
 
 # endregion Base classes
