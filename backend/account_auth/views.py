@@ -8,15 +8,14 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
+from inventory.inventory_notifications import sync_low_stock_notifications
 from inventory.models import Inventory
 from inventory.serializers import InventorySerializer
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from inventory.inventory_notifications import sync_low_stock_notifications
-
-from .models import CustomUser, InstanceSettings, Notification
+from .models import CustomUser, InstanceSettings, Notification, UserAPIKey
 from .serializers import (
     AdminUserSerializer,
     CredentialResetSerializer,
@@ -27,7 +26,7 @@ from .serializers import (
 
 
 class SignupView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
         if not settings.ENABLE_SIGNUP:
@@ -52,7 +51,7 @@ class SignupView(APIView):
 
 
 class LoginView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
         identifier = request.data.get('identifier') or request.data.get('username') or request.data.get('email')
@@ -213,3 +212,56 @@ class NotificationDetailView(APIView):
         notification.read = True
         notification.save(update_fields=("read",))
         return Response(NotificationSerializer(notification).data)
+
+
+class APIKeyListView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    @staticmethod
+    def serialize(key):
+        return {
+            # The package primary key contains the stored hash; expose only the public prefix.
+            "id": key.prefix, # Prefix is used for the URL and is unique, so it can serve as an identifier for the API key
+            "name": key.name,
+            "prefix": key.prefix,
+            "created": key.created,
+            "expiry_date": key.expiry_date,
+            "revoked": key.revoked,
+        }
+
+    def get(self, request):
+        keys = UserAPIKey.objects.filter(user=request.user).order_by("-created")
+        return Response([self.serialize(key) for key in keys])
+
+    def post(self, request):
+        name = str(request.data.get("name", "")).strip()
+        if not name:
+            return Response({"name": "A name is required."}, status=status.HTTP_400_BAD_REQUEST)
+        if len(name) > 50:
+            return Response({"name": "Name must be 50 characters or fewer."}, status=status.HTTP_400_BAD_REQUEST)
+        api_key, key = UserAPIKey.objects.create_key(name=name, user=request.user)
+        return Response({**self.serialize(api_key), "key": key}, status=status.HTTP_201_CREATED)
+
+
+class APIKeyDetailView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_key(self, request, key_id):
+        return get_object_or_404(UserAPIKey, prefix=key_id, user=request.user)
+
+    def patch(self, request, key_id):
+        """ Update the name of an existing API key."""
+        api_key = self.get_key(request, key_id)
+        name = str(request.data.get("name", "")).strip()
+        if not name or len(name) > 50:
+            return Response({"name": "Name must contain 1 to 50 characters."}, status=status.HTTP_400_BAD_REQUEST)
+        api_key.name = name
+        api_key.save(update_fields=("name",))
+        return Response(APIKeyListView.serialize(api_key))
+
+    def delete(self, request, key_id):
+        """ Revoke an existing API key."""
+        api_key = self.get_key(request, key_id)
+        api_key.revoked = True
+        api_key.save(update_fields=("revoked",))
+        return Response(status=status.HTTP_204_NO_CONTENT)
