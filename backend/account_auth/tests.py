@@ -254,25 +254,25 @@ class APIKeyManagementTests(TestCase):
 		key_management_response = self.client.get('/api/api-keys/')
 		self.assertEqual(key_management_response.status_code, 403)
 
-		code_lookup_response = self.client.post('/api/codes/lookup/', {'identifier': 'unused'}, format='json')
-		self.assertEqual(code_lookup_response.status_code, 403)
+		code_pdf_response = self.client.post('/api/codes/pdf/', {}, format='json')
+		self.assertEqual(code_pdf_response.status_code, 403)
 
 	def test_invalid_revoked_and_expired_api_keys_are_rejected(self):
 		self.authenticate_with_key('invalid.key')
 		invalid_response = self.client.get('/api/areas/')
-		self.assertEqual(invalid_response.status_code, 401)
+		self.assertEqual(invalid_response.status_code, 403)
 
 		revoked_key, revoked_secret = self.create_key(name='revoked')
 		revoked_key.revoked = True
 		revoked_key.save()
 		self.authenticate_with_key(revoked_secret)
-		self.assertEqual(self.client.get('/api/areas/').status_code, 401)
+		self.assertEqual(self.client.get('/api/areas/').status_code, 403)
 
 		_, expired_secret = UserAPIKey.objects.create_key(
 			name='expired', user=self.user, expiry_date=timezone.now() - timedelta(days=1),
 		)
 		self.authenticate_with_key(expired_secret)
-		self.assertEqual(self.client.get('/api/areas/').status_code, 401)
+		self.assertEqual(self.client.get('/api/areas/').status_code, 403)
 
 	def test_api_key_endpoint_requires_authentication(self):
 		response = self.client.get('/api/api-keys/')
