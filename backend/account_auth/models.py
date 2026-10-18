@@ -3,6 +3,7 @@ import uuid
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 from django.db.models import Q
+from rest_framework_api_key.models import AbstractAPIKey
 
 
 class CustomUserManager(UserManager):
@@ -25,6 +26,10 @@ class CustomUser(AbstractUser):
     inventories = models.ManyToManyField('inventory.Inventory', blank=True, related_name='users')
     last_login = models.DateTimeField(null=True, blank=True)
     is_superuser = models.BooleanField(default=False)
+
+
+class UserAPIKey(AbstractAPIKey):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="api_keys")
 
 
 class InstanceSettings(models.Model):
@@ -50,13 +55,13 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ("-created_at",)
-        constraints = [
+        constraints = (
             models.UniqueConstraint(
                 fields=("user", "source_key"),
                 condition=Q(source_key__gt=""),
                 name="unique_notification_source_per_user",
             ),
-        ]
+        )
 
     def __str__(self):
         return f"{self.title} ({self.user})"

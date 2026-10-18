@@ -1,13 +1,15 @@
 import os
+from datetime import timedelta
 from unittest.mock import patch
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase, override_settings
-from inventory.models import Inventory
+from django.utils import timezone
+from inventory.models import Area, Inventory
 from rest_framework.test import APIClient
 
-from .models import CustomUser, InstanceSettings
+from .models import CustomUser, InstanceSettings, UserAPIKey
 
 
 class SignupInventoryTests(TestCase):
@@ -177,3 +179,101 @@ class AdminUserManagementTests(TestCase):
 		self.assertEqual(delete_response.status_code, 400)
 		self.assertEqual(demote_response.status_code, 400)
 		self.assertTrue(CustomUser.objects.filter(pk=self.admin.pk).exists())
+
+
+# Tests for API key management and authentication
+class APIKeyManagementTests(TestCase):
+	def setUp(self):
+		self.client = APIClient()
+		self.user = CustomUser.objects.create_user(
+			username='api-user', password='StrongPassword!123', name='API User',
+		)
+		self.other_user = CustomUser.objects.create_user(
+			username='other-api-user', password='StrongPassword!123', name='Other User',
+		)
+		self.inventory = Inventory.objects.create(name='User inventory')
+		self.inventory.users.add(self.user)
+		self.area = Area.objects.create(name='User area', inventory=self.inventory)
+		self.other_inventory = Inventory.objects.create(name='Other inventory')
+		self.other_inventory.users.add(self.other_user)
+		Area.objects.create(name='Other area', inventory=self.other_inventory)
+
+	def create_key(self, user=None, name='automation'):
+		api_key, secret = UserAPIKey.objects.create_key(name=name, user=user or self.user)
+		return api_key, secret
+
+	def authenticate_with_key(self, secret):
+		self.client.credentials(HTTP_AUTHORIZATION=f'Api-Key {secret}')
+
+	def test_authenticated_user_can_create_and_list_api_keys(self):
+		self.client.force_login(self.user)
+		response = self.client.post('/api/api-keys/', {'name': 'nightly sync'}, format='json')
+
+		self.assertEqual(response.status_code, 201)
+		self.assertIn('key', response.data)
+		self.assertEqual(response.data['name'], 'nightly sync')
+		self.assertEqual(response.data['id'], response.data['prefix'])
+		self.assertNotIn('hashed_key', response.data)
+
+		listing = self.client.get('/api/api-keys/')
+		self.assertEqual(listing.status_code, 200)
+		self.assertEqual(len(listing.data), 1)
+		self.assertNotIn('key', listing.data[0])
+
+	def test_api_key_can_rename_and_revoke_only_owned_key(self):
+		self.client.force_login(self.user)
+		api_key, _ = self.create_key()
+		other_key, _ = self.create_key(user=self.other_user, name='other')
+
+		update = self.client.patch(f'/api/api-keys/{api_key.prefix}/', {'name': 'renamed'}, format='json')
+		self.assertEqual(update.status_code, 200)
+		self.assertEqual(update.data['name'], 'renamed')
+
+		forbidden_update = self.client.patch(f'/api/api-keys/{other_key.prefix}/', {'name': 'stolen'}, format='json')
+		self.assertEqual(forbidden_update.status_code, 404)
+
+		revoked = self.client.delete(f'/api/api-keys/{api_key.prefix}/')
+		self.assertEqual(revoked.status_code, 204)
+		api_key.refresh_from_db()
+		self.assertTrue(api_key.revoked)
+		self.assertFalse(UserAPIKey.objects.get(pk=other_key.pk).revoked)
+
+	def test_api_key_authentication_scopes_inventory_access_to_owner(self):
+		_, secret = self.create_key()
+		self.authenticate_with_key(secret)
+
+		response = self.client.get('/api/areas/')
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual([area['uuid'] for area in response.data], [str(self.area.uuid)])
+
+	def test_api_key_authentication_is_only_enabled_on_opted_in_views(self):
+		_, secret = self.create_key()
+		self.authenticate_with_key(secret)
+
+		key_management_response = self.client.get('/api/api-keys/')
+		self.assertEqual(key_management_response.status_code, 403)
+
+		code_pdf_response = self.client.post('/api/codes/pdf/', {}, format='json')
+		self.assertEqual(code_pdf_response.status_code, 403)
+
+	def test_invalid_revoked_and_expired_api_keys_are_rejected(self):
+		self.authenticate_with_key('invalid.key')
+		invalid_response = self.client.get('/api/areas/')
+		self.assertEqual(invalid_response.status_code, 401)
+
+		revoked_key, revoked_secret = self.create_key(name='revoked')
+		revoked_key.revoked = True
+		revoked_key.save()
+		self.authenticate_with_key(revoked_secret)
+		self.assertEqual(self.client.get('/api/areas/').status_code, 401)
+
+		_, expired_secret = UserAPIKey.objects.create_key(
+			name='expired', user=self.user, expiry_date=timezone.now() - timedelta(days=1),
+		)
+		self.authenticate_with_key(expired_secret)
+		self.assertEqual(self.client.get('/api/areas/').status_code, 401)
+
+	def test_api_key_endpoint_requires_authentication(self):
+		response = self.client.get('/api/api-keys/')
+		self.assertEqual(response.status_code, 403)

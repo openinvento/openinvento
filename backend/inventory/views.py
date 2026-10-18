@@ -1,5 +1,7 @@
 import uuid
+from typing import ClassVar
 
+from account_auth.authentication import StandardOrAPIKeyAuthMixin
 from account_auth.models import CustomUser
 from account_auth.serializers import UserSerializer
 from django.conf import settings
@@ -39,7 +41,7 @@ from .serializers import (
 )
 
 
-class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
+class InventoryViewSet(StandardOrAPIKeyAuthMixin, viewsets.ReadOnlyModelViewSet):
     """ Viewset for listing and retrieving inventories. """
     serializer_class = InventorySerializer
     permission_classes = (IsAuthenticated, IsInventoryMember)
@@ -191,7 +193,7 @@ class ExportInventoryView(InventoryAccessMixin, APIView):
 # endregion Inventory Settings/ Management Views
 
 
-class DashboardView(InventoryScopedAPIView):
+class DashboardView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     def get(self, request, *args, **kwargs):
         inventories = self.get_accessible_inventories()
         inventory_uuid = request.query_params.get("inventory")
@@ -240,35 +242,35 @@ class DashboardView(InventoryScopedAPIView):
         })
 
 
-class AreaViewSet(InventoryScopedViewSet):
+class AreaViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     queryset = Area.objects.all()
     serializer_class = AreaSerializer
 
 
-class ShelfViewSet(InventoryScopedViewSet):
+class ShelfViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     queryset = Shelf.objects.all()
     serializer_class = ShelfSerializer
     select_related_fields = ("inventory", "area")
 
 
-class ChestViewSet(InventoryScopedViewSet):
+class ChestViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     queryset = Chest.objects.all()
     serializer_class = ChestSerializer
     select_related_fields = ("inventory", "area", "shelf", "parent_chest")
 
 
-class ArticleCategoryViewSet(InventoryScopedViewSet):
+class ArticleCategoryViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     queryset = ArticleCategory.objects.all()
     serializer_class = ArticleCategorySerializer
 
 
-class CategoryFieldViewSet(InventoryScopedViewSet):
+class CategoryFieldViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     queryset = CategoryField.objects.all()
     serializer_class = CategoryFieldSerializer
     select_related_fields = ("inventory", "category")
 
 
-class ArticleViewSet(InventoryScopedViewSet):
+class ArticleViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     select_related_fields = ("inventory", "area", "shelf", "chest", "category")
@@ -321,7 +323,7 @@ class ArticleAttachmentsView(InventoryScopedAPIView):
         return Response(status=204)
 
 
-class SearchView(InventoryScopedAPIView):
+class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     """
     Search for articles in the inventory.
     """
@@ -343,6 +345,8 @@ class SearchView(InventoryScopedAPIView):
         return Response(serializer.data)
 
 
+# region QR/ BARCODE VIEWS
+
 CODE_MODELS = (
     (Article, "article"),
     (Chest, "chest"),
@@ -352,8 +356,7 @@ CODE_MODELS = (
     (CategoryField, "field"),
 )
 
-
-class CodeLookupView(InventoryScopedAPIView):
+class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     def post(self, request, *args, **kwargs):
         identifier = str(request.data.get("identifier", "")).strip()
         if not identifier:
@@ -376,7 +379,7 @@ class CodeLookupView(InventoryScopedAPIView):
 
 
 class CodePdfView(InventoryScopedAPIView):
-    page_sizes = {
+    page_sizes: ClassVar[dict[str, tuple[str, int, int]]] = {
         "a4": ("A4", 210, 297),
         "a5": ("A5", 148, 210),
         "letter": ("Letter", 216, 279),
@@ -425,3 +428,5 @@ class CodePdfView(InventoryScopedAPIView):
         response = FileResponse(pdf_buffer, content_type="application/pdf")
         response["Content-Disposition"] = 'attachment; filename="openinvento-codes.pdf"'
         return response
+
+# endregion QR/ BARCODE VIEWS

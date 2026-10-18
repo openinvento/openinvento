@@ -11,7 +11,8 @@ urlpatterns = [
     path("api/instance-settings/backup/", InstanceBackupView.as_view(), name="instance-backup"),
     path("api/instance-settings/version-check/", VersionCheckView.as_view(), name="version-check"),
     path("api/instance-settings/", InstanceSettingsView.as_view(), name="instance-settings"),
-    path('admin/', admin.site.urls),
+    # Deactivate the admin panel for security reasons, maybe activate it later (optionally!)
+    #path('admin/', admin.site.urls),
     
     path("api/", include(inventory_api_urls)),
     path("api/", include(auth_urls)),

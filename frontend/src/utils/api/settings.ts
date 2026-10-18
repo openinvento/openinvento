@@ -70,3 +70,28 @@ export async function updateUser(uuid: string, user: Partial<UserInput>) {
 export async function deleteUser(uuid: string) {
   return deleteData<void>(`/api/users/${uuid}/`)
 }
+
+export type APIKey = {
+  id: string
+  name: string
+  prefix: string
+  created: string
+  expiry_date: string | null
+  revoked: boolean
+}
+
+export async function getAPIKeys() {
+  return fetchData<APIKey[]>('/api/api-keys/')
+}
+
+export async function createAPIKey(name: string) {
+  return postData<APIKey & { key: string }>('/api/api-keys/', { name })
+}
+
+export async function renameAPIKey(id: string, name: string) {
+  return patchData<APIKey>(`/api/api-keys/${id}/`, { name })
+}
+
+export async function revokeAPIKey(id: string) {
+  return deleteData<void>(`/api/api-keys/${id}/`)
+}
