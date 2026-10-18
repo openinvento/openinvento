@@ -14,5 +14,15 @@ The application periodically checks for new releases and notifies instance admin
 Set the env variable `ENABLE_UPDATE_CHECKER` to `false` in the environment variables to disable this feature.
 
 
+### External API with API keys
+- You can manage API keys in the settings page
+- To make an API reqest, you need to set the following headers:
+
+```
+Authorization: Api-Key <API_KEY>
+```
+
+-> Documentation of all external API endpoints are following!
+
 #### TODO: Move this into openinvento/docs repository -> website
 

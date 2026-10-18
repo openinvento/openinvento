@@ -103,11 +103,7 @@ def protected_media_view(request, path):
     if media_root not in file_path.parents or not file_path.is_file():
         raise Http404("File not found")
 
-    accessible_inventories = (
-        Article.objects.filter(inventory__users=request.user)
-        if not request.user.is_superuser
-        else Article.objects.all()
-    )
+    accessible_inventories = Article.objects.filter(inventory__users=request.user)
     if not accessible_inventories.filter(image=path).exists() and not ArticleAttachment.objects.filter(
         file=path, article__in=accessible_inventories
     ).exists():

@@ -10,9 +10,6 @@ class IsInventoryMember(permissions.BasePermission):
         return bool(request.user and request.user.is_authenticated)
 
     def has_object_permission(self, request, view, obj):
-        if request.user.is_superuser:
-            return True
-
         inventory = obj if isinstance(obj, Inventory) else getattr(obj, "inventory", None)
         if inventory is None:
             return False

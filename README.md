@@ -111,10 +111,14 @@ The Docker deployment reads these variables from the environment or a `.env` fil
 | `CREATE_INIT_ADMIN` | No | `true` | Set to `false` to disable automatic initial administrator creation. |
 | `ENABLE_SIGNUP` | No | `false` | Set to `true` to enable public account signup. |
 | `ENABLE_UPDATE_CHECKER` | No | `true` | Set to `false` to disable automatic update notifications. |
+| `ALLOW_INVENTORY_USER_INVITES` | No | `true` | Set to `true` to allow users to invite other users to their inventories. |
 
 The initial administrator is created after migrations only when the database contains no users. After the first login, the user will be prompted to change their password.
 
 `APP_URL` and `APP_URLS` are used to configure both Django `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`. Include a port in the value when the public address uses a non-standard port; the port is kept for CSRF origin checks and automatically omitted from `ALLOWED_HOSTS`. Use `https://` for HTTPS addresses so Django receives the correct CSRF origin scheme. Paths are ignored; supply the site origin only. For example: `APP_URL=example.com` or `APP_URLS=example.com,https://admin.example.com:8443`.
+
+`ALLOW_INVENTORY_USER_INVITES` is a boolean environment variable that controls whether users can invite other users to their inventories. Set it to `true` to allow user invitations, or `false` to disable this feature. 
+Activating also means that all users are displayed in the user list, which may be a privacy concern. 
 
 
 
