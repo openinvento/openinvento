@@ -118,8 +118,6 @@ export function LoginForm({
       </form>
       <FieldDescription className="px-6 text-center">
         {allowSignup && <>Need an account? <a href="/auth/signup">Sign up</a>.{" "}</>}
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
       </FieldDescription>
     </div>
   )
