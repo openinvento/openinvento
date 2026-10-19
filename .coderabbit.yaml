@@ -1,0 +1,7 @@
+reviews:
+  auto_apply_labels: true
+
+  auto_review:
+    enabled: false
+    labels:
+      - "ai-review"
