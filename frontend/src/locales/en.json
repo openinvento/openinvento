@@ -270,6 +270,11 @@
     "viewCategories": "Categories"
   },
   "inventory": {
+    "view": {
+      "label": "Inventory layout",
+      "grid": "Grid view",
+      "list": "List view"
+    },
     "categories": {
       "books": "Books and media",
       "clothing": "Clothing",
