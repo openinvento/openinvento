@@ -5,6 +5,7 @@ import { Link, useNavigate, useParams } from "react-router"
 import { ArticleCard } from "@/components/inventory/entity-cards"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
+import { InventoryViewToggle, useInventoryViewMode } from "@/components/inventory/view-mode"
 import { InventoryDraggable } from "@/components/inventory/inventory-dnd"
 import { inventoryApi, type Area, type Article, type Chest, type Shelf } from "@/utils/api/inventory"
 
@@ -19,6 +20,8 @@ export default function ChestPage() {
   const { chestId } = useParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
+
+  const { viewMode, setViewMode } = useInventoryViewMode()
   const [chest, setChest] = useState<Chest | null>(null)
   const [articles, setArticles] = useState<Article[]>([])
   const [areas, setAreas] = useState<Area[]>([])
@@ -117,15 +120,26 @@ export default function ChestPage() {
             <h1 className="text-3xl font-semibold tracking-tight">{chest.name}</h1>
             <p className="mt-2 text-muted-foreground">{t("chests.articleCount", { count: articles.length })}</p>
           </div>
-          <div className="flex gap-2"><Button variant="outline" onClick={() => setIdentifierOpen(true)}><Pencil /> {t("chests.editIdentifier")}</Button><Button variant="outline" onClick={() => { setEditAreaId(chest.area); setEditOpen(true) }}><Pencil /> {t("chests.editChest")}</Button></div>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <InventoryViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+
+            <Button variant="outline" onClick={() => setIdentifierOpen(true)}>
+              <Pencil /> 
+              {t("chests.editIdentifier")}
+            </Button>
+            <Button variant="outline" onClick={() => { setEditAreaId(chest.area); setEditOpen(true) }}>
+              <Pencil /> 
+              {t("chests.editChest")}
+            </Button>
+          </div>
         </div>
         {articles.length === 0 ? (
           <p className="rounded-2xl border border-dashed bg-muted/20 p-8 text-center text-sm text-muted-foreground">{t("chests.empty")}</p>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+          <div className={viewMode === "list" ? "flex flex-col gap-2" : "grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"}>
             {articles.map((article) => 
             <InventoryDraggable key={article.uuid} item={{ kind: "article", id: article.uuid }}>
-                <ArticleCard name={article.name} articleIcon={article.icon} articleImage={article.image}
+                <ArticleCard viewMode={viewMode} name={article.name} articleIcon={article.icon} articleImage={article.image}
                   subtitle={t("areas.detail.inStock", { count: article.quantity })} 
                   badge={getLowStockBadge(article, t("areas.detail.lowStock"))} 
                   onOpen={() => navigate(`/app/articles/${article.uuid}`)} 

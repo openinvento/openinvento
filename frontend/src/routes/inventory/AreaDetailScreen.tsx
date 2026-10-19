@@ -6,6 +6,7 @@ import { ArticleCard, ChestCard } from "@/components/inventory/entity-cards"
 import { ShelfSection } from "@/components/inventory/ShelfSection"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
+import { InventoryViewToggle, useInventoryViewMode } from "@/components/inventory/view-mode"
 import { InventoryDraggable, InventoryDropTarget } from "@/components/inventory/inventory-dnd"
 import {
   getSelectedInventory,
@@ -32,6 +33,7 @@ export default function AreaDetailScreen() {
   const { areaId } = useParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { viewMode, setViewMode } = useInventoryViewMode()
 
   const [inventory, setInventory] = useState<Inventory | null>(null)
   const [area, setArea] = useState<Area | null>(null)
@@ -166,7 +168,9 @@ export default function AreaDetailScreen() {
         <p className="mt-2 text-muted-foreground">{t("areas.detail.summary", { articles: articles.length, chests: chests.length, shelves: shelves.length })}</p>
       </div>
     
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+      <InventoryViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+      
       <Button className="p-4" variant="outline" onClick={() => setModal({ kind: "shelf" })}><Plus /> {t("areas.detail.actions.shelf")}</Button>
       <Button className="p-4" variant="outline" onClick={() => setModal({ kind: "chest" })}><Plus /> {t("areas.detail.actions.chest")}</Button>
       <Button className="p-4" onClick={() => navigate(`/app/areas/${areaId}/articles/new`)}><Plus /> {t("areas.detail.actions.article")}</Button>
@@ -180,10 +184,11 @@ export default function AreaDetailScreen() {
       {articles.filter((article) => article.shelf === null).length > 0 && (
         <div>
           <h2 className="mb-3 text-lg font-semibold">{t("areas.detail.articles")}</h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+          <div className={viewMode === "list" ? "flex flex-col gap-2" : "grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"}>
             {articles.filter((article) => article.shelf === null).map((article) => (
               <InventoryDraggable key={article.uuid} item={{ kind: "article", id: article.uuid }}>
                 <ArticleCard
+                  viewMode={viewMode}
                   name={article.name}
                   articleIcon={article.icon}
                   articleImage={article.image}
@@ -204,6 +209,7 @@ export default function AreaDetailScreen() {
         <ShelfSection
           key={shelf.uuid}
           shelf={shelf}
+          viewMode={viewMode}
           chests={chests}
           articles={articles}
           isOpen={openShelves[shelf.uuid] !== false}
@@ -240,7 +246,7 @@ export default function AreaDetailScreen() {
       {chests.filter((chest) => chest.shelf === null).length > 0 && (
         <div>
           <h2 className="mb-3 text-lg font-semibold">{t("areas.detail.otherItems")}</h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+          <div className={viewMode === "list" ? "flex flex-col gap-2" : "grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"}>
             {chests
               .filter((chest) => chest.shelf === null)
               .map((chest) => (
@@ -252,6 +258,7 @@ export default function AreaDetailScreen() {
                     target={{ kind: "chest", id: chest.uuid }}
                   >
                     <ChestCard
+                      viewMode={viewMode}
                       name={chest.name}
                       subtitle={t("areas.detail.articleCount", {
                         count: articles.filter(
