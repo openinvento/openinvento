@@ -18,6 +18,7 @@
 OpenInvento - Selfhosted Inventory Manager
 
 Landing Page: https://openinvento.github.io/landingpage/
+Documentation: https://openinvento.github.io/docs/
 
 
 ## Features
@@ -55,70 +56,12 @@ Here are some example screenshots:
   <img src="https://raw.githubusercontent.com/openinvento/openinvento/refs/heads/main/assets/screenshots/areas_mobile_screen.png" width="30%" alt="Areas Mobile" />
 </p>
 
-# Installation
-
-## Docker Compose (recommended)
-Use the **docker-compose.yml** file: https://github.com/openinvento/openinvento/blob/main/docker-compose.yml
-
-An example `.env` file is [provided in the repository](https://github.com/openinvento/openinvento/blob/main/.env.example). 
+# Installation and updating
+Follow the instructions in the [documentation](https://openinvento.github.io/docs/docs/setup-installation/docker) to install OpenInvento.
 
 
-## Manual Docker Installation
-docker volume create openinvento-data
-
-```
-docker run -d \
-  --name openinvento \
-  --restart unless-stopped \
-  -v openinvento-data:/data \
-  -p 8080:80 \
-  -e DATA_DIRECTORY=/data \
-  -e APP_URL=http://localhost:8080 \
-  -e INIT_ADMIN_USERNAME=admin \
-  -e INIT_ADMIN_PASSWORD=change-this-password \
-  -e CREATE_INIT_ADMIN=true \
-  -e ENABLE_SIGNUP=false \
-  -e SECRET_KEY=replace-with-a-long-random-secret \
-  ghcr.io/openinvento/openinvento:latest
-```
-Once the container is running, open [http://localhost:8080](http://localhost:8080) in your browser and log in with your initial administrator credentials.
-
-
-# Update
-## Docker (docker run)
-Pull the latest image and restart the container while keeping your data (persists in volumes).
-
-Docker Compose (recommended):
-1. `docker compose pull`
-2. `docker compose up -d`
-
-
-# Configuration
-
-
-## Env Variables
-
-The Docker deployment reads these variables from the environment or a `.env` file:
-
-| Variable | Required | Default | Description |
-| --- | --- | --- | --- |
-| `APP_URL` | Recommended | None | Main public application URL. Accepts `https://example.com`, `http://localhost:8080`, or a bare `example.com[:port]` host. Bare hosts default to `http://`. |
-| `APP_URLS` | No | None | Comma-separated additional application URLs, with the same format as `APP_URL`. |
-| `SECRET_KEY` | Recommended | Unsafe fallback | Secret key used by Django. Set a long random value in production. You can generate one with `openssl rand -hex 32`. |
-| `DATA_DIRECTORY` | No | `/data` in Docker | Directory for the database and uploaded files. |
-| `INIT_ADMIN_USERNAME` | Required when enabled | None | Username for the initial administrator account. |
-| `INIT_ADMIN_PASSWORD` | Required when enabled | None | Password for the initial administrator account. It must be changed on first login. |
-| `CREATE_INIT_ADMIN` | No | `true` | Set to `false` to disable automatic initial administrator creation. |
-| `ENABLE_SIGNUP` | No | `false` | Set to `true` to enable public account signup. |
-| `ENABLE_UPDATE_CHECKER` | No | `true` | Set to `false` to disable automatic update notifications. |
-| `ALLOW_INVENTORY_USER_INVITES` | No | `true` | Set to `true` to allow users to invite other users to their inventories. |
-
-The initial administrator is created after migrations only when the database contains no users. After the first login, the user will be prompted to change their password.
-
-`APP_URL` and `APP_URLS` are used to configure both Django `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`. Include a port in the value when the public address uses a non-standard port; the port is kept for CSRF origin checks and automatically omitted from `ALLOWED_HOSTS`. Use `https://` for HTTPS addresses so Django receives the correct CSRF origin scheme. Paths are ignored; supply the site origin only. For example: `APP_URL=example.com` or `APP_URLS=example.com,https://admin.example.com:8443`.
-
-`ALLOW_INVENTORY_USER_INVITES` is a boolean environment variable that controls whether users can invite other users to their inventories. Set it to `true` to allow user invitations, or `false` to disable this feature. 
-Activating also means that all users are displayed in the user list, which may be a privacy concern. 
+# Configuration and Environment Variables
+For a complete list of configuratin options and environment variables, please refer to the [documentation](https://openinvento.github.io/docs/docs/setup-installation/configuration).
 
 
 
