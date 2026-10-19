@@ -35,7 +35,7 @@ jobs:
             )
           )
 
-        uses: openinvento/cla-github-action@120ddac3df1ac95308f830024c7e7a3a7e293cc1 # Commit pinned version
+        uses: openinvento/cla-github-action@62d1473b544d904553d1f03013f0ce33b19dd2e2 # Commit pinned version
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
