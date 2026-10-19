@@ -7,9 +7,11 @@ import {
   InventoryDropTarget,
 } from "@/components/inventory/inventory-dnd"
 import type { Article, Chest, Shelf } from "@/utils/api/inventory"
+import type { InventoryViewMode } from "./view-mode"
 
 type ShelfSectionProps = {
   shelf: Shelf
+  viewMode: InventoryViewMode
   chests: Chest[]
   articles: Article[]
   isOpen: boolean
@@ -34,6 +36,7 @@ function getLowStockBadge(article: Article, label: string) {
 
 export function ShelfSection({
   shelf,
+  viewMode,
   chests,
   articles,
   isOpen,
@@ -101,7 +104,7 @@ export function ShelfSection({
 
           {isOpen && (
             <div className="border-t p-4">
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+              <div className={viewMode === "list" ? "flex flex-col gap-2" : "grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"}>
                 {sectionChests.map((chest) => (
                   <InventoryDraggable
                     key={chest.uuid}
@@ -111,6 +114,7 @@ export function ShelfSection({
                       target={{ kind: "chest", id: chest.uuid }}
                     >
                       <ChestCard
+                        viewMode={viewMode}
                         name={chest.name}
                         subtitle={t("areas.detail.articleCount", {
                           count: articles.filter(
@@ -130,6 +134,7 @@ export function ShelfSection({
                     item={{ kind: "article", id: article.uuid }}
                   >
                     <ArticleCard
+                      viewMode={viewMode}
                       name={article.name}
                       articleIcon={article.icon}
                       articleImage={article.image}
