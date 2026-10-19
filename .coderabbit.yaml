@@ -6,3 +6,6 @@ reviews:
     enabled: false
     labels:
       - "ai-review"
+
+    workflow:
+    request_changes: true 
