@@ -1,0 +1,8 @@
+
+reviews:
+  labeling:
+    enabled: true
+  
+  triggers:
+    pr_labels:
+      - "ai-review"
