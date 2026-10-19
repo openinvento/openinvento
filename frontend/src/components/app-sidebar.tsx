@@ -105,7 +105,7 @@ const data = {
     },
     {
       title: "Help",
-      url: "#",
+      url: "https://openinvento.github.io/docs/",
       icon: (
         <MessageCircleQuestionIcon
         />
