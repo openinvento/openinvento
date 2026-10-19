@@ -2,10 +2,13 @@ reviews:
   labeling:
     enabled: true
 
+  auto_apply_labels: true
+
   auto_review:
     enabled: false
     labels:
       - "ai-review"
 
-    workflow:
+  workflow:
     request_changes: true 
+  request_changes_workflow: true
