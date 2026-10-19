@@ -85,7 +85,6 @@ export default function AreasPage() {
             <AreaCard 
               key={area.uuid} 
               name={area.name} 
-              subtitle={t("areas.openArea")}
               onOpen={() => navigate(`/app/areas/${area.uuid}`)} 
               onRename={() => setModal({ area })} 
               onDelete={() => void remove(area)} 

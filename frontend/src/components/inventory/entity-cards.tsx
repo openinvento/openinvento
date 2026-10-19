@@ -4,10 +4,10 @@ import { getArticleIcon } from "./article-icon-picker"
 import { getMediaUrl } from "@/utils/api/base"
 import type { InventoryViewMode } from "./view-mode"
 
-type CardProps = { name: string; subtitle: string; icon: LucideIcon; onOpen?: () => void; onRename: () => void; onDelete: () => void; badge?: string; viewMode?: InventoryViewMode }
+type CardProps = { name: string; subtitle?: string | null; icon: LucideIcon; onOpen?: () => void; onRename: () => void; onDelete: () => void; badge?: string; viewMode?: InventoryViewMode }
 
 
-function EntityCard({ name, subtitle, icon: Icon, onOpen, onRename, onDelete, badge, image, viewMode = "grid" }: CardProps & { image?: string | null }) {
+function EntityCard({ name, subtitle=null, icon: Icon, onOpen, onRename, onDelete, badge, image, viewMode = "grid" }: CardProps & { image?: string | null }) {
   const imageUrl = getMediaUrl(image)
   return (
     <EntityContextMenu label={name} onRename={onRename} onDelete={onDelete}><article onClick={onOpen} className={`group relative cursor-pointer rounded-2xl border bg-card transition hover:border-foreground/20 ${viewMode === "list" ? "flex min-h-16 items-center gap-3 p-3" : "min-h-32 p-4"}`}>
@@ -20,7 +20,7 @@ function EntityCard({ name, subtitle, icon: Icon, onOpen, onRename, onDelete, ba
 
       <div className={viewMode === "list" ? "min-w-0 flex-1 sm:flex sm:items-center sm:justify-between sm:gap-4" : ""}>
         <h3 className="truncate font-semibold">{name}</h3>
-        <p className={`${viewMode === "list" ? "" : "mt-1"} text-sm text-muted-foreground`}>{subtitle}</p>
+        {subtitle && <p className={`${viewMode === "list" ? "" : "mt-1"} text-sm text-muted-foreground`}>{subtitle}</p>}
       </div>
       {badge && viewMode === "list" && <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">{badge}</span>}
     </article>
