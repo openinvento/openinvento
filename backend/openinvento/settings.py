@@ -141,10 +141,12 @@ INSTALLED_APPS = [
 # Modules are normal Django apps, activated by their directory name, for
 # example OPENINVENTO_MODULES=loans,other_module. They are disabled by
 # default and can register models, migrations, signals, admin, and optional URLs.
-from modules.registry import get_enabled_modules
+from modules.registry import get_available_modules, get_enabled_modules
 
-ENABLED_MODULES = get_enabled_modules(_csv_env("OPENINVENTO_MODULES", []))
-INSTALLED_APPS.extend(module.app_config for module in ENABLED_MODULES)
+DEFAULT_ENABLED_MODULES = get_enabled_modules(_csv_env("OPENINVENTO_MODULES", []))
+AVAILABLE_MODULES = get_available_modules()
+# Install all discovered modules so instance admins can activate them without a restart.
+INSTALLED_APPS.extend(module.app_config for module in AVAILABLE_MODULES)
 
 if HAS_CORSHEADERS:
     INSTALLED_APPS.append("corsheaders")
@@ -155,6 +157,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'modules.middleware.EnabledModuleMiddleware',
     'django.contrib.auth.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

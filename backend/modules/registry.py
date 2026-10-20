@@ -1,11 +1,13 @@
 """Discovery and URL registration for optional Django modules."""
 
 import re
+from pathlib import Path
 from dataclasses import dataclass
 from importlib import import_module
 from importlib.util import find_spec
 
 _MODULE_NAME = re.compile(r"^[a-z][a-z0-9_]*$")
+_MODULE_DIR = Path(__file__).resolve().parent
 
 
 @dataclass(frozen=True)
@@ -19,15 +21,13 @@ class EnabledModule:
 
 def get_enabled_modules(names=None):
     """Return enabled modules, rejecting misspelled or unavailable names."""
-    # If names is None, read from settings.ENABLED_MODULES. Otherwise, use the provided names. Used in urls.py for example
     if names is None:
         from django.conf import settings
 
-        names = getattr(settings, "ENABLED_MODULES", ())
+        names = getattr(settings, "DEFAULT_ENABLED_MODULES", ())
         if names and isinstance(names[0], EnabledModule):
             return tuple(names)
 
-    # use name list; mainly used in settings.py where ENABLED_MODULES is defined
     modules = []
     for name in names:
         if not _MODULE_NAME.fullmatch(name):
@@ -68,3 +68,13 @@ def get_enabled_modules(names=None):
         )
 
     return tuple(modules)
+
+
+def get_available_modules():
+    """Return all discoverable module packages, whether currently enabled or not."""
+    names = sorted(
+        child.name for child in _MODULE_DIR.iterdir()
+        if child.is_dir() and _MODULE_NAME.fullmatch(child.name)
+        and (child / "apps.py").is_file()
+    )
+    return get_enabled_modules(names)
