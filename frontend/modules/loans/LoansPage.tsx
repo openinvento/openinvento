@@ -7,15 +7,13 @@ import { Input } from "@/components/ui/input"
 import BaseScreen from "@/layouts/BaseScreen"
 import { inventoryApi, type Article, type Chest } from "@/utils/api/inventory"
 import { loansApi, type Loan } from "./api"
-
-type ItemKind = "article" | "chest"
+import LoanItemSelector from "./LoanItemSelector"
 
 export default function LoansPage() {
   const { t, i18n } = useTranslation()
   const [articles, setArticles] = useState<Article[]>([])
   const [chests, setChests] = useState<Chest[]>([])
   const [loans, setLoans] = useState<Loan[]>([])
-  const [kind, setKind] = useState<ItemKind>("article")
   const [itemId, setItemId] = useState("")
   const [quantity, setQuantity] = useState(1)
   const [dueAt, setDueAt] = useState("")
@@ -25,7 +23,10 @@ export default function LoansPage() {
   const [returningId, setReturningId] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const items = useMemo(() => kind === "article" ? articles : chests, [articles, chests, kind])
+  const selectedArticle = articles.find((article) => `article:${article.uuid}` === itemId)
+  const selectedChest = chests.find((chest) => `chest:${chest.uuid}` === itemId)
+  const selectedKind = selectedArticle ? "article" : selectedChest ? "chest" : null
+
   const itemNames = useMemo(() => new Map([
     ...articles.map((article) => [`article:${article.uuid}`, article.name] as const),
     ...chests.map((chest) => [`chest:${chest.uuid}`, chest.name] as const),
@@ -54,20 +55,16 @@ export default function LoansPage() {
   }, [t])
 
   useEffect(() => { void load() }, [load])
-  useEffect(() => {
-    setItemId(items[0]?.uuid ?? "")
-  }, [items])
-
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!itemId) return
+    if (!selectedKind) return
     setSaving(true)
     setError(null)
     try {
       const loan = await loansApi.create({
-        article: kind === "article" ? itemId : null,
-        chest: kind === "chest" ? itemId : null,
-        quantity: kind === "article" ? quantity : 1,
+        article: selectedArticle?.uuid ?? null,
+        chest: selectedChest?.uuid ?? null,
+        quantity: selectedKind === "article" ? quantity : 1,
         due_at: dueAt ? new Date(dueAt).toISOString() : null,
         notes,
       })
@@ -103,7 +100,7 @@ export default function LoansPage() {
 
   return (
     <BaseScreen title={t("loans.title")}>
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
+      <div className="mx-auto flex w-full flex-col gap-8">
         {error && <p className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive" role="alert">{error}</p>}
         <section className="rounded-xl border bg-card p-5">
           <div className="mb-5 flex items-center gap-3">
@@ -114,21 +111,8 @@ export default function LoansPage() {
             </div>
           </div>
           <form className="grid gap-4 sm:grid-cols-2" onSubmit={handleCreate}>
-            <label className="grid gap-1.5 text-sm">
-              {t("loans.itemType")}
-              <select className="h-9 rounded-lg border border-input bg-background px-3" value={kind} onChange={(event) => setKind(event.target.value as ItemKind)}>
-                <option value="article">{t("loans.article")}</option>
-                <option value="chest">{t("loans.chest")}</option>
-              </select>
-            </label>
-            <label className="grid gap-1.5 text-sm">
-              {t("loans.item")}
-              <select className="h-9 rounded-lg border border-input bg-background px-3" value={itemId} onChange={(event) => setItemId(event.target.value)} required>
-                {items.length === 0 && <option value="">{t("loans.noItems")}</option>}
-                {items.map((item) => <option key={item.uuid} value={item.uuid}>{item.name}</option>)}
-              </select>
-            </label>
-            {kind === "article" && (
+            <LoanItemSelector articles={articles} chests={chests} value={itemId} onValueChange={setItemId} />
+            {selectedKind === "article" && (
               <label className="grid gap-1.5 text-sm">
                 {t("loans.quantity")}
                 <Input type="number" min={1} value={quantity} onChange={(event) => setQuantity(Math.max(1, Number(event.target.value)))} required />
@@ -143,7 +127,7 @@ export default function LoansPage() {
               <Input value={notes} onChange={(event) => setNotes(event.target.value)} />
             </label>
             <div className="sm:col-span-2">
-              <Button type="submit" disabled={saving || !itemId || items.length === 0}>
+              <Button type="submit" className="px-4 py-3" disabled={saving || !selectedKind}>
                 {saving ? t("loans.saving") : t("loans.create")}
               </Button>
             </div>
