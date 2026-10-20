@@ -4,7 +4,6 @@ export type Loan = {
   id: number
   article: string | null
   chest: string | null
-  borrower: string
   lent_by: string | null
   quantity: number
   lent_at: string
