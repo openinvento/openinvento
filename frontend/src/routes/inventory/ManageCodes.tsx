@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router"
-import { Printer, ScanLine } from "lucide-react"
+import { LoaderCircle, Printer, ScanBarcode, ScanLine, X } from "lucide-react"
 
 import Scanner from "@/components/qr-bar-code/Scanner"
 import { Button } from "@/components/ui/button"
@@ -34,23 +34,97 @@ export default function ManageCodes() {
 		size: "a4",
 		layout: "vertical",
 	})
+
 	const [isScannerOpen, setIsScannerOpen] = useState(false)
+
+	const [useExternalBarcodeScanner, setUseExternalBarcodeScanner] = useState(false)
+	const [externalScanError, setExternalScanError] = useState("")
+	const [isLookingUpExternalCode, setIsLookingUpExternalCode] = useState(false)
+	const [isListeningForExternalCode, setIsListeningForExternalCode] = useState(false)
+	const externalCodeBuffer = useRef("")
+
+	const externalCodeTimer = useRef<number | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const [isGenerating, setIsGenerating] = useState(false)
 	const [error, setError] = useState("")
 
 	async function handleCodeDetected(identifier: string) {
 		const result = await inventoryApi.lookupCode(identifier)
-		const paths: Record<typeof result.type, string> = {
-			article: `/app/articles/${result.uuid}`,
-			area: `/app/areas/${result.uuid}`,
-			shelf: "/app/areas",
-			chest: "/app/areas",
-			category: "/app/manage-categories-and-fields",
-			field: "/app/manage-categories-and-fields",
+		switch (result.type) {
+			case "article":
+				navigate(`/app/articles/${result.uuid}`)
+				break
+			case "area":
+				navigate(`/app/areas/${result.uuid}`)
+				break
+			case "shelf": {
+				const shelf = (await inventoryApi.listShelves()).find((item) => item.uuid === result.uuid)
+				if (!shelf) throw new Error(t("manageCodes.externalScanner.errors.lookup"))
+				navigate(`/app/areas/${shelf.area}`)
+				break
+			}
+			case "chest":
+				navigate(`/app/chests/${result.uuid}`)
+				break
+			case "category":
+			case "field":
+				navigate("/app/manage-categories-and-fields")
+				break
 		}
-		navigate(paths[result.type])
 	}
+
+	/* External barcode scanners */
+	useEffect(() => {
+		if (!useExternalBarcodeScanner) return
+
+		const finishInput = async () => {
+			if (externalCodeTimer.current !== null) {
+				window.clearTimeout(externalCodeTimer.current)
+				externalCodeTimer.current = null
+			}
+			const identifier = externalCodeBuffer.current.trim()
+			externalCodeBuffer.current = ""
+			setIsListeningForExternalCode(false)
+			if (!identifier || isLookingUpExternalCode) return
+
+			setIsLookingUpExternalCode(true)
+			setExternalScanError("")
+			try {
+				await handleCodeDetected(identifier)
+			} catch (reason) {
+				setExternalScanError(reason instanceof Error ? reason.message : t("manageCodes.externalScanner.errors.lookup"))
+			} finally {
+				setIsLookingUpExternalCode(false)
+			}
+		}
+
+		const onKeyDown = (event: KeyboardEvent) => {
+			if (event.key === "Escape") {
+				setUseExternalBarcodeScanner(false)
+				return
+			}
+			if (event.key === "Enter") {
+				event.preventDefault()
+				void finishInput()
+				return
+			}
+			if (event.key.length !== 1 || event.ctrlKey || event.altKey || event.metaKey) return
+
+			externalCodeBuffer.current += event.key
+			if (externalCodeTimer.current !== null) window.clearTimeout(externalCodeTimer.current)
+			setIsListeningForExternalCode(true)
+			externalCodeTimer.current = window.setTimeout(() => void finishInput(), 300)
+		}
+
+		window.addEventListener("keydown", onKeyDown) // register event listener
+		return () => {
+			window.removeEventListener("keydown", onKeyDown)
+			if (externalCodeTimer.current !== null) window.clearTimeout(externalCodeTimer.current)
+			externalCodeTimer.current = null
+			externalCodeBuffer.current = ""
+			setIsListeningForExternalCode(false)
+		}
+	}, [useExternalBarcodeScanner, isLookingUpExternalCode, t])
 
 	useEffect(() => {
 		void (async () => {
@@ -132,9 +206,15 @@ export default function ManageCodes() {
 			description={t("manageCodes.description")}
 		>
             <div className="mb-6 flex items-center justify-center gap-3">
-                <Button className="w-full py-6 mb-5" onClick={() => setIsScannerOpen(true)}>
+                <Button className="flex-1 py-6 mb-5" onClick={() => setIsScannerOpen(true)}>
                     <ScanLine /> {t("manageCodes.scan")}
                 </Button>
+				<Button 
+					variant="outline" size="icon" className="border-dashed py-6 mb-5 w-1/12" 
+					onClick={() => setUseExternalBarcodeScanner(true)} title={t("manageCodes.useExternalBarcodeScanner")}
+				>
+					<ScanBarcode className="h-5 w-5 text-muted-foreground" />
+				</Button>
             </div>
 			{isScannerOpen ? (
 				<Scanner onClose={() => setIsScannerOpen(false)} onCodeDetected={handleCodeDetected} />
@@ -201,6 +281,25 @@ export default function ManageCodes() {
 							</div>
 						</div>
 					</aside>
+				</div>
+			)}
+			{useExternalBarcodeScanner && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="presentation" onMouseDown={(event) => {
+					if (event.target === event.currentTarget) setUseExternalBarcodeScanner(false)
+				}}>
+					<section role="dialog" aria-modal="true" aria-labelledby="external-scanner-title" className="w-full max-w-md rounded-xl border bg-card p-6 shadow-lg">
+						<div className="flex items-start justify-between gap-4">
+							<div>
+								<h2 id="external-scanner-title" className="text-lg font-semibold">{t("manageCodes.externalScanner.title")}</h2>
+								<p className="mt-2 text-sm text-muted-foreground">{t("manageCodes.externalScanner.ready")}</p>
+							</div>
+							<Button aria-label={t("manageCodes.externalScanner.close")} size="icon" variant="ghost" onClick={() => setUseExternalBarcodeScanner(false)}>
+								<X />
+							</Button>
+						</div>
+						{(isListeningForExternalCode || isLookingUpExternalCode) && <p className="mt-4 flex items-center gap-2 text-sm"><LoaderCircle className="size-4 animate-spin" />{isLookingUpExternalCode ? t("manageCodes.externalScanner.lookingUp") : t("manageCodes.externalScanner.listening")}</p>}
+						{externalScanError && <p className="mt-4 text-sm text-destructive">{externalScanError}</p>}
+					</section>
 				</div>
 			)}
 		</BaseScreen>

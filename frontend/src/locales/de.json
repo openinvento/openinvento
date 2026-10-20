@@ -94,6 +94,17 @@
       "article": "Artikel",
       "chest": "Kiste",
       "shelf": "Regal"
+    },
+    "useExternalBarcodeScanner": "Externer Barcodescanner",
+    "externalScanner": {
+      "title": "Externer Barcodescanner",
+      "ready": "Bereit für Eingaben vom externen Barcodescanner. Jetzt einen Code scannen.",
+      "listening": "Barcode wird empfangen...",
+      "lookingUp": "Inventarelement wird gesucht...",
+      "close": "Scanner schließen",
+      "errors": {
+        "lookup": "Das gescannte Element konnte nicht gefunden werden."
+      }
     }
   },
   "settings": {
