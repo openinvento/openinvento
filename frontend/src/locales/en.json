@@ -218,14 +218,14 @@
     "articleCount": "{{count}} articles",
     "backToArea": "Back to area",
     "confirmDelete": "Delete {{name}}?",
-    "editIdentifier": "Edit identifier",
     "editChest": "Edit chest",
+    "editIdentifier": "Edit identifier",
     "editTitle": "Edit chest",
     "empty": "No articles are stored in this chest yet.",
     "errors": {
       "delete": "Could not delete article.",
-      "identifier": "Could not update the identifier.",
       "edit": "Could not update this chest.",
+      "identifier": "Could not update the identifier.",
       "load": "Could not load this chest."
     },
     "identifierTitle": "Edit chest identifier",
@@ -269,11 +269,6 @@
     "viewCategories": "Categories"
   },
   "inventory": {
-    "view": {
-      "label": "Inventory layout",
-      "grid": "Grid view",
-      "list": "List view"
-    },
     "categories": {
       "books": "Books and media",
       "clothing": "Clothing",
@@ -298,6 +293,11 @@
       "serial_number": "Serial number",
       "size": "Size",
       "warranty_months": "Warranty period in months"
+    },
+    "view": {
+      "grid": "Grid view",
+      "label": "Inventory layout",
+      "list": "List view"
     }
   },
   "manageCodes": {
@@ -330,6 +330,17 @@
       "article": "Article",
       "chest": "Chest",
       "shelf": "Shelf"
+    },
+    "useExternalBarcodeScanner": "External Barcode Scanner",
+    "externalScanner": {
+      "title": "External barcode scanner",
+      "ready": "Ready for input from external barcode scanner. Scan a code now.",
+      "listening": "Receiving barcode...",
+      "lookingUp": "Finding the inventory item...",
+      "close": "Close scanner",
+      "errors": {
+        "lookup": "Unable to find the scanned item."
+      }
     }
   },
   "navActions": {
@@ -337,6 +348,7 @@
     "chest": "chest",
     "confirmDelete": "Delete {{name}}? Its contents may be deleted too.",
     "delete": "Delete",
+    "dismiss": "Dismiss",
     "editIdentifier": "Edit identifier",
     "errors": {
       "delete": "Could not delete this item.",
@@ -345,16 +357,15 @@
     },
     "identifier": "Identifier",
     "identifierTitle": "Edit {{kind}} identifier",
+    "lowStock": "Low stock: {{name}}",
     "moreActions": "More actions",
     "name": "Name",
     "noActions": "No actions available.",
     "noNotifications": "No notifications.",
-    "lowStock": "Low stock: {{name}}",
-    "stockLevel": "{{quantity}} left (minimum {{minimum}})",
     "notifications": "Notifications",
-    "dismiss": "Dismiss",
     "rename": "Rename",
-    "renameTitle": "Rename {{kind}}"
+    "renameTitle": "Rename {{kind}}",
+    "stockLevel": "{{quantity}} left (minimum {{minimum}})"
   },
   "search": {
     "empty": "No articles found.",
@@ -380,29 +391,6 @@
     "accountSave": "Save personal account",
     "accountSaving": "Saving...",
     "accountUsername": "Username",
-    "apiKeys": {
-      "title": "API keys",
-      "description": "Use a key to access your inventory through the API. Keys have the same access as your account.",
-      "createdOnce": "Copy this key now. It will not be shown again.",
-      "copy": "Copy key",
-      "dismiss": "Dismiss",
-      "namePlaceholder": "Key name",
-      "nameLabel": "API key name",
-      "create": "Create API key",
-      "creating": "Creating...",
-      "loading": "Loading API keys...",
-      "empty": "No API keys yet.",
-      "revoked": "revoked",
-      "prefix": "Key prefix: {{prefix}}",
-      "rename": "Rename",
-      "renamePrompt": "Enter a new name",
-      "revoke": "Revoke",
-      "revokeConfirm": "Revoke API key {{name}}? This cannot be undone.",
-      "loadError": "Could not load API keys.",
-      "createError": "Could not create API key.",
-      "updateError": "Could not rename API key.",
-      "revokeError": "Could not revoke API key."
-    },
     "admin": {
       "actions": "Actions",
       "addUser": "Add User",
@@ -416,17 +404,6 @@
       "deleteUser": "Delete user",
       "deleteUserError": "Could not delete user.",
       "downloadBackup": "Download backup",
-      "version": {
-        "title": "OpenInvento updates",
-        "description": "Check for a new version and review its changelog.",
-        "checkButton": "Check for updates",
-        "checking": "Checking...",
-        "checkError": "Could not fetch release information.",
-        "updateAvailable": "Version {{version}} is available.",
-        "upToDate": "This instance is running the latest version ({{version}}).",
-        "noNotes": "No release notes were provided.",
-        "noChangelog": "No changelog entries are available since this version."
-      },
       "editUser": "Edit user",
       "email": "Email",
       "enableEmailLogin": "Enable email login",
@@ -444,11 +421,45 @@
       "saveUser": "Save user",
       "saveUserError": "Could not save user.",
       "userManagement": "User Management",
-      "username": "Username"
+      "username": "Username",
+      "version": {
+        "checkButton": "Check for updates",
+        "checkError": "Could not fetch release information.",
+        "checking": "Checking...",
+        "description": "Check for a new version and review its changelog.",
+        "noChangelog": "No changelog entries are available since this version.",
+        "noNotes": "No release notes were provided.",
+        "title": "OpenInvento updates",
+        "upToDate": "This instance is running the latest version ({{version}}).",
+        "updateAvailable": "Version {{version}} is available."
+      }
     },
     "adminTab": "Admin settings (instance)",
     "allowEmailLogin": "Allow email address login",
     "allowEmailLoginDescription": "When enabled, users can sign in with their email address in addition to their username.",
+    "apiKeys": {
+      "copy": "Copy key",
+      "create": "Create API key",
+      "createError": "Could not create API key.",
+      "createdOnce": "Copy this key now. It will not be shown again.",
+      "creating": "Creating...",
+      "description": "Use a key to access your inventory through the API. Keys have the same access as your account.",
+      "dismiss": "Dismiss",
+      "empty": "No API keys yet.",
+      "loadError": "Could not load API keys.",
+      "loading": "Loading API keys...",
+      "nameLabel": "API key name",
+      "namePlaceholder": "Key name",
+      "prefix": "Key prefix: {{prefix}}",
+      "rename": "Rename",
+      "renamePrompt": "Enter a new name",
+      "revoke": "Revoke",
+      "revokeConfirm": "Revoke API key {{name}}? This cannot be undone.",
+      "revokeError": "Could not revoke API key.",
+      "revoked": "revoked",
+      "title": "API keys",
+      "updateError": "Could not rename API key."
+    },
     "description": "Select how the user interface should be displayed.",
     "instanceSettingsLoadError": "Could not load instance settings.",
     "instanceSettingsSaveError": "Could not save instance settings.",
@@ -525,14 +536,14 @@
     "areas": "Areas",
     "categoriesAndFields": "Categories and Fields",
     "codeManagement": "Code Management",
+    "favorites": "Favorites",
     "home": "Home",
     "loans": "Loans",
     "inventorySettings": "Inventory Settings",
-    "search": "Search",
-    "settings": "Settings",
-    "favorites": "Favorites",
     "noAreas": "No areas yet.",
     "noFavorites": "No favorites yet.",
-    "removeFavorite": "Remove from Favorites"
+    "removeFavorite": "Remove from Favorites",
+    "search": "Search",
+    "settings": "Settings"
   }
 }
