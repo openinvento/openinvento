@@ -229,16 +229,16 @@ export default function AdminSettings() {
 
       <section className="border-b pb-7">
         <div className="mb-4">
-          <h2 className="font-semibold">Modules</h2>
-          <p className="text-sm text-muted-foreground">Choose which optional modules are available in this instance. When you enable a new module, you have to restart your OpenInvento Instance to apply database changes.</p>
+          <h2 className="font-semibold">{t("settings.admin.modules.title")}</h2>
+          <p className="text-sm text-muted-foreground">{t("settings.admin.modules.description")}</p>
         </div>
         {availableModules.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No optional modules are installed.</p>
+          <p className="text-sm text-muted-foreground">{t("settings.admin.modules.noAvailableModules")}</p>
         ) : (
           <div className="grid gap-3">
             {availableModules.map((module) => (
               <Field key={module.name}>
-                <FieldLabel className="flex-row items-center text-sm font-normal">
+                <FieldLabel className="flex-row items-center text-sm font-normal gap-4">
                   <Switch
                     checked={enabledModules.includes(module.name)}
                     disabled={saving}

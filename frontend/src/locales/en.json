@@ -298,11 +298,6 @@
       "grid": "Grid view",
       "label": "Inventory layout",
       "list": "List view"
-    },
-    "view": {
-      "grid": "Grid view",
-      "label": "Inventory layout",
-      "list": "List view"
     }
   },
   "loans": {
@@ -348,6 +343,16 @@
       "load": "Unable to load inventory items.",
       "selectItem": "Select at least one item first."
     },
+    "externalScanner": {
+      "close": "Close scanner",
+      "errors": {
+        "lookup": "Unable to find the scanned item."
+      },
+      "listening": "Receiving barcode...",
+      "lookingUp": "Finding the inventory item...",
+      "ready": "Ready for input from external barcode scanner. Scan a code now.",
+      "title": "External barcode scanner"
+    },
     "inventoryItems": "Inventory Items",
     "layout": "Layout",
     "loading": "Loading inventory items...",
@@ -366,17 +371,7 @@
       "chest": "Chest",
       "shelf": "Shelf"
     },
-    "useExternalBarcodeScanner": "External Barcode Scanner",
-    "externalScanner": {
-      "title": "External barcode scanner",
-      "ready": "Ready for input from external barcode scanner. Scan a code now.",
-      "listening": "Receiving barcode...",
-      "lookingUp": "Finding the inventory item...",
-      "close": "Close scanner",
-      "errors": {
-        "lookup": "Unable to find the scanned item."
-      }
-    }
+    "useExternalBarcodeScanner": "External Barcode Scanner"
   },
   "navActions": {
     "area": "area",
@@ -445,6 +440,11 @@
       "loadUsersError": "Could not load users.",
       "loadingUsers": "Loading users...",
       "member": "Member",
+      "modules": {
+        "description": "Choose which optional modules are available in this instance",
+        "noAvailableModules": "No optional modules are installed.",
+        "title": "Modules"
+      },
       "name": "Name",
       "newUser": "New user",
       "noEmail": "No email address",
