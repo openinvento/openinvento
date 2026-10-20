@@ -16,12 +16,20 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .instance_notifications import get_current_version
 from .version_fetching import VersionFetcher
+from modules.registry import get_enabled_modules
 
 #TODO: Add option to serve user uploads through Nginx or a connected S3 storage bucket
 
 def health_view(request):
     """Return HTTP 200 for health checks."""
     return JsonResponse({'status': 'healthy'}, status=200)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def modules_view(request):
+    """Return the optional modules enabled on this instance."""
+    return Response({"modules": [module.name for module in get_enabled_modules()]})
 
 
 # General Endpoints for instance settings

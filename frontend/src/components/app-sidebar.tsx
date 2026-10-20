@@ -19,6 +19,7 @@ import { FAVORITES_CHANGED_EVENT, getFavorites, removeFavorite, type Favorite } 
 import i18n from "@/i18n"
 import { getSidebarData, type SidebarData } from "@/utils/api/general"
 import { inventoryApi, type Area } from "@/utils/api/inventory"
+import { getEnabledModules } from "@/utils/api/modules"
 
 // This is sample data.
 const data = {
@@ -182,6 +183,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [favorites, setFavorites] = React.useState<Favorite[]>([])
   const [sidebar, setSidebar] = React.useState<SidebarData | null>(null)
   const [areas, setAreas] = React.useState<Area[]>([])
+  const [enabledModules, setEnabledModules] = React.useState<string[]>([])
+
+  React.useEffect(() => {
+    void getEnabledModules().then(setEnabledModules).catch(() => setEnabledModules([]))
+  }, [])
 
   React.useEffect(() => {
     void getSidebarData().then(setSidebar).catch(() => setSidebar(null))
@@ -206,10 +212,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [])
 
   /* Auto set isActive based on the current URL location */
-  const dynamicNavMain = data.navMain.map((item) => ({
+  const dynamicNavMain = data.navMain
+    .filter((item) => item.url !== "/app/loans" || enabledModules.includes("loans"))
+    .map((item) => ({
     ...item,
     isActive: location.pathname === item.url || (item.url === "/app" && location.pathname === "/app/dashboard")
-  }))
+    }))
 
   return (
     <Sidebar className="border-r-0" {...props}>

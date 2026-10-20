@@ -9,11 +9,13 @@ from .views import (
     InstanceSettingsView,
     VersionCheckView,
     health_view,
+    modules_view,
     protected_media_view,
 )
 
 urlpatterns = [
     path("api/health", health_view, name="health"),
+    path("api/modules/", modules_view, name="modules"),
     path("api/instance-settings/backup/", InstanceBackupView.as_view(), name="instance-backup"),
     path("api/instance-settings/version-check/", VersionCheckView.as_view(), name="version-check"),
     path("api/instance-settings/", InstanceSettingsView.as_view(), name="instance-settings"),

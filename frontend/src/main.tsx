@@ -1,4 +1,6 @@
 import { StrictMode } from 'react'
+import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router' // 💡 Wichtig: aus 'react-router' importieren
 import './index.css'
@@ -23,6 +25,20 @@ import ManageCategoriesAndFieldsPage from './routes/inventory/ManageCategoriesAn
 import ManageCodes from './routes/inventory/ManageCodes.tsx'
 import ResetCredentialsPage from './routes/auth/ResetCredentials.tsx'
 import LoansPage from '../modules/loans/LoansPage.tsx'
+import { getEnabledModules } from './utils/api/modules'
+
+function EnabledModuleRoute({ name, children }: { name: string; children: ReactNode }) {
+  const [enabled, setEnabled] = useState<boolean | null>(null)
+  useEffect(() => {
+    let active = true
+    void getEnabledModules()
+      .then((modules) => { if (active) setEnabled(modules.includes(name)) })
+      .catch(() => { if (active) setEnabled(false) })
+    return () => { active = false }
+  }, [name])
+  if (enabled === null) return null
+  return enabled ? children : <Navigate to="/app/dashboard" replace />
+}
 
 
 /* Dark / White mode handling */
@@ -72,7 +88,7 @@ const router = createBrowserRouter([
       },
       {
         path: "loans",
-        element: <LoansPage />,
+        element: <EnabledModuleRoute name="loans"><LoansPage /></EnabledModuleRoute>,
       },
       {
         path: "search",
