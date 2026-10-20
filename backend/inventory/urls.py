@@ -3,18 +3,18 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     AreaViewSet,
+    ArticleAttachmentsView,
     ArticleCategoryViewSet,
     ArticleViewSet,
-    ArticleAttachmentsView,
     CategoryFieldViewSet,
     ChestViewSet,
     CodeLookupView,
     CodePdfView,
     DashboardView,
     ExportInventoryView,
-    InventoryViewSet,
     InventoryManageView,
     InventoryMembersView,
+    InventoryViewSet,
     SearchView,
     ShelfViewSet,
 )
