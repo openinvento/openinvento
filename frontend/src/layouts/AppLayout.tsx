@@ -17,7 +17,7 @@ import {
 
 export default function DashboardLayout() {
   const location = useLocation()
-  const pageName = location.pathname.includes("/areas") ? "Inventory areas" : location.pathname.includes("/articles") ? "Article" : "Dashboard"
+  const pageName = location.pathname.includes("/loans") ? "Loans" : location.pathname.includes("/areas") ? "Inventory areas" : location.pathname.includes("/articles") ? "Article" : "Dashboard"
   return (
     <InventoryDndBoundary>
     <SidebarProvider>

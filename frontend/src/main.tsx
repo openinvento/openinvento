@@ -22,6 +22,7 @@ import { SessionGuard } from './components/auth/session-guard.tsx'
 import ManageCategoriesAndFieldsPage from './routes/inventory/ManageCategoriesAndFields.tsx'
 import ManageCodes from './routes/inventory/ManageCodes.tsx'
 import ResetCredentialsPage from './routes/auth/ResetCredentials.tsx'
+import LoansPage from '../extensions/loans/LoansPage.tsx'
 
 
 /* Dark / White mode handling */
@@ -68,6 +69,10 @@ const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <Dashboard />,
+      },
+      {
+        path: "loans",
+        element: <LoansPage />,
       },
       {
         path: "search",

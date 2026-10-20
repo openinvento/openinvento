@@ -14,7 +14,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuestionIcon, QrCodeIcon, TextSearchIcon, WarehouseIcon } from "lucide-react"
+import { SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuestionIcon, QrCodeIcon, TextSearchIcon, WarehouseIcon, HandCoinsIcon } from "lucide-react"
 import { FAVORITES_CHANGED_EVENT, getFavorites, removeFavorite, type Favorite } from "@/utils/favorites"
 import i18n from "@/i18n"
 import { getSidebarData, type SidebarData } from "@/utils/api/general"
@@ -57,6 +57,12 @@ const data = {
       ),
       isActive: false,
       badge: "10",
+    },
+    {
+      title: i18n.t("sidebar.loans"),
+      url: "/app/loans",
+      icon: <HandCoinsIcon />,
+      isActive: false,
     },
     {
       title: i18n.t("sidebar.codeManagement"),
