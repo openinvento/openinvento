@@ -1,5 +1,6 @@
 reviews:
   auto_apply_labels: true
+  review_status: false
 
   auto_review:
     enabled: false
