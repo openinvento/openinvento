@@ -38,7 +38,6 @@ class LoanSerializer(serializers.ModelSerializer):
             "id",
             "article",
             "chest",
-            "borrower",
             "lent_by",
             "quantity",
             "lent_at",

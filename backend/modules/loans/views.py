@@ -13,12 +13,12 @@ class LoanViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Loan.objects.filter(borrower=self.request.user).select_related(
-            "article", "chest", "borrower", "lent_by"
+        return Loan.objects.filter(lent_by=self.request.user).select_related(
+            "article", "chest", "lent_by"
         )
 
     def perform_create(self, serializer):
-        serializer.save(borrower=self.request.user, lent_by=self.request.user)
+        serializer.save(lent_by=self.request.user)
 
     @action(detail=True, methods=("post",), url_path="return")
     def return_loan(self, request, pk=None):

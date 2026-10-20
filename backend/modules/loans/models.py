@@ -21,9 +21,6 @@ class Loan(models.Model):
         null=True,
         blank=True,
     )
-    borrower = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="loans"
-    )
     lent_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -55,4 +52,4 @@ class Loan(models.Model):
 
     def __str__(self):
         item = self.article or self.chest
-        return f"{item} borrowed by {self.borrower}"
+        return f"{item} lent by {self.lent_by}"
