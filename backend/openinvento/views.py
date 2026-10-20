@@ -16,12 +16,20 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .instance_notifications import get_current_version
 from .version_fetching import VersionFetcher
+from modules.registry import get_available_modules
 
 #TODO: Add option to serve user uploads through Nginx or a connected S3 storage bucket
 
 def health_view(request):
     """Return HTTP 200 for health checks."""
     return JsonResponse({'status': 'healthy'}, status=200)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def modules_view(request):
+    """Return the optional modules enabled on this instance."""
+    return Response({"modules": InstanceSettings.get_solo().enabled_modules})
 
 
 # General Endpoints for instance settings
@@ -82,16 +90,38 @@ class InstanceSettingsView(APIView):
         return Response({
             **InstanceSettingsSerializer(InstanceSettings.get_solo()).data,
             "allow_signup": settings.ENABLE_SIGNUP,
+            "enabled_modules": InstanceSettings.get_solo().enabled_modules,
+            "available_modules": [
+                {"name": module.name, "label": module.name.replace("_", " ").title()}
+                for module in get_available_modules()
+            ],
         })
 
     def patch(self, request):
-        self.permission_classes = (permissions.IsAdminUser,)
-        self.check_permissions(request)
+        if not request.user.is_staff:
+            return Response({"detail": "Administrator access is required."}, status=status.HTTP_403_FORBIDDEN)
         instance_settings = InstanceSettings.get_solo()
+        if "enabled_modules" in request.data:
+            requested = request.data["enabled_modules"]
+            if not isinstance(requested, list) or not all(isinstance(name, str) for name in requested):
+                return Response({"enabled_modules": "Provide a list of module names."}, status=status.HTTP_400_BAD_REQUEST)
+            available = {module.name for module in get_available_modules()}
+            if len(requested) != len(set(requested)) or not set(requested).issubset(available):
+                return Response({"enabled_modules": "One or more modules are unavailable."}, status=status.HTTP_400_BAD_REQUEST)
+            instance_settings.enabled_modules = requested
+            instance_settings.save(update_fields=("enabled_modules",))
         serializer = InstanceSettingsSerializer(instance_settings, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response({
+                **serializer.data,
+                "allow_signup": settings.ENABLE_SIGNUP,
+                "enabled_modules": instance_settings.enabled_modules,
+                "available_modules": [
+                    {"name": module.name, "label": module.name.replace("_", " ").title()}
+                    for module in get_available_modules()
+                ],
+            })
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])

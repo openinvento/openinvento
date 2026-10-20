@@ -1,4 +1,6 @@
 import { StrictMode } from 'react'
+import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router' // 💡 Wichtig: aus 'react-router' importieren
 import './index.css'
@@ -22,6 +24,25 @@ import { SessionGuard } from './components/auth/session-guard.tsx'
 import ManageCategoriesAndFieldsPage from './routes/inventory/ManageCategoriesAndFields.tsx'
 import ManageCodes from './routes/inventory/ManageCodes.tsx'
 import ResetCredentialsPage from './routes/auth/ResetCredentials.tsx'
+import LoansPage from '../modules/loans/LoansPage.tsx'
+import { getEnabledModules, MODULES_CHANGED_EVENT } from './utils/api/modules'
+
+function EnabledModuleRoute({ name, children }: { name: string; children: ReactNode }) {
+  const [enabled, setEnabled] = useState<boolean | null>(null)
+  useEffect(() => {
+    let active = true
+    const loadModules = () => {
+      void getEnabledModules(true)
+        .then((modules) => { if (active) setEnabled(modules.includes(name)) })
+        .catch(() => { if (active) setEnabled(false) })
+    }
+    loadModules()
+    window.addEventListener(MODULES_CHANGED_EVENT, loadModules)
+    return () => { active = false; window.removeEventListener(MODULES_CHANGED_EVENT, loadModules) }
+  }, [name])
+  if (enabled === null) return null
+  return enabled ? children : <Navigate to="/app/dashboard" replace />
+}
 
 
 /* Dark / White mode handling */
@@ -68,6 +89,10 @@ const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <Dashboard />,
+      },
+      {
+        path: "loans",
+        element: <EnabledModuleRoute name="loans"><LoansPage /></EnabledModuleRoute>,
       },
       {
         path: "search",

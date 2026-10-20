@@ -40,6 +40,8 @@ const emptyForm: UserForm = {
 export default function AdminSettings() {
   const { t } = useTranslation()
   const [allowEmailLogin, setAllowEmailLogin] = useState(false)
+  const [enabledModules, setEnabledModules] = useState<string[]>([])
+  const [availableModules, setAvailableModules] = useState<{ name: string; label: string }[]>([])
   const [settingsError, setSettingsError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [backupLoading, setBackupLoading] = useState(false)
@@ -58,6 +60,8 @@ export default function AdminSettings() {
     Promise.all([getInstanceSettings(), getUsers()])
       .then(([settings, loadedUsers]) => {
         setAllowEmailLogin(settings.allow_email_login)
+        setEnabledModules(settings.enabled_modules)
+        setAvailableModules(settings.available_modules)
         setUsers(loadedUsers)
       })
       .catch(() => {
@@ -77,6 +81,25 @@ export default function AdminSettings() {
     } catch {
       setAllowEmailLogin(!value)
       setSettingsError(t("settings.instanceSettingsSaveError"))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleModuleChange(moduleName: string, enabled: boolean) {
+    const previous = enabledModules
+    const next = enabled
+      ? [...previous, moduleName]
+      : previous.filter((name) => name !== moduleName)
+    setEnabledModules(next)
+    setSaving(true)
+    setSettingsError(null)
+    try {
+      const updated = await updateInstanceSettings({ enabled_modules: next })
+      setEnabledModules(updated.enabled_modules)
+    } catch {
+      setEnabledModules(previous)
+      setSettingsError("Could not update enabled modules.")
     } finally {
       setSaving(false)
     }
@@ -202,6 +225,31 @@ export default function AdminSettings() {
           </FieldLabel>
           <FieldError>{settingsError}</FieldError>
         </Field>
+      </section>
+
+      <section className="border-b pb-7">
+        <div className="mb-4">
+          <h2 className="font-semibold">{t("settings.admin.modules.title")}</h2>
+          <p className="text-sm text-muted-foreground">{t("settings.admin.modules.description")}</p>
+        </div>
+        {availableModules.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("settings.admin.modules.noAvailableModules")}</p>
+        ) : (
+          <div className="grid gap-3">
+            {availableModules.map((module) => (
+              <Field key={module.name}>
+                <FieldLabel className="flex-row items-center text-sm font-normal gap-4">
+                  <Switch
+                    checked={enabledModules.includes(module.name)}
+                    disabled={saving}
+                    onCheckedChange={(checked) => void handleModuleChange(module.name, checked)}
+                  />
+                  {module.label}
+                </FieldLabel>
+              </Field>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="flex items-center justify-between gap-4 border-b pb-7">

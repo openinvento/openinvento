@@ -300,6 +300,37 @@
       "list": "List view"
     }
   },
+  "loans": {
+    "article": "Articles",
+    "chest": "Chests",
+    "create": "Record loan",
+    "description": "Track articles and chests borrowed from your inventory.",
+    "due": "Due",
+    "dueDate": "Due date (optional)",
+    "empty": "No loans recorded yet.",
+    "errors": {
+      "create": "Error during creating a loan.",
+      "inventoryLoad": "Error during loading inventory items.",
+      "load": "Error during loading loans.",
+      "return": "Error during marking the loan as returned."
+    },
+    "history": "Your loans",
+    "item": "Item",
+    "itemType": "Item type",
+    "loading": "Loading loans...",
+    "markReturned": "Mark returned",
+    "newLoan": "Record a loan",
+    "noDueDate": "No due date",
+    "noItems": "No items available in this inventory.",
+    "notes": "Notes (optional)",
+    "notesLabel": "Notes",
+    "quantity": "Quantity",
+    "returned": "Returned {{date}}",
+    "returning": "Returning...",
+    "saving": "Saving...",
+    "title": "Loans",
+    "unknownItem": "Inventory item"
+  },
   "manageCodes": {
     "clearSelection": "Clear selection",
     "codeType": "Code type",
@@ -312,6 +343,16 @@
       "generate": "Unable to generate the codes.",
       "load": "Unable to load inventory items.",
       "selectItem": "Select at least one item first."
+    },
+    "externalScanner": {
+      "close": "Close scanner",
+      "errors": {
+        "lookup": "Unable to find the scanned item."
+      },
+      "listening": "Receiving barcode...",
+      "lookingUp": "Finding the inventory item...",
+      "ready": "Ready for input from external barcode scanner. Scan a code now.",
+      "title": "External barcode scanner"
     },
     "inventoryItems": "Inventory Items",
     "layout": "Layout",
@@ -331,17 +372,7 @@
       "chest": "Chest",
       "shelf": "Shelf"
     },
-    "useExternalBarcodeScanner": "External Barcode Scanner",
-    "externalScanner": {
-      "title": "External barcode scanner",
-      "ready": "Ready for input from external barcode scanner. Scan a code now.",
-      "listening": "Receiving barcode...",
-      "lookingUp": "Finding the inventory item...",
-      "close": "Close scanner",
-      "errors": {
-        "lookup": "Unable to find the scanned item."
-      }
-    }
+    "useExternalBarcodeScanner": "External Barcode Scanner"
   },
   "navActions": {
     "area": "area",
@@ -410,6 +441,11 @@
       "loadUsersError": "Could not load users.",
       "loadingUsers": "Loading users...",
       "member": "Member",
+      "modules": {
+        "description": "Choose which optional modules are available in this instance",
+        "noAvailableModules": "No optional modules are installed.",
+        "title": "Modules"
+      },
       "name": "Name",
       "newUser": "New user",
       "noEmail": "No email address",
@@ -509,6 +545,7 @@
     "favorites": "Favorites",
     "home": "Home",
     "inventorySettings": "Inventory Settings",
+    "loans": "Loans",
     "noAreas": "No areas yet.",
     "noFavorites": "No favorites yet.",
     "removeFavorite": "Remove from Favorites",
