@@ -78,4 +78,5 @@ jobs:
       - name: Run django tests
         env:
           SECRET_KEY: temporary-secret-key-for-ci
+          OPENINVENTO_MODULES: loans
         run: poetry run python manage.py test
