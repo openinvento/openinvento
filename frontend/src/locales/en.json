@@ -10,7 +10,7 @@
     "detail": {
       "actions": {
         "article": "Article",
-        "chest": "Chest",
+        "box": "Box",
         "shelf": "Shelf"
       },
       "allAreas": "All areas",
@@ -27,7 +27,7 @@
       "fields": {
         "area": "Area",
         "category": "Category",
-        "chest": "Chest",
+        "box": "Box",
         "description": "Description",
         "icon": "Icon",
         "name": "Name",
@@ -45,14 +45,14 @@
         "new": "New {{kind}}"
       },
       "noCategory": "No category",
-      "noChest": "No chest",
+      "noBox": "No box",
       "notOnShelf": "Not on a shelf",
       "nothingStored": "Nothing stored here yet.",
       "otherFields": "Other fields",
       "otherItems": "Other items",
       "renameShelf": "Rename shelf",
       "stockFields": "Stock thresholds",
-      "summary": "{{articles}} articles · {{chests}} chests · {{shelves}} shelves"
+      "summary": "{{articles}} articles · {{boxes}} boxes · {{shelves}} shelves"
     },
     "empty": {
       "noAreas": {
@@ -100,7 +100,7 @@
       "fields": {
         "area": "Area",
         "category": "Category",
-        "chest": "Chest",
+        "box": "Box",
         "chooseImage": "Choose image",
         "description": "Description",
         "identifier": "Identifier",
@@ -123,7 +123,7 @@
       "loading": "Loading article...",
       "noArea": "No area",
       "noCategory": "No category",
-      "noChest": "No chest",
+      "noBox": "No box",
       "noShelf": "No shelf",
       "saveChanges": "Save changes",
       "saving": "Saving...",
@@ -214,22 +214,22 @@
     "optionsPlaceholder": "Comma-separated values",
     "title": "Categories and fields"
   },
-  "chests": {
+  "boxes": {
     "articleCount": "{{count}} articles",
     "backToArea": "Back to area",
     "confirmDelete": "Delete {{name}}?",
-    "editChest": "Edit chest",
+    "editBox": "Edit box",
     "editIdentifier": "Edit identifier",
-    "editTitle": "Edit chest",
-    "empty": "No articles are stored in this chest yet.",
+    "editTitle": "Edit box",
+    "empty": "No articles are stored in this box yet.",
     "errors": {
       "delete": "Could not delete article.",
-      "edit": "Could not update this chest.",
+      "edit": "Could not update this box.",
       "identifier": "Could not update the identifier.",
-      "load": "Could not load this chest."
+      "load": "Could not load this box."
     },
-    "identifierTitle": "Edit chest identifier",
-    "loading": "Loading chest..."
+    "identifierTitle": "Edit box identifier",
+    "loading": "Loading box..."
   },
   "dashboard": {
     "addArticle": "Add an article",
@@ -260,7 +260,7 @@
       "area": "Area",
       "article": "Article",
       "category": "Category",
-      "chest": "Chest",
+      "box": "Box",
       "field": "Field",
       "shelf": "Shelf"
     },
@@ -302,9 +302,9 @@
   },
   "loans": {
     "article": "Articles",
-    "chest": "Chests",
+    "box": "Boxes",
     "create": "Record loan",
-    "description": "Track articles and chests borrowed from your inventory.",
+    "description": "Track articles and boxes borrowed from your inventory.",
     "due": "Due",
     "dueDate": "Due date (optional)",
     "empty": "No loans recorded yet.",
@@ -369,14 +369,14 @@
     "types": {
       "area": "Area",
       "article": "Article",
-      "chest": "Chest",
+      "box": "Box",
       "shelf": "Shelf"
     },
     "useExternalBarcodeScanner": "External Barcode Scanner"
   },
   "navActions": {
     "area": "area",
-    "chest": "chest",
+    "box": "box",
     "confirmDelete": "Delete {{name}}? Its contents may be deleted too.",
     "delete": "Delete",
     "dismiss": "Dismiss",
@@ -409,7 +409,7 @@
     "noInventory": "No inventory available.",
     "placeholder": "Search items by name",
     "prompt": "Enter a search term to find articles.",
-    "chest": "Chest",
+    "box": "Box",
     "quantity": "{{count}} in stock",
     "searchDescription": "Search your inventory",
     "searchTitle": "Search",
