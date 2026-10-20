@@ -57,6 +57,10 @@ def get_enabled_modules(names=None):
         urlconf = getattr(config, "urlconf", f"{package}.urls")
         has_urls = find_spec(urlconf) is not None
         prefix = getattr(config, "url_prefix", name.strip("/") + "/").strip("/")
+        if not prefix:
+            raise ValueError(
+                f"Module {name!r} must define a non-empty url_prefix attribute in its AppConfig."
+            )
         modules.append(
             EnabledModule(
                 name=name,
