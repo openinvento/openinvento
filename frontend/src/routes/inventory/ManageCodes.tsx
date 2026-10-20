@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
-import { Printer, ScanLine } from "lucide-react"
+import { Printer, ScanBarcode, ScanLine } from "lucide-react"
 
 import Scanner from "@/components/qr-bar-code/Scanner"
 import { Button } from "@/components/ui/button"
@@ -34,7 +34,9 @@ export default function ManageCodes() {
 		size: "a4",
 		layout: "vertical",
 	})
+
 	const [isScannerOpen, setIsScannerOpen] = useState(false)
+	const [useExternalBarcodeScanner, setUseExternalBarcodeScanner] = useState(false)
 	const [isLoading, setIsLoading] = useState(true)
 	const [isGenerating, setIsGenerating] = useState(false)
 	const [error, setError] = useState("")
@@ -132,9 +134,15 @@ export default function ManageCodes() {
 			description={t("manageCodes.description")}
 		>
             <div className="mb-6 flex items-center justify-center gap-3">
-                <Button className="w-full py-6 mb-5" onClick={() => setIsScannerOpen(true)}>
+                <Button className="flex-1 py-6 mb-5" onClick={() => setIsScannerOpen(true)}>
                     <ScanLine /> {t("manageCodes.scan")}
                 </Button>
+				<Button 
+					variant="outline" size="icon" className="border-dashed py-6 mb-5 w-1/12" 
+					onClick={() => setUseExternalBarcodeScanner(true)} title={t("manageCodes.useExternalBarcodeScanner")}
+				>
+					<ScanBarcode className="h-5 w-5 text-muted-foreground" />
+				</Button>
             </div>
 			{isScannerOpen ? (
 				<Scanner onClose={() => setIsScannerOpen(false)} onCodeDetected={handleCodeDetected} />
