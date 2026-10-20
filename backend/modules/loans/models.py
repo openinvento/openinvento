@@ -8,7 +8,7 @@ class Loan(models.Model):
 
     article = models.ForeignKey(
         "inventory.Article",
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name="loans",
         null=True,
         blank=True,
@@ -16,7 +16,7 @@ class Loan(models.Model):
     # You can also loan a chest
     chest = models.ForeignKey(
         "inventory.Chest",
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name="loans",
         null=True,
         blank=True,
