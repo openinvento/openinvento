@@ -65,7 +65,7 @@
     "article": "Artikel",
     "chest": "Kisten",
     "create": "Ausleihe erfassen",
-    "description": "Verfolge ausgeliehene Artikel und Truhen aus deinem Inventar.",
+    "description": "Verfolge ausgeliehene Artikel und Kisten aus deinem Inventar.",
     "due": "Fällig",
     "dueDate": "Fälligkeitsdatum (optional)",
     "empty": "Bisher wurden keine Ausleihen erfasst.",
