@@ -298,6 +298,11 @@
       "grid": "Grid view",
       "label": "Inventory layout",
       "list": "List view"
+    },
+    "view": {
+      "grid": "Grid view",
+      "label": "Inventory layout",
+      "list": "List view"
     }
   },
   "loans": {
@@ -360,6 +365,17 @@
       "article": "Article",
       "chest": "Chest",
       "shelf": "Shelf"
+    },
+    "useExternalBarcodeScanner": "External Barcode Scanner",
+    "externalScanner": {
+      "title": "External barcode scanner",
+      "ready": "Ready for input from external barcode scanner. Scan a code now.",
+      "listening": "Receiving barcode...",
+      "lookingUp": "Finding the inventory item...",
+      "close": "Close scanner",
+      "errors": {
+        "lookup": "Unable to find the scanned item."
+      }
     }
   },
   "navActions": {
