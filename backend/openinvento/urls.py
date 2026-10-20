@@ -2,6 +2,7 @@
 from account_auth import urls as auth_urls
 from django.contrib import admin
 from django.urls import include, path, re_path
+from extensions.registry import get_enabled_extensions
 from inventory import urls as inventory_api_urls
 
 from .views import InstanceBackupView, InstanceSettingsView, VersionCheckView, health_view, protected_media_view
@@ -17,6 +18,15 @@ urlpatterns = [
     path("api/", include(inventory_api_urls)),
     path("api/", include(auth_urls)),
 ]
+
+for extension in get_enabled_extensions():
+    if extension.urlpatterns is not None:
+        urlpatterns.append(
+            path(
+                f"api/{extension.url_prefix}",
+                include(extension.urlconf),
+            )
+        )
 
 urlpatterns += [
     re_path(r'^media/(?P<path>.*)$', protected_media_view, name='media'),

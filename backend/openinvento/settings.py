@@ -138,6 +138,14 @@ INSTALLED_APPS = [
     "openinvento.apps.OpenInventoConfig",
 ]
 
+# Extensions are normal Django apps, activated by their directory name, for
+# example OPENINVENTO_EXTENSIONS=loans,other_extension. They are disabled by
+# default and can register models, migrations, signals, admin, and optional URLs.
+from extensions.registry import get_enabled_extensions
+
+ENABLED_EXTENSIONS = get_enabled_extensions(_csv_env("OPENINVENTO_EXTENSIONS", []))
+INSTALLED_APPS.extend(extension.app_config for extension in ENABLED_EXTENSIONS)
+
 if HAS_CORSHEADERS:
     INSTALLED_APPS.append("corsheaders")
 
