@@ -10,8 +10,8 @@ from .models import (
     Article,
     ArticleAttachment,
     ArticleCategory,
+    Box,
     CategoryField,
-    Chest,
     Inventory,
     Shelf,
 )
@@ -117,16 +117,16 @@ class ShelfSerializer(InventoryScopedSerializer):
         return attrs
 
 
-class ChestSerializer(InventoryScopedSerializer):
+class BoxSerializer(InventoryScopedSerializer):
     identifier = serializers.CharField(required=False, allow_blank=True, max_length=30)
     area = serializers.PrimaryKeyRelatedField(queryset=Area.objects.none())
     shelf = serializers.PrimaryKeyRelatedField(queryset=Shelf.objects.none(), required=False, allow_null=True)
-    parent_chest = serializers.PrimaryKeyRelatedField(
-        queryset=Chest.objects.none(), required=False, allow_null=True
+    parent_box = serializers.PrimaryKeyRelatedField(
+        queryset=Box.objects.none(), required=False, allow_null=True
     )
 
     class Meta:
-        model = Chest
+        model = Box
         fields = (
             "uuid",
             "identifier",
@@ -136,7 +136,7 @@ class ChestSerializer(InventoryScopedSerializer):
             "name",
             "area",
             "shelf",
-            "parent_chest",
+            "parent_box",
         )
         read_only_fields = ("uuid", "created_at", "updated_at")
 
@@ -144,16 +144,16 @@ class ChestSerializer(InventoryScopedSerializer):
         super().__init__(*args, **kwargs)
         self.fields["area"].queryset = self._inventory_queryset(Area)
         self.fields["shelf"].queryset = self._inventory_queryset(Shelf)
-        self.fields["parent_chest"].queryset = self._inventory_queryset(Chest)
+        self.fields["parent_box"].queryset = self._inventory_queryset(Box)
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
         area = attrs.get("area") or getattr(self.instance, "area", None)
         shelf = attrs.get("shelf") if "shelf" in attrs else getattr(self.instance, "shelf", None)
-        parent_chest = (
-            attrs.get("parent_chest")
-            if "parent_chest" in attrs
-            else getattr(self.instance, "parent_chest", None)
+        parent_box = (
+            attrs.get("parent_box")
+            if "parent_box" in attrs
+            else getattr(self.instance, "parent_box", None)
         )
 
         if area is None:
@@ -162,20 +162,20 @@ class ChestSerializer(InventoryScopedSerializer):
         if shelf is not None and shelf.area_id != area.uuid:
             raise serializers.ValidationError({"shelf": "Shelf must belong to the selected area."})
 
-        if parent_chest is not None:
+        if parent_box is not None:
             if self.instance is not None:
-                ancestor = parent_chest
+                ancestor = parent_box
                 visited = set()
                 while ancestor is not None and ancestor.pk not in visited:
                     if ancestor.pk == self.instance.pk:
                         raise serializers.ValidationError(
-                            {"parent_chest": "A chest cannot be its own ancestor."}
+                            {"parent_box": "A box cannot be its own ancestor."}
                         )
                     visited.add(ancestor.pk)
-                    ancestor = ancestor.parent_chest
-            if parent_chest.area_id != area.uuid:
+                    ancestor = ancestor.parent_box
+            if parent_box.area_id != area.uuid:
                 raise serializers.ValidationError(
-                    {"parent_chest": "Parent chest must belong to the selected area."}
+                    {"parent_box": "Parent box must belong to the selected area."}
                 )
 
         return attrs
@@ -197,7 +197,7 @@ class ArticleSerializer(InventoryScopedSerializer):
     identifier = serializers.CharField(required=False, allow_blank=True, max_length=30)
     area = serializers.PrimaryKeyRelatedField(queryset=Area.objects.none(), required=False, allow_null=True)
     shelf = serializers.PrimaryKeyRelatedField(queryset=Shelf.objects.none(), required=False, allow_null=True)
-    chest = serializers.PrimaryKeyRelatedField(queryset=Chest.objects.none(), required=False, allow_null=True)
+    box = serializers.PrimaryKeyRelatedField(queryset=Box.objects.none(), required=False, allow_null=True)
     category = serializers.PrimaryKeyRelatedField(
         queryset=ArticleCategory.objects.none(), required=False, allow_null=True
     )
@@ -206,7 +206,8 @@ class ArticleSerializer(InventoryScopedSerializer):
 
     class Meta:
         model = Article
-        fields = (            "uuid",
+        fields = (
+            "uuid",
             "identifier",
             "inventory",
             "created_at",
@@ -215,7 +216,7 @@ class ArticleSerializer(InventoryScopedSerializer):
             "description",
             "area",
             "shelf",
-            "chest",
+            "box",
             "quantity",
             "stock_tracking",
             "image",
@@ -230,7 +231,7 @@ class ArticleSerializer(InventoryScopedSerializer):
         super().__init__(*args, **kwargs)
         self.fields["area"].queryset = self._inventory_queryset(Area)
         self.fields["shelf"].queryset = self._inventory_queryset(Shelf)
-        self.fields["chest"].queryset = self._inventory_queryset(Chest)
+        self.fields["box"].queryset = self._inventory_queryset(Box)
         self.fields["category"].queryset = self._inventory_queryset(ArticleCategory)
 
     def get_category_fields(self, obj):
@@ -257,16 +258,16 @@ class ArticleSerializer(InventoryScopedSerializer):
         attrs = super().validate(attrs)
         area = attrs.get("area") if "area" in attrs else getattr(self.instance, "area", None)
         shelf = attrs.get("shelf") if "shelf" in attrs else getattr(self.instance, "shelf", None)
-        chest = attrs.get("chest") if "chest" in attrs else getattr(self.instance, "chest", None)
+        box = attrs.get("box") if "box" in attrs else getattr(self.instance, "box", None)
 
         if shelf is not None and area is not None and shelf.area_id != area.uuid:
             raise serializers.ValidationError({"shelf": "Shelf must belong to the selected area."})
 
-        if chest is not None:
-            if area is not None and chest.area_id != area.uuid:
-                raise serializers.ValidationError({"chest": "Chest must belong to the selected area."})
-            if shelf is not None and chest.shelf_id is not None and chest.shelf_id != shelf.uuid:
-                raise serializers.ValidationError({"chest": "Chest must belong to the selected shelf."})
+        if box is not None:
+            if area is not None and box.area_id != area.uuid:
+                raise serializers.ValidationError({"box": "Box must belong to the selected area."})
+            if shelf is not None and box.shelf_id is not None and box.shelf_id != shelf.uuid:
+                raise serializers.ValidationError({"box": "Box must belong to the selected shelf."})
 
         custom_fields = attrs.get("custom_fields")
         if custom_fields is not None and not isinstance(custom_fields, dict):
@@ -306,4 +307,3 @@ class CategoryFieldSerializer(InventoryScopedSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["category"].queryset = self._inventory_queryset(ArticleCategory)
-

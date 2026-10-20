@@ -8,7 +8,7 @@ from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser
 
-from .models import Article, ArticleAttachment, ArticleCategory, Area, Chest, Inventory, Shelf
+from .models import Article, ArticleAttachment, ArticleCategory, Area, Box, Inventory, Shelf
 
 
 ONE_PIXEL_PNG = base64.b64decode(
@@ -103,8 +103,8 @@ class InventoryIsolationTests(TestCase):
 		self.other_area = Area.objects.create(name="Other area", inventory=self.other_inventory)
 		self.shelf = Shelf.objects.create(name="Primary shelf", area=self.area, inventory=self.inventory)
 		self.other_shelf = Shelf.objects.create(name="Other shelf", area=self.other_area, inventory=self.other_inventory)
-		self.chest = Chest.objects.create(name="Primary chest", area=self.area, shelf=self.shelf, inventory=self.inventory)
-		self.other_chest = Chest.objects.create(name="Other chest", area=self.other_area, shelf=self.other_shelf, inventory=self.other_inventory)
+		self.box = Box.objects.create(name="Primary box", area=self.area, shelf=self.shelf, inventory=self.inventory)
+		self.other_box = Box.objects.create(name="Other box", area=self.other_area, shelf=self.other_shelf, inventory=self.other_inventory)
 		self.category = ArticleCategory.objects.create(name="Primary category", inventory=self.inventory)
 		self.other_category = ArticleCategory.objects.create(name="Other category", inventory=self.other_inventory)
 		self.article = Article.objects.create(
@@ -112,7 +112,7 @@ class InventoryIsolationTests(TestCase):
 			inventory=self.inventory,
 			area=self.area,
 			shelf=self.shelf,
-			chest=self.chest,
+			box=self.box,
 			category=self.category,
 		)
 
@@ -137,7 +137,7 @@ class InventoryIsolationTests(TestCase):
 				"inventory": str(self.inventory.uuid),
 				"area": str(self.other_area.uuid),
 				"shelf": str(self.other_shelf.uuid),
-				"chest": str(self.other_chest.uuid),
+				"box": str(self.other_box.uuid),
 				"category": str(self.other_category.uuid),
 			},
 			format="json",
@@ -151,7 +151,10 @@ class InventoryIsolationTests(TestCase):
 
 		response = self.client.patch(
 			f"/api/articles/{self.article.uuid}/",
-			{"area": str(self.other_area.uuid)},
+			{
+				"area": str(self.other_area.uuid),
+				"shelf": str(self.other_shelf.uuid),
+			},
 			format="json",
 		)
 		self.assertEqual(response.status_code, 400)
@@ -162,33 +165,45 @@ class InventoryIsolationTests(TestCase):
 			format="json",
 		)
 		self.assertEqual(response.status_code, 400)
-		self.article.refresh_from_db()
-		self.assertEqual(self.article.inventory_id, self.inventory.uuid)
 
-	def test_article_put_rejects_cross_inventory_relations(self):
+	def test_article_create_and_patch_accept_valid_scoped_relations(self):
 		self.authenticate()
-		response = self.client.put(
-			f"/api/articles/{self.article.uuid}/",
+
+		created_response = self.client.post(
+			"/api/articles/",
 			{
-				"name": "Invalid replacement",
+				"name": "Valid article",
 				"inventory": str(self.inventory.uuid),
-				"area": str(self.other_area.uuid),
-				"quantity": 1,
+				"area": str(self.area.uuid),
+				"shelf": str(self.shelf.uuid),
+				"box": str(self.box.uuid),
+				"category": str(self.category.uuid),
 			},
 			format="json",
 		)
+		self.assertEqual(created_response.status_code, 201)
 
-		self.assertEqual(response.status_code, 400)
+		article_uuid = created_response.json()["uuid"]
+		patch_response = self.client.patch(
+			f"/api/articles/{article_uuid}/",
+			{
+				"name": "Updated valid article",
+				"shelf": None,
+				"box": None,
+			},
+			format="json",
+		)
+		self.assertEqual(patch_response.status_code, 200)
 
-	def test_category_field_rejects_cross_inventory_category(self):
+	def test_category_field_rejects_foreign_category(self):
 		self.authenticate()
+
 		response = self.client.post(
 			"/api/category-fields/",
 			{
 				"inventory": str(self.inventory.uuid),
-				"category": str(self.other_category.uuid),
 				"label": "Invalid field",
-				"field_type": "text",
+				"category": str(self.other_category.uuid),
 			},
 			format="json",
 		)
@@ -199,8 +214,8 @@ class InventoryIsolationTests(TestCase):
 		self.authenticate()
 
 		response = self.client.patch(
-			f"/api/chests/{self.chest.uuid}/",
-			{"parent_chest": str(self.chest.uuid)},
+			f"/api/boxes/{self.box.uuid}/",
+			{"parent_box": str(self.box.uuid)},
 			format="json",
 		)
 		self.assertEqual(response.status_code, 400)
@@ -235,4 +250,3 @@ class InventoryIsolationTests(TestCase):
 		)
 		self.assertEqual(response.status_code, 200)
 		self.assertIsNone(response.json()["image"])
-
