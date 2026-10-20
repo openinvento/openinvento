@@ -2,7 +2,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser
-from inventory.models import Article, Area, Chest, Inventory, Shelf
+from inventory.models import Article, Area, Box, Inventory, Shelf
 
 from .models import Loan
 
@@ -25,8 +25,8 @@ class LoanAPITests(TestCase):
         self.article = Article.objects.create(
             name="Projector", inventory=self.inventory, area=self.area
         )
-        self.chest = Chest.objects.create(
-            name="Equipment chest",
+        self.box = Box.objects.create(
+            name="Equipment box",
             area=self.area,
             shelf=self.shelf,
             inventory=self.inventory,
@@ -48,25 +48,25 @@ class LoanAPITests(TestCase):
         self.assertNotIn("borrower", response.data)
         loan = Loan.objects.get()
         self.assertEqual(loan.article, self.article)
-        self.assertIsNone(loan.chest)
+        self.assertIsNone(loan.box)
         self.assertEqual(loan.quantity, 2)
         self.assertEqual(loan.lent_by, self.user)
         self.assertEqual(response.data["notes"], "External event")
 
-    def test_create_chest_loan(self):
+    def test_create_box_loan(self):
         response = self.client.post(
-            "/api/loans/", {"chest": str(self.chest.uuid)}, format="json"
+            "/api/loans/", {"box": str(self.box.uuid)}, format="json"
         )
 
         self.assertEqual(response.status_code, 201, response.data)
         loan = Loan.objects.get()
-        self.assertEqual(loan.chest, self.chest)
+        self.assertEqual(loan.box, self.box)
         self.assertIsNone(loan.article)
 
     def test_create_rejects_missing_or_multiple_items(self):
         for payload in (
             {},
-            {"article": str(self.article.uuid), "chest": str(self.chest.uuid)},
+            {"article": str(self.article.uuid), "box": str(self.box.uuid)},
         ):
             with self.subTest(payload=payload):
                 response = self.client.post("/api/loans/", payload, format="json")
@@ -74,7 +74,7 @@ class LoanAPITests(TestCase):
 
     def test_loan_history_is_scoped_to_recorder(self):
         own_loan = Loan.objects.create(article=self.article, lent_by=self.user)
-        Loan.objects.create(chest=self.chest, lent_by=self.other_user)
+        Loan.objects.create(box=self.box, lent_by=self.other_user)
 
         response = self.client.get("/api/loans/")
 
