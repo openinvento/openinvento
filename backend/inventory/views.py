@@ -24,7 +24,7 @@ from .models import (
     ArticleAttachment,
     ArticleCategory,
     CategoryField,
-    Chest,
+    Box,
     Inventory,
     Shelf,
 )
@@ -35,7 +35,7 @@ from .serializers import (
     ArticleCategorySerializer,
     ArticleSerializer,
     CategoryFieldSerializer,
-    ChestSerializer,
+    BoxSerializer,
     InventorySerializer,
     ShelfSerializer,
 )
@@ -195,7 +195,7 @@ class DashboardView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         scoped_models = (
             (Area, "area", "name"),
             (Shelf, "shelf", "name"),
-            (Chest, "chest", "name"),
+            (Box, "box", "name"),
             (Article, "article", "name"),
             (ArticleCategory, "category", "name"),
             (CategoryField, "field", "label"),
@@ -246,10 +246,10 @@ class ShelfViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     select_related_fields = ("inventory", "area")
 
 
-class ChestViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
-    queryset = Chest.objects.all()
-    serializer_class = ChestSerializer
-    select_related_fields = ("inventory", "area", "shelf", "parent_chest")
+class BoxViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
+    queryset = Box.objects.all()
+    serializer_class = BoxSerializer
+    select_related_fields = ("inventory", "area", "shelf", "parent_box")
 
 
 class ArticleCategoryViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
@@ -266,7 +266,7 @@ class CategoryFieldViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
 class ArticleViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
-    select_related_fields = ("inventory", "area", "shelf", "chest", "category")
+    select_related_fields = ("inventory", "area", "shelf", "box", "category")
 
 
 class ArticleAttachmentsView(InventoryScopedAPIView):
@@ -332,19 +332,19 @@ class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
             inventory__in=self.get_accessible_inventories(),
             inventory__uuid=inventory,
             name__icontains=query
-        ).select_related("inventory", "area", "shelf", "chest", "category")
-        chests = Chest.objects.filter(
+        ).select_related("inventory", "area", "shelf", "box", "category")
+        boxes = Box.objects.filter(
             inventory__in=self.get_accessible_inventories(),
             inventory__uuid=inventory,
             name__icontains=query,
-        ).select_related("inventory", "area", "shelf", "parent_chest")
+        ).select_related("inventory", "area", "shelf", "parent_box")
 
         results = [
             {**item, "type": "article"}
             for item in ArticleSerializer(articles, many=True).data
         ] + [
-            {**item, "type": "chest"}
-            for item in ChestSerializer(chests, many=True).data
+            {**item, "type": "box"}
+            for item in BoxSerializer(boxes, many=True).data
         ]
         return Response(results)
 
@@ -353,7 +353,7 @@ class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
 
 CODE_MODELS = (
     (Article, "article"),
-    (Chest, "chest"),
+    (Box, "box"),
     (Shelf, "shelf"),
     (Area, "area"),
     (ArticleCategory, "category"),

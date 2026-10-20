@@ -4,7 +4,7 @@ from django.utils import timezone
 
 
 class Loan(models.Model):
-    """A record of an inventory article or chest being borrowed by a user."""
+    """A record of an inventory article or box being borrowed by a user."""
 
     article = models.ForeignKey(
         "inventory.Article",
@@ -13,9 +13,9 @@ class Loan(models.Model):
         null=True,
         blank=True,
     )
-    # You can also loan a chest
-    chest = models.ForeignKey(
-        "inventory.Chest",
+    # You can also loan a box
+    box = models.ForeignKey(
+        "inventory.Box",
         on_delete=models.CASCADE,
         related_name="loans",
         null=True,
@@ -39,8 +39,8 @@ class Loan(models.Model):
         constraints = (
             models.CheckConstraint(
                 condition=(
-                    models.Q(article__isnull=False, chest__isnull=True)
-                    | models.Q(article__isnull=True, chest__isnull=False)
+                    models.Q(article__isnull=False, box__isnull=True)
+                    | models.Q(article__isnull=True, box__isnull=False)
                 ),
                 name="loan_exactly_one_item",
             ),
@@ -51,5 +51,5 @@ class Loan(models.Model):
         return self.returned_at is not None
 
     def __str__(self):
-        item = self.article or self.chest
+        item = self.article or self.box
         return f"{item} lent by {self.lent_by}"

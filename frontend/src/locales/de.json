@@ -20,8 +20,8 @@
     },
     "signupDisabled": "Die öffentliche Kontoerstellung ist für diese Instanz derzeit deaktiviert."
   },
-  "chests": {
-    "editChest": "Kiste bearbeiten",
+  "boxes": {
+    "editBox": "Kiste bearbeiten",
     "editTitle": "Kiste bearbeiten",
     "errors": {
       "edit": "Kiste konnte nicht bearbeitet werden."
@@ -63,7 +63,7 @@
   },
   "loans": {
     "article": "Artikel",
-    "chest": "Kisten",
+    "box": "Kisten",
     "create": "Ausleihe erfassen",
     "description": "Verfolge ausgeliehene Artikel und Kisten aus deinem Inventar.",
     "due": "Fällig",
@@ -119,7 +119,7 @@
     "types": {
       "area": "Bereich",
       "article": "Artikel",
-      "chest": "Kiste",
+      "box": "Kiste",
       "shelf": "Regal"
     },
     "useExternalBarcodeScanner": "Externer Barcodescanner",
@@ -136,7 +136,7 @@
   },
   "navActions": {
     "area": "Bereich",
-    "chest": "Kiste",
+    "box": "Kiste",
     "confirmDelete": "{{name}} löschen? Der Inhalt kann ebenfalls gelöscht werden.",
     "delete": "Löschen",
     "dismiss": "Ausblenden",

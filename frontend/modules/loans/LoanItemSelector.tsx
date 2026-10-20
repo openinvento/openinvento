@@ -13,25 +13,25 @@ import {
   ComboboxList,
   ComboboxSeparator,
 } from "@/components/ui/combobox"
-import type { Article, Chest } from "@/utils/api/inventory"
+import type { Article, Box } from "@/utils/api/inventory"
 
-type ItemKind = "article" | "chest"
-type ItemChoice = { kind: ItemKind; item: Article | Chest }
+type ItemKind = "article" | "box"
+type ItemChoice = { kind: ItemKind; item: Article | Box }
 
 type LoanItemSelectorProps = {
   articles: Article[]
-  chests: Chest[]
+  boxes: Box[]
   value: string
   onValueChange: (value: string) => void
 }
 
-export default function LoanItemSelector({ articles, chests, value, onValueChange }: LoanItemSelectorProps) {
+export default function LoanItemSelector({ articles, boxes, value, onValueChange }: LoanItemSelectorProps) {
   const { t } = useTranslation()
   const itemChoices = useMemo(() => ({
     articles: articles.map((item) => ({ kind: "article" as const, item })),
-    chests: chests.map((item) => ({ kind: "chest" as const, item })),
-  }), [articles, chests])
-  const selectedChoice = [...itemChoices.articles, ...itemChoices.chests].find(
+    boxes: boxes.map((item) => ({ kind: "box" as const, item })),
+  }), [articles, boxes])
+  const selectedChoice = [...itemChoices.articles, ...itemChoices.boxes].find(
     ({ kind, item }) => `${kind}:${item.uuid}` === value,
   )
 
@@ -41,13 +41,13 @@ export default function LoanItemSelector({ articles, chests, value, onValueChang
         {t("loans.item")}
         <Combobox<ItemChoice> items={[
           ...(itemChoices.articles.length ? [{ label: t("loans.article"), items: itemChoices.articles }] : []),
-          ...(itemChoices.chests.length ? [{ label: t("loans.chest"), items: itemChoices.chests }] : []),
+          ...(itemChoices.boxes.length ? [{ label: t("loans.box"), items: itemChoices.boxes }] : []),
         ]}
           value={selectedChoice ?? null}
           onValueChange={(choice) => onValueChange(choice ? `${choice.kind}:${choice.item.uuid}` : "")}
           itemToStringValue={(choice) => `${choice.kind}:${choice.item.uuid}`}
           itemToStringLabel={(choice) => choice.item.name}
-          disabled={articles.length + chests.length === 0}
+          disabled={articles.length + boxes.length === 0}
         >
           <ComboboxInput className="h-9 w-full" placeholder={t("loans.item")} showClear />
           <ComboboxContent>
@@ -58,7 +58,7 @@ export default function LoanItemSelector({ articles, chests, value, onValueChang
                 <ComboboxCollection>
                   {(choice) => <ComboboxItem key={`${choice.kind}:${choice.item.uuid}`} value={choice}>{choice.item.name}</ComboboxItem>}
                 </ComboboxCollection>
-                {group.label === t("loans.article") && chests.length > 0 && <ComboboxSeparator />}
+                {group.label === t("loans.article") && boxes.length > 0 && <ComboboxSeparator />}
               </ComboboxGroup>}
             </ComboboxList>
           </ComboboxContent>

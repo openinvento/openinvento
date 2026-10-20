@@ -1,4 +1,4 @@
-from inventory.models import Article, Chest
+from inventory.models import Article, Box
 from rest_framework import serializers
 
 from .models import Loan
@@ -8,8 +8,8 @@ class LoanSerializer(serializers.ModelSerializer):
     article = serializers.PrimaryKeyRelatedField(
         queryset=Article.objects.none(), required=False, allow_null=True
     )
-    chest = serializers.PrimaryKeyRelatedField(
-        queryset=Chest.objects.none(), required=False, allow_null=True
+    box = serializers.PrimaryKeyRelatedField(
+        queryset=Box.objects.none(), required=False, allow_null=True
     )
 
     def __init__(self, *args, **kwargs):
@@ -19,16 +19,16 @@ class LoanSerializer(serializers.ModelSerializer):
             self.fields["article"].queryset = Article.objects.filter(
                 inventory__users=request.user
             )
-            self.fields["chest"].queryset = Chest.objects.filter(
+            self.fields["box"].queryset = Box.objects.filter(
                 inventory__users=request.user
             )
 
     def validate(self, attrs):
         article = attrs.get("article", getattr(self.instance, "article", None))
-        chest = attrs.get("chest", getattr(self.instance, "chest", None))
-        if (article is None) == (chest is None):
+        box = attrs.get("box", getattr(self.instance, "box", None))
+        if (article is None) == (box is None):
             raise serializers.ValidationError(
-                "Select exactly one of article or chest."
+                "Select exactly one of article or box."
             )
         return attrs
 
@@ -37,7 +37,7 @@ class LoanSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "article",
-            "chest",
+            "box",
             "lent_by",
             "quantity",
             "lent_at",

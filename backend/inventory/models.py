@@ -55,7 +55,7 @@ class Inventory(models.Model):
 
 class InventoryComponent(models.Model):
     """
-    Base class for all components of the inventory (Area, Shelf, Chest, Article, ArticleCategory).
+    Base class for all components of the inventory (Area, Shelf, Box, Article, ArticleCategory).
     """
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     identifier = models.CharField(max_length=30, blank=True)
@@ -84,11 +84,11 @@ class Shelf(InventoryComponent):
     def __str__(self):
         return f"Shelf: {self.name} -> {self.area.name}"
 
-class Chest(InventoryComponent):
+class Box(InventoryComponent):
     name = models.CharField(max_length=100)
-    area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name="chests")
-    shelf = models.ForeignKey(Shelf, on_delete=models.CASCADE, null=True, blank=True, related_name='chests')
-    parent_chest = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='sub_chests')
+    area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name="boxes")
+    shelf = models.ForeignKey(Shelf, on_delete=models.CASCADE, null=True, blank=True, related_name='boxes')
+    parent_box = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='sub_boxes')
 
     def __str__(self):
         return self.name
@@ -99,7 +99,7 @@ class Article(InventoryComponent):
     
     area = models.ForeignKey(Area, on_delete=models.CASCADE, null=True, blank=True)
     shelf = models.ForeignKey(Shelf, on_delete=models.CASCADE, null=True, blank=True)
-    chest = models.ForeignKey(Chest, on_delete=models.SET_NULL, null=True, blank=True, related_name='contained_articles')
+    box = models.ForeignKey(Box, on_delete=models.SET_NULL, null=True, blank=True, related_name='contained_articles')
     
     quantity = models.IntegerField(default=1)
     stock_tracking = models.BooleanField(default=False)

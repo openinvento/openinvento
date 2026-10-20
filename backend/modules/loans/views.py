@@ -14,7 +14,7 @@ class LoanViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Loan.objects.filter(lent_by=self.request.user).select_related(
-            "article", "chest", "lent_by"
+            "article", "box", "lent_by"
         )
 
     def perform_create(self, serializer):

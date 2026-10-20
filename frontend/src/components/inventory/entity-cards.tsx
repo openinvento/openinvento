@@ -30,5 +30,5 @@ function EntityCard({ name, subtitle=null, icon: Icon, onOpen, onRename, onDelet
 export const AreaCard = (props: Omit<CardProps, "icon">) => <EntityCard {...props} icon={DoorOpen} />
 export const ArticleCard = ({ articleIcon, articleImage, ...props }: Omit<CardProps, "icon"> &
   { articleIcon?: string | null; articleImage?: string | null }) => <EntityCard {...props} image={articleImage} icon={getArticleIcon(articleIcon)} />
-export const ChestCard = (props: Omit<CardProps, "icon">) => <EntityCard {...props} icon={Box} />
+export const BoxCard = (props: Omit<CardProps, "icon">) => <EntityCard {...props} icon={Box} />
 export const ShelfCard = (props: Omit<CardProps, "icon">) => <EntityCard {...props} icon={Archive} />

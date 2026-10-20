@@ -13,7 +13,7 @@ type CodeItem = {
 	uuid: string
 	identifier: string
 	name: string
-	type: "area" | "shelf" | "chest" | "article"
+	type: "area" | "shelf" | "box" | "article"
 }
 
 const codeTypes: CodePdfOptions["code_type"][] = [
@@ -63,8 +63,8 @@ export default function ManageCodes() {
 				navigate(`/app/areas/${shelf.area}`)
 				break
 			}
-			case "chest":
-				navigate(`/app/chests/${result.uuid}`)
+			case "box":
+				navigate(`/app/boxes/${result.uuid}`)
 				break
 			case "category":
 			case "field":
@@ -129,16 +129,16 @@ export default function ManageCodes() {
 	useEffect(() => {
 		void (async () => {
 			try {
-				const [areas, shelves, chests, articles] = await Promise.all([
+				const [areas, shelves, boxes, articles] = await Promise.all([
 					inventoryApi.listAreas(),
 					inventoryApi.listShelves(),
-					inventoryApi.listChests(),
+					inventoryApi.listBoxes(),
 					inventoryApi.listArticles(),
 				])
 				const allItems = [
 					...areas.map((item) => ({ ...item, type: "area" as const })),
 					...shelves.map((item) => ({ ...item, type: "shelf" as const })),
-					...chests.map((item) => ({ ...item, type: "chest" as const })),
+					...boxes.map((item) => ({ ...item, type: "box" as const })),
 					...articles.map((item) => ({ ...item, type: "article" as const })),
 				]
 				setFilteredItems(allItems)

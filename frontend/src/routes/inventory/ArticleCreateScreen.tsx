@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { getSelectedInventory, inventoryApi, type ArticleCategory, type CategoryField, type Chest, type Inventory, type Shelf } from "@/utils/api/inventory"
+import { getSelectedInventory, inventoryApi, type ArticleCategory, type CategoryField, type Box, type Inventory, type Shelf } from "@/utils/api/inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 import { compressArticleImage } from "@/utils/article-image"
 
@@ -20,12 +20,12 @@ export default function ArticleCreateScreen() {
   const [inventory, setInventory] = useState<Inventory | null>(null)
   const [areaName, setAreaName] = useState("")
   const [shelves, setShelves] = useState<Shelf[]>([])
-  const [chests, setChests] = useState<Chest[]>([])
+  const [boxes, setBoxes] = useState<Box[]>([])
   const [categories, setCategories] = useState<ArticleCategory[]>([])
   const [fields, setFields] = useState<CategoryField[]>([])
   const [selectedCategory, setSelectedCategory] = useState("")
   const [selectedShelf, setSelectedShelf] = useState("")
-  const [selectedChest, setSelectedChest] = useState("")
+  const [selectedBox, setSelectedBox] = useState("")
   const [selectedIcon, setSelectedIcon] = useState("Package")
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -37,18 +37,18 @@ export default function ArticleCreateScreen() {
     void (async () => {
       if (!areaId) return
       try {
-        const [inventories, areas, nextShelves, nextChests, nextCategories, nextFields] = await Promise.all([
+        const [inventories, areas, nextShelves, nextBoxes, nextCategories, nextFields] = await Promise.all([
           inventoryApi.listInventories(),
           inventoryApi.listAreas(),
           inventoryApi.listShelves(),
-          inventoryApi.listChests(),
+          inventoryApi.listBoxes(),
           inventoryApi.listCategories(),
           inventoryApi.listCategoryFields(),
         ])
         setInventory(getSelectedInventory(inventories))
         setAreaName(areas.find((area) => area.uuid === areaId)?.name ?? "")
         setShelves(nextShelves.filter((shelf) => shelf.area === areaId))
-        setChests(nextChests.filter((chest) => chest.area === areaId))
+        setBoxes(nextBoxes.filter((box) => box.area === areaId))
         setCategories(nextCategories)
         setFields(nextFields)
       } catch (reason) {
@@ -89,7 +89,7 @@ export default function ArticleCreateScreen() {
       payload.append("inventory", inventory.uuid)
       payload.append("area", areaId)
       payload.append("shelf", selectedShelf)
-      payload.append("chest", selectedChest)
+      payload.append("box", selectedBox)
       payload.append("category", selectedCategory)
       payload.append("quantity", form.get("quantity")?.toString() || "1")
       payload.append("stock_tracking", String(stockTracking))
@@ -180,10 +180,10 @@ export default function ArticleCreateScreen() {
               <SelectContent><SelectItem value="">{t("areas.detail.notOnShelf")}</SelectItem>{shelves.map((shelf) => <SelectItem key={shelf.uuid} value={shelf.uuid}>{shelf.name}</SelectItem>)}</SelectContent>
             </Select>
           </Field>
-          <Field label={t("areas.detail.fields.chest")}>
-            <Select name="chest" value={selectedChest} onValueChange={(value) => setSelectedChest(value ?? "")}>
-              <SelectTrigger className="w-full"><SelectValue placeholder={t("areas.detail.noChest")} /></SelectTrigger>
-              <SelectContent><SelectItem value="">{t("areas.detail.noChest")}</SelectItem>{chests.map((chest) => <SelectItem key={chest.uuid} value={chest.uuid}>{chest.name}</SelectItem>)}</SelectContent>
+          <Field label={t("areas.detail.fields.box")}>
+            <Select name="box" value={selectedBox} onValueChange={(value) => setSelectedBox(value ?? "")}>
+              <SelectTrigger className="w-full"><SelectValue placeholder={t("areas.detail.noBox")} /></SelectTrigger>
+              <SelectContent><SelectItem value="">{t("areas.detail.noBox")}</SelectItem>{boxes.map((box) => <SelectItem key={box.uuid} value={box.uuid}>{box.name}</SelectItem>)}</SelectContent>
             </Select>
           </Field>
         </section>

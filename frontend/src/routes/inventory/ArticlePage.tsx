@@ -8,7 +8,7 @@ import { removeFavorite } from "@/utils/favorites"
 import { getArticleIcon } from "@/components/inventory/article-icon-picker"
 import { ImageUploadField } from "@/components/inventory/image-upload-field"
 import { FullscreenImagePreview } from "@/components/inventory/fullscreen-image-preview"
-import { inventoryApi, type Area, type Article, type ArticleAttachment, type ArticleCategory, type CategoryField, type Chest, type Shelf } from "@/utils/api/inventory"
+import { inventoryApi, type Area, type Article, type ArticleAttachment, type ArticleCategory, type CategoryField, type Box, type Shelf } from "@/utils/api/inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 import { useTranslation } from "react-i18next"
 import { compressArticleImage } from "@/utils/article-image"
@@ -22,7 +22,7 @@ export default function ArticlePage() {
   const [article, setArticle] = useState<Article | null>(null)
   const [areas, setAreas] = useState<Area[]>([])
   const [shelves, setShelves] = useState<Shelf[]>([])
-  const [chests, setChests] = useState<Chest[]>([])
+  const [boxes, setBoxes] = useState<Box[]>([])
   const [categories, setCategories] = useState<ArticleCategory[]>([])
   const [categoryFields, setCategoryFields] = useState<CategoryField[]>([])
   const [globalFields, setGlobalFields] = useState<CategoryField[]>([])
@@ -34,7 +34,7 @@ export default function ArticlePage() {
   const [selectedArea, setSelectedArea] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedShelf, setSelectedShelf] = useState<string | null>(null)
-  const [selectedChest, setSelectedChest] = useState<string | null>(null)
+  const [selectedBox, setSelectedBox] = useState<string | null>(null)
   const [image, setImage] = useState<File | null>(null)
   const [imageChanged, setImageChanged] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -69,7 +69,7 @@ export default function ArticlePage() {
 
   useEffect(() => { void (async () => { 
     try {
-      const [allArticles, nextAreas, nextShelves, nextChests, nextCategories, nextFields] = await Promise.all([inventoryApi.listArticles(), inventoryApi.listAreas(), inventoryApi.listShelves(), inventoryApi.listChests(), inventoryApi.listCategories(), inventoryApi.listCategoryFields()]); 
+      const [allArticles, nextAreas, nextShelves, nextBoxes, nextCategories, nextFields] = await Promise.all([inventoryApi.listArticles(), inventoryApi.listAreas(), inventoryApi.listShelves(), inventoryApi.listBoxes(), inventoryApi.listCategories(), inventoryApi.listCategoryFields()]);
       const nextArticle = allArticles.find((item) => item.uuid === articleId) ?? null
       setArticle(nextArticle)
       if (nextArticle) setAttachments(await inventoryApi.listArticleAttachments(nextArticle.uuid))
@@ -77,10 +77,10 @@ export default function ArticlePage() {
       setSelectedArea(nextArticle?.area ?? null)
       setSelectedCategory(nextArticle?.category ?? null)
       setSelectedShelf(nextArticle?.shelf ?? null)
-      setSelectedChest(nextArticle?.chest ?? null)
+      setSelectedBox(nextArticle?.box ?? null)
       setAreas(nextAreas); 
       setShelves(nextShelves); 
-      setChests(nextChests) 
+      setBoxes(nextBoxes)
       setCategories(nextCategories)
       setCategoryFields(nextFields.filter((field) => field.category !== null))
       setGlobalFields(nextFields.filter((field) => field.category === null))
@@ -116,7 +116,7 @@ export default function ArticlePage() {
       payload.append("stock_tracking", String(stockTracking))
       payload.append("area", value("area") || "")
       payload.append("shelf", value("shelf") || "")
-      payload.append("chest", value("chest") || "")
+      payload.append("box", value("box") || "")
       payload.append("category", value("category") || "")
       payload.append("custom_fields", JSON.stringify(customFields))
       if (image) payload.append("image", image)
@@ -200,7 +200,7 @@ export default function ArticlePage() {
   if (!article) return <section><Link to="/app/areas" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="size-4" /> {t("articles.page.areas")}</Link><p className="mt-6 text-muted-foreground">{error || t("articles.page.loading")}</p></section>
   
   const relevantShelves = shelves.filter((shelf) => !selectedArea || shelf.area === selectedArea)
-  const relevantChests = chests.filter((chest) => !selectedArea || chest.area === selectedArea)
+  const relevantBoxes = boxes.filter((box) => !selectedArea || box.area === selectedArea)
   const articleFields = [...categoryFields.filter((field) => field.category === selectedCategory), ...globalFields]
   const stockFields = articleFields.filter((field) => field.key === "minimum_quantity" || field.key === "stock_level")
   const otherFields = articleFields.filter((field) => field.key !== "minimum_quantity" && field.key !== "stock_level")
@@ -300,7 +300,7 @@ export default function ArticlePage() {
                   onChange={(event) => {
                     setSelectedArea(event.target.value || null)
                     setSelectedShelf(null)
-                    setSelectedChest(null)
+                    setSelectedBox(null)
                   }}
                 >
                   <option value="">{t("articles.page.noArea")}</option>
@@ -338,16 +338,16 @@ export default function ArticlePage() {
                 </select>
               </Field>
 
-              <Field label={t("articles.page.fields.chest")}>
+              <Field label={t("articles.page.fields.box")}>
                 <select
-                  name="chest"
-                  value={selectedChest ?? ""}
-                  onChange={(event) => setSelectedChest(event.target.value || null)}
+                  name="box"
+                  value={selectedBox ?? ""}
+                  onChange={(event) => setSelectedBox(event.target.value || null)}
                 >
-                  <option value="">{t("articles.page.noChest")}</option>
-                  {relevantChests.map((chest) => (
-                    <option key={chest.uuid} value={chest.uuid}>
-                      {chest.name}
+                  <option value="">{t("articles.page.noBox")}</option>
+                  {relevantBoxes.map((box) => (
+                    <option key={box.uuid} value={box.uuid}>
+                      {box.name}
                     </option>
                   ))}
                 </select>
