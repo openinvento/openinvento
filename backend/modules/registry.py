@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from importlib import import_module
 from importlib.util import find_spec
 
-_EXTENSION_NAME = re.compile(r"^[a-z][a-z0-9_]*$")
+_MODULE_NAME = re.compile(r"^[a-z][a-z0-9_]*$")
 
 
 @dataclass(frozen=True)
@@ -19,15 +19,19 @@ class EnabledModule:
 
 def get_enabled_modules(names=None):
     """Return enabled modules, rejecting misspelled or unavailable names."""
+    # If names is None, read from settings.ENABLED_MODULES. Otherwise, use the provided names. Used in urls.py for example
     if names is None:
         from django.conf import settings
 
         names = getattr(settings, "ENABLED_MODULES", ())
+        if names and isinstance(names[0], EnabledModule):
+            return tuple(names)
 
+    # use name list; mainly used in settings.py where ENABLED_MODULES is defined
     modules = []
     for name in names:
-        if not _EXTENSION_NAME.fullmatch(name):
-            raise ValueError(f"Invalid extension name {name!r}.")
+        if not _MODULE_NAME.fullmatch(name):
+            raise ValueError(f"Invalid module name {name!r}.")
 
         package = f"modules.{name}"
         if find_spec(package) is None:
