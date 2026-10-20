@@ -1,11 +1,16 @@
 
 from account_auth import urls as auth_urls
-from django.contrib import admin
 from django.urls import include, path, re_path
-from modules.registry import get_enabled_modules
 from inventory import urls as inventory_api_urls
+from modules.registry import get_enabled_modules
 
-from .views import InstanceBackupView, InstanceSettingsView, VersionCheckView, health_view, protected_media_view
+from .views import (
+    InstanceBackupView,
+    InstanceSettingsView,
+    VersionCheckView,
+    health_view,
+    protected_media_view,
+)
 
 urlpatterns = [
     path("api/health", health_view, name="health"),
