@@ -323,6 +323,7 @@
     "noDueDate": "No due date",
     "noItems": "No items available in this inventory.",
     "notes": "Notes (optional)",
+    "notesLabel": "Notes",
     "quantity": "Quantity",
     "returned": "Returned {{date}}",
     "returning": "Returning...",

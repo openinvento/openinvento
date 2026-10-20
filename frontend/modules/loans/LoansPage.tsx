@@ -149,6 +149,7 @@ export default function LoansPage() {
                       <div className="min-w-0">
                         <p className="truncate font-medium">{itemLabel}{loan.article && loan.quantity > 1 ? ` × ${loan.quantity}` : ""}</p>
                         <p className="text-sm text-muted-foreground">{t("loans.due")}: {formatDate(loan.due_at)}</p>
+                        {loan.notes && <p className="text-sm text-muted-foreground">{t("loans.notesLabel")}: {loan.notes}</p>}
                       </div>
                     </div>
                     {loan.returned_at ? (
