@@ -230,9 +230,10 @@
     "returning": "Wird zurückgebucht...",
     "unknownItem": "Inventarobjekt",
     "errors": {
-      "load": "Ausleihen konnten nicht geladen werden.",
-      "create": "Ausleihe konnte nicht erfasst werden.",
-      "return": "Ausleihe konnte nicht als zurückgegeben markiert werden."
+      "load": "Fehler beim Laden der Ausleihen.",
+      "create": "Fehler beim Erfassen der Ausleihe.",
+      "return": "Fehler beim Markieren der Rückgabe.",
+      "inventoryLoad": "Fehler beim Laden der Inventarobjekte."
     }
   },
   "sidebar": {

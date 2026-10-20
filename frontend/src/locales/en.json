@@ -515,9 +515,10 @@
     "returning": "Returning...",
     "unknownItem": "Inventory item",
     "errors": {
-      "load": "Could not load loans.",
-      "create": "Could not record this loan.",
-      "return": "Could not mark this loan as returned."
+      "load": "Error during loading loans.",
+      "create": "Error during creating a loan.",
+      "return": "Error during marking the loan as returned.",
+      "inventoryLoad": "Error during loading inventory items."
     }
   },
   "sidebar": {

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import BaseScreen from "@/layouts/BaseScreen"
 import { inventoryApi, type Article, type Chest } from "@/utils/api/inventory"
-import { ApiError } from "@/utils/api/base"
 import { loansApi, type Loan } from "./api"
 
 type ItemKind = "article" | "chest"
@@ -24,7 +23,7 @@ export default function LoansPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [returningId, setReturningId] = useState<number | null>(null)
-  const [error, setError] = useState("")
+  const [error, setError] = useState<string | null>(null)
 
   const items = useMemo(() => kind === "article" ? articles : chests, [articles, chests, kind])
   const itemNames = useMemo(() => new Map([
@@ -34,21 +33,24 @@ export default function LoansPage() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    setError("")
-    try {
-      const [nextLoans, nextArticles, nextChests] = await Promise.all([
-        loansApi.list(),
-        inventoryApi.listArticles(),
-        inventoryApi.listChests(),
-      ])
-      setLoans(nextLoans)
-      setArticles(nextArticles)
-      setChests(nextChests)
-    } catch (cause) {
-      setError(cause instanceof ApiError ? cause.message : t("loans.errors.load"))
-    } finally {
-      setLoading(false)
+    setError(null)
+    const [loanResult, inventoryResult] = await Promise.allSettled([
+      loansApi.list(),
+      Promise.all([inventoryApi.listArticles(), inventoryApi.listChests()]),
+    ])
+
+    if (loanResult.status === "fulfilled") {
+      setLoans(loanResult.value)
+    } else {
+      setError(t("loans.errors.load"))
     }
+    if (inventoryResult.status === "fulfilled") {
+      setArticles(inventoryResult.value[0])
+      setChests(inventoryResult.value[1])
+    } else if (loanResult.status === "fulfilled") {
+      setError(t("loans.errors.inventoryLoad"))
+    }
+    setLoading(false)
   }, [t])
 
   useEffect(() => { void load() }, [load])
@@ -60,7 +62,7 @@ export default function LoansPage() {
     event.preventDefault()
     if (!itemId) return
     setSaving(true)
-    setError("")
+    setError(null)
     try {
       const loan = await loansApi.create({
         article: kind === "article" ? itemId : null,
@@ -73,8 +75,8 @@ export default function LoansPage() {
       setDueAt("")
       setNotes("")
       setQuantity(1)
-    } catch (cause) {
-      setError(cause instanceof ApiError ? cause.message : t("loans.errors.create"))
+    } catch {
+      setError(t("loans.errors.create"))
     } finally {
       setSaving(false)
     }
@@ -82,12 +84,12 @@ export default function LoansPage() {
 
   async function handleReturn(id: number) {
     setReturningId(id)
-    setError("")
+    setError(null)
     try {
       const updated = await loansApi.return(id)
       setLoans((current) => current.map((loan) => loan.id === id ? updated : loan))
-    } catch (cause) {
-      setError(cause instanceof ApiError ? cause.message : t("loans.errors.return"))
+    } catch {
+      setError(t("loans.errors.return"))
     } finally {
       setReturningId(null)
     }
@@ -102,6 +104,7 @@ export default function LoansPage() {
   return (
     <BaseScreen title={t("loans.title")}>
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
+        {error && <p className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive" role="alert">{error}</p>}
         <section className="rounded-xl border bg-card p-5">
           <div className="mb-5 flex items-center gap-3">
             <HandCoinsIcon className="size-5 text-primary" />
@@ -139,7 +142,6 @@ export default function LoansPage() {
               {t("loans.notes")}
               <Input value={notes} onChange={(event) => setNotes(event.target.value)} />
             </label>
-            {error && <p className="text-sm text-destructive sm:col-span-2" role="alert">{error}</p>}
             <div className="sm:col-span-2">
               <Button type="submit" disabled={saving || !itemId || items.length === 0}>
                 {saving ? t("loans.saving") : t("loans.create")}
