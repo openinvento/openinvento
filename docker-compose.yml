@@ -13,6 +13,7 @@ services:
       CREATE_INIT_ADMIN: ${CREATE_INIT_ADMIN:-true} # Set to false to disable initial administrator creation
       ENABLE_SIGNUP: ${ENABLE_SIGNUP:-false} # Set to true to enable public account signup
       SECRET_KEY: ${SECRET_KEY} # Set this to a random string for security purposes - You can generate one with `openssl rand -hex 32`
+      OPENINVENTO_MODULES: ${OPENINVENTO_MODULES:-} # Comma-separated list of modules to enable (e.g. "loans,module2") -> Restart the container after changing this value to apply changes
     volumes:
       - openinvento-data:/data
 
