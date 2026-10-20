@@ -6,8 +6,8 @@ from .views import (
     ArticleAttachmentsView,
     ArticleCategoryViewSet,
     ArticleViewSet,
+    BoxViewSet,
     CategoryFieldViewSet,
-    ChestViewSet,
     CodeLookupView,
     CodePdfView,
     DashboardView,
@@ -23,7 +23,7 @@ router = DefaultRouter()
 router.register(r"inventories", InventoryViewSet, basename="inventory")
 router.register(r"areas", AreaViewSet, basename="area")
 router.register(r"shelves", ShelfViewSet, basename="shelf")
-router.register(r"chests", ChestViewSet, basename="chest")
+router.register(r"boxes", BoxViewSet, basename="box")
 router.register(r"article-categories", ArticleCategoryViewSet, basename="article-category")
 router.register(r"category-fields", CategoryFieldViewSet, basename="category-field")
 router.register(r"articles", ArticleViewSet, basename="article")
