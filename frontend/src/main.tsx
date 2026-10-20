@@ -22,7 +22,7 @@ import { SessionGuard } from './components/auth/session-guard.tsx'
 import ManageCategoriesAndFieldsPage from './routes/inventory/ManageCategoriesAndFields.tsx'
 import ManageCodes from './routes/inventory/ManageCodes.tsx'
 import ResetCredentialsPage from './routes/auth/ResetCredentials.tsx'
-import LoansPage from '../extensions/loans/LoansPage.tsx'
+import LoansPage from '../modules/loans/LoansPage.tsx'
 
 
 /* Dark / White mode handling */

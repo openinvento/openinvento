@@ -138,13 +138,13 @@ INSTALLED_APPS = [
     "openinvento.apps.OpenInventoConfig",
 ]
 
-# Extensions are normal Django apps, activated by their directory name, for
-# example OPENINVENTO_EXTENSIONS=loans,other_extension. They are disabled by
+# Modules are normal Django apps, activated by their directory name, for
+# example OPENINVENTO_MODULES=loans,other_module. They are disabled by
 # default and can register models, migrations, signals, admin, and optional URLs.
-from extensions.registry import get_enabled_extensions
+from modules.registry import get_enabled_modules
 
-ENABLED_EXTENSIONS = get_enabled_extensions(_csv_env("OPENINVENTO_EXTENSIONS", []))
-INSTALLED_APPS.extend(extension.app_config for extension in ENABLED_EXTENSIONS)
+ENABLED_MODULES = get_enabled_modules(_csv_env("OPENINVENTO_MODULES", []))
+INSTALLED_APPS.extend(module.app_config for module in ENABLED_MODULES)
 
 if HAS_CORSHEADERS:
     INSTALLED_APPS.append("corsheaders")
