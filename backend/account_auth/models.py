@@ -34,10 +34,16 @@ class UserAPIKey(AbstractAPIKey):
 
 class InstanceSettings(models.Model):
     allow_email_login = models.BooleanField(default=False)
+    enabled_modules = models.JSONField(default=list, blank=True)
 
     @classmethod
     def get_solo(cls):
-        settings, _ = cls.objects.get_or_create(pk=1)
+        from django.conf import settings as django_settings
+
+        defaults = {
+            "enabled_modules": [module.name for module in getattr(django_settings, "DEFAULT_ENABLED_MODULES", ())]
+        }
+        settings, _ = cls.objects.get_or_create(pk=1, defaults=defaults)
         return settings
 
 
