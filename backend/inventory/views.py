@@ -333,9 +333,20 @@ class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
             inventory__uuid=inventory,
             name__icontains=query
         ).select_related("inventory", "area", "shelf", "chest", "category")
+        chests = Chest.objects.filter(
+            inventory__in=self.get_accessible_inventories(),
+            inventory__uuid=inventory,
+            name__icontains=query,
+        ).select_related("inventory", "area", "shelf", "parent_chest")
 
-        serializer = ArticleSerializer(articles, many=True)
-        return Response(serializer.data)
+        results = [
+            {**item, "type": "article"}
+            for item in ArticleSerializer(articles, many=True).data
+        ] + [
+            {**item, "type": "chest"}
+            for item in ChestSerializer(chests, many=True).data
+        ]
+        return Response(results)
 
 
 # region QR/ BARCODE VIEWS

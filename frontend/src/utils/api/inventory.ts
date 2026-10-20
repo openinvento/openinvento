@@ -17,6 +17,7 @@ export type Article = EntityBase & {
   custom_fields: Record<string, string | number | boolean | null>
   category_fields: CategoryField[]
 }
+export type SearchResult = (Article & { type: "article" }) | (Chest & { type: "chest" })
 export type ArticleAttachment = { id: number; original_name: string; url: string; size: number; created_at: string }
 export type CategoryField = EntityBase & { key: string; label: string; field_type: string; options: string[]; category: string | null }
 export type ArticleCategory = EntityBase & { fields: CategoryField[]; category_fields?: CategoryField[] }
@@ -118,7 +119,7 @@ export const inventoryApi = {
     patchData<T>(`/api/${kind}/${uuid}/`, payload),
   remove: (kind: EntityPath, uuid: string) => deleteData<void>(`/api/${kind}/${uuid}/`),
   searchInventory: (query: string, inventory: string) =>
-    fetchData<Article[]>(`/api/search/?q=${encodeURIComponent(query)}&inventory=${encodeURIComponent(inventory)}`),
+    fetchData<SearchResult[]>(`/api/search/?q=${encodeURIComponent(query)}&inventory=${encodeURIComponent(inventory)}`),
   lookupCode: (identifier: string) =>
     postData<CodeLookupResult>("/api/codes/lookup/", { identifier }),
   updateInventory: (inventory: string, name: string) =>

@@ -4,7 +4,7 @@ import { getArticleIcon } from "./article-icon-picker"
 import { getMediaUrl } from "@/utils/api/base"
 import type { InventoryViewMode } from "./view-mode"
 
-type CardProps = { name: string; subtitle?: string | null; icon: LucideIcon; onOpen?: () => void; onRename: () => void; onDelete: () => void; badge?: string; viewMode?: InventoryViewMode }
+type CardProps = { name: string; subtitle?: string | null; icon: LucideIcon; onOpen?: () => void; onRename?: () => void; onDelete?: () => void; badge?: string; viewMode?: InventoryViewMode }
 
 
 function EntityCard({ name, subtitle=null, icon: Icon, onOpen, onRename, onDelete, badge, image, viewMode = "grid" }: CardProps & { image?: string | null }) {
@@ -28,7 +28,7 @@ function EntityCard({ name, subtitle=null, icon: Icon, onOpen, onRename, onDelet
   )
 }
 export const AreaCard = (props: Omit<CardProps, "icon">) => <EntityCard {...props} icon={DoorOpen} />
-export const ArticleCard = ({ articleIcon, articleImage, ...props }: Omit<CardProps, "icon"> & 
+export const ArticleCard = ({ articleIcon, articleImage, ...props }: Omit<CardProps, "icon"> &
   { articleIcon?: string | null; articleImage?: string | null }) => <EntityCard {...props} image={articleImage} icon={getArticleIcon(articleIcon)} />
 export const ChestCard = (props: Omit<CardProps, "icon">) => <EntityCard {...props} icon={Box} />
 export const ShelfCard = (props: Omit<CardProps, "icon">) => <EntityCard {...props} icon={Archive} />
