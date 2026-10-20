@@ -19,7 +19,7 @@ import { FAVORITES_CHANGED_EVENT, getFavorites, removeFavorite, type Favorite } 
 import i18n from "@/i18n"
 import { getSidebarData, type SidebarData } from "@/utils/api/general"
 import { inventoryApi, type Area } from "@/utils/api/inventory"
-import { getEnabledModules } from "@/utils/api/modules"
+import { getEnabledModules, MODULES_CHANGED_EVENT } from "@/utils/api/modules"
 
 // This is sample data.
 const data = {
@@ -186,7 +186,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [enabledModules, setEnabledModules] = React.useState<string[]>([])
 
   React.useEffect(() => {
-    void getEnabledModules().then(setEnabledModules).catch(() => setEnabledModules([]))
+    const loadModules = () => void getEnabledModules().then(setEnabledModules).catch(() => setEnabledModules([]))
+    loadModules()
+    window.addEventListener(MODULES_CHANGED_EVENT, loadModules)
+    return () => window.removeEventListener(MODULES_CHANGED_EVENT, loadModules)
   }, [])
 
   React.useEffect(() => {

@@ -25,16 +25,20 @@ import ManageCategoriesAndFieldsPage from './routes/inventory/ManageCategoriesAn
 import ManageCodes from './routes/inventory/ManageCodes.tsx'
 import ResetCredentialsPage from './routes/auth/ResetCredentials.tsx'
 import LoansPage from '../modules/loans/LoansPage.tsx'
-import { getEnabledModules } from './utils/api/modules'
+import { getEnabledModules, MODULES_CHANGED_EVENT } from './utils/api/modules'
 
 function EnabledModuleRoute({ name, children }: { name: string; children: ReactNode }) {
   const [enabled, setEnabled] = useState<boolean | null>(null)
   useEffect(() => {
     let active = true
-    void getEnabledModules()
-      .then((modules) => { if (active) setEnabled(modules.includes(name)) })
-      .catch(() => { if (active) setEnabled(false) })
-    return () => { active = false }
+    const loadModules = () => {
+      void getEnabledModules(true)
+        .then((modules) => { if (active) setEnabled(modules.includes(name)) })
+        .catch(() => { if (active) setEnabled(false) })
+    }
+    loadModules()
+    window.addEventListener(MODULES_CHANGED_EVENT, loadModules)
+    return () => { active = false; window.removeEventListener(MODULES_CHANGED_EVENT, loadModules) }
   }, [name])
   if (enabled === null) return null
   return enabled ? children : <Navigate to="/app/dashboard" replace />
