@@ -1,68 +1,95 @@
 {
-  "navActions": {
-    "area": "Bereich",
-    "chest": "Kiste",
-    "confirmDelete": "{{name}} löschen? Der Inhalt kann ebenfalls gelöscht werden.",
-    "delete": "Löschen",
-    "errors": {
-      "delete": "Element konnte nicht gelöscht werden.",
-      "rename": "Element konnte nicht umbenannt werden."
+  "areas": {
+    "detail": {
+      "errors": {
+        "move": "Element konnte nicht verschoben werden."
+      },
+      "fields": {
+        "area": "Bereich"
+      }
+    }
+  },
+  "auth": {
+    "reset": {
+      "confirmPassword": "Neues Passwort bestätigen",
+      "newPassword": "Neues Passwort",
+      "saving": "Wird gespeichert...",
+      "submit": "Zugangsdaten aktualisieren",
+      "title": "Zugangsdaten aktualisieren",
+      "warning": "Aus Sicherheitsgründen musst du einen neuen Benutzernamen und ein neues Passwort festlegen."
     },
-    "name": "Name",
-    "moreActions": "Weitere Aktionen",
-    "noActions": "Keine Aktionen verfügbar.",
-    "noNotifications": "Keine Benachrichtigungen.",
-    "lowStock": "Niedriger Bestand: {{name}}",
-    "stockLevel": "Noch {{quantity}} vorhanden (Minimum {{minimum}})",
-    "notifications": "Benachrichtigungen",
-    "dismiss": "Ausblenden",
-    "rename": "Umbenennen",
-    "renameTitle": "{{kind}} umbenennen"
+    "signupDisabled": "Die öffentliche Kontoerstellung ist für diese Instanz derzeit deaktiviert."
   },
   "chests": {
     "editChest": "Kiste bearbeiten",
     "editTitle": "Kiste bearbeiten",
-    "errors": { "edit": "Kiste konnte nicht bearbeitet werden." }
-  },
-  "areas": {
-    "detail": {
-      "fields": { "area": "Bereich" },
-      "errors": { "move": "Element konnte nicht verschoben werden." }
+    "errors": {
+      "edit": "Kiste konnte nicht bearbeitet werden."
     }
   },
   "inventory": {
-    "view": {
-      "label": "Inventaransicht",
-      "grid": "Rasteransicht",
-      "list": "Listenansicht"
-    },
     "categories": {
-      "food": "Lebensmittel",
       "books": "Bücher und Medien",
-      "electronics": "Elektronik",
       "clothing": "Kleidung",
+      "electronics": "Elektronik",
+      "food": "Lebensmittel",
       "medicine": "Medikamente"
     },
     "fields": {
-      "barcode": "Barcode",
-      "expiration_date": "Ablaufdatum",
-      "isbn": "ISBN",
       "author": "Autor/in",
+      "barcode": "Barcode",
+      "brand": "Marke",
+      "expiration_date": "Ablaufdatum",
+      "expiry": "Ablaufdatum",
+      "has_insurance": "Versichert",
+      "isbn": "ISBN",
+      "minimum_quantity": "Mindestbestand",
       "pages": "Seiten",
+      "prescription_required": "Verschreibung erforderlich",
+      "purchase_date": "Kaufdatum",
+      "pzn_barcode": "PZN-Barcode",
+      "quantity": "Menge",
       "read_status": "Lesestatus",
       "serial_number": "Seriennummer",
-      "purchase_date": "Kaufdatum",
-      "warranty_months": "Garantiezeit in Monaten",
-      "has_insurance": "Versichert",
-      "brand": "Marke",
       "size": "Größe",
-      "quantity": "Menge",
-      "pzn_barcode": "PZN-Barcode",
-      "expiry": "Ablaufdatum",
-      "prescription_required": "Verschreibung erforderlich",
-      "minimum_quantity": "Mindestbestand",
-      "stock_level": "Bestandsniveau"
+      "stock_level": "Bestandsniveau",
+      "warranty_months": "Garantiezeit in Monaten"
+    },
+    "view": {
+      "grid": "Rasteransicht",
+      "label": "Inventaransicht",
+      "list": "Listenansicht"
     }
+  },
+  "loans": {
+    "article": "Artikel",
+    "chest": "Kisten",
+    "create": "Ausleihe erfassen",
+    "description": "Verfolge ausgeliehene Artikel und Truhen aus deinem Inventar.",
+    "due": "Fällig",
+    "dueDate": "Fälligkeitsdatum (optional)",
+    "empty": "Bisher wurden keine Ausleihen erfasst.",
+    "errors": {
+      "create": "Fehler beim Erfassen der Ausleihe.",
+      "inventoryLoad": "Fehler beim Laden der Inventarobjekte.",
+      "load": "Fehler beim Laden der Ausleihen.",
+      "return": "Fehler beim Markieren der Rückgabe."
+    },
+    "history": "Deine Ausleihen",
+    "item": "Objekt",
+    "itemType": "Objekttyp",
+    "loading": "Ausleihen werden geladen...",
+    "markReturned": "Als zurückgegeben markieren",
+    "newLoan": "Ausleihe erfassen",
+    "noDueDate": "Kein Fälligkeitsdatum",
+    "noItems": "Keine Objekte in diesem Inventar verfügbar.",
+    "notes": "Notizen (optional)",
+    "quantity": "Anzahl",
+    "returned": "Zurückgegeben am {{date}}",
+    "returning": "Wird zurückgebucht...",
+    "saving": "Wird gespeichert...",
+    "title": "Ausleihen",
+    "unknownItem": "Inventarobjekt"
   },
   "manageCodes": {
     "clearSelection": "Auswahl aufheben",
@@ -86,8 +113,8 @@
     "print": "Codes drucken",
     "scan": "Code scannen",
     "searchPlaceholder": "Elemente suchen",
-    "selectedCount": "{{selected}} von {{total}} ausgewählt",
     "selectAll": "Alle auswählen",
+    "selectedCount": "{{selected}} von {{total}} ausgewählt",
     "title": "QR-Codes und Barcodes",
     "types": {
       "area": "Bereich",
@@ -96,32 +123,47 @@
       "shelf": "Regal"
     }
   },
+  "navActions": {
+    "area": "Bereich",
+    "chest": "Kiste",
+    "confirmDelete": "{{name}} löschen? Der Inhalt kann ebenfalls gelöscht werden.",
+    "delete": "Löschen",
+    "dismiss": "Ausblenden",
+    "errors": {
+      "delete": "Element konnte nicht gelöscht werden.",
+      "rename": "Element konnte nicht umbenannt werden."
+    },
+    "lowStock": "Niedriger Bestand: {{name}}",
+    "moreActions": "Weitere Aktionen",
+    "name": "Name",
+    "noActions": "Keine Aktionen verfügbar.",
+    "noNotifications": "Keine Benachrichtigungen.",
+    "notifications": "Benachrichtigungen",
+    "rename": "Umbenennen",
+    "renameTitle": "{{kind}} umbenennen",
+    "stockLevel": "Noch {{quantity}} vorhanden (Minimum {{minimum}})"
+  },
   "settings": {
+    "accountLoadError": "Kontodaten konnten nicht geladen werden.",
+    "accountName": "Anzeigename",
+    "accountPassword": "Neues Passwort",
+    "accountPasswordConfirm": "Neues Passwort bestätigen",
+    "accountSave": "Persönliches Konto speichern",
+    "accountSaving": "Wird gespeichert...",
+    "accountUsername": "Benutzername",
     "admin": {
-      "addUser": "Benutzer hinzufügen",
-      "userManagement": "Benutzerverwaltung",
       "actions": "Aktionen",
+      "addUser": "Benutzer hinzufügen",
       "administrator": "Administrator",
       "backupDescription": "Datenbank und alle von dieser Instanz gespeicherten Dateien herunterladen.",
       "backupError": "Instanz-Backup konnte nicht heruntergeladen werden.",
       "backupLoading": "Backup wird erstellt...",
       "backupTitle": "Instanz-Backup",
-      "downloadBackup": "Backup herunterladen",
-      "version": {
-        "title": "OpenInvento-Updates",
-        "description": "Nach einer neuen Version suchen und das Änderungsprotokoll ansehen.",
-        "checkButton": "Nach Updates suchen",
-        "checking": "Suche läuft...",
-        "checkError": "Release-Informationen konnten nicht abgerufen werden.",
-        "updateAvailable": "Version {{version}} ist verfügbar.",
-        "upToDate": "Diese Instanz verwendet die neueste Version ({{version}}).",
-        "noNotes": "Für dieses Release gibt es keine Änderungsnotizen.",
-        "noChangelog": "Seit dieser Version sind keine Änderungsnotizen verfügbar."
-      },
       "cancel": "Abbrechen",
       "confirmDelete": "{{name}} löschen?",
       "deleteUser": "Benutzer löschen",
       "deleteUserError": "Benutzer konnte nicht gelöscht werden.",
+      "downloadBackup": "Backup herunterladen",
       "editUser": "Benutzer bearbeiten",
       "email": "E-Mail",
       "enableEmailLogin": "Anmeldung per E-Mail aktivieren",
@@ -138,112 +180,76 @@
       "role": "Rolle",
       "saveUser": "Benutzer speichern",
       "saveUserError": "Benutzer konnte nicht gespeichert werden.",
-      "username": "Benutzername"
+      "userManagement": "Benutzerverwaltung",
+      "username": "Benutzername",
+      "version": {
+        "checkButton": "Nach Updates suchen",
+        "checkError": "Release-Informationen konnten nicht abgerufen werden.",
+        "checking": "Suche läuft...",
+        "description": "Nach einer neuen Version suchen und das Änderungsprotokoll ansehen.",
+        "noChangelog": "Seit dieser Version sind keine Änderungsnotizen verfügbar.",
+        "noNotes": "Für dieses Release gibt es keine Änderungsnotizen.",
+        "title": "OpenInvento-Updates",
+        "upToDate": "Diese Instanz verwendet die neueste Version ({{version}}).",
+        "updateAvailable": "Version {{version}} ist verfügbar."
+      }
     },
-    "accountName": "Anzeigename",
-    "accountPassword": "Neues Passwort",
-    "accountPasswordConfirm": "Neues Passwort bestätigen",
-    "accountSave": "Persönliches Konto speichern",
-    "accountSaving": "Wird gespeichert...",
-    "accountUsername": "Benutzername",
-    "accountLoadError": "Kontodaten konnten nicht geladen werden.",
+    "adminTab": "Administratoreinstellungen",
+    "allowEmailLogin": "Anmeldung mit E-Mail-Adresse erlauben",
+    "allowEmailLoginDescription": "Wenn aktiviert, können sich Benutzer zusätzlich mit ihrer E-Mail-Adresse anmelden.",
     "apiKeys": {
-      "title": "API-Schlüssel",
-      "description": "Mit einem Schlüssel kannst du über die API auf dein Inventar zugreifen. Schlüssel haben dieselben Berechtigungen wie dein Konto.",
-      "createdOnce": "Kopiere diesen Schlüssel jetzt. Er wird nicht erneut angezeigt.",
       "copy": "Schlüssel kopieren",
-      "dismiss": "Schließen",
-      "namePlaceholder": "Name des Schlüssels",
-      "nameLabel": "Name des API-Schlüssels",
       "create": "API-Schlüssel erstellen",
+      "createError": "API-Schlüssel konnte nicht erstellt werden.",
+      "createdOnce": "Kopiere diesen Schlüssel jetzt. Er wird nicht erneut angezeigt.",
       "creating": "Wird erstellt...",
-      "loading": "API-Schlüssel werden geladen...",
+      "description": "Mit einem Schlüssel kannst du über die API auf dein Inventar zugreifen. Schlüssel haben dieselben Berechtigungen wie dein Konto.",
+      "dismiss": "Schließen",
       "empty": "Noch keine API-Schlüssel vorhanden.",
-      "revoked": "widerrufen",
+      "loadError": "API-Schlüssel konnten nicht geladen werden.",
+      "loading": "API-Schlüssel werden geladen...",
+      "nameLabel": "Name des API-Schlüssels",
+      "namePlaceholder": "Name des Schlüssels",
       "prefix": "Schlüsselpräfix: {{prefix}}",
       "rename": "Umbenennen",
       "renamePrompt": "Neuen Namen eingeben",
       "revoke": "Widerrufen",
       "revokeConfirm": "API-Schlüssel {{name}} widerrufen? Dies kann nicht rückgängig gemacht werden.",
-      "loadError": "API-Schlüssel konnten nicht geladen werden.",
-      "createError": "API-Schlüssel konnte nicht erstellt werden.",
-      "updateError": "API-Schlüssel konnte nicht umbenannt werden.",
-      "revokeError": "API-Schlüssel konnte nicht widerrufen werden."
+      "revokeError": "API-Schlüssel konnte nicht widerrufen werden.",
+      "revoked": "widerrufen",
+      "title": "API-Schlüssel",
+      "updateError": "API-Schlüssel konnte nicht umbenannt werden."
     },
     "description": "Wähle aus, wie die Benutzeroberfläche dargestellt werden soll.",
-    "languageLabel": "Sprache",
-    "personalAccount": "Persönliches Konto",
-    "personalAccountDescription": "Benutzername, Anzeigename oder Passwort aktualisieren.",
-    "tabsLabel": "Einstellungsbereiche",
-    "userTab": "Benutzereinstellungen",
-    "adminTab": "Administratoreinstellungen",
-    "themeDark": "Dunkel",
-    "themeLabel": "Design / Theme",
-    "themeLight": "Hell",
-    "themePlaceholder": "Design wählen",
-    "themeSystem": "System",
-    "title": "Einstellungen",
-    "allowEmailLogin": "Anmeldung mit E-Mail-Adresse erlauben",
-    "allowEmailLoginDescription": "Wenn aktiviert, können sich Benutzer zusätzlich mit ihrer E-Mail-Adresse anmelden.",
     "instanceSettingsLoadError": "Instanzeinstellungen konnten nicht geladen werden.",
     "instanceSettingsSaveError": "Instanzeinstellungen konnten nicht gespeichert werden.",
     "inventory": {
       "exportCsv": "CSV-Dateien exportieren",
       "exportDescription": "Inventardaten und zugehörige Dateien als ZIP-Archiv mit CSV-Tabellen herunterladen.",
       "exportError": "Inventar konnte nicht exportiert werden.",
-      "exporting": "CSV wird erstellt...",
-      "exportTitle": "Inventardaten exportieren"
-    }
-  },
-  "auth": {
-    "reset": {
-      "title": "Zugangsdaten aktualisieren",
-      "warning": "Aus Sicherheitsgründen musst du einen neuen Benutzernamen und ein neues Passwort festlegen.",
-      "newPassword": "Neues Passwort",
-      "confirmPassword": "Neues Passwort bestätigen",
-      "saving": "Wird gespeichert...",
-      "submit": "Zugangsdaten aktualisieren"
+      "exportTitle": "Inventardaten exportieren",
+      "exporting": "CSV wird erstellt..."
     },
-    "signupDisabled": "Die öffentliche Kontoerstellung ist für diese Instanz derzeit deaktiviert."
-  },
-  "loans": {
-    "title": "Ausleihen",
-    "newLoan": "Ausleihe erfassen",
-    "description": "Verfolge ausgeliehene Artikel und Truhen aus deinem Inventar.",
-    "itemType": "Objekttyp",
-    "item": "Objekt",
-    "article": "Artikel",
-    "chest": "Truhe",
-    "quantity": "Anzahl",
-    "dueDate": "Fälligkeitsdatum (optional)",
-    "notes": "Notizen (optional)",
-    "create": "Ausleihe erfassen",
-    "saving": "Wird gespeichert...",
-    "history": "Deine Ausleihen",
-    "loading": "Ausleihen werden geladen...",
-    "empty": "Bisher wurden keine Ausleihen erfasst.",
-    "noItems": "Keine Objekte in diesem Inventar verfügbar.",
-    "noDueDate": "Kein Fälligkeitsdatum",
-    "due": "Fällig",
-    "returned": "Zurückgegeben am {{date}}",
-    "markReturned": "Als zurückgegeben markieren",
-    "returning": "Wird zurückgebucht...",
-    "unknownItem": "Inventarobjekt",
-    "errors": {
-      "load": "Fehler beim Laden der Ausleihen.",
-      "create": "Fehler beim Erfassen der Ausleihe.",
-      "return": "Fehler beim Markieren der Rückgabe.",
-      "inventoryLoad": "Fehler beim Laden der Inventarobjekte."
-    }
+    "languageLabel": "Sprache",
+    "personalAccount": "Persönliches Konto",
+    "personalAccountDescription": "Benutzername, Anzeigename oder Passwort aktualisieren.",
+    "tabsLabel": "Einstellungsbereiche",
+    "themeDark": "Dunkel",
+    "themeLabel": "Design / Theme",
+    "themeLight": "Hell",
+    "themePlaceholder": "Design wählen",
+    "themeSystem": "System",
+    "title": "Einstellungen",
+    "userTab": "Benutzereinstellungen"
   },
   "sidebar": {
-    "home": "Home",
-    "loans": "Ausleihen",
-    "settings": "Einstellungen",
     "areas": "Bereiche",
     "favorites": "Favoriten",
+    "home": "Home",
+    "loans": "Ausleihen",
     "noAreas": "Noch keine Bereiche.",
     "noFavorites": "Noch keine Favoriten.",
-    "removeFavorite": "Aus Favoriten entfernen"
+    "removeFavorite": "Aus Favoriten entfernen",
+    "settings": "Einstellungen"
   }
 }
