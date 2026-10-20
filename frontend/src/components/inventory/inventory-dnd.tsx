@@ -8,7 +8,7 @@ import { Feedback, PointerActivationConstraints, PointerSensor } from "@dnd-kit/
 import { useCallback, useEffect, useState, type ReactNode } from "react"
 import { useLocation } from "react-router"
 import { useTranslation } from "react-i18next"
-import type { Chest, Shelf } from "@/utils/api/inventory"
+import type { Box, Shelf } from "@/utils/api/inventory"
 import { inventoryApi, type Article } from "@/utils/api/inventory"
 import type { InventoryDndItem, InventoryDndTarget } from "@/utils/inventory-move"
 import { moveInventoryItem } from "@/utils/inventory-move"
@@ -40,7 +40,7 @@ export function InventoryDropTarget({
     id: target ? `target:${target.kind}:${target.id}` : "target:disabled",
     data: target ? { inventoryTarget: target } : {},
     disabled: !target,
-    collisionPriority: target?.kind === "chest" ? 3 : target?.kind === "shelf" ? 2 : 1,
+    collisionPriority: target?.kind === "box" ? 3 : target?.kind === "shelf" ? 2 : 1,
   })
 
   return (
@@ -138,18 +138,18 @@ export function InventoryDndBoundary({ children }: { children: ReactNode }) {
   const location = useLocation()
   const { t } = useTranslation()
   const [shelves, setShelves] = useState<Shelf[]>([])
-  const [chests, setChests] = useState<Chest[]>([])
+  const [boxes, setBoxes] = useState<Box[]>([])
   const [articles, setArticles] = useState<Article[]>([])
   const [error, setError] = useState("")
 
   const load = useCallback(async () => {
-    const [nextShelves, nextChests, nextArticles] = await Promise.all([
+    const [nextShelves, nextBoxes, nextArticles] = await Promise.all([
       inventoryApi.listShelves(),
-      inventoryApi.listChests(),
+      inventoryApi.listBoxes(),
       inventoryApi.listArticles(),
     ])
     setShelves(nextShelves)
-    setChests(nextChests)
+    setBoxes(nextBoxes)
     setArticles(nextArticles)
   }, [])
 
@@ -165,12 +165,12 @@ export function InventoryDndBoundary({ children }: { children: ReactNode }) {
   ) => {
     setError("")
     try {
-      await moveInventoryItem(item, target, { articles, chests, shelves })
+      await moveInventoryItem(item, target, { articles, boxes, shelves })
       window.dispatchEvent(new Event("openinvento:inventory-moved"))
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : t("areas.detail.errors.move"))
     }
-  }, [articles, chests, shelves, t])
+  }, [articles, boxes, shelves, t])
 
   return (
     <InventoryDndProvider onMove={(item, target) => void handleMove(item, target)}>

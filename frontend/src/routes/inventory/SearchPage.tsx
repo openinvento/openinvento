@@ -6,7 +6,7 @@ import { useNavigate, useSearchParams } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { getSelectedInventory, inventoryApi, type Inventory, type SearchResult } from "@/utils/api/inventory"
-import { ArticleCard, ChestCard } from "@/components/inventory/entity-cards"
+import { ArticleCard, BoxCard } from "@/components/inventory/entity-cards"
 
 export default function SearchPage() {
   const { t } = useTranslation()
@@ -99,12 +99,12 @@ export default function SearchPage() {
       ) : results.length > 0 ? (
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((article) => (
-            article.type === "chest" ? (
-              <ChestCard
+            article.type === "box" ? (
+              <BoxCard
                 key={`${article.type}-${article.uuid}`}
                 name={article.name}
-                subtitle={`${article.identifier} · ${t("search.chest")}`}
-                onOpen={() => navigate(`/app/chests/${article.uuid}`)}
+                subtitle={`${article.identifier} · ${t("search.box")}`}
+                onOpen={() => navigate(`/app/boxes/${article.uuid}`)}
               />
             ) : (
               <ArticleCard

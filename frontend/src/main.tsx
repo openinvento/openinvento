@@ -12,7 +12,7 @@ import SettingsPage from './routes/Settings.tsx'
 import InventorySettingsPage from './routes/InventorySettings.tsx'
 import AreasPage from './routes/inventory/AreasPage.tsx'
 import AreaDetailScreen from './routes/inventory/AreaDetailScreen.tsx'
-import ChestPage from './routes/inventory/ChestPage.tsx'
+import BoxPage from './routes/inventory/BoxPage.tsx'
 import ArticleCreateScreen from './routes/inventory/ArticleCreateScreen.tsx'
 import ArticlePage from './routes/inventory/ArticlePage.tsx'
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -111,8 +111,8 @@ const router = createBrowserRouter([
         element: <AreaDetailScreen />,
       },
       {
-        path: "chests/:chestId",
-        element: <ChestPage />,
+        path: "boxes/:boxId",
+        element: <BoxPage />,
       },
       {
         path: "articles/:articleId",

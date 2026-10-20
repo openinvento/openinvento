@@ -5,14 +5,14 @@ import { ArchiveIcon, HandCoinsIcon, RotateCcwIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import BaseScreen from "@/layouts/BaseScreen"
-import { inventoryApi, type Article, type Chest } from "@/utils/api/inventory"
+import { inventoryApi, type Article, type Box } from "@/utils/api/inventory"
 import { loansApi, type Loan } from "./api"
 import LoanItemSelector from "./LoanItemSelector"
 
 export default function LoansPage() {
   const { t, i18n } = useTranslation()
   const [articles, setArticles] = useState<Article[]>([])
-  const [chests, setChests] = useState<Chest[]>([])
+  const [boxes, setBoxes] = useState<Box[]>([])
   const [loans, setLoans] = useState<Loan[]>([])
   const [itemId, setItemId] = useState("")
   const [quantity, setQuantity] = useState(1)
@@ -24,20 +24,20 @@ export default function LoansPage() {
   const [error, setError] = useState<string | null>(null)
 
   const selectedArticle = articles.find((article) => `article:${article.uuid}` === itemId)
-  const selectedChest = chests.find((chest) => `chest:${chest.uuid}` === itemId)
-  const selectedKind = selectedArticle ? "article" : selectedChest ? "chest" : null
+  const selectedBox = boxes.find((box) => `box:${box.uuid}` === itemId)
+  const selectedKind = selectedArticle ? "article" : selectedBox ? "box" : null
 
   const itemNames = useMemo(() => new Map([
     ...articles.map((article) => [`article:${article.uuid}`, article.name] as const),
-    ...chests.map((chest) => [`chest:${chest.uuid}`, chest.name] as const),
-  ]), [articles, chests])
+    ...boxes.map((box) => [`box:${box.uuid}`, box.name] as const),
+  ]), [articles, boxes])
 
   const load = useCallback(async () => {
     setLoading(true)
     setError(null)
     const [loanResult, inventoryResult] = await Promise.allSettled([
       loansApi.list(),
-      Promise.all([inventoryApi.listArticles(), inventoryApi.listChests()]),
+      Promise.all([inventoryApi.listArticles(), inventoryApi.listBoxes()]),
     ])
 
     if (loanResult.status === "fulfilled") {
@@ -47,7 +47,7 @@ export default function LoansPage() {
     }
     if (inventoryResult.status === "fulfilled") {
       setArticles(inventoryResult.value[0])
-      setChests(inventoryResult.value[1])
+      setBoxes(inventoryResult.value[1])
     } else if (loanResult.status === "fulfilled") {
       setError(t("loans.errors.inventoryLoad"))
     }
@@ -63,7 +63,7 @@ export default function LoansPage() {
     try {
       const loan = await loansApi.create({
         article: selectedArticle?.uuid ?? null,
-        chest: selectedChest?.uuid ?? null,
+        box: selectedBox?.uuid ?? null,
         quantity: selectedKind === "article" ? quantity : 1,
         due_at: dueAt ? new Date(dueAt).toISOString() : null,
         notes,
@@ -111,7 +111,7 @@ export default function LoansPage() {
             </div>
           </div>
           <form className="grid gap-4 sm:grid-cols-2" onSubmit={handleCreate}>
-            <LoanItemSelector articles={articles} chests={chests} value={itemId} onValueChange={setItemId} />
+            <LoanItemSelector articles={articles} boxes={boxes} value={itemId} onValueChange={setItemId} />
             {selectedKind === "article" && (
               <label className="grid gap-1.5 text-sm">
                 {t("loans.quantity")}
@@ -141,7 +141,7 @@ export default function LoansPage() {
           ) : (
             <div className="overflow-hidden rounded-xl border">
               {loans.map((loan) => {
-                const itemLabel = itemNames.get(`${loan.article ? "article" : "chest"}:${loan.article ?? loan.chest}`) ?? t("loans.unknownItem")
+                const itemLabel = itemNames.get(`${loan.article ? "article" : "box"}:${loan.article ?? loan.box}`) ?? t("loans.unknownItem")
                 return (
                   <div key={loan.id} className="flex flex-wrap items-center justify-between gap-4 border-b p-4 last:border-b-0">
                     <div className="flex min-w-0 items-center gap-3">

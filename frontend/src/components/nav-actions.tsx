@@ -5,12 +5,12 @@ import { BellDotIcon, BellIcon, MoreHorizontalIcon, PencilIcon, QrCodeIcon, Star
 import { Button } from "@/components/ui/button"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { inventoryApi, setSelectedInventory, type Area, type Chest } from "@/utils/api/inventory"
+import { inventoryApi, setSelectedInventory, type Area, type Box } from "@/utils/api/inventory"
 import { isFavorite, toggleFavorite, type Favorite } from "@/utils/favorites"
 import { useTranslation } from "react-i18next"
 import { dismissNotification, getNotificationsOnce, type Notification } from "@/utils/api/notifications"
 
-type PageEntity = { uuid: string; name: string; identifier: string; kind: "areas" | "chests" }
+type PageEntity = { uuid: string; name: string; identifier: string; kind: "areas" | "boxes" }
 
 export function NavActions() {
   const location = useLocation()
@@ -52,20 +52,20 @@ export function NavActions() {
 
   React.useEffect(() => {
     const areaId = location.pathname.match(/^\/app\/areas\/([^/]+)$/)?.[1]
-    const chestId = location.pathname.match(/^\/app\/chests\/([^/]+)$/)?.[1]
+    const boxId = location.pathname.match(/^\/app\/boxes\/([^/]+)$/)?.[1]
     let active = true
     setEntity(null)
     setFavorite(null)
     setFavorited(false)
-    if (!areaId && !chestId) return () => { active = false }
+    if (!areaId && !boxId) return () => { active = false }
 
     void (async () => {
       try {
-        const item: Area | Chest | undefined = areaId
+        const item: Area | Box | undefined = areaId
           ? (await inventoryApi.listAreas()).find((area) => area.uuid === areaId)
-          : (await inventoryApi.listChests()).find((chest) => chest.uuid === chestId)
+          : (await inventoryApi.listBoxes()).find((box) => box.uuid === boxId)
         if (!active || !item) return
-        const kind = areaId ? "areas" : "chests"
+        const kind = areaId ? "areas" : "boxes"
         setEntity({ uuid: item.uuid, name: item.name, identifier: item.identifier, kind })
         if (areaId) {
           const nextFavorite: Favorite = { id: `area:${item.uuid}`, name: item.name, url: `/app/areas/${item.uuid}`, icon: "home" }
@@ -97,7 +97,7 @@ export function NavActions() {
     setSaving(true)
     setError("")
     try {
-      const updated = await inventoryApi.update<Area | Chest>(entity.kind, entity.uuid, { name })
+      const updated = await inventoryApi.update<Area | Box>(entity.kind, entity.uuid, { name })
       setEntity({ ...entity, name: updated.name })
       setRenameOpen(false)
       window.location.reload()
@@ -212,7 +212,7 @@ export function NavActions() {
           </div> : <p className="px-2 py-1 text-sm text-muted-foreground">{t("navActions.noActions")}</p>}
         </PopoverContent>
       </Popover>
-      <InventoryModal title={t("navActions.renameTitle", { kind: entity?.kind === "areas" ? t("navActions.area") : t("navActions.chest") })}
+      <InventoryModal title={t("navActions.renameTitle", { kind: entity?.kind === "areas" ? t("navActions.area") : t("navActions.box") })}
         open={renameOpen} submitting={saving} onClose={() => setRenameOpen(false)} onSubmit={rename}>
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         <label className="grid gap-1.5 text-sm font-medium">
@@ -220,7 +220,7 @@ export function NavActions() {
           <input autoFocus name="name" defaultValue={entity?.name} required className="h-10 rounded-lg border bg-background px-3 font-normal" />
         </label>
       </InventoryModal>
-      <InventoryModal title={t("navActions.identifierTitle", { kind: entity?.kind === "areas" ? t("navActions.area") : t("navActions.chest") })}
+      <InventoryModal title={t("navActions.identifierTitle", { kind: entity?.kind === "areas" ? t("navActions.area") : t("navActions.box") })}
         open={identifierOpen} submitting={saving} onClose={() => setIdentifierOpen(false)} onSubmit={updateIdentifier}>
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         <label className="grid gap-1.5 text-sm font-medium">
