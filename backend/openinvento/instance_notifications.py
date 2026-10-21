@@ -2,10 +2,12 @@
 
 import logging
 import os
-from importlib.metadata import PackageNotFoundError, version as package_version
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as package_version
 
 from account_auth.models import CustomUser
 from account_auth.services import create_notification
+
 from .version_fetching import VersionFetcher
 
 logger = logging.getLogger(__name__)
