@@ -8,6 +8,7 @@
     "dev": "vite --host",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
+    "i18n:check": "node scripts/check-translations.js",
     "preview": "vite preview",
     "license:check": "node scripts/check-licenses.js",
     "license:generate": "node scripts/generate-license-file.js"
