@@ -44,6 +44,7 @@ class DailyScheduler:
                 logger.exception("Daily job failed: %s", job["name"])
 
     def _seconds_until_next_job(self, now):
+        """Return the number of seconds until the next scheduled job, or 3600 if no jobs are registered."""
         next_times = []
         for job in self.jobs:
             run_date = now.date()
@@ -63,4 +64,5 @@ class DailyScheduler:
             now = timezone.localtime()
             self._run_due_jobs(now)
             now = timezone.localtime()
+            # Sleep until the next scheduled job -> Wakeup for the next job and then restart the loop
             time.sleep(self._seconds_until_next_job(now))
