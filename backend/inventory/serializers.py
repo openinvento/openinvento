@@ -1,3 +1,4 @@
+import json
 from urllib.parse import urlsplit
 
 from django.conf import settings
@@ -261,9 +262,10 @@ class ArticleSerializer(InventoryScopedSerializer):
         attrs = super().to_internal_value(data)
         if "field_values" in data:
             try:
-                attrs["field_values"] = serializers.JSONField().run_validation(data.get("field_values"))
-            except serializers.ValidationError as error:
-                raise serializers.ValidationError({"field_values": error.detail}) from error
+                raw_field_values = data.get("field_values")
+                attrs["field_values"] = json.loads(raw_field_values) if isinstance(raw_field_values, str) else raw_field_values
+            except (TypeError, json.JSONDecodeError) as error:
+                raise serializers.ValidationError({"field_values": "Expected a JSON list."}) from error
         return attrs
 
     def get_image(self, obj):

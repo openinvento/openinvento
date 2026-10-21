@@ -93,7 +93,8 @@ export default function ArticlePage() {
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!article) return
-    const form = new FormData(event.currentTarget)
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
     const value = (key: string) => form.get(key)?.toString() || null
     setSaving(true); setError("")
     try {
@@ -102,8 +103,8 @@ export default function ArticlePage() {
         ...article.field_values.filter((fieldValue) => !activeFieldIds.has(fieldValue.field)),
         ...articleFields.flatMap((field) => {
           const previous = article.field_values.find((fieldValue) => fieldValue.field === field.uuid)
-          const valueControl = form.elements.namedItem(`custom_${field.key}`)
-          const notifyControl = form.elements.namedItem(`notify_date_${field.key}`)
+          const valueControl = formElement.elements.namedItem(`custom_${field.key}`)
+          const notifyControl = formElement.elements.namedItem(`notify_date_${field.key}`)
           if (!valueControl && !previous) return []
 
           const rawValue = form.get(`custom_${field.key}`)?.toString()
