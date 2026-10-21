@@ -145,7 +145,7 @@ export default function ArticlePage() {
       window.dispatchEvent(new Event("openinvento:inventory-moved"))
 
       // Redirect to the area page if the article was saved successfully
-      setPendingNavigation(next.area ? `/app/areas/${next.area}` : "/app/areas")
+      setPendingNavigation(next.box ? `/app/boxes/${next.box}` : next.area ? `/app/areas/${next.area}` : "/app/areas")
 
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : t("articles.page.errors.save")) 
