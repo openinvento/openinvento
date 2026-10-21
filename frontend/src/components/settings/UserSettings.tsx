@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select"
 import { useNavigate } from "react-router"
 import { createAPIKey, getAPIKeys, renameAPIKey, revokeAPIKey, type APIKey } from "@/utils/api/settings"
+import { Switch } from "@/components/ui/switch"
 
 type ThemeOption = "light" | "dark" | "system"
 
@@ -34,6 +35,7 @@ export default function UserSettings() {
   const [apiKeyError, setApiKeyError] = useState<string | null>(null)
   const [apiKeysLoading, setApiKeysLoading] = useState(true)
   const [apiKeysSaving, setApiKeysSaving] = useState(false)
+  const [disableMobileZoom, setDisableMobileZoom] = useState(() => localStorage.getItem("disableMobileZoom") !== "false")
   
   const [theme, setTheme] = useState<ThemeOption>(() => {
     if (typeof window !== "undefined") {
@@ -148,6 +150,12 @@ export default function UserSettings() {
       localStorage.setItem("theme", nextTheme)
     }
     window.dispatchEvent(new Event("storage"))
+  }
+
+  function handleDisableMobileZoomChange(checked: boolean) {
+    setDisableMobileZoom(checked)
+    localStorage.setItem("disableMobileZoom", String(checked))
+    window.dispatchEvent(new Event("mobile-zoom-setting-changed"))
   }
 
   const languageName = (language: string) => {
@@ -289,6 +297,18 @@ export default function UserSettings() {
             ))}
           </ul>
         )}
+      </section>
+
+
+      <h2 className="text-xl font-semibold">{t("settings.UISettings")}</h2>
+      <section className="border-b pb-7">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <label htmlFor="disable-mobile-zoom" className="text-sm font-medium">{t("settings.disableMobileZoom")}</label>
+            <p className="text-sm text-muted-foreground">{t("settings.mobileZoomDescription")}</p>
+          </div>
+          <Switch id="disable-mobile-zoom" checked={disableMobileZoom} onCheckedChange={handleDisableMobileZoomChange} aria-label={t("settings.disableMobileZoom")} />
+        </div>
       </section>
 
       <div className="flex flex-row justify-between gap-6 ">
