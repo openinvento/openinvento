@@ -49,12 +49,13 @@ function MobileZoomControl() {
     let enabled = localStorage.getItem('disableMobileZoom') !== 'false'
     let lastTouchEnd = 0
     const preventPinchZoom = (event: TouchEvent) => {
-      if (enabled && event.scale !== undefined && event.scale !== 1) event.preventDefault()
+    const touchEvent = event as any; 
+      if (enabled && touchEvent.scale !== undefined && touchEvent.scale !== 1) touchEvent.preventDefault()
     }
-    const preventDoubleTapZoom = (event: TouchEvent) => {
+    const preventDoubleTapZoom = (touchEvent: TouchEvent) => {
       if (!enabled) return
       const now = Date.now()
-      if (now - lastTouchEnd <= 300) event.preventDefault()
+      if (now - lastTouchEnd <= 300) touchEvent.preventDefault()
       lastTouchEnd = now
     }
     
