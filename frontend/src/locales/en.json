@@ -2,6 +2,10 @@
   "accounts": {
     "logoutBtn": "Logout"
   },
+  "actions": {
+    "delete": "Delete",
+    "rename": "Rename"
+  },
   "areas": {
     "areaName": "Area name",
     "confirmDelete": "Delete {{name}}? Its inventory contents may be deleted too.",
@@ -26,8 +30,8 @@
       },
       "fields": {
         "area": "Area",
-        "category": "Category",
         "box": "Box",
+        "category": "Category",
         "description": "Description",
         "icon": "Icon",
         "name": "Name",
@@ -44,8 +48,8 @@
         "edit": "Edit {{kind}}",
         "new": "New {{kind}}"
       },
-      "noCategory": "No category",
       "noBox": "No box",
+      "noCategory": "No category",
       "notOnShelf": "Not on a shelf",
       "nothingStored": "Nothing stored here yet.",
       "otherFields": "Other fields",
@@ -99,8 +103,8 @@
       },
       "fields": {
         "area": "Area",
-        "category": "Category",
         "box": "Box",
+        "category": "Category",
         "chooseImage": "Choose image",
         "description": "Description",
         "identifier": "Identifier",
@@ -122,8 +126,8 @@
       },
       "loading": "Loading article...",
       "noArea": "No area",
-      "noCategory": "No category",
       "noBox": "No box",
+      "noCategory": "No category",
       "noShelf": "No shelf",
       "saveChanges": "Save changes",
       "saving": "Saving...",
@@ -164,6 +168,23 @@
       "warning": "For security, you must choose a new username and password before continuing."
     },
     "signupDisabled": "Public account signup is currently disabled for this instance."
+  },
+  "boxes": {
+    "articleCount": "{{count}} articles",
+    "backToArea": "Back to area",
+    "confirmDelete": "Delete {{name}}?",
+    "editBox": "Edit box",
+    "editIdentifier": "Edit identifier",
+    "editTitle": "Edit box",
+    "empty": "No articles are stored in this box yet.",
+    "errors": {
+      "delete": "Could not delete article.",
+      "edit": "Could not update this box.",
+      "identifier": "Could not update the identifier.",
+      "load": "Could not load this box."
+    },
+    "identifierTitle": "Edit box identifier",
+    "loading": "Loading box..."
   },
   "categoriesAndFields": {
     "addCategory": "Add category",
@@ -214,23 +235,6 @@
     "optionsPlaceholder": "Comma-separated values",
     "title": "Categories and fields"
   },
-  "boxes": {
-    "articleCount": "{{count}} articles",
-    "backToArea": "Back to area",
-    "confirmDelete": "Delete {{name}}?",
-    "editBox": "Edit box",
-    "editIdentifier": "Edit identifier",
-    "editTitle": "Edit box",
-    "empty": "No articles are stored in this box yet.",
-    "errors": {
-      "delete": "Could not delete article.",
-      "edit": "Could not update this box.",
-      "identifier": "Could not update the identifier.",
-      "load": "Could not load this box."
-    },
-    "identifierTitle": "Edit box identifier",
-    "loading": "Loading box..."
-  },
   "dashboard": {
     "addArticle": "Add an article",
     "addArticleDescription": "Save something new to your inventory.",
@@ -259,8 +263,8 @@
     "types": {
       "area": "Area",
       "article": "Article",
-      "category": "Category",
       "box": "Box",
+      "category": "Category",
       "field": "Field",
       "shelf": "Shelf"
     },
@@ -284,6 +288,7 @@
       "expiry": "Expiry date",
       "has_insurance": "Has insurance",
       "isbn": "ISBN",
+      "minimum_quantity": "Minimum quantity",
       "pages": "Pages",
       "prescription_required": "Prescription required",
       "purchase_date": "Purchase date",
@@ -292,6 +297,7 @@
       "read_status": "Read status",
       "serial_number": "Serial number",
       "size": "Size",
+      "stock_level": "Inventory level",
       "warranty_months": "Warranty period in months"
     },
     "view": {
@@ -399,6 +405,7 @@
     "stockLevel": "{{quantity}} left (minimum {{minimum}})"
   },
   "search": {
+    "box": "Box",
     "empty": "No articles found.",
     "errors": {
       "load": "Could not load inventories.",
@@ -409,7 +416,6 @@
     "noInventory": "No inventory available.",
     "placeholder": "Search items by name",
     "prompt": "Enter a search term to find articles.",
-    "box": "Box",
     "quantity": "{{count}} in stock",
     "searchDescription": "Search your inventory",
     "searchTitle": "Search",
@@ -541,8 +547,10 @@
   },
   "sidebar": {
     "areas": "Areas",
+    "article": "Article",
     "categoriesAndFields": "Categories and Fields",
     "codeManagement": "Code Management",
+    "dashboard": "Dashboard",
     "favorites": "Favorites",
     "home": "Home",
     "inventorySettings": "Inventory Settings",

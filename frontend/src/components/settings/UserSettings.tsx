@@ -150,6 +150,21 @@ export default function UserSettings() {
     window.dispatchEvent(new Event("storage"))
   }
 
+  const languageName = (language: string) => {
+    switch (language) {
+      case "de":
+        return "Deutsch"
+      case "en":
+        return "English"
+      case "es":
+        return "Español"
+      case "fr":
+        return "Français"
+      default:
+        return language
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <section className="border-b pb-7">
@@ -279,13 +294,15 @@ export default function UserSettings() {
       <div className="flex flex-row justify-between gap-6 ">
         <div className="flex flex-1 flex-col gap-2">
           <label className="text-sm font-medium">{t("settings.languageLabel")}</label>
-          <Select value={i18n.resolvedLanguage ?? "en"} onValueChange={(language) => language && i18n.changeLanguage(language)}>
+          <Select value={i18n.resolvedLanguage ?? "en"} itemToStringLabel={() => (languageName(i18n.resolvedLanguage ?? "en"))} onValueChange={(language) => language && i18n.changeLanguage(language)}>
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="de">Deutsch</SelectItem>
               <SelectItem value="en">English</SelectItem>
+              <SelectItem value="es">Español</SelectItem>
+              <SelectItem value="fr">Français</SelectItem>
             </SelectContent>
           </Select>
           <FieldDescription>{t("settings.language.description")}</FieldDescription>
