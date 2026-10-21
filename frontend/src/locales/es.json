@@ -1,0 +1,562 @@
+{
+  "accounts": {
+    "logoutBtn": "Cerrar sesi?n"
+  },
+  "actions": {
+    "delete": "Eliminar",
+    "rename": "Renombrar"
+  },
+  "areas": {
+    "areaName": "Nombre del ?rea",
+    "confirmDelete": "Eliminar {{name}}? Its inventario contenido puede ser eliminado tambi?n.",
+    "createArea": "Crear ?rea",
+    "description": "Organize tu cosas por habitaci?n, garaje, oficina, o any otro lugar.",
+    "detail": {
+      "actions": {
+        "article": "Art?culo",
+        "box": "Caja",
+        "shelf": "Estante"
+      },
+      "allAreas": "All ?reas",
+      "articleCount": "{{count}} art?culos",
+      "articles": "Art?culos",
+      "confirmDelete": "?Eliminar {{name}}?",
+      "deleteShelf": "Eliminar estante",
+      "errors": {
+        "delete": "No se pudo no eliminar elemento.",
+        "load": "No se pudo no cargar este ?rea.",
+        "move": "No se pudo no mover este elemento.",
+        "save": "No se pudo no guardar elemento."
+      },
+      "fields": {
+        "area": "?rea",
+        "box": "Caja",
+        "category": "Categor?a",
+        "description": "Descripci?n",
+        "icon": "Icono",
+        "name": "Nombre",
+        "quantity": "Cantidad",
+        "selectValue": "Selecciona un valor",
+        "shelf": "Estante",
+        "stockTracking": "Controlar existencias"
+      },
+      "inStock": "{{count}} en existencias",
+      "itemCount": "{{count}} elementos",
+      "loading": "Cargando ?rea...",
+      "lowStock": "Pocas existencias",
+      "modal": {
+        "edit": "Editar {{kind}}",
+        "new": "Nuevo {{kind}}"
+      },
+      "noBox": "Sin caja",
+      "noCategory": "Sin categor?a",
+      "notOnShelf": "Not en un estante",
+      "nothingStored": "Todav?a no hay nada guardado aqu?.",
+      "otherFields": "Otros campos",
+      "otherItems": "Otros art?culos",
+      "renameShelf": "Rename estante",
+      "stockFields": "Umbrales de existencias",
+      "summary": "{{articles}} art?culos · {{boxes}} cajas · {{shelves}} estantes"
+    },
+    "empty": {
+      "noAreas": {
+        "text": "Start con el lugar donde you guardas tu cosas.",
+        "title": "Tu inventario tiene sin ?reas"
+      },
+      "noInventory": {
+        "text": "Ask un administrador a a?adir you a un inventario antes crear ?reas.",
+        "title": "No hay inventario disponible"
+      }
+    },
+    "errors": {
+      "delete": "No se pudo no eliminar ?rea.",
+      "load": "No se pudo no cargar ?reas.",
+      "save": "No se pudo no guardar ?rea."
+    },
+    "inventoryFallback": "Tu inventario",
+    "namePlaceholder": "p. ej., cocina",
+    "newArea": "Nuevo ?rea",
+    "renameArea": "Rename ?rea",
+    "title": "?reas"
+  },
+  "articles": {
+    "page": {
+      "areas": "?reas",
+      "attachments": {
+        "add": "A?adir archivo",
+        "deleteError": "No se pudo no quitar el archivo.",
+        "download": "Descargar {{name}}",
+        "empty": "Todav?a no hay archivos adjuntos.",
+        "remove": "Quitar {{name}}",
+        "title": "Archivos y adjuntos",
+        "uploadError": "No se pudo no subir el archivo.",
+        "uploading": "Subiendo..."
+      },
+      "backToArea": "Volver al ?rea",
+      "confirmDelete": "?Eliminar {{name}}?",
+      "delete": "Eliminar",
+      "errors": {
+        "delete": "No se pudo no eliminar art?culo.",
+        "load": "No se pudo no cargar art?culo.",
+        "save": "No se pudo no guardar art?culo.",
+        "unsavedChanges": "You tienes unsaved cambios. Guardar los antes salir este p?gina."
+      },
+      "fields": {
+        "area": "?rea",
+        "box": "Caja",
+        "category": "Categor?a",
+        "chooseImage": "Elegir imagen",
+        "description": "Descripci?n",
+        "identifier": "Identificador",
+        "identifierHelp": "El identificador ayuda identificar elementos en tu inventario y es principalmente usado para c?digos de barras y QR c?digos.",
+        "identifierHelpLabel": "About identificadores",
+        "image": "Imagen (opcional)",
+        "name": "Nombre",
+        "quantity": "Cantidad",
+        "removeImage": "Quitar",
+        "replaceImage": "Reemplazar",
+        "selectValue": "Selecciona un valor",
+        "shelf": "Estante",
+        "stockTracking": "Stock seguimiento"
+      },
+      "headings": {
+        "articleDetails": "Detalles del art?culo",
+        "general": "General",
+        "locationAndCategory": "Location y Category"
+      },
+      "loading": "Cargando art?culo...",
+      "noArea": "Sin ?rea",
+      "noBox": "Sin caja",
+      "noCategory": "Sin categor?a",
+      "noShelf": "Sin estante",
+      "saveChanges": "Guardar cambios",
+      "saving": "Guardando...",
+      "stockFields": "Umbrales de existencias"
+    }
+  },
+  "auth": {
+    "errors": {
+      "emailInvalid": "Introduce una direcci?n de correo v?lida.",
+      "emailRequired": "La direcci?n de correo es obligatoria.",
+      "emailTaken": "Este correo direcci?n es ya registrada.",
+      "generic": "Error de autenticaci?n. Int?ntalo de nuevo.",
+      "invalidCredentials": "Invalid correo, nombre de usuario, o contrase?a.",
+      "invalidField": "{{field}} no v?lido.",
+      "invalidRequest": "Por favor revisa el introducidos detalles.",
+      "nameRequired": "El nombre es obligatorio.",
+      "passwordCommon": "Este contrase?a es tambi?n com?n.",
+      "passwordMismatch": "Las contrase?as no coinciden.",
+      "passwordNumeric": "Password no puede ser completamente num?rico.",
+      "passwordRequired": "La contrase?a es obligatoria.",
+      "passwordSimilar": "Password es tambi?n similar a tu personal informaci?n.",
+      "passwordTooShort": "Password es tambi?n corta. It debe contener en menos 8 caracteres.",
+      "usernameRequired": "Username es obligatorio.",
+      "usernameTaken": "Este nombre de usuario es ya en uso."
+    },
+    "fields": {
+      "email": "correo",
+      "name": "nombre",
+      "password": "contrase?a",
+      "username": "nombre de usuario"
+    },
+    "reset": {
+      "confirmPassword": "Confirmar nueva contrase?a",
+      "newPassword": "Nueva contrase?a",
+      "saving": "Guardando...",
+      "submit": "Actualizar credenciales",
+      "title": "Actualizar tu credenciales",
+      "warning": "For seguridad, you debe elegir un nuevo nombre de usuario y contrase?a antes continuar."
+    },
+    "signupDisabled": "Public cuenta registro es actualmente desactivado para este instancia."
+  },
+  "boxes": {
+    "articleCount": "{{count}} art?culos",
+    "backToArea": "Volver al ?rea",
+    "confirmDelete": "?Eliminar {{name}}?",
+    "editBox": "Editar caja",
+    "editIdentifier": "Editar identificador",
+    "editTitle": "Editar caja",
+    "empty": "Sin art?culos son guardados en este caja todav?a.",
+    "errors": {
+      "delete": "No se pudo no eliminar art?culo.",
+      "edit": "No se pudo no actualizar este caja.",
+      "identifier": "No se pudo no actualizar el identificador.",
+      "load": "No se pudo no cargar este caja."
+    },
+    "identifierTitle": "Editar caja identificador",
+    "loading": "Cargando caja..."
+  },
+  "categoriesAndFields": {
+    "addCategory": "A?adir categor?a",
+    "addField": "A?adir campo",
+    "addGeneralField": "A?adir campo general",
+    "categories": "Categor?as",
+    "category": "Categor?a",
+    "categoryName": "Nombre de la categor?a",
+    "confirmDeleteCategory": "?Eliminar category {{name}} and its fields?",
+    "confirmDeleteField": "?Eliminar field {{name}}?",
+    "createCategory": "Crear categor?a",
+    "delete": "Eliminar",
+    "description": "Define el informaci?n guardados en each art?culo.",
+    "edit": "Editar",
+    "editCategory": "Editar categor?a",
+    "editField": "Editar campo",
+    "errors": {
+      "delete": "No se pudo no eliminar elemento.",
+      "load": "No se pudo no cargar categor?as y campos.",
+      "saveCategory": "No se pudo no guardar categor?a.",
+      "saveField": "No se pudo no guardar campo."
+    },
+    "field": "campo",
+    "fieldType": "Tipo de campo",
+    "fieldTypes": {
+      "barcode": "C?digo de barras",
+      "boolean": "S? / No",
+      "date": "Fecha",
+      "number": "N?mero",
+      "select": "Seleccionar",
+      "text": "Texto"
+    },
+    "fields": "campos",
+    "generalField": "Campo general",
+    "generalFields": "Campos generales",
+    "inventory": "Inventario",
+    "key": "Clave",
+    "label": "Etiqueta",
+    "newCategory": "Nuevo categor?a",
+    "newField": "Nuevo campo",
+    "noCategoriesText": "Crear un categor?a a group relacionados art?culo campos.",
+    "noCategoriesTitle": "Todav?a no hay categor?as",
+    "noCategoryFields": "Sin category-specific campos.",
+    "noGeneralFields": "Sin campos apply a every categor?a.",
+    "noInventoryText": "Ask un administrador a a?adir you a un inventario antes managing categor?as.",
+    "noInventoryTitle": "No hay inventario disponible",
+    "options": "Opciones",
+    "optionsPlaceholder": "Valores separados por comas",
+    "title": "Categories y campos"
+  },
+  "dashboard": {
+    "addArticle": "A?adir un art?culo",
+    "addArticleDescription": "Guardar something nuevo a tu inventario.",
+    "areas": "?reas",
+    "articles": "Art?culos",
+    "categories": "Categor?as",
+    "createArea": "Crear un ?rea",
+    "createAreaDescription": "A?adir un habitaci?n, estante, o almacenamiento space.",
+    "errors": {
+      "load": "No se pudo cargar el panel."
+    },
+    "greeting": "?Buenos d?as!",
+    "inventoryByCategory": "Inventory por categor?a",
+    "lastAdded": "Last a?adido",
+    "loading": "Cargando el panel...",
+    "noCategoryDescription": "Crear categor?as a see tu inventario grouped aqu?.",
+    "noCategoryTitle": "Todav?a no hay categor?as",
+    "noLastAddedDescription": "Nuevo ?reas, art?culos, y otro inventario objects se appear aqu?.",
+    "noLastAddedTitle": "Todav?a no se ha a?adido nada",
+    "overview": "Resumen",
+    "quickActions": "Acciones r?pidas",
+    "recentUpdates": "Actualizaciones recientes",
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar tu elementos...",
+    "title": "Inicio",
+    "types": {
+      "area": "?rea",
+      "article": "Art?culo",
+      "box": "Caja",
+      "category": "Categor?a",
+      "field": "Campo",
+      "shelf": "Estante"
+    },
+    "updatedNow": "Updated just ahora",
+    "viewAll": "Ver todo",
+    "viewCategories": "Categor?as"
+  },
+  "inventory": {
+    "categories": {
+      "books": "Libros y medios",
+      "clothing": "Ropa",
+      "electronics": "Electr?nica",
+      "food": "Alimentos",
+      "medicine": "Medicamentos"
+    },
+    "fields": {
+      "author": "Autor",
+      "barcode": "C?digo de barras",
+      "brand": "Marca",
+      "expiration_date": "Fecha de caducidad",
+      "expiry": "Fecha de caducidad",
+      "has_insurance": "Tiene seguro",
+      "isbn": "ISBN",
+      "pages": "P?ginas",
+      "prescription_required": "Prescription obligatorio",
+      "purchase_date": "Fecha de compra",
+      "pzn_barcode": "PZN c?digo de barras",
+      "quantity": "Cantidad",
+      "read_status": "Estado de lectura",
+      "serial_number": "N?mero de serie",
+      "size": "Tama?o",
+      "warranty_months": "Warranty period en months"
+    },
+    "view": {
+      "grid": "Vista de cuadr?cula",
+      "label": "Inventory disposici?n",
+      "list": "Vista de lista"
+    }
+  },
+  "loans": {
+    "article": "Art?culos",
+    "box": "Cajas",
+    "create": "Registrar pr?stamo",
+    "description": "Track art?culos y cajas prestados de tu inventario.",
+    "due": "Vencimiento",
+    "dueDate": "Due fecha (opcional)",
+    "empty": "Todav?a no se han registrado pr?stamos.",
+    "errors": {
+      "create": "Error al crear un pr?stamo.",
+      "inventoryLoad": "Error al cargando inventario elementos.",
+      "load": "Error al cargando pr?stamos.",
+      "return": "Error al marcar el pr?stamo como devuelto."
+    },
+    "history": "Tu pr?stamos",
+    "item": "Elemento",
+    "itemType": "Tipo de elemento",
+    "loading": "Cargando pr?stamos...",
+    "markReturned": "Marcar como devuelto",
+    "newLoan": "Record un pr?stamo",
+    "noDueDate": "Sin fecha de vencimiento",
+    "noItems": "Sin elementos disponible en este inventario.",
+    "notes": "Notes (opcional)",
+    "notesLabel": "Notas",
+    "quantity": "Cantidad",
+    "returned": "Devuelto el {{date}}",
+    "returning": "Devolviendo...",
+    "saving": "Guardando...",
+    "title": "Pr?stamos",
+    "unknownItem": "Inventory elemento"
+  },
+  "manageCodes": {
+    "clearSelection": "Borrar selecci?n",
+    "codeType": "Tipo de c?digo",
+    "codeTypes": {
+      "barcode": "C?digo de barras",
+      "qr": "C?digo QR"
+    },
+    "description": "Selecciona inventario elementos a imprimir QR c?digos y c?digos de barras.",
+    "errors": {
+      "generate": "No se pudo a generate el c?digos.",
+      "load": "No se pudo a cargar inventario elementos.",
+      "selectItem": "Selecciona en menos uno elemento primero."
+    },
+    "externalScanner": {
+      "close": "Close esc?ner",
+      "errors": {
+        "lookup": "No se pudo a encontrar el scanned elemento."
+      },
+      "listening": "Recibiendo c?digo de barras...",
+      "lookingUp": "Buscando el inventario elemento...",
+      "ready": "Ready para entrada de externo c?digo de barras esc?ner. Scan un c?digo ahora.",
+      "title": "External c?digo de barras esc?ner"
+    },
+    "inventoryItems": "Elementos del inventario",
+    "layout": "Dise?o",
+    "loading": "Cargando inventario elementos...",
+    "noItems": "Sin inventario elementos encontrado.",
+    "options": "Opciones de c?digo",
+    "paperSize": "Tama?o de papel",
+    "print": "Imprimir c?digos",
+    "scan": "Escanear un c?digo",
+    "searchPlaceholder": "Buscar elementos",
+    "selectAll": "Seleccionar todo",
+    "selectedCount": "{{selected}} de {{total}} seleccionados",
+    "title": "C?digos QR y c?digos de barras",
+    "types": {
+      "area": "?rea",
+      "article": "Art?culo",
+      "box": "Caja",
+      "shelf": "Estante"
+    },
+    "useExternalBarcodeScanner": "Esc?ner de c?digos de barras externo"
+  },
+  "navActions": {
+    "area": "?rea",
+    "box": "caja",
+    "confirmDelete": "Eliminar {{name}}? Its contenido puede ser eliminado tambi?n.",
+    "delete": "Eliminar",
+    "dismiss": "Cerrar",
+    "editIdentifier": "Editar identificador",
+    "errors": {
+      "delete": "No se pudo no eliminar este elemento.",
+      "identifier": "No se pudo no actualizar el identificador.",
+      "rename": "No se pudo no renombrar este elemento."
+    },
+    "identifier": "Identificador",
+    "identifierTitle": "Editar {{kind}} identificador",
+    "lowStock": "Low existencias: {{name}}",
+    "moreActions": "M?s acciones",
+    "name": "Nombre",
+    "noActions": "No hay acciones disponibles.",
+    "noNotifications": "No hay notificaciones.",
+    "notifications": "Notificaciones",
+    "rename": "Renombrar",
+    "renameTitle": "Cambiar el nombre de {{kind}}",
+    "stockLevel": "{{quantity}} restantes (m?nimo {{minimum}})"
+  },
+  "search": {
+    "box": "Caja",
+    "empty": "No se encontraron art?culos.",
+    "errors": {
+      "load": "No se pudo no cargar inventories.",
+      "search": "No se pudo no buscar art?culos."
+    },
+    "inventory": "Inventario",
+    "loading": "Cargando inventories...",
+    "noInventory": "No hay inventario disponible.",
+    "placeholder": "Buscar elementos por nombre",
+    "prompt": "Introduce un buscar t?rmino a encontrar art?culos.",
+    "quantity": "{{count}} en existencias",
+    "searchDescription": "Buscar tu inventario",
+    "searchTitle": "Buscar",
+    "submit": "Buscar"
+  },
+  "settings": {
+    "accountLoadError": "No se pudo no cargar tu cuenta detalles.",
+    "accountName": "Nombre visible",
+    "accountPassword": "Nueva contrase?a",
+    "accountPasswordConfirm": "Confirmar nueva contrase?a",
+    "accountSave": "Guardar personal cuenta",
+    "accountSaving": "Guardando...",
+    "accountUsername": "Nombre de usuario",
+    "admin": {
+      "actions": "Acciones",
+      "addUser": "A?adir User",
+      "administrator": "Administrador",
+      "backupDescription": "Descargar el base de datos y todo archivos guardados por este instancia.",
+      "backupError": "No se pudo no descargar el instancia copia de seguridad.",
+      "backupLoading": "Preparando copia de seguridad...",
+      "backupTitle": "Instance copia de seguridad",
+      "cancel": "Cancelar",
+      "confirmDelete": "?Eliminar {{name}}?",
+      "deleteUser": "Eliminar usuario",
+      "deleteUserError": "No se pudo no eliminar usuario.",
+      "downloadBackup": "Descargar copia de seguridad",
+      "editUser": "Editar usuario",
+      "email": "Correo electr?nico",
+      "enableEmailLogin": "Enable correo login",
+      "loadUsersError": "No se pudo no cargar usuarios.",
+      "loadingUsers": "Cargando usuarios...",
+      "member": "Miembro",
+      "modules": {
+        "description": "Elegir which opcional modules son disponible en este instancia",
+        "noAvailableModules": "Sin opcional modules son installed.",
+        "title": "M?dulos"
+      },
+      "name": "Nombre",
+      "newUser": "Nuevo usuario",
+      "noEmail": "Sin correo direcci?n",
+      "noUsers": "No se encontraron usuarios.",
+      "password": "Temporary contrase?a",
+      "passwordHint": "Leave blank a guardas el current contrase?a.",
+      "passwordRequired": "A contrase?a es obligatorio para nuevo usuarios.",
+      "role": "Rol",
+      "saveUser": "Guardar usuario",
+      "saveUserError": "No se pudo no guardar usuario.",
+      "userManagement": "Gesti?n de usuarios",
+      "username": "Nombre de usuario",
+      "version": {
+        "checkButton": "Comprobar para updates",
+        "checkError": "No se pudo no obtener release informaci?n.",
+        "checking": "Comprobando...",
+        "description": "Comprobar para un nuevo versi?n y review su changelog.",
+        "noChangelog": "Sin changelog entries son disponible since este versi?n.",
+        "noNotes": "Sin release notas were provided.",
+        "title": "Actualizaciones de OpenInvento",
+        "upToDate": "Este instancia es running el m?s reciente versi?n ({{version}}).",
+        "updateAvailable": "Version {{version}} es disponible."
+      }
+    },
+    "adminTab": "Admin configuraci?n (instancia)",
+    "allowEmailLogin": "Allow correo direcci?n login",
+    "allowEmailLoginDescription": "When activado, usuarios can iniciar sesi?n en con su correo direcci?n en adem?s a su nombre de usuario.",
+    "apiKeys": {
+      "copy": "Copiar clave",
+      "create": "Crear clave API",
+      "createError": "No se pudo no crear API clave.",
+      "createdOnce": "Copy este clave ahora. It se no ser shown de nuevo.",
+      "creating": "Creando...",
+      "description": "Use un clave a access tu inventario through el API. Keys tienes el same access como tu cuenta.",
+      "dismiss": "Cerrar",
+      "empty": "Sin API claves todav?a.",
+      "loadError": "No se pudo no cargar API claves.",
+      "loading": "Cargando API claves...",
+      "nameLabel": "API clave nombre",
+      "namePlaceholder": "Key nombre",
+      "prefix": "Prefijo de clave: {{prefix}}",
+      "rename": "Renombrar",
+      "renamePrompt": "Introduce un nuevo nombre",
+      "revoke": "Revocar",
+      "revokeConfirm": "Revoke API clave {{name}}? Este no puede ser undone.",
+      "revokeError": "No se pudo no revoke API clave.",
+      "revoked": "revocada",
+      "title": "Claves API",
+      "updateError": "No se pudo no renombrar API clave."
+    },
+    "description": "Selecciona how el usuario interfaz should ser mostrar.",
+    "instanceSettingsLoadError": "No se pudo no cargar instancia configuraci?n.",
+    "instanceSettingsSaveError": "No se pudo no guardar instancia configuraci?n.",
+    "inventory": {
+      "addMember": "A?adir persona",
+      "dangerZone": "Zona peligrosa",
+      "deleteConfirm": "Eliminar {{name}}? All inventario contenido se ser permanentemente eliminado.",
+      "deleteError": "No se pudo no eliminar inventario.",
+      "deleteInventory": "Eliminar inventario",
+      "exportCsv": "Exportar archivos CSV",
+      "exportDescription": "Descargar inventario registros y relacionados archivos como un ZIP de CSV tables.",
+      "exportError": "No se pudo no exportar este inventario.",
+      "exportTitle": "Exportar inventario data",
+      "exporting": "Preparando CSV...",
+      "general": "General",
+      "invitesDisabled": "Adding people es desactivado para este instancia.",
+      "loadError": "No se pudo no cargar inventario configuraci?n.",
+      "loading": "Cargando inventario configuraci?n...",
+      "members": "Compartido con",
+      "name": "Nombre",
+      "noMembers": "Sin miembros encontrado.",
+      "removeMember": "Quitar persona",
+      "removeMemberConfirm": "Quitar {{name}} de este inventario?",
+      "saveError": "No se pudo no actualizar inventario miembros.",
+      "selectPerson": "Selecciona una persona",
+      "title": "Configuraci?n del inventario"
+    },
+    "language": {
+      "description": "Selecciona which idioma do you prefieres"
+    },
+    "languageLabel": "Idioma",
+    "personalAccount": "Cuenta personal",
+    "personalAccountDescription": "Actualizar tu nombre de usuario, visible nombre, o contrase?a.",
+    "tabsLabel": "Secciones de configuraci?n",
+    "themeDark": "Oscuro",
+    "themeLabel": "Tema",
+    "themeLight": "Claro",
+    "themePlaceholder": "Selecciona tema",
+    "themeSystem": "Sistema",
+    "title": "Configuraci?n",
+    "userTab": "User configuraci?n"
+  },
+  "sidebar": {
+    "areas": "?reas",
+    "article": "Art?culo",
+    "categoriesAndFields": "Categories y Fields",
+    "codeManagement": "Gesti?n de c?digos",
+    "dashboard": "Panel",
+    "favorites": "Favoritos",
+    "home": "Inicio",
+    "inventorySettings": "Configuraci?n del inventario",
+    "loans": "Pr?stamos",
+    "noAreas": "Sin ?reas todav?a.",
+    "noFavorites": "Sin favorites todav?a.",
+    "removeFavorite": "Quitar de Favorites",
+    "search": "Buscar",
+    "settings": "Configuraci?n"
+  }
+}

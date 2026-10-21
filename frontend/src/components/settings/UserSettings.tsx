@@ -156,6 +156,10 @@ export default function UserSettings() {
         return "Deutsch"
       case "en":
         return "English"
+      case "es":
+        return "Español"
+      case "fr":
+        return "Français"
       default:
         return language
     }
@@ -297,6 +301,8 @@ export default function UserSettings() {
             <SelectContent>
               <SelectItem value="de">Deutsch</SelectItem>
               <SelectItem value="en">English</SelectItem>
+              <SelectItem value="es">Español</SelectItem>
+              <SelectItem value="fr">Français</SelectItem>
             </SelectContent>
           </Select>
           <FieldDescription>{t("settings.language.description")}</FieldDescription>

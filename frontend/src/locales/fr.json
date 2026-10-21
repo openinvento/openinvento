@@ -1,0 +1,562 @@
+{
+  "accounts": {
+    "logoutBtn": "D?connexion"
+  },
+  "actions": {
+    "delete": "Supprimer",
+    "rename": "Renommer"
+  },
+  "areas": {
+    "areaName": "Nom de la zone",
+    "confirmDelete": "Supprimer {{name}}? Its inventaire contenu may be deleted trop.",
+    "createArea": "Cr?er une zone",
+    "description": "Organize votre affaires par pi?ce, garage, office, ou any other lieu.",
+    "detail": {
+      "actions": {
+        "article": "Article",
+        "box": "Bo?te",
+        "shelf": "?tag?re"
+      },
+      "allAreas": "All zones",
+      "articleCount": "{{count}} articles",
+      "articles": "Articles",
+      "confirmDelete": "Supprimer {{name}} ?",
+      "deleteShelf": "Supprimer ?tag?re",
+      "errors": {
+        "delete": "Impossible pas supprimer ?l?ment.",
+        "load": "Impossible pas charger cet zone.",
+        "move": "Impossible pas d?placer cet ?l?ment.",
+        "save": "Impossible pas enregistrer ?l?ment."
+      },
+      "fields": {
+        "area": "Zone",
+        "box": "Bo?te",
+        "category": "Cat?gorie",
+        "description": "Description",
+        "icon": "Ic?ne",
+        "name": "Nom",
+        "quantity": "Quantit?",
+        "selectValue": "S?lectionner une valeur",
+        "shelf": "?tag?re",
+        "stockTracking": "Suivre le stock"
+      },
+      "inStock": "{{count}} dans stock",
+      "itemCount": "{{count}} ?l?ments",
+      "loading": "Chargement zone...",
+      "lowStock": "Stock faible",
+      "modal": {
+        "edit": "Modifier {{kind}}",
+        "new": "Nouveau {{kind}}"
+      },
+      "noBox": "Sans bo?te",
+      "noCategory": "Sans cat?gorie",
+      "notOnShelf": "Not sur un ?tag?re",
+      "nothingStored": "Rien n?est encore stock? ici.",
+      "otherFields": "Autres champs",
+      "otherItems": "Autres articles",
+      "renameShelf": "Rename ?tag?re",
+      "stockFields": "Seuils de stock",
+      "summary": "{{articles}} articles · {{boxes}} bo?tes · {{shelves}} ?tag?res"
+    },
+    "empty": {
+      "noAreas": {
+        "text": "Start avec le lieu where you keep votre affaires.",
+        "title": "Votre inventaire a aucun zones"
+      },
+      "noInventory": {
+        "text": "Ask un administrator ? add you ? un inventaire avant creating zones.",
+        "title": "Aucun inventaire disponible"
+      }
+    },
+    "errors": {
+      "delete": "Impossible pas supprimer zone.",
+      "load": "Impossible pas charger zones.",
+      "save": "Impossible pas enregistrer zone."
+    },
+    "inventoryFallback": "Votre inventaire",
+    "namePlaceholder": "ex. : cuisine",
+    "newArea": "Nouveau zone",
+    "renameArea": "Rename zone",
+    "title": "Zones"
+  },
+  "articles": {
+    "page": {
+      "areas": "Zones",
+      "attachments": {
+        "add": "Ajouter un fichier",
+        "deleteError": "Impossible pas retirer le fichier.",
+        "download": "T?l?charger {{name}}",
+        "empty": "Aucun fichier joint pour le moment.",
+        "remove": "Retirer {{name}}",
+        "title": "Fichiers et pi?ces jointes",
+        "uploadError": "Impossible pas t?l?verser le fichier.",
+        "uploading": "T?l?versement..."
+      },
+      "backToArea": "Retour ? la zone",
+      "confirmDelete": "Supprimer {{name}} ?",
+      "delete": "Supprimer",
+      "errors": {
+        "delete": "Impossible pas supprimer article.",
+        "load": "Impossible pas charger article.",
+        "save": "Impossible pas enregistrer article.",
+        "unsavedChanges": "You avez unsaved modifications. Enregistrer them avant leaving cet page."
+      },
+      "fields": {
+        "area": "Zone",
+        "box": "Bo?te",
+        "category": "Cat?gorie",
+        "chooseImage": "Choisir une image",
+        "description": "Description",
+        "identifier": "Identifiant",
+        "identifierHelp": "Le identifiant helps identify ?l?ments dans votre inventaire et est mainly used pour codes-barres et QR codes.",
+        "identifierHelpLabel": "? propos des identifiants",
+        "image": "Image (facultative)",
+        "name": "Nom",
+        "quantity": "Quantit?",
+        "removeImage": "Supprimer",
+        "replaceImage": "Remplacer",
+        "selectValue": "S?lectionner une valeur",
+        "shelf": "?tag?re",
+        "stockTracking": "Suivi du stock"
+      },
+      "headings": {
+        "articleDetails": "D?tails de l?article",
+        "general": "G?n?ral",
+        "locationAndCategory": "Location et Category"
+      },
+      "loading": "Chargement article...",
+      "noArea": "Sans zone",
+      "noBox": "Sans bo?te",
+      "noCategory": "Sans cat?gorie",
+      "noShelf": "Sans ?tag?re",
+      "saveChanges": "Enregistrer les modifications",
+      "saving": "Enregistrement...",
+      "stockFields": "Seuils de stock"
+    }
+  },
+  "auth": {
+    "errors": {
+      "emailInvalid": "Saisissez une adresse e-mail valide.",
+      "emailRequired": "L?adresse e-mail est obligatoire.",
+      "emailTaken": "Cet e-mail address est already registered.",
+      "generic": "?chec de l?authentification. Veuillez r?essayer.",
+      "invalidCredentials": "Invalid e-mail, nom d?utilisateur, ou mot de passe.",
+      "invalidField": "{{field}} invalide.",
+      "invalidRequest": "Veuillez check le entered d?tails.",
+      "nameRequired": "Le nom est obligatoire.",
+      "passwordCommon": "Cet mot de passe est trop courant.",
+      "passwordMismatch": "Les mots de passe ne correspondent pas.",
+      "passwordNumeric": "Password ne peut pas be enti?rement num?rique.",
+      "passwordRequired": "Le mot de passe est obligatoire.",
+      "passwordSimilar": "Password est trop similaire ? votre personnel information.",
+      "passwordTooShort": "Password est trop short. It devez contain ? least 8 characters.",
+      "usernameRequired": "Username est obligatoire.",
+      "usernameTaken": "Cet nom d?utilisateur est already taken."
+    },
+    "fields": {
+      "email": "e-mail",
+      "name": "nom",
+      "password": "mot de passe",
+      "username": "nom d?utilisateur"
+    },
+    "reset": {
+      "confirmPassword": "Confirmer le nouveau mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "saving": "Enregistrement...",
+      "submit": "Mettre ? jour credentials",
+      "title": "Mettre ? jour votre credentials",
+      "warning": "For security, you devez choose un nouveau nom d?utilisateur et mot de passe avant continuing."
+    },
+    "signupDisabled": "Public compte signup est currently disabled pour cet instance."
+  },
+  "boxes": {
+    "articleCount": "{{count}} articles",
+    "backToArea": "Retour ? la zone",
+    "confirmDelete": "Supprimer {{name}} ?",
+    "editBox": "Modifier bo?te",
+    "editIdentifier": "Modifier identifiant",
+    "editTitle": "Modifier bo?te",
+    "empty": "Aucun articles sont stored dans cet bo?te encore.",
+    "errors": {
+      "delete": "Impossible pas supprimer article.",
+      "edit": "Impossible pas mettre ? jour cet bo?te.",
+      "identifier": "Impossible pas mettre ? jour le identifiant.",
+      "load": "Impossible pas charger cet bo?te."
+    },
+    "identifierTitle": "Modifier bo?te identifiant",
+    "loading": "Chargement bo?te..."
+  },
+  "categoriesAndFields": {
+    "addCategory": "Ajouter une cat?gorie",
+    "addField": "Ajouter un champ",
+    "addGeneralField": "Ajouter un champ g?n?ral",
+    "categories": "Cat?gories",
+    "category": "Cat?gorie",
+    "categoryName": "Nom de la cat?gorie",
+    "confirmDeleteCategory": "Supprimer category {{name}} and its fields ?",
+    "confirmDeleteField": "Supprimer field {{name}} ?",
+    "createCategory": "Cr?er une cat?gorie",
+    "delete": "Supprimer",
+    "description": "Define le information stored sur each article.",
+    "edit": "Modifier",
+    "editCategory": "Modifier la cat?gorie",
+    "editField": "Modifier le champ",
+    "errors": {
+      "delete": "Impossible pas supprimer ?l?ment.",
+      "load": "Impossible pas charger cat?gories et champs.",
+      "saveCategory": "Impossible pas enregistrer cat?gorie.",
+      "saveField": "Impossible pas enregistrer champ."
+    },
+    "field": "champ",
+    "fieldType": "Type de champ",
+    "fieldTypes": {
+      "barcode": "Code-barres",
+      "boolean": "Oui / Non",
+      "date": "Date",
+      "number": "Nombre",
+      "select": "S?lectionner",
+      "text": "Texte"
+    },
+    "fields": "champs",
+    "generalField": "Champ g?n?ral",
+    "generalFields": "Champs g?n?raux",
+    "inventory": "Inventaire",
+    "key": "Cl?",
+    "label": "Libell?",
+    "newCategory": "Nouveau cat?gorie",
+    "newField": "Nouveau champ",
+    "noCategoriesText": "Cr?er un cat?gorie ? group related article champs.",
+    "noCategoriesTitle": "Aucune cat?gorie pour le moment",
+    "noCategoryFields": "Aucun category-specific champs.",
+    "noGeneralFields": "Aucun champs apply ? every cat?gorie.",
+    "noInventoryText": "Ask un administrator ? add you ? un inventaire avant managing cat?gories.",
+    "noInventoryTitle": "Aucun inventaire disponible",
+    "options": "Options",
+    "optionsPlaceholder": "Valeurs s?par?es par des virgules",
+    "title": "Categories et champs"
+  },
+  "dashboard": {
+    "addArticle": "Ajouter un article",
+    "addArticleDescription": "Enregistrer something nouveau ? votre inventaire.",
+    "areas": "Zones",
+    "articles": "Articles",
+    "categories": "Cat?gories",
+    "createArea": "Cr?er un zone",
+    "createAreaDescription": "Ajouter un pi?ce, ?tag?re, ou rangement space.",
+    "errors": {
+      "load": "Impossible de charger le tableau de bord."
+    },
+    "greeting": "Bonjour !",
+    "inventoryByCategory": "Inventory par cat?gorie",
+    "lastAdded": "Last ajout?",
+    "loading": "Chargement du tableau de bord...",
+    "noCategoryDescription": "Cr?er cat?gories ? see votre inventaire grouped ici.",
+    "noCategoryTitle": "Aucune cat?gorie pour le moment",
+    "noLastAddedDescription": "Nouveau zones, articles, et other inventaire objects sera appear ici.",
+    "noLastAddedTitle": "Aucun ajout pour le moment",
+    "overview": "Vue d?ensemble",
+    "quickActions": "Actions rapides",
+    "recentUpdates": "Mises ? jour r?centes",
+    "search": "Rechercher",
+    "searchPlaceholder": "Rechercher votre ?l?ments...",
+    "title": "Accueil",
+    "types": {
+      "area": "Zone",
+      "article": "Article",
+      "box": "Bo?te",
+      "category": "Cat?gorie",
+      "field": "Champ",
+      "shelf": "?tag?re"
+    },
+    "updatedNow": "Updated just maintenant",
+    "viewAll": "Tout afficher",
+    "viewCategories": "Cat?gories"
+  },
+  "inventory": {
+    "categories": {
+      "books": "Livres et m?dias",
+      "clothing": "V?tements",
+      "electronics": "?lectronique",
+      "food": "Aliments",
+      "medicine": "M?dicaments"
+    },
+    "fields": {
+      "author": "Auteur",
+      "barcode": "Code-barres",
+      "brand": "Marque",
+      "expiration_date": "Date d?expiration",
+      "expiry": "Date d?expiration",
+      "has_insurance": "Assur?",
+      "isbn": "ISBN",
+      "pages": "Pages",
+      "prescription_required": "Prescription obligatoire",
+      "purchase_date": "Date d?achat",
+      "pzn_barcode": "Code-barres PZN",
+      "quantity": "Quantit?",
+      "read_status": "?tat de lecture",
+      "serial_number": "Num?ro de s?rie",
+      "size": "Taille",
+      "warranty_months": "Warranty period dans months"
+    },
+    "view": {
+      "grid": "Vue en grille",
+      "label": "Disposition de l?inventaire",
+      "list": "Vue en liste"
+    }
+  },
+  "loans": {
+    "article": "Articles",
+    "box": "Bo?tes",
+    "create": "Enregistrer un pr?t",
+    "description": "Track articles et bo?tes borrowed de votre inventaire.",
+    "due": "?ch?ance",
+    "dueDate": "Due date (facultatif)",
+    "empty": "Aucun pr?t enregistr? pour le moment.",
+    "errors": {
+      "create": "Error during creating un pr?t.",
+      "inventoryLoad": "Error during chargement inventaire ?l?ments.",
+      "load": "Error during chargement pr?ts.",
+      "return": "Error during marquer le pr?t comme rendu."
+    },
+    "history": "Votre pr?ts",
+    "item": "Article",
+    "itemType": "Type d?article",
+    "loading": "Chargement pr?ts...",
+    "markReturned": "Marquer comme rendu",
+    "newLoan": "Record un pr?t",
+    "noDueDate": "Aucune date d??ch?ance",
+    "noItems": "Aucun ?l?ments disponible dans cet inventaire.",
+    "notes": "Notes (facultatif)",
+    "notesLabel": "Notes",
+    "quantity": "Quantit?",
+    "returned": "Rendu le {{date}}",
+    "returning": "Retour en cours...",
+    "saving": "Enregistrement...",
+    "title": "Pr?ts",
+    "unknownItem": "Inventory ?l?ment"
+  },
+  "manageCodes": {
+    "clearSelection": "Effacer la s?lection",
+    "codeType": "Type de code",
+    "codeTypes": {
+      "barcode": "Code-barres",
+      "qr": "Code QR"
+    },
+    "description": "S?lectionner inventaire ?l?ments ? print QR codes et codes-barres.",
+    "errors": {
+      "generate": "Impossible ? generate le codes.",
+      "load": "Impossible ? charger inventaire ?l?ments.",
+      "selectItem": "S?lectionner ? least one ?l?ment d?abord."
+    },
+    "externalScanner": {
+      "close": "Fermer le scanner",
+      "errors": {
+        "lookup": "Impossible ? trouver le scanned ?l?ment."
+      },
+      "listening": "R?ception barcode...",
+      "lookingUp": "Recherche le inventaire ?l?ment...",
+      "ready": "Ready pour entr?e de externe barcode scanner. Scan un code maintenant.",
+      "title": "Scanner de codes-barres externe"
+    },
+    "inventoryItems": "?l?ments de l?inventaire",
+    "layout": "Disposition",
+    "loading": "Chargement inventaire ?l?ments...",
+    "noItems": "Aucun inventaire ?l?ments trouv?.",
+    "options": "Options du code",
+    "paperSize": "Format du papier",
+    "print": "Imprimer les codes",
+    "scan": "Scanner un code",
+    "searchPlaceholder": "Rechercher ?l?ments",
+    "selectAll": "Tout s?lectionner",
+    "selectedCount": "{{selected}} de {{total}} s?lectionn?",
+    "title": "Codes QR et codes-barres",
+    "types": {
+      "area": "Zone",
+      "article": "Article",
+      "box": "Bo?te",
+      "shelf": "?tag?re"
+    },
+    "useExternalBarcodeScanner": "Scanner de codes-barres externe"
+  },
+  "navActions": {
+    "area": "zone",
+    "box": "bo?te",
+    "confirmDelete": "Supprimer {{name}}? Its contenu may be deleted trop.",
+    "delete": "Supprimer",
+    "dismiss": "Fermer",
+    "editIdentifier": "Modifier identifiant",
+    "errors": {
+      "delete": "Impossible pas supprimer cet ?l?ment.",
+      "identifier": "Impossible pas mettre ? jour le identifiant.",
+      "rename": "Impossible pas renommer cet ?l?ment."
+    },
+    "identifier": "Identifiant",
+    "identifierTitle": "Modifier {{kind}} identifiant",
+    "lowStock": "Stock faible : {{name}}",
+    "moreActions": "Plus d?actions",
+    "name": "Nom",
+    "noActions": "Aucune action disponible.",
+    "noNotifications": "Aucune notification.",
+    "notifications": "Notifications",
+    "rename": "Renommer",
+    "renameTitle": "Renommer {{kind}}",
+    "stockLevel": "{{quantity}} restant (minimum {{minimum}})"
+  },
+  "search": {
+    "box": "Bo?te",
+    "empty": "Aucun article trouv?.",
+    "errors": {
+      "load": "Impossible pas charger inventories.",
+      "search": "Impossible pas rechercher articles."
+    },
+    "inventory": "Inventaire",
+    "loading": "Chargement inventories...",
+    "noInventory": "Aucun inventaire disponible.",
+    "placeholder": "Rechercher ?l?ments par nom",
+    "prompt": "Saisir un rechercher terme ? trouver articles.",
+    "quantity": "{{count}} dans stock",
+    "searchDescription": "Rechercher votre inventaire",
+    "searchTitle": "Rechercher",
+    "submit": "Rechercher"
+  },
+  "settings": {
+    "accountLoadError": "Impossible pas charger votre compte d?tails.",
+    "accountName": "Nom d?affichage",
+    "accountPassword": "Nouveau mot de passe",
+    "accountPasswordConfirm": "Confirmer le nouveau mot de passe",
+    "accountSave": "Enregistrer personnel compte",
+    "accountSaving": "Enregistrement...",
+    "accountUsername": "Nom d?utilisateur",
+    "admin": {
+      "actions": "Actions",
+      "addUser": "Ajouter User",
+      "administrator": "Administrateur",
+      "backupDescription": "T?l?charger le database et tout fichiers stored par cet instance.",
+      "backupError": "Impossible pas t?l?charger le instance sauvegarde.",
+      "backupLoading": "Pr?paration sauvegarde...",
+      "backupTitle": "Instance sauvegarde",
+      "cancel": "Annuler",
+      "confirmDelete": "Supprimer {{name}} ?",
+      "deleteUser": "Supprimer utilisateur",
+      "deleteUserError": "Impossible pas supprimer utilisateur.",
+      "downloadBackup": "T?l?charger sauvegarde",
+      "editUser": "Modifier utilisateur",
+      "email": "E-mail",
+      "enableEmailLogin": "Enable e-mail login",
+      "loadUsersError": "Impossible pas charger utilisateurs.",
+      "loadingUsers": "Chargement utilisateurs...",
+      "member": "Membre",
+      "modules": {
+        "description": "Choisir which facultatif modules sont disponible dans cet instance",
+        "noAvailableModules": "Aucun facultatif modules sont installed.",
+        "title": "Modules"
+      },
+      "name": "Nom",
+      "newUser": "Nouveau utilisateur",
+      "noEmail": "Aucun e-mail address",
+      "noUsers": "Aucun utilisateur trouv?.",
+      "password": "Temporary mot de passe",
+      "passwordHint": "Leave blank ? keep le current mot de passe.",
+      "passwordRequired": "A mot de passe est obligatoire pour nouveau utilisateurs.",
+      "role": "R?le",
+      "saveUser": "Enregistrer utilisateur",
+      "saveUserError": "Impossible pas enregistrer utilisateur.",
+      "userManagement": "Gestion des utilisateurs",
+      "username": "Nom d?utilisateur",
+      "version": {
+        "checkButton": "V?rifier pour updates",
+        "checkError": "Impossible pas r?cup?rer release information.",
+        "checking": "V?rification...",
+        "description": "V?rifier pour un nouveau version et review its changelog.",
+        "noChangelog": "Aucun changelog entries sont disponible since cet version.",
+        "noNotes": "Aucun release notes were provided.",
+        "title": "Mises ? jour OpenInvento",
+        "upToDate": "Cet instance est running le derni?re version ({{version}}).",
+        "updateAvailable": "Version {{version}} est disponible."
+      }
+    },
+    "adminTab": "Admin param?tres (instance)",
+    "allowEmailLogin": "Allow e-mail address login",
+    "allowEmailLoginDescription": "When enabled, utilisateurs can sign dans avec their e-mail address dans addition ? their nom d?utilisateur.",
+    "apiKeys": {
+      "copy": "Copier la cl?",
+      "create": "Cr?er une cl? API",
+      "createError": "Impossible pas cr?er API cl?.",
+      "createdOnce": "Copy cet cl? maintenant. It sera pas be shown ? nouveau.",
+      "creating": "Cr?ation...",
+      "description": "Use un cl? ? access votre inventaire through le API. Keys avez le same access comme votre compte.",
+      "dismiss": "Fermer",
+      "empty": "Aucun API cl?s encore.",
+      "loadError": "Impossible pas charger API cl?s.",
+      "loading": "Chargement API cl?s...",
+      "nameLabel": "API cl? nom",
+      "namePlaceholder": "Key nom",
+      "prefix": "Pr?fixe de cl? : {{prefix}}",
+      "rename": "Renommer",
+      "renamePrompt": "Saisir un nouveau nom",
+      "revoke": "R?voquer",
+      "revokeConfirm": "Revoke API cl? {{name}}? Cet ne peut pas be undone.",
+      "revokeError": "Impossible pas revoke API cl?.",
+      "revoked": "r?voqu?e",
+      "title": "Cl?s API",
+      "updateError": "Impossible pas renommer API cl?."
+    },
+    "description": "S?lectionner how le utilisateur interface should be affich?e.",
+    "instanceSettingsLoadError": "Impossible pas charger instance param?tres.",
+    "instanceSettingsSaveError": "Impossible pas enregistrer instance param?tres.",
+    "inventory": {
+      "addMember": "Ajouter une personne",
+      "dangerZone": "Zone de danger",
+      "deleteConfirm": "Supprimer {{name}}? All inventaire contenu sera be d?finitivement deleted.",
+      "deleteError": "Impossible pas supprimer inventaire.",
+      "deleteInventory": "Supprimer inventaire",
+      "exportCsv": "Exporter les fichiers CSV",
+      "exportDescription": "T?l?charger inventaire records et related fichiers comme un ZIP de CSV tables.",
+      "exportError": "Impossible pas export cet inventaire.",
+      "exportTitle": "Exporter inventaire data",
+      "exporting": "Pr?paration CSV...",
+      "general": "G?n?ral",
+      "invitesDisabled": "Adding people est disabled pour cet instance.",
+      "loadError": "Impossible pas charger inventaire param?tres.",
+      "loading": "Chargement inventaire param?tres...",
+      "members": "Partag? avec",
+      "name": "Nom",
+      "noMembers": "Aucun membres trouv?.",
+      "removeMember": "Retirer une personne",
+      "removeMemberConfirm": "Retirer {{name}} de cet inventaire?",
+      "saveError": "Impossible pas mettre ? jour inventaire membres.",
+      "selectPerson": "S?lectionner une personne",
+      "title": "Param?tres de l?inventaire"
+    },
+    "language": {
+      "description": "S?lectionner which langue do you pr?f?rez"
+    },
+    "languageLabel": "Langue",
+    "personalAccount": "Compte personnel",
+    "personalAccountDescription": "Mettre ? jour votre nom d?utilisateur, display nom, ou mot de passe.",
+    "tabsLabel": "Sections des param?tres",
+    "themeDark": "Sombre",
+    "themeLabel": "Th?me",
+    "themeLight": "Clair",
+    "themePlaceholder": "S?lectionner th?me",
+    "themeSystem": "Syst?me",
+    "title": "Param?tres",
+    "userTab": "User param?tres"
+  },
+  "sidebar": {
+    "areas": "Zones",
+    "article": "Article",
+    "categoriesAndFields": "Categories et Fields",
+    "codeManagement": "Gestion des codes",
+    "dashboard": "Tableau de bord",
+    "favorites": "Favoris",
+    "home": "Accueil",
+    "inventorySettings": "Param?tres de l?inventaire",
+    "loans": "Pr?ts",
+    "noAreas": "Aucun zones encore.",
+    "noFavorites": "Aucun favorites encore.",
+    "removeFavorite": "Retirer de Favorites",
+    "search": "Rechercher",
+    "settings": "Param?tres"
+  }
+}
