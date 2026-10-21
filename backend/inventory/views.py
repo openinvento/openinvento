@@ -267,6 +267,7 @@ class ArticleViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     select_related_fields = ("inventory", "area", "shelf", "box", "category")
+    prefetch_related_fields = ("field_values__field",)
 
 
 class ArticleAttachmentsView(InventoryScopedAPIView):
@@ -333,6 +334,7 @@ class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
             inventory__uuid=inventory,
             name__icontains=query
         ).select_related("inventory", "area", "shelf", "box", "category")
+        articles = articles.prefetch_related("field_values__field")
         boxes = Box.objects.filter(
             inventory__in=self.get_accessible_inventories(),
             inventory__uuid=inventory,

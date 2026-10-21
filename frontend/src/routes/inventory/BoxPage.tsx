@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { ArrowLeft, Pencil } from "lucide-react"
+import { ArrowLeft, Pencil, Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate, useParams } from "react-router"
 import { ArticleCard } from "@/components/inventory/entity-cards"
@@ -10,7 +10,7 @@ import { InventoryDraggable } from "@/components/inventory/inventory-dnd"
 import { inventoryApi, type Area, type Article, type Box, type Shelf } from "@/utils/api/inventory"
 
 function getLowStockBadge(article: Article, label: string) {
-  const minimumQuantity = article.custom_fields.minimum_quantity
+  const minimumQuantity = article.field_values.find((field) => field.key === "minimum_quantity")?.value
   return article.stock_tracking && typeof minimumQuantity === "number" && article.quantity <= minimumQuantity
     ? label
     : undefined
@@ -121,6 +121,10 @@ export default function BoxPage() {
             <p className="mt-2 text-muted-foreground">{t("boxes.articleCount", { count: articles.length })}</p>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button onClick={() => navigate(`/app/areas/${box.area}/articles/new?box=${box.uuid}`)}>
+              <Plus />
+              {t("dashboard.addArticle")}
+            </Button>
             <InventoryViewToggle viewMode={viewMode} setViewMode={setViewMode} />
 
             <Button variant="outline" onClick={() => setIdentifierOpen(true)}>

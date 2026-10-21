@@ -112,7 +112,6 @@ class Article(InventoryComponent):
     )
     icon = models.CharField(max_length=40, blank=True, null=True)
     category = models.ForeignKey('ArticleCategory', on_delete=models.SET_NULL, null=True, blank=True)
-    custom_fields = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.quantity}x)"
@@ -199,3 +198,21 @@ class CategoryField(InventoryComponent):
 
     def __str__(self):
         return self.label
+
+
+class ArticleFieldValue(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="field_values")
+    field = models.ForeignKey(CategoryField, on_delete=models.CASCADE, related_name="article_values")
+    value = models.JSONField(default=None, blank=True, null=True)
+    notify_on_date = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = (
+            models.UniqueConstraint(
+                fields=("article", "field"),
+                name="unique_article_field_value",
+            ),
+        )
+
+    def __str__(self):
+        return f"{self.article}: {self.field.label}"

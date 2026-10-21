@@ -21,7 +21,7 @@ import {
 type CreateKind = "box" | "shelf"
 
 function getLowStockBadge(article: Article, label: string) {
-  const minimumQuantity = article.custom_fields.minimum_quantity
+  const minimumQuantity = article.field_values.find((field) => field.key === "minimum_quantity")?.value
   return article.stock_tracking &&
     typeof minimumQuantity === "number" &&
     article.quantity <= minimumQuantity
@@ -181,11 +181,11 @@ export default function AreaDetailScreen() {
     <InventoryDropTarget target={{ kind: "area", id: areaId ?? "" }}>
     <div className="space-y-6">
       {/* Articles can live directly in an area without a shelf. */}
-      {articles.filter((article) => article.shelf === null).length > 0 && (
+      {articles.filter((article) => article.shelf === null && article.box === null).length > 0 && (
         <div>
           <h2 className="mb-3 text-lg font-semibold">{t("areas.detail.articles")}</h2>
           <div className={viewMode === "list" ? "flex flex-col gap-2" : "grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"}>
-            {articles.filter((article) => article.shelf === null).map((article) => (
+            {articles.filter((article) => article.shelf === null && article.box === null).map((article) => (
               <InventoryDraggable key={article.uuid} item={{ kind: "article", id: article.uuid }}>
                 <ArticleCard
                   viewMode={viewMode}

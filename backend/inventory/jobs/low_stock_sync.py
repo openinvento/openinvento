@@ -1,6 +1,7 @@
-from account_auth.models import Notification
+from django.contrib.auth import get_user_model
 
-from .models import Article, Inventory
+from account_auth.models import Notification
+from inventory.models import Article, Inventory
 
 
 def sync_low_stock_notifications(user):
@@ -8,11 +9,18 @@ def sync_low_stock_notifications(user):
     articles = Article.objects.filter(
         inventory__in=inventories,
         stock_tracking=True,
-    ).select_related("inventory")
+    ).select_related("inventory").prefetch_related("field_values__field")
 
     active_source_keys = set()
     for article in articles:
-        minimum = article.custom_fields.get("minimum_quantity")
+        minimum = next(
+            (
+                field_value.value
+                for field_value in article.field_values.all()
+                if field_value.field.key == "minimum_quantity"
+            ),
+            None,
+        )
         if not isinstance(minimum, (int, float)) or article.quantity > minimum:
             continue
 
@@ -36,7 +44,16 @@ def sync_low_stock_notifications(user):
             },
         )
 
-    stale = Notification.objects.filter(user=user, kind="low_stock", source_key__startswith="low-stock:article:")
+    stale = Notification.objects.filter(
+        user=user,
+        kind="low_stock",
+        source_key__startswith="low-stock:article:",
+    )
     if active_source_keys:
         stale = stale.exclude(source_key__in=active_source_keys)
     stale.delete()
+
+
+def sync_all_low_stock_notifications():
+    for user in get_user_model().objects.all().iterator():
+        sync_low_stock_notifications(user)

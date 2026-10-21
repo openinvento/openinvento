@@ -209,6 +209,8 @@
     },
     "field": "champ",
     "fieldType": "Type de champ",
+    "dateNotifications": "Notifier à cette date",
+    "dateNotificationsDescription": "Créer une notification pour les articles qui utilisent ce champ.",
     "fieldTypes": {
       "barcode": "Code-barres",
       "boolean": "Oui / Non",
