@@ -9,11 +9,18 @@ def sync_low_stock_notifications(user):
     articles = Article.objects.filter(
         inventory__in=inventories,
         stock_tracking=True,
-    ).select_related("inventory")
+    ).select_related("inventory").prefetch_related("field_values__field")
 
     active_source_keys = set()
     for article in articles:
-        minimum = (article.custom_fields or {}).get("minimum_quantity")
+        minimum = next(
+            (
+                field_value.value
+                for field_value in article.field_values.all()
+                if field_value.field.key == "minimum_quantity"
+            ),
+            None,
+        )
         if not isinstance(minimum, (int, float)) or article.quantity > minimum:
             continue
 
