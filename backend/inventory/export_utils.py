@@ -86,7 +86,7 @@ def generate_inventory_csv_export(inventory):
 
         articles = list(Article.objects.filter(inventory=inventory).select_related(
             "area", "shelf", "box", "category"
-        ).prefetch_related("attachments").order_by("created_at"))
+        ).prefetch_related("attachments", "field_values__field").order_by("created_at"))
         write_table(
             archive,
             "articles.csv",

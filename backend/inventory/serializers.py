@@ -10,6 +10,7 @@ from .models import (
     Article,
     ArticleAttachment,
     ArticleCategory,
+    ArticleFieldValue,
     Box,
     CategoryField,
     Inventory,
@@ -202,6 +203,8 @@ class ArticleSerializer(InventoryScopedSerializer):
         queryset=ArticleCategory.objects.none(), required=False, allow_null=True
     )
     category_fields = serializers.SerializerMethodField()
+    custom_fields = serializers.SerializerMethodField()
+    date_notifications = serializers.SerializerMethodField()
     image = ProtectedImageField(required=False, allow_null=True) # Use the custom ProtectedImageField for the image field
 
     class Meta:
@@ -223,6 +226,7 @@ class ArticleSerializer(InventoryScopedSerializer):
             "icon",
             "category",
             "custom_fields",
+            "date_notifications",
             "category_fields",
         )
         read_only_fields = ("uuid", "created_at", "updated_at")
@@ -243,6 +247,29 @@ class ArticleSerializer(InventoryScopedSerializer):
             Q(category__isnull=True) | Q(category=obj.category)
         )
         return CategoryFieldSerializer(fields, many=True).data
+
+    def get_custom_fields(self, obj):
+        return {
+            row.field.key: row.value
+            for row in obj.field_values.select_related("field").all()
+        }
+
+    def get_date_notifications(self, obj):
+        return {
+            row.field.key: row.notify_on_date
+            for row in obj.field_values.select_related("field").all()
+            if row.field.field_type == "date"
+        }
+
+    def to_internal_value(self, data):
+        attrs = super().to_internal_value(data)
+        for name in ("custom_fields", "date_notifications"):
+            if name in data:
+                try:
+                    attrs[name] = serializers.JSONField().run_validation(data.get(name))
+                except serializers.ValidationError as error:
+                    raise serializers.ValidationError({name: error.detail}) from error
+        return attrs
 
     def get_image(self, obj):
         if not obj.image:
@@ -273,7 +300,77 @@ class ArticleSerializer(InventoryScopedSerializer):
         if custom_fields is not None and not isinstance(custom_fields, dict):
             raise serializers.ValidationError({"custom_fields": "Expected an object."})
 
+        date_notifications = attrs.get("date_notifications")
+        if date_notifications is not None and (
+            not isinstance(date_notifications, dict)
+            or any(not isinstance(enabled, bool) for enabled in date_notifications.values())
+        ):
+            raise serializers.ValidationError({"date_notifications": "Expected an object of boolean values."})
+
+        inventory = attrs.get("inventory", getattr(self.instance, "inventory", None))
+        if inventory is not None:
+            fields = CategoryField.objects.filter(inventory=inventory)
+            fields_by_key = {}
+            for field in fields:
+                fields_by_key.setdefault(field.key, []).append(field)
+
+            if custom_fields is not None:
+                invalid_keys = [key for key in custom_fields if key not in fields_by_key]
+                if invalid_keys:
+                    raise serializers.ValidationError({"custom_fields": f"Unknown field key(s): {', '.join(invalid_keys)}"})
+
+            if date_notifications is not None:
+                invalid_keys = [
+                    key for key in date_notifications
+                    if not any(field.field_type == "date" for field in fields_by_key.get(key, []))
+                ]
+                if invalid_keys:
+                    raise serializers.ValidationError({"date_notifications": f"Unknown date field key(s): {', '.join(invalid_keys)}"})
+
         return attrs
+
+    def _save_field_values(self, article, custom_fields, date_notifications):
+        if custom_fields is None and date_notifications is None:
+            return
+
+        fields = CategoryField.objects.filter(inventory=article.inventory)
+        preferred_fields = {}
+        for field in fields:
+            if field.category_id is None or field.category_id == article.category_id:
+                if field.category_id == article.category_id:
+                    preferred_fields[field.key] = field
+                else:
+                    preferred_fields.setdefault(field.key, field)
+
+        keys = set(custom_fields or {}) | set(date_notifications or {})
+        for key in keys:
+            field = preferred_fields.get(key)
+            if field is None:
+                continue
+            current = ArticleFieldValue.objects.filter(article=article, field=field).first()
+            value = (custom_fields or {}).get(key, current.value if current else None)
+            notify = (date_notifications or {}).get(
+                key, current.notify_on_date if current else False
+            )
+            ArticleFieldValue.objects.update_or_create(
+                article=article,
+                field=field,
+                defaults={"value": value, "notify_on_date": notify if field.field_type == "date" else False},
+            )
+
+    def create(self, validated_data):
+        custom_fields = validated_data.pop("custom_fields", None)
+        date_notifications = validated_data.pop("date_notifications", None)
+        article = super().create(validated_data)
+        self._save_field_values(article, custom_fields, date_notifications)
+        return article
+
+    def update(self, instance, validated_data):
+        custom_fields = validated_data.pop("custom_fields", None)
+        date_notifications = validated_data.pop("date_notifications", None)
+        article = super().update(instance, validated_data)
+        self._save_field_values(article, custom_fields, date_notifications)
+        return article
 
 
 class ArticleAttachmentSerializer(serializers.ModelSerializer):
@@ -299,7 +396,7 @@ class CategoryFieldSerializer(InventoryScopedSerializer):
         model = CategoryField
         fields = (
             "uuid", "identifier", "inventory", "created_at", "updated_at",
-            "key", "label", "field_type", "category", "notify_on_date",
+            "key", "label", "field_type", "category",
             "options",
         )
         read_only_fields = ("uuid", "identifier", "created_at", "updated_at", "key")
@@ -310,8 +407,4 @@ class CategoryFieldSerializer(InventoryScopedSerializer):
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
-        field_type = attrs.get("field_type", getattr(self.instance, "field_type", "text"))
-        notify_on_date = attrs.get("notify_on_date", getattr(self.instance, "notify_on_date", False))
-        if notify_on_date and field_type != "date":
-            raise serializers.ValidationError({"notify_on_date": "Only date fields can send reminders."})
         return attrs
