@@ -299,7 +299,7 @@ class CategoryFieldSerializer(InventoryScopedSerializer):
         model = CategoryField
         fields = (
             "uuid", "identifier", "inventory", "created_at", "updated_at",
-            "key", "label", "field_type", "category",
+            "key", "label", "field_type", "category", "notify_on_date",
             "options",
         )
         read_only_fields = ("uuid", "identifier", "created_at", "updated_at", "key")
@@ -307,3 +307,11 @@ class CategoryFieldSerializer(InventoryScopedSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["category"].queryset = self._inventory_queryset(ArticleCategory)
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        field_type = attrs.get("field_type", getattr(self.instance, "field_type", "text"))
+        notify_on_date = attrs.get("notify_on_date", getattr(self.instance, "notify_on_date", False))
+        if notify_on_date and field_type != "date":
+            raise serializers.ValidationError({"notify_on_date": "Only date fields can send reminders."})
+        return attrs

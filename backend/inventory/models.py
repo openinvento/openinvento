@@ -163,6 +163,7 @@ class CategoryField(InventoryComponent):
     label = models.CharField(max_length=100)
     field_type = models.CharField(max_length=20, choices=FIELD_TYPES, default="text")
     options = models.JSONField(default=list, blank=True)
+    notify_on_date = models.BooleanField(default=False)
     # A nullable category field represents a global field ("All categories")
     category = models.ForeignKey(
         ArticleCategory,
