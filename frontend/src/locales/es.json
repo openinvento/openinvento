@@ -422,6 +422,7 @@
     "submit": "Buscar"
   },
   "settings": {
+    "UISettings": "Configuración de la interfaz de usuario",
     "accountLoadError": "No se pudieron cargar los datos de tu cuenta.",
     "accountName": "Nombre visible",
     "accountPassword": "Nueva contraseña",
@@ -504,6 +505,7 @@
       "updateError": "No se pudo renombrar API clave."
     },
     "description": "Selecciona cómo se debe mostrar la interfaz de usuario.",
+    "disableMobileZoom": "Desactivar el zoom en dispositivos móviles",
     "instanceSettingsLoadError": "No se pudo cargar la configuración de la instancia.",
     "instanceSettingsSaveError": "No se pudo guardar la configuración de la instancia.",
     "inventory": {
@@ -534,6 +536,8 @@
       "description": "Selecciona el idioma que prefieres"
     },
     "languageLabel": "Idioma",
+    "mobileZoomDescription": "Evita el zoom con pellizco y doble toque en dispositivos táctiles.",
+    "mobileZoomTitle": "Zoom móvil",
     "personalAccount": "Cuenta personal",
     "personalAccountDescription": "Actualiza tu nombre de usuario, nombre visible o contraseña.",
     "tabsLabel": "Secciones de configuración",

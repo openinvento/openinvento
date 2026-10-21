@@ -422,6 +422,7 @@
     "submit": "Suche"
   },
   "settings": {
+    "UISettings": "UI Einstellungen",
     "accountLoadError": "Kontodaten konnten nicht geladen werden.",
     "accountName": "Anzeigename",
     "accountPassword": "Neues Passwort",
@@ -504,6 +505,7 @@
       "updateError": "API-Schlüssel konnte nicht umbenannt werden."
     },
     "description": "Wähle aus, wie die Benutzeroberfläche dargestellt werden soll.",
+    "disableMobileZoom": "Zoom auf Mobilgeräten deaktivieren",
     "instanceSettingsLoadError": "Instanzeinstellungen konnten nicht geladen werden.",
     "instanceSettingsSaveError": "Instanzeinstellungen konnten nicht gespeichert werden.",
     "inventory": {
@@ -534,6 +536,8 @@
       "description": "Wähle deine bevorzugte Sprache aus."
     },
     "languageLabel": "Sprache",
+    "mobileZoomDescription": "Pinch- und Doppeltipp-Zoom in der App auf Touchgeräten verhindern.",
+    "mobileZoomTitle": "Mobiler Zoom",
     "personalAccount": "Persönliches Konto",
     "personalAccountDescription": "Benutzername, Anzeigename oder Passwort aktualisieren.",
     "tabsLabel": "Einstellungsbereiche",

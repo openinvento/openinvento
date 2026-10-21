@@ -422,6 +422,7 @@
     "submit": "Search"
   },
   "settings": {
+    "UISettings": "UI Settings",
     "accountLoadError": "Could not load your account details.",
     "accountName": "Display name",
     "accountPassword": "New password",
@@ -504,6 +505,7 @@
       "updateError": "Could not rename API key."
     },
     "description": "Select how the user interface should be displayed.",
+    "disableMobileZoom": "Disable zoom on mobile devices",
     "instanceSettingsLoadError": "Could not load instance settings.",
     "instanceSettingsSaveError": "Could not save instance settings.",
     "inventory": {
@@ -534,6 +536,8 @@
       "description": "Select which language do you prefer"
     },
     "languageLabel": "Language",
+    "mobileZoomDescription": "Prevent pinch and double-tap zoom in the app on touch devices.",
+    "mobileZoomTitle": "Mobile zoom",
     "personalAccount": "Personal account",
     "personalAccountDescription": "Update your username, display name, or password.",
     "tabsLabel": "Settings sections",

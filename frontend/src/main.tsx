@@ -44,6 +44,36 @@ function EnabledModuleRoute({ name, children }: { name: string; children: ReactN
   return enabled ? children : <Navigate to="/app/dashboard" replace />
 }
 
+function MobileZoomControl() {
+  useEffect(() => {
+    let enabled = localStorage.getItem('disableMobileZoom') !== 'false'
+    let lastTouchEnd = 0
+    const preventPinchZoom = (event: TouchEvent) => {
+    const touchEvent = event as any; 
+      if (enabled && touchEvent.scale !== undefined && touchEvent.scale !== 1) touchEvent.preventDefault()
+    }
+    const preventDoubleTapZoom = (touchEvent: TouchEvent) => {
+      if (!enabled) return
+      const now = Date.now()
+      if (now - lastTouchEnd <= 300) touchEvent.preventDefault()
+      lastTouchEnd = now
+    }
+    
+    const updateSetting = () => { enabled = localStorage.getItem('disableMobileZoom') !== 'false' }
+    document.addEventListener('touchmove', preventPinchZoom, { passive: false })
+    document.addEventListener('touchend', preventDoubleTapZoom, { passive: false })
+    window.addEventListener('storage', updateSetting)
+    window.addEventListener('mobile-zoom-setting-changed', updateSetting)
+    return () => {
+      document.removeEventListener('touchmove', preventPinchZoom)
+      document.removeEventListener('touchend', preventDoubleTapZoom)
+      window.removeEventListener('storage', updateSetting)
+      window.removeEventListener('mobile-zoom-setting-changed', updateSetting)
+    }
+  }, [])
+  return null
+}
+
 
 /* Dark / White mode handling */
 function updateTheme() {
@@ -163,6 +193,7 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
   <TooltipProvider>
+    <MobileZoomControl />
     <RouterProvider router={router} />
   </TooltipProvider>
   </StrictMode>,
