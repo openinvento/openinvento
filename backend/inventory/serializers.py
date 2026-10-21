@@ -203,8 +203,7 @@ class ArticleSerializer(InventoryScopedSerializer):
         queryset=ArticleCategory.objects.none(), required=False, allow_null=True
     )
     category_fields = serializers.SerializerMethodField()
-    custom_fields = serializers.SerializerMethodField()
-    date_notifications = serializers.SerializerMethodField()
+    field_values = serializers.SerializerMethodField()
     image = ProtectedImageField(required=False, allow_null=True) # Use the custom ProtectedImageField for the image field
 
     class Meta:
@@ -225,8 +224,7 @@ class ArticleSerializer(InventoryScopedSerializer):
             "image",
             "icon",
             "category",
-            "custom_fields",
-            "date_notifications",
+            "field_values",
             "category_fields",
         )
         read_only_fields = ("uuid", "created_at", "updated_at")
@@ -248,27 +246,24 @@ class ArticleSerializer(InventoryScopedSerializer):
         )
         return CategoryFieldSerializer(fields, many=True).data
 
-    def get_custom_fields(self, obj):
-        return {
-            row.field.key: row.value
+    def get_field_values(self, obj):
+        return [
+            {
+                "field": str(row.field_id),
+                "key": row.field.key,
+                "value": row.value,
+                "notify_on_date": row.notify_on_date,
+            }
             for row in obj.field_values.select_related("field").all()
-        }
-
-    def get_date_notifications(self, obj):
-        return {
-            row.field.key: row.notify_on_date
-            for row in obj.field_values.select_related("field").all()
-            if row.field.field_type == "date"
-        }
+        ]
 
     def to_internal_value(self, data):
         attrs = super().to_internal_value(data)
-        for name in ("custom_fields", "date_notifications"):
-            if name in data:
-                try:
-                    attrs[name] = serializers.JSONField().run_validation(data.get(name))
-                except serializers.ValidationError as error:
-                    raise serializers.ValidationError({name: error.detail}) from error
+        if "field_values" in data:
+            try:
+                attrs["field_values"] = serializers.JSONField().run_validation(data.get("field_values"))
+            except serializers.ValidationError as error:
+                raise serializers.ValidationError({"field_values": error.detail}) from error
         return attrs
 
     def get_image(self, obj):
@@ -296,80 +291,59 @@ class ArticleSerializer(InventoryScopedSerializer):
             if shelf is not None and box.shelf_id is not None and box.shelf_id != shelf.uuid:
                 raise serializers.ValidationError({"box": "Box must belong to the selected shelf."})
 
-        custom_fields = attrs.get("custom_fields")
-        if custom_fields is not None and not isinstance(custom_fields, dict):
-            raise serializers.ValidationError({"custom_fields": "Expected an object."})
-
-        date_notifications = attrs.get("date_notifications")
-        if date_notifications is not None and (
-            not isinstance(date_notifications, dict)
-            or any(not isinstance(enabled, bool) for enabled in date_notifications.values())
-        ):
-            raise serializers.ValidationError({"date_notifications": "Expected an object of boolean values."})
-
+        field_values = attrs.get("field_values")
         inventory = attrs.get("inventory", getattr(self.instance, "inventory", None))
-        if inventory is not None:
-            fields = CategoryField.objects.filter(inventory=inventory)
-            fields_by_key = {}
-            for field in fields:
-                fields_by_key.setdefault(field.key, []).append(field)
+        if field_values is not None:
+            if not isinstance(field_values, list):
+                raise serializers.ValidationError({"field_values": "Expected a list."})
+            if inventory is None:
+                raise serializers.ValidationError({"field_values": "An inventory is required."})
 
-            if custom_fields is not None:
-                invalid_keys = [key for key in custom_fields if key not in fields_by_key]
-                if invalid_keys:
-                    raise serializers.ValidationError({"custom_fields": f"Unknown field key(s): {', '.join(invalid_keys)}"})
-
-            if date_notifications is not None:
-                invalid_keys = [
-                    key for key in date_notifications
-                    if not any(field.field_type == "date" for field in fields_by_key.get(key, []))
-                ]
-                if invalid_keys:
-                    raise serializers.ValidationError({"date_notifications": f"Unknown date field key(s): {', '.join(invalid_keys)}"})
+            available_fields = {
+                str(field.uuid): field
+                for field in CategoryField.objects.filter(inventory=inventory)
+            }
+            seen_fields = set()
+            for item in field_values:
+                if not isinstance(item, dict) or not isinstance(item.get("field"), str):
+                    raise serializers.ValidationError({"field_values": "Each item must include a field ID."})
+                field_id = item["field"]
+                field = available_fields.get(field_id)
+                if field is None:
+                    raise serializers.ValidationError({"field_values": f"Unknown field ID: {field_id}"})
+                if field_id in seen_fields:
+                    raise serializers.ValidationError({"field_values": f"Duplicate field ID: {field_id}"})
+                if not isinstance(item.get("notify_on_date", False), bool):
+                    raise serializers.ValidationError({"field_values": "notify_on_date must be a boolean."})
+                if item.get("notify_on_date", False) and field.field_type != "date":
+                    raise serializers.ValidationError({"field_values": "Only date fields can send reminders."})
+                seen_fields.add(field_id)
 
         return attrs
 
-    def _save_field_values(self, article, custom_fields, date_notifications):
-        if custom_fields is None and date_notifications is None:
+    def _save_field_values(self, article, field_values):
+        if field_values is None:
             return
-
-        fields = CategoryField.objects.filter(inventory=article.inventory)
-        preferred_fields = {}
-        for field in fields:
-            if field.category_id is None or field.category_id == article.category_id:
-                if field.category_id == article.category_id:
-                    preferred_fields[field.key] = field
-                else:
-                    preferred_fields.setdefault(field.key, field)
-
-        keys = set(custom_fields or {}) | set(date_notifications or {})
-        for key in keys:
-            field = preferred_fields.get(key)
-            if field is None:
-                continue
-            current = ArticleFieldValue.objects.filter(article=article, field=field).first()
-            value = (custom_fields or {}).get(key, current.value if current else None)
-            notify = (date_notifications or {}).get(
-                key, current.notify_on_date if current else False
-            )
+        for item in field_values:
             ArticleFieldValue.objects.update_or_create(
                 article=article,
-                field=field,
-                defaults={"value": value, "notify_on_date": notify if field.field_type == "date" else False},
+                field_id=item["field"],
+                defaults={
+                    "value": item.get("value"),
+                    "notify_on_date": item.get("notify_on_date", False),
+                },
             )
 
     def create(self, validated_data):
-        custom_fields = validated_data.pop("custom_fields", None)
-        date_notifications = validated_data.pop("date_notifications", None)
+        field_values = validated_data.pop("field_values", None)
         article = super().create(validated_data)
-        self._save_field_values(article, custom_fields, date_notifications)
+        self._save_field_values(article, field_values)
         return article
 
     def update(self, instance, validated_data):
-        custom_fields = validated_data.pop("custom_fields", None)
-        date_notifications = validated_data.pop("date_notifications", None)
+        field_values = validated_data.pop("field_values", None)
         article = super().update(instance, validated_data)
-        self._save_field_values(article, custom_fields, date_notifications)
+        self._save_field_values(article, field_values)
         return article
 
 

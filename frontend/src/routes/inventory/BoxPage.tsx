@@ -10,7 +10,7 @@ import { InventoryDraggable } from "@/components/inventory/inventory-dnd"
 import { inventoryApi, type Area, type Article, type Box, type Shelf } from "@/utils/api/inventory"
 
 function getLowStockBadge(article: Article, label: string) {
-  const minimumQuantity = article.custom_fields.minimum_quantity
+  const minimumQuantity = article.field_values.find((field) => field.key === "minimum_quantity")?.value
   return article.stock_tracking && typeof minimumQuantity === "number" && article.quantity <= minimumQuantity
     ? label
     : undefined

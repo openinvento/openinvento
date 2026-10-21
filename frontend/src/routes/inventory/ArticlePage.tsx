@@ -97,16 +97,32 @@ export default function ArticlePage() {
     const value = (key: string) => form.get(key)?.toString() || null
     setSaving(true); setError("")
     try {
-      const customFields = Object.fromEntries(
-        articleFields.map((field) => [
-          field.key, 
-          field.field_type === "boolean"
-            ? form.get(`custom_${field.key}`) === "true"
-            : field.field_type === "number"
-              ? (form.get(`custom_${field.key}`)?.toString() ? Number(form.get(`custom_${field.key}`)) : null)
-              : form.get(`custom_${field.key}`)?.toString() || ""
-        ])
-      );
+      const activeFieldIds = new Set(articleFields.map((field) => field.uuid))
+      const fieldValues = [
+        ...article.field_values.filter((fieldValue) => !activeFieldIds.has(fieldValue.field)),
+        ...articleFields.flatMap((field) => {
+          const previous = article.field_values.find((fieldValue) => fieldValue.field === field.uuid)
+          const valueControl = form.elements.namedItem(`custom_${field.key}`)
+          const notifyControl = form.elements.namedItem(`notify_date_${field.key}`)
+          if (!valueControl && !previous) return []
+
+          const rawValue = form.get(`custom_${field.key}`)?.toString()
+          const value = !valueControl
+            ? previous?.value ?? null
+            : field.field_type === "boolean"
+              ? rawValue === "true"
+              : field.field_type === "number"
+                ? rawValue ? Number(rawValue) : null
+                : rawValue ?? ""
+          const notifyOnDate = field.field_type !== "date"
+            ? false
+            : notifyControl
+              ? form.get(`notify_date_${field.key}`) === "true"
+              : previous?.notify_on_date ?? false
+
+          return [{ field: field.uuid, key: field.key, value, notify_on_date: notifyOnDate }]
+        }),
+      ]
       const payload = new FormData()
       payload.append("name", form.get("name")?.toString().trim() || "")
       payload.append("identifier", form.get("identifier")?.toString().trim() || "")
@@ -117,7 +133,7 @@ export default function ArticlePage() {
       payload.append("shelf", value("shelf") || "")
       payload.append("box", value("box") || "")
       payload.append("category", value("category") || "")
-      payload.append("custom_fields", JSON.stringify(customFields))
+      payload.append("field_values", JSON.stringify(fieldValues))
       if (image) payload.append("image", image)
       else if (imageChanged) payload.append("image", "")
 
@@ -382,7 +398,7 @@ export default function ArticlePage() {
                 {otherFields.map((field) => 
                   <Field key={field.uuid} label={getFieldLabel(field)}>
                     {field.field_type === "select" ? (
-                      <select name={`custom_${field.key}`} defaultValue={article.custom_fields[field.key]?.toString() ?? ""}>
+                      <select name={`custom_${field.key}`} defaultValue={article.field_values.find((item) => item.field === field.uuid)?.value?.toString() ?? ""}>
                         <option value="">{t("articles.page.fields.selectValue")}</option>
                         {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
                       </select>
@@ -390,13 +406,30 @@ export default function ArticlePage() {
                       <Switch
                         name={`custom_${field.key}`}
                         value="true"
-                        defaultChecked={article.custom_fields[field.key] === true}
+                        defaultChecked={article.field_values.find((item) => item.field === field.uuid)?.value === true}
                       />
+                    ) : field.field_type === "date" ? (
+                      <div className="grid gap-2">
+                        <input
+                          name={`custom_${field.key}`}
+                          type="date"
+                          defaultValue={article.field_values.find((item) => item.field === field.uuid)?.value?.toString() ?? ""}
+                        />
+                        <span className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm font-normal">
+                          <span>{t("categoriesAndFields.dateNotifications")}</span>
+                          <Switch
+                            name={`notify_date_${field.key}`}
+                            value="true"
+                            defaultChecked={article.field_values.find((item) => item.field === field.uuid)?.notify_on_date ?? false}
+                            aria-label={t("categoriesAndFields.dateNotifications")}
+                          />
+                        </span>
+                      </div>
                     ) : (
                       <input
                         name={`custom_${field.key}`}
-                        type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"}
-                        defaultValue={article.custom_fields[field.key]?.toString() ?? ""}
+                        type={field.field_type === "number" ? "number" : "text"}
+                        defaultValue={article.field_values.find((item) => item.field === field.uuid)?.value?.toString() ?? ""}
                       />
                     )}
                   </Field>)
@@ -420,7 +453,7 @@ export default function ArticlePage() {
                     {stockFields.map((field) => 
                       <Field key={field.uuid} label={getFieldLabel(field)}>
                         {field.field_type === "select" ? (
-                          <select name={`custom_${field.key}`} defaultValue={article.custom_fields[field.key]?.toString() ?? ""}>
+                          <select name={`custom_${field.key}`} defaultValue={article.field_values.find((item) => item.field === field.uuid)?.value?.toString() ?? ""}>
                             <option value="">{t("articles.page.fields.selectValue")}</option>
                             {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
                           </select>
@@ -428,13 +461,30 @@ export default function ArticlePage() {
                           <Switch
                             name={`custom_${field.key}`}
                             value="true"
-                            defaultChecked={article.custom_fields[field.key] === true}
+                            defaultChecked={article.field_values.find((item) => item.field === field.uuid)?.value === true}
                           />
+                        ) : field.field_type === "date" ? (
+                          <div className="grid gap-2">
+                            <input
+                              name={`custom_${field.key}`}
+                              type="date"
+                              defaultValue={article.field_values.find((item) => item.field === field.uuid)?.value?.toString() ?? ""}
+                            />
+                            <span className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm font-normal">
+                              <span>{t("categoriesAndFields.dateNotifications")}</span>
+                              <Switch
+                                name={`notify_date_${field.key}`}
+                                value="true"
+                                defaultChecked={article.field_values.find((item) => item.field === field.uuid)?.notify_on_date ?? false}
+                                aria-label={t("categoriesAndFields.dateNotifications")}
+                              />
+                            </span>
+                          </div>
                         ) : (
                           <input
                             name={`custom_${field.key}`}
-                            type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"}
-                            defaultValue={article.custom_fields[field.key]?.toString() ?? ""}
+                            type={field.field_type === "number" ? "number" : "text"}
+                            defaultValue={article.field_values.find((item) => item.field === field.uuid)?.value?.toString() ?? ""}
                           />
                         )}
                       </Field>)

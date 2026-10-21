@@ -75,14 +75,19 @@ export default function ArticleCreateScreen() {
     setSaving(true)
     setError("")
     try {
-      const customFields = Object.fromEntries(articleFields.map((field) => [
-        field.key,
-        field.field_type === "boolean"
-          ? form.get(`custom_${field.key}`) === "true"
-          : field.field_type === "number"
-            ? (form.get(`custom_${field.key}`)?.toString() ? Number(form.get(`custom_${field.key}`)) : null)
-            : form.get(`custom_${field.key}`)?.toString() || "",
-      ]))
+      const fieldValues = articleFields.map((field) => {
+        const rawValue = form.get(`custom_${field.key}`)?.toString()
+        return {
+          field: field.uuid,
+          key: field.key,
+          value: field.field_type === "boolean"
+            ? rawValue === "true"
+            : field.field_type === "number"
+              ? rawValue ? Number(rawValue) : null
+              : rawValue || "",
+          notify_on_date: false,
+        }
+      })
       const payload = new FormData()
       payload.append("name", name)
       /* payload.append("identifier", form.get("identifier")?.toString().trim() || "") */
@@ -95,7 +100,7 @@ export default function ArticleCreateScreen() {
       payload.append("stock_tracking", String(stockTracking))
       payload.append("description", form.get("description")?.toString() || "")
       payload.append("icon", selectedIcon)
-      payload.append("custom_fields", JSON.stringify(customFields))
+      payload.append("field_values", JSON.stringify(fieldValues))
       if (image) payload.append("image", image)
 
       const article = await inventoryApi.create<{ area: string }>("articles", payload)

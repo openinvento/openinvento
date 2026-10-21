@@ -26,7 +26,7 @@ type ShelfSectionProps = {
 }
 
 function getLowStockBadge(article: Article, label: string) {
-  const minimumQuantity = article.custom_fields.minimum_quantity
+  const minimumQuantity = article.field_values.find((field) => field.key === "minimum_quantity")?.value
   return article.stock_tracking &&
     typeof minimumQuantity === "number" &&
     article.quantity <= minimumQuantity
