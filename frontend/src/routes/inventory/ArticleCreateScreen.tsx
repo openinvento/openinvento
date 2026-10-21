@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react"
 import { ArrowLeft, Save } from "lucide-react"
-import { Link, useNavigate, useParams } from "react-router"
+import { Link, useNavigate, useParams, useSearchParams } from "react-router"
 import { useTranslation } from "react-i18next"
 import BaseScreen from "@/layouts/BaseScreen"
 import { ArticleIconPicker } from "@/components/inventory/article-icon-picker"
@@ -15,6 +15,7 @@ import { compressArticleImage } from "@/utils/article-image"
 
 export default function ArticleCreateScreen() {
   const { areaId } = useParams()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [inventory, setInventory] = useState<Inventory | null>(null)
@@ -25,7 +26,7 @@ export default function ArticleCreateScreen() {
   const [fields, setFields] = useState<CategoryField[]>([])
   const [selectedCategory, setSelectedCategory] = useState("")
   const [selectedShelf, setSelectedShelf] = useState("")
-  const [selectedBox, setSelectedBox] = useState("")
+  const [selectedBox, setSelectedBox] = useState(() => searchParams.get("box") ?? "")
   const [selectedIcon, setSelectedIcon] = useState("Package")
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -85,7 +86,7 @@ export default function ArticleCreateScreen() {
             : field.field_type === "number"
               ? rawValue ? Number(rawValue) : null
               : rawValue || "",
-          notify_on_date: false,
+          notify_on_date: field.field_type === "date" && form.get(`notify_date_${field.key}`) === "true",
         }
       })
       const payload = new FormData()
@@ -207,9 +208,17 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function CustomField({ field, label, selectLabel }: { field: CategoryField; label: string; selectLabel: string }) {
+  const { t } = useTranslation()
   return <Field label={label}>
     {field.field_type === "select" ? <Select name={`custom_${field.key}`} defaultValue=""><SelectTrigger className="w-full"><SelectValue placeholder={selectLabel} /></SelectTrigger><SelectContent><SelectItem value="">{selectLabel}</SelectItem>{field.options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select>
       : field.field_type === "boolean" ? <Switch name={`custom_${field.key}`} value="true" />
-        : <Input name={`custom_${field.key}`} type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"} />}
+        : field.field_type === "date" ? <div className="grid gap-2">
+          <Input name={`custom_${field.key}`} type="date" />
+          <span className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm font-normal">
+            <span>{t("categoriesAndFields.dateNotifications")}</span>
+            <Switch name={`notify_date_${field.key}`} value="true" aria-label={t("categoriesAndFields.dateNotifications")} />
+          </span>
+        </div>
+          : <Input name={`custom_${field.key}`} type={field.field_type === "number" ? "number" : "text"} />}
   </Field>
 }
