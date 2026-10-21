@@ -23,11 +23,15 @@ class Command(BaseCommand):
         scheduler = DailyScheduler()
         date_field_time = self.parse_schedule_time("DATE_FIELD_NOTIFICATION_TIME")
         low_stock_time = self.parse_schedule_time("LOW_STOCK_NOTIFICATION_TIME")
+
+        # Register date field notifications sync task
         scheduler.register_daily_job(
             "date field notifications",
             sync_all_date_field_notifications,
             date_field_time,
         )
+
+        # Register low stock notifications sync task
         scheduler.register_daily_job(
             "low stock notifications",
             sync_all_low_stock_notifications,
@@ -38,6 +42,7 @@ class Command(BaseCommand):
             "1", "true", "yes", "on",
         }
         if check_updates:
+            # Register update check task
             update_check_time = self.parse_schedule_time("UPDATE_CHECK_TIME")
             scheduler.register_daily_job(
                 "OpenInvento update check",
