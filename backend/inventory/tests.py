@@ -5,10 +5,12 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.test.client import MULTIPART_CONTENT, encode_multipart
 from rest_framework.test import APIClient
+from django.utils import timezone
 
-from account_auth.models import CustomUser
+from account_auth.models import CustomUser, Notification
+from inventory.jobs.date_field_sync import sync_date_field_notifications
 
-from .models import Article, ArticleAttachment, ArticleCategory, Area, Box, Inventory, Shelf
+from .models import Article, ArticleAttachment, ArticleCategory, ArticleFieldValue, Area, Box, CategoryField, Inventory, Shelf
 
 
 ONE_PIXEL_PNG = base64.b64decode(
@@ -250,3 +252,69 @@ class InventoryIsolationTests(TestCase):
 		)
 		self.assertEqual(response.status_code, 200)
 		self.assertIsNone(response.json()["image"])
+
+
+class DateFieldNotificationTests(TestCase):
+	def setUp(self):
+		self.client = APIClient()
+		self.user = CustomUser.objects.create_user(username="date-owner", password="password")
+		self.inventory = Inventory.objects.create(name="Reminder inventory")
+		self.inventory.users.add(self.user)
+		self.area = Area.objects.create(name="Reminder area", inventory=self.inventory)
+		self.field = CategoryField.objects.create(
+			label="Expiry date", key="expiry-date", field_type="date", inventory=self.inventory,
+		)
+		self.client.force_authenticate(user=self.user)
+
+	def test_article_api_saves_date_notification_preference(self):
+		response = self.client.post(
+			"/api/articles/",
+			{
+				"name": "Milk",
+				"inventory": str(self.inventory.uuid),
+				"area": str(self.area.uuid),
+				"field_values": [{
+					"field": str(self.field.uuid),
+					"key": self.field.key,
+					"value": timezone.localdate().isoformat(),
+					"notify_on_date": True,
+				}],
+			},
+			format="json",
+		)
+
+		self.assertEqual(response.status_code, 201, response.json())
+		value = ArticleFieldValue.objects.get(article__uuid=response.json()["uuid"], field=self.field)
+		self.assertEqual(value.value, timezone.localdate().isoformat())
+		self.assertTrue(value.notify_on_date)
+
+	def test_sync_creates_idempotent_reminder_for_due_date(self):
+		article = Article.objects.create(name="Milk", inventory=self.inventory, area=self.area)
+		ArticleFieldValue.objects.create(
+			article=article,
+			field=self.field,
+			value=timezone.localdate().isoformat(),
+			notify_on_date=True,
+		)
+
+		sync_date_field_notifications(self.user)
+		sync_date_field_notifications(self.user)
+
+		notifications = Notification.objects.filter(user=self.user, kind="date_reminder")
+		self.assertEqual(notifications.count(), 1)
+		reminder = notifications.get()
+		self.assertEqual(reminder.title, "Date reminder: Expiry date")
+		self.assertEqual(reminder.link, f"/app/articles/{article.uuid}")
+		self.assertEqual(reminder.metadata["date"], timezone.localdate().isoformat())
+
+	def test_sync_ignores_disabled_and_non_due_dates(self):
+		for name, value, enabled in (
+			("Disabled", timezone.localdate().isoformat(), False),
+			("Future", "2999-01-01", True),
+		):
+			article = Article.objects.create(name=name, inventory=self.inventory, area=self.area)
+			ArticleFieldValue.objects.create(article=article, field=self.field, value=value, notify_on_date=enabled)
+
+		sync_date_field_notifications(self.user)
+
+		self.assertFalse(Notification.objects.filter(user=self.user, kind="date_reminder").exists())

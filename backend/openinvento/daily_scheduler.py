@@ -56,7 +56,7 @@ class DailyScheduler:
 
         if not next_times:
             return 3600
-        return max(1, min(next_times) - timezone.now().timestamp())
+        return max(1, min(next_times) - now.timestamp())
 
     def run_forever(self):
         while True:
