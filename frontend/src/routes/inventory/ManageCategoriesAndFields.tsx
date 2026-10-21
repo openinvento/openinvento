@@ -97,7 +97,13 @@ export default function ManageCategoriesAndFieldsPage() {
 
     setSaving(true)
     try {
-      const payload = { label, field_type: fieldType, category, options }
+      const payload = {
+        label,
+        field_type: fieldType,
+        category,
+        options,
+        notify_on_date: fieldType === "date" && form.get("notify_on_date") === "on",
+      }
       if (fieldModal?.field) {
         await inventoryApi.update("category-fields", fieldModal.field.uuid, payload)
       } else {
@@ -239,6 +245,7 @@ export default function ManageCategoriesAndFieldsPage() {
         onSubmit={saveCategory}
       />
       <FieldModalForm
+        key={fieldModal?.field?.uuid ?? `new-${fieldModal?.category ?? "general"}`}
         modal={fieldModal}
         categories={categories}
         saving={saving}
@@ -337,6 +344,23 @@ function FieldModalForm({
           </SelectContent>
         </Select>
       </FormField>
+
+      {fieldType === "date" && (
+        <label className="flex items-start gap-3 rounded-lg border p-3">
+          <input
+            type="checkbox"
+            name="notify_on_date"
+            defaultChecked={modal?.field?.notify_on_date ?? false}
+            className="mt-1"
+          />
+          <span className="grid gap-1">
+            <span className="text-sm font-medium">{t("categoriesAndFields.dateNotifications")}</span>
+            <span className="text-sm text-muted-foreground">
+              {t("categoriesAndFields.dateNotificationsDescription")}
+            </span>
+          </span>
+        </label>
+      )}
 
       {/* Category Select */}
       <FormField label={t("categoriesAndFields.category")}>

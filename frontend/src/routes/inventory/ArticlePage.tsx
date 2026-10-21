@@ -107,7 +107,6 @@ export default function ArticlePage() {
               : form.get(`custom_${field.key}`)?.toString() || ""
         ])
       );
-
       const payload = new FormData()
       payload.append("name", form.get("name")?.toString().trim() || "")
       payload.append("identifier", form.get("identifier")?.toString().trim() || "")
