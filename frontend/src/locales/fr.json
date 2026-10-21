@@ -422,6 +422,7 @@
     "submit": "Rechercher"
   },
   "settings": {
+    "UISettings": "Paramètres de l'interface utilisateur",
     "accountLoadError": "Impossible de charger les informations du compte.",
     "accountName": "Nom d’affichage",
     "accountPassword": "Nouveau mot de passe",
@@ -504,6 +505,7 @@
       "updateError": "Impossible de renommer la clé API."
     },
     "description": "Choisissez l’apparence de l’interface utilisateur.",
+    "disableMobileZoom": "Désactiver le zoom sur les appareils mobiles",
     "instanceSettingsLoadError": "Impossible de charger les paramètres de l’instance.",
     "instanceSettingsSaveError": "Impossible d’enregistrer les paramètres de l’instance.",
     "inventory": {
@@ -534,6 +536,8 @@
       "description": "Sélectionnez la langue de votre choix"
     },
     "languageLabel": "Langue",
+    "mobileZoomDescription": "Empêcher le zoom par pincement et double toucher sur les appareils tactiles.",
+    "mobileZoomTitle": "Zoom mobile",
     "personalAccount": "Compte personnel",
     "personalAccountDescription": "Mettez à jour votre nom d’utilisateur, votre nom d’affichage ou votre mot de passe.",
     "tabsLabel": "Sections des paramètres",
