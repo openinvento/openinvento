@@ -209,6 +209,8 @@
     },
     "field": "campo",
     "fieldType": "Tipo de campo",
+    "dateNotifications": "Notificar en esta fecha",
+    "dateNotificationsDescription": "Crear una notificación para los artículos que usan este campo.",
     "fieldTypes": {
       "barcode": "Código de barras",
       "boolean": "Sí / No",

@@ -198,6 +198,8 @@
     "createCategory": "Create category",
     "delete": "Delete",
     "description": "Define the information stored on each article.",
+    "dateNotifications": "Notify on this date",
+    "dateNotificationsDescription": "Create a notification on this date for articles using this field.",
     "edit": "Edit",
     "editCategory": "Edit category",
     "editField": "Edit field",

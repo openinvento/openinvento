@@ -198,6 +198,8 @@
     "createCategory": "Kategorie erstellen",
     "delete": "Löschen",
     "description": "Lege fest, welche Informationen zu jedem Artikel gespeichert werden.",
+    "dateNotifications": "An diesem Datum benachrichtigen",
+    "dateNotificationsDescription": "Eine Benachrichtigung für Artikel erstellen, die dieses Feld verwenden.",
     "edit": "Bearbeiten",
     "editCategory": "Kategorie bearbeiten",
     "editField": "Feld bearbeiten",
