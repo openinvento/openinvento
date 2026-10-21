@@ -288,6 +288,7 @@
       "expiry": "Expiry date",
       "has_insurance": "Has insurance",
       "isbn": "ISBN",
+      "minimum_quantity": "Minimum quantity",
       "pages": "Pages",
       "prescription_required": "Prescription required",
       "purchase_date": "Purchase date",
@@ -296,6 +297,7 @@
       "read_status": "Read status",
       "serial_number": "Serial number",
       "size": "Size",
+      "stock_level": "Inventory level",
       "warranty_months": "Warranty period in months"
     },
     "view": {
