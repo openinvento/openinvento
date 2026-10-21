@@ -8,8 +8,6 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
-from inventory.inventory_notifications import sync_low_stock_notifications
-from inventory.models import Inventory
 from inventory.serializers import InventorySerializer
 from rest_framework import permissions, status
 from rest_framework.response import Response
@@ -189,7 +187,6 @@ class NotificationListView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request):
-        sync_low_stock_notifications(request.user)
         notifications = Notification.objects.filter(user=request.user, read=False)
         return Response(NotificationSerializer(notifications, many=True).data)
 
