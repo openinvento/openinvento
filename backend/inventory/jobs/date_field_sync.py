@@ -11,6 +11,7 @@ def sync_date_field_notifications(user):
     fields = CategoryField.objects.filter(
         inventory__in=inventories,
         field_type="date",
+        notify_on_date=True,
     )
     today = timezone.localdate().isoformat()
 
@@ -18,7 +19,6 @@ def sync_date_field_notifications(user):
         articles = Article.objects.filter(
             inventory_id=field.inventory_id,
             **{f"custom_fields__{field.key}": today},
-            **{f"date_notifications__{field.key}": True},
         ).select_related("inventory")
         if field.category_id:
             articles = articles.filter(category_id=field.category_id)
