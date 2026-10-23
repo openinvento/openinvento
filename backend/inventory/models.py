@@ -121,7 +121,7 @@ class ArticleAttachment(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="attachments")
     file = models.FileField(
         upload_to=article_attachment_upload_path,
-        validators=[FileExtensionValidator(allowed_extensions=["pdf", "doc", "docx", "odt", "txt", "rtf", "xls", "xlsx", "csv", "ppt", "pptx", "zip"]), validate_file_size],
+        validators=[FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png", "pdf", "doc", "docx", "odt", "txt", "rtf", "xls", "xlsx", "csv", "ppt", "pptx", "zip"]), validate_file_size],
     )
     original_name = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)

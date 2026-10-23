@@ -18,7 +18,7 @@ export type Article = EntityBase & {
   category_fields: CategoryField[]
 }
 export type SearchResult = (Article & { type: "article" }) | (Box & { type: "box" })
-export type ArticleAttachment = { id: number; original_name: string; url: string; size: number; created_at: string }
+export type ArticleAttachment = { id: number; original_name: string; url: string; size: number; is_image: boolean; created_at: string }
 export type ArticleFieldValue = { field: string; key: string; value: string | number | boolean | null; notify_on_date: boolean }
 export type CategoryField = EntityBase & { key: string; label: string; field_type: string; options: string[]; category: string | null }
 export type ArticleCategory = EntityBase & { fields: CategoryField[]; category_fields?: CategoryField[] }

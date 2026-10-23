@@ -8,6 +8,7 @@ import { removeFavorite } from "@/utils/favorites"
 import { ArticleIconPicker, getArticleIcon } from "@/components/inventory/article-icon-picker"
 import { ImageUploadField } from "@/components/inventory/image-upload-field"
 import { FullscreenImagePreview } from "@/components/inventory/fullscreen-image-preview"
+import { ArticleImageGallery } from "@/components/inventory/article-image-gallery"
 import { inventoryApi, type Area, type Article, type ArticleAttachment, type ArticleCategory, type CategoryField, type Box, type Shelf } from "@/utils/api/inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 import { useTranslation } from "react-i18next"
@@ -42,6 +43,7 @@ export default function ArticlePage() {
   const [attachments, setAttachments] = useState<ArticleAttachment[]>([])
   const [attachmentBusy, setAttachmentBusy] = useState(false)
   const attachmentInputId = useId()
+  const imageInputId = useId()
   const [unsavedChanges, setUnsavedChanges] = useState(false)
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
   const blocker = useBlocker(unsavedChanges)
@@ -192,6 +194,23 @@ export default function ArticlePage() {
     }
   }
 
+  async function uploadImages(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? [])
+    event.target.value = ""
+    if (!article || files.length === 0) return
+    setAttachmentBusy(true)
+    setError("")
+    try {
+      const uploaded: ArticleAttachment[] = []
+      for (const file of files) uploaded.push(await inventoryApi.uploadArticleAttachment(article.uuid, file))
+      setAttachments((current) => [...current, ...uploaded])
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : t("articles.page.attachments.uploadError"))
+    } finally {
+      setAttachmentBusy(false)
+    }
+  }
+
   async function deleteAttachment(attachment: ArticleAttachment) {
     try {
       await inventoryApi.removeArticleAttachment(attachment.id)
@@ -222,6 +241,8 @@ export default function ArticlePage() {
   const articleFields = [...categoryFields.filter((field) => field.category === selectedCategory), ...globalFields]
   const stockFields = articleFields.filter((field) => field.key === "minimum_quantity" || field.key === "stock_level")
   const otherFields = articleFields.filter((field) => field.key !== "minimum_quantity" && field.key !== "stock_level")
+  const imageAttachments = attachments.filter((attachment) => attachment.is_image)
+  const fileAttachments = attachments.filter((attachment) => !attachment.is_image)
 
   return (
     <section className="w-full">
@@ -504,16 +525,16 @@ export default function ArticlePage() {
         </form>
 
         <section className="mt-8 grid gap-4 rounded-xl border bg-muted/15 p-4 sm:p-5" aria-labelledby="article-attachments-heading">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3 border-t pt-4">
             <h2 id="article-attachments-heading" className="flex items-center gap-2 text-sm font-semibold"><Paperclip className="size-4" />{t("articles.page.attachments.title")}</h2>
             <label htmlFor={attachmentInputId} className="inline-flex h-8 cursor-pointer items-center gap-2 rounded-lg bg-secondary px-3 text-sm font-medium text-secondary-foreground hover:bg-secondary/80">
               <Upload className="size-4" />{attachmentBusy ? t("articles.page.attachments.uploading") : t("articles.page.attachments.add")}
             </label>
             <input id={attachmentInputId} type="file" accept=".pdf,.doc,.docx,.odt,.txt,.rtf,.xls,.xlsx,.csv,.ppt,.pptx,.zip" onChange={(event) => void uploadAttachment(event)} className="sr-only" disabled={attachmentBusy} />
           </div>
-          {attachments.length === 0 ? <p className="text-sm text-muted-foreground">{t("articles.page.attachments.empty")}</p> : (
+          {fileAttachments.length === 0 ? <p className="text-sm text-muted-foreground">{t("articles.page.attachments.empty")}</p> : (
             <ul className="grid gap-2">
-              {attachments.map((attachment) => (
+              {fileAttachments.map((attachment) => (
                 <li key={attachment.id} className="flex min-w-0 items-center gap-3 rounded-lg border bg-background p-3">
                   <FileText className="size-5 shrink-0 text-muted-foreground" />
                   <span className="min-w-0 flex-1 truncate text-sm">{attachment.original_name}<span className="ml-2 text-xs text-muted-foreground">{(attachment.size / 1024).toFixed(0)} KB</span></span>
@@ -523,6 +544,14 @@ export default function ArticlePage() {
               ))}
             </ul>
           )}
+          <div className="flex items-center justify-between gap-3 border-t pt-4">
+            <h3 className="text-sm font-semibold">{t("articles.page.attachments.images")}</h3>
+            <label htmlFor={imageInputId} className="inline-flex h-8 cursor-pointer items-center rounded-lg border px-3 text-sm font-medium hover:bg-muted">
+              {t("articles.page.attachments.addImages")}
+            </label>
+            <input id={imageInputId} type="file" accept=".jpg,.jpeg,.png" multiple onChange={(event) => void uploadImages(event)} className="sr-only" disabled={attachmentBusy} />
+          </div>
+          {imageAttachments.length > 0 && <ArticleImageGallery images={imageAttachments} onRemove={(attachment) => void deleteAttachment(attachment)} />}
         </section>
       </div>
     </section>

@@ -84,9 +84,11 @@
       "areas": "Zones",
       "attachments": {
         "add": "Ajouter un fichier",
+        "addImages": "Ajouter une image",
         "deleteError": "Impossible de retirer le fichier.",
         "download": "Télécharger {{name}}",
         "empty": "Aucun fichier joint pour le moment.",
+        "images": "Pièces jointes d’images",
         "remove": "Retirer {{name}}",
         "title": "Fichiers et pièces jointes",
         "uploadError": "Impossible de téléverser le fichier.",
