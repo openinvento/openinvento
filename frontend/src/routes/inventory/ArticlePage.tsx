@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverDescription, PopoverTrigger } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
 import { removeFavorite } from "@/utils/favorites"
-import { getArticleIcon } from "@/components/inventory/article-icon-picker"
+import { ArticleIconPicker, getArticleIcon } from "@/components/inventory/article-icon-picker"
 import { ImageUploadField } from "@/components/inventory/image-upload-field"
 import { FullscreenImagePreview } from "@/components/inventory/fullscreen-image-preview"
 import { inventoryApi, type Area, type Article, type ArticleAttachment, type ArticleCategory, type CategoryField, type Box, type Shelf } from "@/utils/api/inventory"
@@ -35,6 +35,7 @@ export default function ArticlePage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedShelf, setSelectedShelf] = useState<string | null>(null)
   const [selectedBox, setSelectedBox] = useState<string | null>(null)
+  const [selectedIcon, setSelectedIcon] = useState<string | null>(null)
   const [image, setImage] = useState<File | null>(null)
   const [imageChanged, setImageChanged] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -135,6 +136,7 @@ export default function ArticlePage() {
       payload.append("box", value("box") || "")
       payload.append("category", value("category") || "")
       payload.append("field_values", JSON.stringify(fieldValues))
+      payload.append("icon", selectedIcon || "")
       if (image) payload.append("image", image)
       else if (imageChanged) payload.append("image", "")
 
@@ -293,6 +295,9 @@ export default function ArticlePage() {
                 />
                 {t("articles.page.fields.stockTracking")}
               </label>
+              <Field label={t("articles.page.fields.icon")}>
+                <ArticleIconPicker value={selectedIcon} onChange={setSelectedIcon} />
+              </Field>
               <Field label={t("articles.page.fields.image")}>
                 <ImageUploadField
                   imageSrc={imagePreview || getMediaUrl(article.image) || null}

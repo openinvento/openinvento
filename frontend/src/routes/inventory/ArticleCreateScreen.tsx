@@ -146,7 +146,9 @@ export default function ArticleCreateScreen() {
             <Switch name="stock_tracking" value="true" checked={stockTracking} onCheckedChange={setStockTracking} />
             {t("areas.detail.fields.stockTracking")}
           </label>
-          <Field label={t("areas.detail.fields.icon")}><ArticleIconPicker value={selectedIcon} onChange={setSelectedIcon} /></Field>
+          <Field label={t("areas.detail.fields.icon")}>
+            <ArticleIconPicker value={selectedIcon} onChange={setSelectedIcon} />
+          </Field>
           <Field label={t("articles.page.fields.image")}>
             <ImageUploadField
               imageSrc={imagePreview}

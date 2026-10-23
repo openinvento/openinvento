@@ -13,7 +13,7 @@ export function getArticleIcon(name: string | null | undefined): LucideIcon {
   return (name && !nonIconExports.has(name) && iconMap[name]) || LucideIcons.Package
 }
 
-type Props = { value: string; onChange: (value: string) => void }
+type Props = { value: string | null | undefined; onChange: (value: string) => void }
 
 export function ArticleIconPicker({ value, onChange }: Props) {
   const [query, setQuery] = useState("")
