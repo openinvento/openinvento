@@ -84,9 +84,11 @@
       "areas": "Bereiche",
       "attachments": {
         "add": "Datei hinzufügen",
+        "addImages": "Bild hinzufügen",
         "deleteError": "Datei konnte nicht entfernt werden.",
         "download": "{{name}} herunterladen",
         "empty": "Noch keine Dateien angehängt.",
+        "images": "Foto-Anhänge",
         "remove": "{{name}} entfernen",
         "title": "Dateien und Anhänge",
         "uploadError": "Datei konnte nicht hochgeladen werden.",

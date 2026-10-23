@@ -84,9 +84,11 @@
       "areas": "Areas",
       "attachments": {
         "add": "Add file",
+        "addImages": "Add image",
         "deleteError": "Could not remove the file.",
         "download": "Download {{name}}",
         "empty": "No files attached yet.",
+        "images": "Image attachments",
         "remove": "Remove {{name}}",
         "title": "Files and attachments",
         "uploadError": "Could not upload the file.",

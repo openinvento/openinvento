@@ -84,9 +84,11 @@
       "areas": "áreas",
       "attachments": {
         "add": "Añadir archivo",
+        "addImages": "Agregar imagen",
         "deleteError": "No se pudo quitar el archivo.",
         "download": "Descargar {{name}}",
         "empty": "Todavía no hay archivos adjuntos.",
+        "images": "Adjuntos de imagen",
         "remove": "Quitar {{name}}",
         "title": "Archivos y adjuntos",
         "uploadError": "No se pudo subir el archivo.",
