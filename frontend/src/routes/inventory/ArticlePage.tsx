@@ -526,17 +526,7 @@ export default function ArticlePage() {
 
         <section className="mt-8 grid gap-4 rounded-xl border bg-muted/15 p-4 sm:p-5" aria-labelledby="article-attachments-heading">
           <div className="flex items-center justify-between gap-3 border-t pt-4">
-            <h2 id="article-attachments-heading" className="flex items-center gap-2 text-sm font-semibold"><Paperclip className="size-4" />{t("articles.page.attachments.images")}</h2>
-            <label htmlFor={imageInputId} className="inline-flex h-8 cursor-pointer items-center rounded-lg border px-3 text-sm font-medium hover:bg-muted">
-              {t("articles.page.attachments.addImages")}
-            </label>
-            <input id={imageInputId} type="file" accept=".jpg,.jpeg,.png" multiple onChange={(event) => void uploadImages(event)} className="sr-only" disabled={attachmentBusy} />
-          </div>
-          {imageAttachments.length > 0 && (
-            <ArticleImageGallery images={imageAttachments} onRemove={(attachment) => void deleteAttachment(attachment)} />
-          )}
-          <div className="flex items-center justify-between gap-3 border-t pt-4">
-            <h3 className="text-sm font-semibold">{t("articles.page.attachments.title")}</h3>
+            <h2 id="article-attachments-heading" className="flex items-center gap-2 text-sm font-semibold"><Paperclip className="size-4" />{t("articles.page.attachments.title")}</h2>
             <label htmlFor={attachmentInputId} className="inline-flex h-8 cursor-pointer items-center gap-2 rounded-lg bg-secondary px-3 text-sm font-medium text-secondary-foreground hover:bg-secondary/80">
               <Upload className="size-4" />{attachmentBusy ? t("articles.page.attachments.uploading") : t("articles.page.attachments.add")}
             </label>
@@ -554,6 +544,14 @@ export default function ArticlePage() {
               ))}
             </ul>
           )}
+          <div className="flex items-center justify-between gap-3 border-t pt-4">
+            <h3 className="text-sm font-semibold">{t("articles.page.attachments.images")}</h3>
+            <label htmlFor={imageInputId} className="inline-flex h-8 cursor-pointer items-center rounded-lg border px-3 text-sm font-medium hover:bg-muted">
+              {t("articles.page.attachments.addImages")}
+            </label>
+            <input id={imageInputId} type="file" accept=".jpg,.jpeg,.png" multiple onChange={(event) => void uploadImages(event)} className="sr-only" disabled={attachmentBusy} />
+          </div>
+          {imageAttachments.length > 0 && <ArticleImageGallery images={imageAttachments} onRemove={(attachment) => void deleteAttachment(attachment)} />}
         </section>
       </div>
     </section>
