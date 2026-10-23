@@ -2,20 +2,21 @@ import BaseScreen from "@/layouts/BaseScreen"
 import { useEffect, useState, type FormEvent } from "react"
 import { LoaderCircle, Search } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Link, useSearchParams } from "react-router"
+import { useNavigate, useSearchParams } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { getSelectedInventory, inventoryApi, type Article, type Inventory } from "@/utils/api/inventory"
-import { getArticleIcon } from "@/components/inventory/article-icon-picker"
+import { getSelectedInventory, inventoryApi, type Inventory, type SearchResult } from "@/utils/api/inventory"
+import { ArticleCard, BoxCard } from "@/components/inventory/entity-cards"
 
 export default function SearchPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const initialQuery = searchParams.get("q")?.trim() ?? ""
   const [inventories, setInventories] = useState<Inventory[]>([])
   const [inventoryId, setInventoryId] = useState("")
   const [query, setQuery] = useState(initialQuery)
-  const [results, setResults] = useState<Article[]>([])
+  const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(true)
   const [searching, setSearching] = useState(false)
   const [error, setError] = useState("")
@@ -98,12 +99,23 @@ export default function SearchPage() {
       ) : results.length > 0 ? (
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((article) => (
-            <Link key={article.uuid} to={`/app/articles/${article.uuid}`} className="rounded-2xl border bg-card p-4 shadow-xs transition hover:-translate-y-0.5 hover:shadow-md">
-              <div className="mb-4 grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">{(() => { const Icon = getArticleIcon(article.icon); return <Icon className="size-5" /> })()}</div>
-              <h2 className="font-semibold">{article.name}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">{article.identifier}</p>
-              <p className="mt-3 text-sm">{t("search.quantity", { count: article.quantity })}</p>
-            </Link>
+            article.type === "box" ? (
+              <BoxCard
+                key={`${article.type}-${article.uuid}`}
+                name={article.name}
+                subtitle={`${article.identifier} · ${t("search.box")}`}
+                onOpen={() => navigate(`/app/boxes/${article.uuid}`)}
+              />
+            ) : (
+              <ArticleCard
+                key={`${article.type}-${article.uuid}`}
+                name={article.name}
+                subtitle={`${article.identifier} · ${t("search.quantity", { count: article.quantity })}`}
+                articleIcon={article.icon}
+                articleImage={article.image}
+                onOpen={() => navigate(`/app/articles/${article.uuid}`)}
+              />
+            )
           ))}
         </div>
       ) : query.trim() ? (

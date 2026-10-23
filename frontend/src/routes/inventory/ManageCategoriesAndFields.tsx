@@ -97,7 +97,12 @@ export default function ManageCategoriesAndFieldsPage() {
 
     setSaving(true)
     try {
-      const payload = { label, field_type: fieldType, category, options }
+      const payload = {
+        label,
+        field_type: fieldType,
+        category,
+        options,
+      }
       if (fieldModal?.field) {
         await inventoryApi.update("category-fields", fieldModal.field.uuid, payload)
       } else {
@@ -238,13 +243,16 @@ export default function ManageCategoriesAndFieldsPage() {
         onClose={() => setCategoryModal(null)}
         onSubmit={saveCategory}
       />
-      <FieldModalForm
-        modal={fieldModal}
-        categories={categories}
-        saving={saving}
-        onClose={() => setFieldModal(null)}
-        onSubmit={saveField}
-      />
+      {fieldModal && (
+        <FieldModalForm
+          key={fieldModal.field?.uuid ?? `new-${fieldModal.category ?? "general"}`}
+          modal={fieldModal}
+          categories={categories}
+          saving={saving}
+          onClose={() => setFieldModal(null)}
+          onSubmit={saveField}
+        />
+      )}
     </BaseScreen>
   )
 }
@@ -290,7 +298,7 @@ function FieldModalForm({
   onClose,
   onSubmit,
 }: {
-  modal: FieldModal
+  modal: Exclude<FieldModal, null>
   categories: ArticleCategory[]
   saving: boolean
   onClose: () => void

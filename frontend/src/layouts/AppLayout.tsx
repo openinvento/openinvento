@@ -14,10 +14,20 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { useTranslation } from "react-i18next"
 
 export default function DashboardLayout() {
   const location = useLocation()
-  const pageName = location.pathname.includes("/areas") ? "Inventory areas" : location.pathname.includes("/articles") ? "Article" : "Dashboard"
+  const { t } = useTranslation()
+  const pathTitleMap: [string, string][] = [
+    ["/loans", t("sidebar.loans")],
+    ["/areas", t("sidebar.areas")],
+    ["/articles", t("sidebar.article")],
+  ] as const
+
+  const pageName = pathTitleMap.find(([path]) => location.pathname.includes(path))?.[1] || t("sidebar.dashboard")
+
+
   return (
     <InventoryDndBoundary>
     <SidebarProvider>

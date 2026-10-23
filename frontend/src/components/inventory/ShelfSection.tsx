@@ -1,32 +1,32 @@
 import { ChevronDown, Pencil, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { ArticleCard, ChestCard } from "@/components/inventory/entity-cards"
+import { ArticleCard, BoxCard } from "@/components/inventory/entity-cards"
 import { Button } from "@/components/ui/button"
 import {
   InventoryDraggable,
   InventoryDropTarget,
 } from "@/components/inventory/inventory-dnd"
-import type { Article, Chest, Shelf } from "@/utils/api/inventory"
+import type { Article, Box, Shelf } from "@/utils/api/inventory"
 import type { InventoryViewMode } from "./view-mode"
 
 type ShelfSectionProps = {
   shelf: Shelf
   viewMode: InventoryViewMode
-  chests: Chest[]
+  boxes: Box[]
   articles: Article[]
   isOpen: boolean
   onToggle: () => void
   onEditShelf: () => void
   onDeleteShelf: () => void
-  onOpenChest: (chest: Chest) => void
-  onEditChest: (chest: Chest) => void
-  onDeleteChest: (chest: Chest) => void
+  onOpenBox: (box: Box) => void
+  onEditBox: (box: Box) => void
+  onDeleteBox: (box: Box) => void
   onOpenArticle: (article: Article) => void
   onDeleteArticle: (article: Article) => void
 }
 
 function getLowStockBadge(article: Article, label: string) {
-  const minimumQuantity = article.custom_fields.minimum_quantity
+  const minimumQuantity = article.field_values.find((field) => field.key === "minimum_quantity")?.value
   return article.stock_tracking &&
     typeof minimumQuantity === "number" &&
     article.quantity <= minimumQuantity
@@ -37,22 +37,22 @@ function getLowStockBadge(article: Article, label: string) {
 export function ShelfSection({
   shelf,
   viewMode,
-  chests,
+  boxes,
   articles,
   isOpen,
   onToggle,
   onEditShelf,
   onDeleteShelf,
-  onOpenChest,
-  onEditChest,
-  onDeleteChest,
+  onOpenBox,
+  onEditBox,
+  onDeleteBox,
   onOpenArticle,
   onDeleteArticle,
 }: ShelfSectionProps) {
   const { t } = useTranslation()
-  const sectionChests = chests.filter((chest) => chest.shelf === shelf.uuid)
+  const sectionBoxes = boxes.filter((box) => box.shelf === shelf.uuid)
   const sectionArticles = articles.filter(
-    (article) => article.shelf === shelf.uuid && article.chest === null,
+    (article) => article.shelf === shelf.uuid && article.box === null,
   )
 
   return (
@@ -71,7 +71,7 @@ export function ShelfSection({
             <span className="font-semibold">{shelf.name}</span>
             <span className="text-sm text-muted-foreground">
               {t("areas.detail.itemCount", {
-                count: sectionChests.length + sectionArticles.length,
+                count: sectionBoxes.length + sectionArticles.length,
               })}
             </span>
             <span className="ml-auto flex items-center gap-1">
@@ -105,25 +105,25 @@ export function ShelfSection({
           {isOpen && (
             <div className="border-t p-4">
               <div className={viewMode === "list" ? "flex flex-col gap-2" : "grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"}>
-                {sectionChests.map((chest) => (
+                {sectionBoxes.map((box) => (
                   <InventoryDraggable
-                    key={chest.uuid}
-                    item={{ kind: "chest", id: chest.uuid }}
+                    key={box.uuid}
+                    item={{ kind: "box", id: box.uuid }}
                   >
                     <InventoryDropTarget
-                      target={{ kind: "chest", id: chest.uuid }}
+                      target={{ kind: "box", id: box.uuid }}
                     >
-                      <ChestCard
+                      <BoxCard
                         viewMode={viewMode}
-                        name={chest.name}
+                        name={box.name}
                         subtitle={t("areas.detail.articleCount", {
                           count: articles.filter(
-                            (article) => article.chest === chest.uuid,
+                            (article) => article.box === box.uuid,
                           ).length,
                         })}
-                        onOpen={() => onOpenChest(chest)}
-                        onRename={() => onEditChest(chest)}
-                        onDelete={() => onDeleteChest(chest)}
+                        onOpen={() => onOpenBox(box)}
+                        onRename={() => onEditBox(box)}
+                        onDelete={() => onDeleteBox(box)}
                       />
                     </InventoryDropTarget>
                   </InventoryDraggable>
@@ -153,7 +153,7 @@ export function ShelfSection({
                 ))}
               </div>
 
-              {sectionChests.length + sectionArticles.length === 0 && (
+              {sectionBoxes.length + sectionArticles.length === 0 && (
                 <p className="py-3 text-sm text-muted-foreground">
                   {t("areas.detail.nothingStored")}
                 </p>

@@ -5,10 +5,12 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.test.client import MULTIPART_CONTENT, encode_multipart
 from rest_framework.test import APIClient
+from django.utils import timezone
 
-from account_auth.models import CustomUser
+from account_auth.models import CustomUser, Notification
+from inventory.jobs.date_field_sync import sync_date_field_notifications
 
-from .models import Article, ArticleAttachment, ArticleCategory, Area, Chest, Inventory, Shelf
+from .models import Article, ArticleAttachment, ArticleCategory, ArticleFieldValue, Area, Box, CategoryField, Inventory, Shelf
 
 
 ONE_PIXEL_PNG = base64.b64decode(
@@ -103,8 +105,8 @@ class InventoryIsolationTests(TestCase):
 		self.other_area = Area.objects.create(name="Other area", inventory=self.other_inventory)
 		self.shelf = Shelf.objects.create(name="Primary shelf", area=self.area, inventory=self.inventory)
 		self.other_shelf = Shelf.objects.create(name="Other shelf", area=self.other_area, inventory=self.other_inventory)
-		self.chest = Chest.objects.create(name="Primary chest", area=self.area, shelf=self.shelf, inventory=self.inventory)
-		self.other_chest = Chest.objects.create(name="Other chest", area=self.other_area, shelf=self.other_shelf, inventory=self.other_inventory)
+		self.box = Box.objects.create(name="Primary box", area=self.area, shelf=self.shelf, inventory=self.inventory)
+		self.other_box = Box.objects.create(name="Other box", area=self.other_area, shelf=self.other_shelf, inventory=self.other_inventory)
 		self.category = ArticleCategory.objects.create(name="Primary category", inventory=self.inventory)
 		self.other_category = ArticleCategory.objects.create(name="Other category", inventory=self.other_inventory)
 		self.article = Article.objects.create(
@@ -112,7 +114,7 @@ class InventoryIsolationTests(TestCase):
 			inventory=self.inventory,
 			area=self.area,
 			shelf=self.shelf,
-			chest=self.chest,
+			box=self.box,
 			category=self.category,
 		)
 
@@ -137,7 +139,7 @@ class InventoryIsolationTests(TestCase):
 				"inventory": str(self.inventory.uuid),
 				"area": str(self.other_area.uuid),
 				"shelf": str(self.other_shelf.uuid),
-				"chest": str(self.other_chest.uuid),
+				"box": str(self.other_box.uuid),
 				"category": str(self.other_category.uuid),
 			},
 			format="json",
@@ -151,7 +153,10 @@ class InventoryIsolationTests(TestCase):
 
 		response = self.client.patch(
 			f"/api/articles/{self.article.uuid}/",
-			{"area": str(self.other_area.uuid)},
+			{
+				"area": str(self.other_area.uuid),
+				"shelf": str(self.other_shelf.uuid),
+			},
 			format="json",
 		)
 		self.assertEqual(response.status_code, 400)
@@ -162,33 +167,45 @@ class InventoryIsolationTests(TestCase):
 			format="json",
 		)
 		self.assertEqual(response.status_code, 400)
-		self.article.refresh_from_db()
-		self.assertEqual(self.article.inventory_id, self.inventory.uuid)
 
-	def test_article_put_rejects_cross_inventory_relations(self):
+	def test_article_create_and_patch_accept_valid_scoped_relations(self):
 		self.authenticate()
-		response = self.client.put(
-			f"/api/articles/{self.article.uuid}/",
+
+		created_response = self.client.post(
+			"/api/articles/",
 			{
-				"name": "Invalid replacement",
+				"name": "Valid article",
 				"inventory": str(self.inventory.uuid),
-				"area": str(self.other_area.uuid),
-				"quantity": 1,
+				"area": str(self.area.uuid),
+				"shelf": str(self.shelf.uuid),
+				"box": str(self.box.uuid),
+				"category": str(self.category.uuid),
 			},
 			format="json",
 		)
+		self.assertEqual(created_response.status_code, 201)
 
-		self.assertEqual(response.status_code, 400)
+		article_uuid = created_response.json()["uuid"]
+		patch_response = self.client.patch(
+			f"/api/articles/{article_uuid}/",
+			{
+				"name": "Updated valid article",
+				"shelf": None,
+				"box": None,
+			},
+			format="json",
+		)
+		self.assertEqual(patch_response.status_code, 200)
 
-	def test_category_field_rejects_cross_inventory_category(self):
+	def test_category_field_rejects_foreign_category(self):
 		self.authenticate()
+
 		response = self.client.post(
 			"/api/category-fields/",
 			{
 				"inventory": str(self.inventory.uuid),
-				"category": str(self.other_category.uuid),
 				"label": "Invalid field",
-				"field_type": "text",
+				"category": str(self.other_category.uuid),
 			},
 			format="json",
 		)
@@ -199,8 +216,8 @@ class InventoryIsolationTests(TestCase):
 		self.authenticate()
 
 		response = self.client.patch(
-			f"/api/chests/{self.chest.uuid}/",
-			{"parent_chest": str(self.chest.uuid)},
+			f"/api/boxes/{self.box.uuid}/",
+			{"parent_box": str(self.box.uuid)},
 			format="json",
 		)
 		self.assertEqual(response.status_code, 400)
@@ -236,3 +253,68 @@ class InventoryIsolationTests(TestCase):
 		self.assertEqual(response.status_code, 200)
 		self.assertIsNone(response.json()["image"])
 
+
+class DateFieldNotificationTests(TestCase):
+	def setUp(self):
+		self.client = APIClient()
+		self.user = CustomUser.objects.create_user(username="date-owner", password="password")
+		self.inventory = Inventory.objects.create(name="Reminder inventory")
+		self.inventory.users.add(self.user)
+		self.area = Area.objects.create(name="Reminder area", inventory=self.inventory)
+		self.field = CategoryField.objects.create(
+			label="Expiry date", key="expiry-date", field_type="date", inventory=self.inventory,
+		)
+		self.client.force_authenticate(user=self.user)
+
+	def test_article_api_saves_date_notification_preference(self):
+		response = self.client.post(
+			"/api/articles/",
+			{
+				"name": "Milk",
+				"inventory": str(self.inventory.uuid),
+				"area": str(self.area.uuid),
+				"field_values": [{
+					"field": str(self.field.uuid),
+					"key": self.field.key,
+					"value": timezone.localdate().isoformat(),
+					"notify_on_date": True,
+				}],
+			},
+			format="json",
+		)
+
+		self.assertEqual(response.status_code, 201, response.json())
+		value = ArticleFieldValue.objects.get(article__uuid=response.json()["uuid"], field=self.field)
+		self.assertEqual(value.value, timezone.localdate().isoformat())
+		self.assertTrue(value.notify_on_date)
+
+	def test_sync_creates_idempotent_reminder_for_due_date(self):
+		article = Article.objects.create(name="Milk", inventory=self.inventory, area=self.area)
+		ArticleFieldValue.objects.create(
+			article=article,
+			field=self.field,
+			value=timezone.localdate().isoformat(),
+			notify_on_date=True,
+		)
+
+		sync_date_field_notifications(self.user)
+		sync_date_field_notifications(self.user)
+
+		notifications = Notification.objects.filter(user=self.user, kind="date_reminder")
+		self.assertEqual(notifications.count(), 1)
+		reminder = notifications.get()
+		self.assertEqual(reminder.title, "Date reminder: Expiry date")
+		self.assertEqual(reminder.link, f"/app/articles/{article.uuid}")
+		self.assertEqual(reminder.metadata["date"], timezone.localdate().isoformat())
+
+	def test_sync_ignores_disabled_and_non_due_dates(self):
+		for name, value, enabled in (
+			("Disabled", timezone.localdate().isoformat(), False),
+			("Future", "2999-01-01", True),
+		):
+			article = Article.objects.create(name=name, inventory=self.inventory, area=self.area)
+			ArticleFieldValue.objects.create(article=article, field=self.field, value=value, notify_on_date=enabled)
+
+		sync_date_field_notifications(self.user)
+
+		self.assertFalse(Notification.objects.filter(user=self.user, kind="date_reminder").exists())

@@ -1,4 +1,6 @@
 import { StrictMode } from 'react'
+import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router' // 💡 Wichtig: aus 'react-router' importieren
 import './index.css'
@@ -10,7 +12,7 @@ import SettingsPage from './routes/Settings.tsx'
 import InventorySettingsPage from './routes/InventorySettings.tsx'
 import AreasPage from './routes/inventory/AreasPage.tsx'
 import AreaDetailScreen from './routes/inventory/AreaDetailScreen.tsx'
-import ChestPage from './routes/inventory/ChestPage.tsx'
+import BoxPage from './routes/inventory/BoxPage.tsx'
 import ArticleCreateScreen from './routes/inventory/ArticleCreateScreen.tsx'
 import ArticlePage from './routes/inventory/ArticlePage.tsx'
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -22,6 +24,55 @@ import { SessionGuard } from './components/auth/session-guard.tsx'
 import ManageCategoriesAndFieldsPage from './routes/inventory/ManageCategoriesAndFields.tsx'
 import ManageCodes from './routes/inventory/ManageCodes.tsx'
 import ResetCredentialsPage from './routes/auth/ResetCredentials.tsx'
+import LoansPage from '../modules/loans/LoansPage.tsx'
+import { getEnabledModules, MODULES_CHANGED_EVENT } from './utils/api/modules'
+
+function EnabledModuleRoute({ name, children }: { name: string; children: ReactNode }) {
+  const [enabled, setEnabled] = useState<boolean | null>(null)
+  useEffect(() => {
+    let active = true
+    const loadModules = () => {
+      void getEnabledModules(true)
+        .then((modules) => { if (active) setEnabled(modules.includes(name)) })
+        .catch(() => { if (active) setEnabled(false) })
+    }
+    loadModules()
+    window.addEventListener(MODULES_CHANGED_EVENT, loadModules)
+    return () => { active = false; window.removeEventListener(MODULES_CHANGED_EVENT, loadModules) }
+  }, [name])
+  if (enabled === null) return null
+  return enabled ? children : <Navigate to="/app/dashboard" replace />
+}
+
+function MobileZoomControl() {
+  useEffect(() => {
+    let enabled = localStorage.getItem('disableMobileZoom') !== 'false'
+    let lastTouchEnd = 0
+    const preventPinchZoom = (event: TouchEvent) => {
+    const touchEvent = event as any; 
+      if (enabled && touchEvent.scale !== undefined && touchEvent.scale !== 1) touchEvent.preventDefault()
+    }
+    const preventDoubleTapZoom = (touchEvent: TouchEvent) => {
+      if (!enabled) return
+      const now = Date.now()
+      if (now - lastTouchEnd <= 300) touchEvent.preventDefault()
+      lastTouchEnd = now
+    }
+    
+    const updateSetting = () => { enabled = localStorage.getItem('disableMobileZoom') !== 'false' }
+    document.addEventListener('touchmove', preventPinchZoom, { passive: false })
+    document.addEventListener('touchend', preventDoubleTapZoom, { passive: false })
+    window.addEventListener('storage', updateSetting)
+    window.addEventListener('mobile-zoom-setting-changed', updateSetting)
+    return () => {
+      document.removeEventListener('touchmove', preventPinchZoom)
+      document.removeEventListener('touchend', preventDoubleTapZoom)
+      window.removeEventListener('storage', updateSetting)
+      window.removeEventListener('mobile-zoom-setting-changed', updateSetting)
+    }
+  }, [])
+  return null
+}
 
 
 /* Dark / White mode handling */
@@ -70,6 +121,10 @@ const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
+        path: "loans",
+        element: <EnabledModuleRoute name="loans"><LoansPage /></EnabledModuleRoute>,
+      },
+      {
         path: "search",
         element: <SearchPage />,
       },
@@ -86,8 +141,8 @@ const router = createBrowserRouter([
         element: <AreaDetailScreen />,
       },
       {
-        path: "chests/:chestId",
-        element: <ChestPage />,
+        path: "boxes/:boxId",
+        element: <BoxPage />,
       },
       {
         path: "articles/:articleId",
@@ -138,6 +193,7 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
   <TooltipProvider>
+    <MobileZoomControl />
     <RouterProvider router={router} />
   </TooltipProvider>
   </StrictMode>,

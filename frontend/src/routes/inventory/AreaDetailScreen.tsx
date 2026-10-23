@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from "react"
 import { ArrowLeft, Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate, useParams } from "react-router"
-import { ArticleCard, ChestCard } from "@/components/inventory/entity-cards"
+import { ArticleCard, BoxCard } from "@/components/inventory/entity-cards"
 import { ShelfSection } from "@/components/inventory/ShelfSection"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
@@ -13,15 +13,15 @@ import {
   inventoryApi,
   type Area,
   type Article,
-  type Chest,
+  type Box,
   type Inventory,
   type Shelf,
 } from "@/utils/api/inventory"
 
-type CreateKind = "chest" | "shelf"
+type CreateKind = "box" | "shelf"
 
 function getLowStockBadge(article: Article, label: string) {
-  const minimumQuantity = article.custom_fields.minimum_quantity
+  const minimumQuantity = article.field_values.find((field) => field.key === "minimum_quantity")?.value
   return article.stock_tracking &&
     typeof minimumQuantity === "number" &&
     article.quantity <= minimumQuantity
@@ -41,9 +41,9 @@ export default function AreaDetailScreen() {
   const [editAreaId, setEditAreaId] = useState("")
   const [shelves, setShelves] = useState<Shelf[]>([])
   const [allShelves, setAllShelves] = useState<Shelf[]>([])
-  const [chests, setChests] = useState<Chest[]>([])
+  const [boxes, setBoxes] = useState<Box[]>([])
   const [articles, setArticles] = useState<Article[]>([])
-  const [modal, setModal] = useState<{ kind: CreateKind; item?: Shelf | Chest } | null>(null)
+  const [modal, setModal] = useState<{ kind: CreateKind; item?: Shelf | Box } | null>(null)
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
   const [openShelves, setOpenShelves] = useState<Record<string, boolean>>({})
@@ -52,11 +52,11 @@ export default function AreaDetailScreen() {
     if (!areaId) return
     setError("")
     try {
-      const [inventories, allAreas, allShelves, allChests, allArticles] = await Promise.all([
+      const [inventories, allAreas, allShelves, allBoxes, allArticles] = await Promise.all([
         inventoryApi.listInventories(),
         inventoryApi.listAreas(),
         inventoryApi.listShelves(),
-        inventoryApi.listChests(),
+        inventoryApi.listBoxes(),
         inventoryApi.listArticles(),
       ])
       setInventory(getSelectedInventory(inventories))
@@ -64,7 +64,7 @@ export default function AreaDetailScreen() {
       setAllAreas(allAreas)
       setShelves(allShelves.filter((item) => item.area === areaId))
       setAllShelves(allShelves)
-      setChests(allChests.filter((item) => item.area === areaId))
+      setBoxes(allBoxes.filter((item) => item.area === areaId))
       setArticles(allArticles.filter((item) => item.area === areaId))
     } catch (reason) {
       setError(
@@ -99,7 +99,7 @@ export default function AreaDetailScreen() {
 
     if (modal.kind === "shelf") {
       payload = { ...basePayload }
-    } else if (modal.kind === "chest") {
+    } else if (modal.kind === "box") {
       payload = {
         ...basePayload,
         shelf: optional("shelf"),
@@ -110,7 +110,7 @@ export default function AreaDetailScreen() {
     try {
       if (modal.item) {
         await inventoryApi.update(
-          modal.kind === "shelf" ? "shelves" : "chests",
+          modal.kind === "shelf" ? "shelves" : "boxes",
           modal.item.uuid,
           payload,
         )
@@ -118,8 +118,8 @@ export default function AreaDetailScreen() {
         await inventoryApi.create(
           modal.kind === "shelf"
             ? "shelves"
-            : modal.kind === "chest"
-              ? "chests"
+            : modal.kind === "box"
+              ? "boxes"
               : "articles",
           payload,
         )
@@ -137,7 +137,7 @@ export default function AreaDetailScreen() {
       setSaving(false)
     }
   }
-  async function remove(kind: "articles" | "chests" | "shelves", uuid: string, name: string) {
+  async function remove(kind: "articles" | "boxes" | "shelves", uuid: string, name: string) {
     if (!window.confirm(t("areas.detail.confirmDelete", { name }))) return
     try {
       await inventoryApi.remove(kind, uuid)
@@ -165,14 +165,14 @@ export default function AreaDetailScreen() {
       {/* Area header and creation actions */}
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">{area.name}</h1>
-        <p className="mt-2 text-muted-foreground">{t("areas.detail.summary", { articles: articles.length, chests: chests.length, shelves: shelves.length })}</p>
+        <p className="mt-2 text-muted-foreground">{t("areas.detail.summary", { articles: articles.length, boxes: boxes.length, shelves: shelves.length })}</p>
       </div>
     
       <div className="flex flex-wrap items-center gap-2">
       <InventoryViewToggle viewMode={viewMode} setViewMode={setViewMode} />
       
       <Button className="p-4" variant="outline" onClick={() => setModal({ kind: "shelf" })}><Plus /> {t("areas.detail.actions.shelf")}</Button>
-      <Button className="p-4" variant="outline" onClick={() => setModal({ kind: "chest" })}><Plus /> {t("areas.detail.actions.chest")}</Button>
+      <Button className="p-4" variant="outline" onClick={() => setModal({ kind: "box" })}><Plus /> {t("areas.detail.actions.box")}</Button>
       <Button className="p-4" onClick={() => navigate(`/app/areas/${areaId}/articles/new`)}><Plus /> {t("areas.detail.actions.article")}</Button>
       </div>
     </div>
@@ -181,11 +181,11 @@ export default function AreaDetailScreen() {
     <InventoryDropTarget target={{ kind: "area", id: areaId ?? "" }}>
     <div className="space-y-6">
       {/* Articles can live directly in an area without a shelf. */}
-      {articles.filter((article) => article.shelf === null).length > 0 && (
+      {articles.filter((article) => article.shelf === null && article.box === null).length > 0 && (
         <div>
           <h2 className="mb-3 text-lg font-semibold">{t("areas.detail.articles")}</h2>
           <div className={viewMode === "list" ? "flex flex-col gap-2" : "grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"}>
-            {articles.filter((article) => article.shelf === null).map((article) => (
+            {articles.filter((article) => article.shelf === null && article.box === null).map((article) => (
               <InventoryDraggable key={article.uuid} item={{ kind: "article", id: article.uuid }}>
                 <ArticleCard
                   viewMode={viewMode}
@@ -210,7 +210,7 @@ export default function AreaDetailScreen() {
           key={shelf.uuid}
           shelf={shelf}
           viewMode={viewMode}
-          chests={chests}
+          boxes={boxes}
           articles={articles}
           isOpen={openShelves[shelf.uuid] !== false}
           onToggle={() =>
@@ -226,13 +226,13 @@ export default function AreaDetailScreen() {
           onDeleteShelf={() =>
             void remove("shelves", shelf.uuid, shelf.name)
           }
-          onOpenChest={(chest) => navigate(`/app/chests/${chest.uuid}`)}
-          onEditChest={(chest) => {
-            setEditAreaId(chest.area)
-            setModal({ kind: "chest", item: chest })
+          onOpenBox={(box) => navigate(`/app/boxes/${box.uuid}`)}
+          onEditBox={(box) => {
+            setEditAreaId(box.area)
+            setModal({ kind: "box", item: box })
           }}
-          onDeleteChest={(chest) =>
-            void remove("chests", chest.uuid, chest.name)
+          onDeleteBox={(box) =>
+            void remove("boxes", box.uuid, box.name)
           }
           onOpenArticle={(article) =>
             navigate(`/app/articles/${article.uuid}`)
@@ -243,35 +243,35 @@ export default function AreaDetailScreen() {
         />
       ))}
 
-      {chests.filter((chest) => chest.shelf === null).length > 0 && (
+      {boxes.filter((box) => box.shelf === null).length > 0 && (
         <div>
           <h2 className="mb-3 text-lg font-semibold">{t("areas.detail.otherItems")}</h2>
           <div className={viewMode === "list" ? "flex flex-col gap-2" : "grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"}>
-            {chests
-              .filter((chest) => chest.shelf === null)
-              .map((chest) => (
+            {boxes
+              .filter((box) => box.shelf === null)
+              .map((box) => (
                 <InventoryDraggable
-                  key={chest.uuid}
-                  item={{ kind: "chest", id: chest.uuid }}
+                  key={box.uuid}
+                  item={{ kind: "box", id: box.uuid }}
                 >
                   <InventoryDropTarget
-                    target={{ kind: "chest", id: chest.uuid }}
+                    target={{ kind: "box", id: box.uuid }}
                   >
-                    <ChestCard
+                    <BoxCard
                       viewMode={viewMode}
-                      name={chest.name}
+                      name={box.name}
                       subtitle={t("areas.detail.articleCount", {
                         count: articles.filter(
-                          (article) => article.chest === chest.uuid,
+                          (article) => article.box === box.uuid,
                         ).length,
                       })}
-                      onOpen={() => navigate(`/app/chests/${chest.uuid}`)}
+                      onOpen={() => navigate(`/app/boxes/${box.uuid}`)}
                       onRename={() => {
-                        setEditAreaId(chest.area)
-                        setModal({ kind: "chest", item: chest })
+                        setEditAreaId(box.area)
+                        setModal({ kind: "box", item: box })
                       }}
                       onDelete={() =>
-                        void remove("chests", chest.uuid, chest.name)
+                        void remove("boxes", box.uuid, box.name)
                       }
                     />
                   </InventoryDropTarget>

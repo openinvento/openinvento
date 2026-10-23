@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react"
 import { ArrowLeft, Save } from "lucide-react"
-import { Link, useNavigate, useParams } from "react-router"
+import { Link, useNavigate, useParams, useSearchParams } from "react-router"
 import { useTranslation } from "react-i18next"
 import BaseScreen from "@/layouts/BaseScreen"
 import { ArticleIconPicker } from "@/components/inventory/article-icon-picker"
@@ -9,23 +9,24 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { getSelectedInventory, inventoryApi, type ArticleCategory, type CategoryField, type Chest, type Inventory, type Shelf } from "@/utils/api/inventory"
+import { getSelectedInventory, inventoryApi, type ArticleCategory, type CategoryField, type Box, type Inventory, type Shelf } from "@/utils/api/inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 import { compressArticleImage } from "@/utils/article-image"
 
 export default function ArticleCreateScreen() {
   const { areaId } = useParams()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [inventory, setInventory] = useState<Inventory | null>(null)
   const [areaName, setAreaName] = useState("")
   const [shelves, setShelves] = useState<Shelf[]>([])
-  const [chests, setChests] = useState<Chest[]>([])
+  const [boxes, setBoxes] = useState<Box[]>([])
   const [categories, setCategories] = useState<ArticleCategory[]>([])
   const [fields, setFields] = useState<CategoryField[]>([])
   const [selectedCategory, setSelectedCategory] = useState("")
   const [selectedShelf, setSelectedShelf] = useState("")
-  const [selectedChest, setSelectedChest] = useState("")
+  const [selectedBox, setSelectedBox] = useState(() => searchParams.get("box") ?? "")
   const [selectedIcon, setSelectedIcon] = useState("Package")
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -37,18 +38,18 @@ export default function ArticleCreateScreen() {
     void (async () => {
       if (!areaId) return
       try {
-        const [inventories, areas, nextShelves, nextChests, nextCategories, nextFields] = await Promise.all([
+        const [inventories, areas, nextShelves, nextBoxes, nextCategories, nextFields] = await Promise.all([
           inventoryApi.listInventories(),
           inventoryApi.listAreas(),
           inventoryApi.listShelves(),
-          inventoryApi.listChests(),
+          inventoryApi.listBoxes(),
           inventoryApi.listCategories(),
           inventoryApi.listCategoryFields(),
         ])
         setInventory(getSelectedInventory(inventories))
         setAreaName(areas.find((area) => area.uuid === areaId)?.name ?? "")
         setShelves(nextShelves.filter((shelf) => shelf.area === areaId))
-        setChests(nextChests.filter((chest) => chest.area === areaId))
+        setBoxes(nextBoxes.filter((box) => box.area === areaId))
         setCategories(nextCategories)
         setFields(nextFields)
       } catch (reason) {
@@ -75,27 +76,32 @@ export default function ArticleCreateScreen() {
     setSaving(true)
     setError("")
     try {
-      const customFields = Object.fromEntries(articleFields.map((field) => [
-        field.key,
-        field.field_type === "boolean"
-          ? form.get(`custom_${field.key}`) === "true"
-          : field.field_type === "number"
-            ? (form.get(`custom_${field.key}`)?.toString() ? Number(form.get(`custom_${field.key}`)) : null)
-            : form.get(`custom_${field.key}`)?.toString() || "",
-      ]))
+      const fieldValues = articleFields.map((field) => {
+        const rawValue = form.get(`custom_${field.key}`)?.toString()
+        return {
+          field: field.uuid,
+          key: field.key,
+          value: field.field_type === "boolean"
+            ? rawValue === "true"
+            : field.field_type === "number"
+              ? rawValue ? Number(rawValue) : null
+              : rawValue || "",
+          notify_on_date: field.field_type === "date" && form.get(`notify_date_${field.key}`) === "true",
+        }
+      })
       const payload = new FormData()
       payload.append("name", name)
       /* payload.append("identifier", form.get("identifier")?.toString().trim() || "") */
       payload.append("inventory", inventory.uuid)
       payload.append("area", areaId)
       payload.append("shelf", selectedShelf)
-      payload.append("chest", selectedChest)
+      payload.append("box", selectedBox)
       payload.append("category", selectedCategory)
       payload.append("quantity", form.get("quantity")?.toString() || "1")
       payload.append("stock_tracking", String(stockTracking))
       payload.append("description", form.get("description")?.toString() || "")
       payload.append("icon", selectedIcon)
-      payload.append("custom_fields", JSON.stringify(customFields))
+      payload.append("field_values", JSON.stringify(fieldValues))
       if (image) payload.append("image", image)
 
       const article = await inventoryApi.create<{ area: string }>("articles", payload)
@@ -180,10 +186,10 @@ export default function ArticleCreateScreen() {
               <SelectContent><SelectItem value="">{t("areas.detail.notOnShelf")}</SelectItem>{shelves.map((shelf) => <SelectItem key={shelf.uuid} value={shelf.uuid}>{shelf.name}</SelectItem>)}</SelectContent>
             </Select>
           </Field>
-          <Field label={t("areas.detail.fields.chest")}>
-            <Select name="chest" value={selectedChest} onValueChange={(value) => setSelectedChest(value ?? "")}>
-              <SelectTrigger className="w-full"><SelectValue placeholder={t("areas.detail.noChest")} /></SelectTrigger>
-              <SelectContent><SelectItem value="">{t("areas.detail.noChest")}</SelectItem>{chests.map((chest) => <SelectItem key={chest.uuid} value={chest.uuid}>{chest.name}</SelectItem>)}</SelectContent>
+          <Field label={t("areas.detail.fields.box")}>
+            <Select name="box" value={selectedBox} onValueChange={(value) => setSelectedBox(value ?? "")}>
+              <SelectTrigger className="w-full"><SelectValue placeholder={t("areas.detail.noBox")} /></SelectTrigger>
+              <SelectContent><SelectItem value="">{t("areas.detail.noBox")}</SelectItem>{boxes.map((box) => <SelectItem key={box.uuid} value={box.uuid}>{box.name}</SelectItem>)}</SelectContent>
             </Select>
           </Field>
         </section>
@@ -202,9 +208,17 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function CustomField({ field, label, selectLabel }: { field: CategoryField; label: string; selectLabel: string }) {
+  const { t } = useTranslation()
   return <Field label={label}>
     {field.field_type === "select" ? <Select name={`custom_${field.key}`} defaultValue=""><SelectTrigger className="w-full"><SelectValue placeholder={selectLabel} /></SelectTrigger><SelectContent><SelectItem value="">{selectLabel}</SelectItem>{field.options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select>
       : field.field_type === "boolean" ? <Switch name={`custom_${field.key}`} value="true" />
-        : <Input name={`custom_${field.key}`} type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"} />}
+        : field.field_type === "date" ? <div className="grid gap-2">
+          <Input name={`custom_${field.key}`} type="date" />
+          <span className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm font-normal">
+            <span>{t("categoriesAndFields.dateNotifications")}</span>
+            <Switch name={`notify_date_${field.key}`} value="true" aria-label={t("categoriesAndFields.dateNotifications")} />
+          </span>
+        </div>
+          : <Input name={`custom_${field.key}`} type={field.field_type === "number" ? "number" : "text"} />}
   </Field>
 }

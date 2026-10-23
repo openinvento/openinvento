@@ -1,68 +1,343 @@
 {
-  "navActions": {
-    "area": "Bereich",
-    "chest": "Kiste",
-    "confirmDelete": "{{name}} löschen? Der Inhalt kann ebenfalls gelöscht werden.",
-    "delete": "Löschen",
-    "errors": {
-      "delete": "Element konnte nicht gelöscht werden.",
-      "rename": "Element konnte nicht umbenannt werden."
-    },
-    "name": "Name",
-    "moreActions": "Weitere Aktionen",
-    "noActions": "Keine Aktionen verfügbar.",
-    "noNotifications": "Keine Benachrichtigungen.",
-    "lowStock": "Niedriger Bestand: {{name}}",
-    "stockLevel": "Noch {{quantity}} vorhanden (Minimum {{minimum}})",
-    "notifications": "Benachrichtigungen",
-    "dismiss": "Ausblenden",
-    "rename": "Umbenennen",
-    "renameTitle": "{{kind}} umbenennen"
+  "accounts": {
+    "logoutBtn": "Abmelden"
   },
-  "chests": {
-    "editChest": "Kiste bearbeiten",
-    "editTitle": "Kiste bearbeiten",
-    "errors": { "edit": "Kiste konnte nicht bearbeitet werden." }
+  "actions": {
+    "delete": "Löschen",
+    "rename": "Umbenennen"
   },
   "areas": {
+    "areaName": "Bereichsname",
+    "confirmDelete": "{{name}} löschen? Der Inventarinhalt könnte ebenfalls gelöscht werden.",
+    "createArea": "Bereich erstellen",
+    "description": "Ordne deine Dinge nach Zimmer, Garage, Büro oder einem anderen Ort.",
     "detail": {
-      "fields": { "area": "Bereich" },
-      "errors": { "move": "Element konnte nicht verschoben werden." }
+      "actions": {
+        "article": "Artikel",
+        "box": "Kiste",
+        "shelf": "Regal"
+      },
+      "allAreas": "Alle Bereiche",
+      "articleCount": "{{count}} Artikel",
+      "articles": "Artikel",
+      "confirmDelete": "{{name}} löschen?",
+      "deleteShelf": "Regal löschen",
+      "errors": {
+        "delete": "Element konnte nicht gelöscht werden.",
+        "load": "Dieser Bereich konnte nicht geladen werden.",
+        "move": "Element konnte nicht verschoben werden.",
+        "save": "Element konnte nicht gespeichert werden."
+      },
+      "fields": {
+        "area": "Bereich",
+        "box": "Kiste",
+        "category": "Kategorie",
+        "description": "Beschreibung",
+        "icon": "Symbol",
+        "name": "Name",
+        "quantity": "Menge",
+        "selectValue": "Wert auswählen",
+        "shelf": "Regal",
+        "stockTracking": "Bestand verfolgen"
+      },
+      "inStock": "{{count}} auf Lager",
+      "itemCount": "{{count}} Elemente",
+      "loading": "Bereich wird geladen...",
+      "lowStock": "Niedriger Bestand",
+      "modal": {
+        "edit": "{{kind}} bearbeiten",
+        "new": "Neue/r {{kind}}"
+      },
+      "noBox": "Keine Kiste",
+      "noCategory": "Keine Kategorie",
+      "notOnShelf": "In keinem Regal",
+      "nothingStored": "Hier ist noch nichts eingelagert.",
+      "otherFields": "Weitere Felder",
+      "otherItems": "Weitere Elemente",
+      "renameShelf": "Regal umbenennen",
+      "stockFields": "Bestandsschwellenwerte",
+      "summary": "{{articles}} Artikel · {{boxes}} Kisten · {{shelves}} Regale"
+    },
+    "empty": {
+      "noAreas": {
+        "text": "Beginne mit dem Ort, an dem du deine Dinge aufbewahrst.",
+        "title": "Dein Inventar hat noch keine Bereiche"
+      },
+      "noInventory": {
+        "text": "Bitte einen Administrator, dich einem Inventar hinzuzufügen, bevor du Bereiche erstellst.",
+        "title": "Kein Inventar verfügbar"
+      }
+    },
+    "errors": {
+      "delete": "Bereich konnte nicht gelöscht werden.",
+      "load": "Bereiche konnten nicht geladen werden.",
+      "save": "Bereich konnte nicht gespeichert werden."
+    },
+    "inventoryFallback": "Dein Inventar",
+    "namePlaceholder": "z. B. Küche",
+    "newArea": "Neuer Bereich",
+    "renameArea": "Bereich umbenennen",
+    "title": "Bereiche"
+  },
+  "articles": {
+    "page": {
+      "areas": "Bereiche",
+      "attachments": {
+        "add": "Datei hinzufügen",
+        "deleteError": "Datei konnte nicht entfernt werden.",
+        "download": "{{name}} herunterladen",
+        "empty": "Noch keine Dateien angehängt.",
+        "remove": "{{name}} entfernen",
+        "title": "Dateien und Anhänge",
+        "uploadError": "Datei konnte nicht hochgeladen werden.",
+        "uploading": "Wird hochgeladen..."
+      },
+      "backToArea": "Zurück zum Bereich",
+      "confirmDelete": "{{name}} löschen?",
+      "delete": "Löschen",
+      "errors": {
+        "delete": "Artikel konnte nicht gelöscht werden.",
+        "load": "Artikel konnte nicht geladen werden.",
+        "save": "Artikel konnte nicht gespeichert werden.",
+        "unsavedChanges": "Du hast ungespeicherte Änderungen. Speichere sie, bevor du diese Seite verlässt."
+      },
+      "fields": {
+        "area": "Bereich",
+        "box": "Kiste",
+        "category": "Kategorie",
+        "chooseImage": "Bild auswählen",
+        "description": "Beschreibung",
+        "identifier": "Kennung",
+        "identifierHelp": "Die Kennung hilft dabei, Elemente in deinem Inventar zu identifizieren, und wird hauptsächlich für Barcodes und QR-Codes verwendet.",
+        "identifierHelpLabel": "Über Kennungen",
+        "image": "Bild (optional)",
+        "name": "Name",
+        "quantity": "Menge",
+        "removeImage": "Entfernen",
+        "replaceImage": "Ersetzen",
+        "selectValue": "Wert auswählen",
+        "shelf": "Regal",
+        "stockTracking": "Bestandsverfolgung"
+      },
+      "headings": {
+        "articleDetails": "Artikeldetails",
+        "general": "Allgemein",
+        "locationAndCategory": "Ort und Kategorie"
+      },
+      "loading": "Artikel wird geladen...",
+      "noArea": "Kein Bereich",
+      "noBox": "Keine Kiste",
+      "noCategory": "Keine Kategorie",
+      "noShelf": "Kein Regal",
+      "saveChanges": "Änderungen speichern",
+      "saving": "Wird gespeichert...",
+      "stockFields": "Bestandsschwellenwerte"
     }
   },
-  "inventory": {
-    "view": {
-      "label": "Inventaransicht",
-      "grid": "Rasteransicht",
-      "list": "Listenansicht"
+  "auth": {
+    "errors": {
+      "emailInvalid": "Gib eine gültige E-Mail-Adresse ein.",
+      "emailRequired": "Die E-Mail-Adresse ist erforderlich.",
+      "emailTaken": "Diese E-Mail-Adresse ist bereits registriert.",
+      "generic": "Anmeldung fehlgeschlagen. Bitte versuche es erneut.",
+      "invalidCredentials": "Ungültige E-Mail-Adresse, Benutzername oder Passwort.",
+      "invalidField": "Ungültige Angabe für {{field}}.",
+      "invalidRequest": "Bitte überprüfe deine Eingaben.",
+      "nameRequired": "Der Name ist erforderlich.",
+      "passwordCommon": "Dieses Passwort ist zu häufig verwendet.",
+      "passwordMismatch": "Die Passwörter stimmen nicht überein.",
+      "passwordNumeric": "Das Passwort darf nicht ausschließlich aus Zahlen bestehen.",
+      "passwordRequired": "Das Passwort ist erforderlich.",
+      "passwordSimilar": "Das Passwort ähnelt deinen persönlichen Angaben zu sehr.",
+      "passwordTooShort": "Das Passwort ist zu kurz. Es muss mindestens 8 Zeichen enthalten.",
+      "usernameRequired": "Der Benutzername ist erforderlich.",
+      "usernameTaken": "Dieser Benutzername ist bereits vergeben."
     },
+    "fields": {
+      "email": "E-Mail-Adresse",
+      "name": "Name",
+      "password": "Passwort",
+      "username": "Benutzername"
+    },
+    "reset": {
+      "confirmPassword": "Neues Passwort bestätigen",
+      "newPassword": "Neues Passwort",
+      "saving": "Wird gespeichert...",
+      "submit": "Zugangsdaten aktualisieren",
+      "title": "Zugangsdaten aktualisieren",
+      "warning": "Aus Sicherheitsgründen musst du einen neuen Benutzernamen und ein neues Passwort festlegen."
+    },
+    "signupDisabled": "Die öffentliche Kontoerstellung ist für diese Instanz derzeit deaktiviert."
+  },
+  "boxes": {
+    "articleCount": "{{count}} Artikel",
+    "backToArea": "Zurück zum Bereich",
+    "confirmDelete": "{{name}} löschen?",
+    "editBox": "Kiste bearbeiten",
+    "editIdentifier": "Kennung bearbeiten",
+    "editTitle": "Kiste bearbeiten",
+    "empty": "In dieser Kiste sind noch keine Artikel eingelagert.",
+    "errors": {
+      "delete": "Artikel konnte nicht gelöscht werden.",
+      "edit": "Kiste konnte nicht bearbeitet werden.",
+      "identifier": "Kennung konnte nicht aktualisiert werden.",
+      "load": "Diese Kiste konnte nicht geladen werden."
+    },
+    "identifierTitle": "Kistenkennung bearbeiten",
+    "loading": "Kiste wird geladen..."
+  },
+  "categoriesAndFields": {
+    "addCategory": "Kategorie hinzufügen",
+    "addField": "Feld hinzufügen",
+    "addGeneralField": "Allgemeines Feld hinzufügen",
+    "categories": "Kategorien",
+    "category": "Kategorie",
+    "categoryName": "Kategoriename",
+    "confirmDeleteCategory": "Kategorie {{name}} und ihre Felder löschen?",
+    "confirmDeleteField": "Feld {{name}} löschen?",
+    "createCategory": "Kategorie erstellen",
+    "delete": "Löschen",
+    "description": "Lege fest, welche Informationen zu jedem Artikel gespeichert werden.",
+    "dateNotifications": "An diesem Datum benachrichtigen",
+    "dateNotificationsDescription": "Eine Benachrichtigung für Artikel erstellen, die dieses Feld verwenden.",
+    "edit": "Bearbeiten",
+    "editCategory": "Kategorie bearbeiten",
+    "editField": "Feld bearbeiten",
+    "errors": {
+      "delete": "Element konnte nicht gelöscht werden.",
+      "load": "Kategorien und Felder konnten nicht geladen werden.",
+      "saveCategory": "Kategorie konnte nicht gespeichert werden.",
+      "saveField": "Feld konnte nicht gespeichert werden."
+    },
+    "field": "Feld",
+    "fieldType": "Feldtyp",
+    "fieldTypes": {
+      "barcode": "Barcode",
+      "boolean": "Ja / Nein",
+      "date": "Datum",
+      "number": "Zahl",
+      "select": "Auswählen",
+      "text": "Text"
+    },
+    "fields": "Felder",
+    "generalField": "Allgemeines Feld",
+    "generalFields": "Allgemeine Felder",
+    "inventory": "Inventar",
+    "key": "Schlüssel",
+    "label": "Bezeichnung",
+    "newCategory": "Neue Kategorie",
+    "newField": "Neues Feld",
+    "noCategoriesText": "Erstelle eine Kategorie, um zusammengehörige Artikelfelder zu gruppieren.",
+    "noCategoriesTitle": "Noch keine Kategorien",
+    "noCategoryFields": "Keine kategoriespezifischen Felder.",
+    "noGeneralFields": "Es gibt keine Felder, die für alle Kategorien gelten.",
+    "noInventoryText": "Bitte einen Administrator, dich einem Inventar hinzuzufügen, bevor du Kategorien verwaltest.",
+    "noInventoryTitle": "Kein Inventar verfügbar",
+    "options": "Optionen",
+    "optionsPlaceholder": "Durch Kommas getrennte Werte",
+    "title": "Kategorien und Felder"
+  },
+  "dashboard": {
+    "addArticle": "Artikel hinzufügen",
+    "addArticleDescription": "Speichere etwas Neues in deinem Inventar.",
+    "areas": "Bereiche",
+    "articles": "Artikel",
+    "categories": "Kategorien",
+    "createArea": "Bereich erstellen",
+    "createAreaDescription": "Füge einen Raum, ein Regal oder einen Lagerplatz hinzu.",
+    "errors": {
+      "load": "Dashboard konnte nicht geladen werden."
+    },
+    "greeting": "Guten Morgen!",
+    "inventoryByCategory": "Inventar nach Kategorie",
+    "lastAdded": "Zuletzt hinzugefügt",
+    "loading": "Dashboard wird geladen...",
+    "noCategoryDescription": "Erstelle Kategorien, um dein Inventar hier gruppiert anzuzeigen.",
+    "noCategoryTitle": "Noch keine Kategorien",
+    "noLastAddedDescription": "Neue Bereiche, Artikel und andere Inventarelemente werden hier angezeigt.",
+    "noLastAddedTitle": "Noch nichts hinzugefügt",
+    "overview": "Übersicht",
+    "quickActions": "Schnellaktionen",
+    "recentUpdates": "Letzte Aktualisierungen",
+    "search": "Suche",
+    "searchPlaceholder": "Inventar durchsuchen...",
+    "title": "Startseite",
+    "types": {
+      "area": "Bereich",
+      "article": "Artikel",
+      "box": "Kiste",
+      "category": "Kategorie",
+      "field": "Feld",
+      "shelf": "Regal"
+    },
+    "updatedNow": "Gerade aktualisiert",
+    "viewAll": "Alle anzeigen",
+    "viewCategories": "Kategorien"
+  },
+  "inventory": {
     "categories": {
-      "food": "Lebensmittel",
       "books": "Bücher und Medien",
-      "electronics": "Elektronik",
       "clothing": "Kleidung",
+      "electronics": "Elektronik",
+      "food": "Lebensmittel",
       "medicine": "Medikamente"
     },
     "fields": {
-      "barcode": "Barcode",
-      "expiration_date": "Ablaufdatum",
-      "isbn": "ISBN",
       "author": "Autor/in",
+      "barcode": "Barcode",
+      "brand": "Marke",
+      "expiration_date": "Ablaufdatum",
+      "expiry": "Ablaufdatum",
+      "has_insurance": "Versichert",
+      "isbn": "ISBN",
+      "minimum_quantity": "Mindestbestand",
       "pages": "Seiten",
+      "prescription_required": "Verschreibung erforderlich",
+      "purchase_date": "Kaufdatum",
+      "pzn_barcode": "PZN-Barcode",
+      "quantity": "Menge",
       "read_status": "Lesestatus",
       "serial_number": "Seriennummer",
-      "purchase_date": "Kaufdatum",
-      "warranty_months": "Garantiezeit in Monaten",
-      "has_insurance": "Versichert",
-      "brand": "Marke",
       "size": "Größe",
-      "quantity": "Menge",
-      "pzn_barcode": "PZN-Barcode",
-      "expiry": "Ablaufdatum",
-      "prescription_required": "Verschreibung erforderlich",
-      "minimum_quantity": "Mindestbestand",
-      "stock_level": "Bestandsniveau"
+      "stock_level": "Bestandsniveau",
+      "warranty_months": "Garantiezeit in Monaten"
+    },
+    "view": {
+      "grid": "Rasteransicht",
+      "label": "Inventaransicht",
+      "list": "Listenansicht"
     }
+  },
+  "loans": {
+    "article": "Artikel",
+    "box": "Kisten",
+    "create": "Ausleihe erfassen",
+    "description": "Verfolge ausgeliehene Artikel und Kisten aus deinem Inventar.",
+    "due": "Fällig",
+    "dueDate": "Fälligkeitsdatum (optional)",
+    "empty": "Bisher wurden keine Ausleihen erfasst.",
+    "errors": {
+      "create": "Fehler beim Erfassen der Ausleihe.",
+      "inventoryLoad": "Fehler beim Laden der Inventarobjekte.",
+      "load": "Fehler beim Laden der Ausleihen.",
+      "return": "Fehler beim Markieren der Rückgabe."
+    },
+    "history": "Deine Ausleihen",
+    "item": "Objekt",
+    "itemType": "Objekttyp",
+    "loading": "Ausleihen werden geladen...",
+    "markReturned": "Als zurückgegeben markieren",
+    "newLoan": "Ausleihe erfassen",
+    "noDueDate": "Kein Fälligkeitsdatum",
+    "noItems": "Keine Objekte in diesem Inventar verfügbar.",
+    "notes": "Notizen (optional)",
+    "notesLabel": "Notizen",
+    "quantity": "Anzahl",
+    "returned": "Zurückgegeben am {{date}}",
+    "returning": "Wird zurückgebucht...",
+    "saving": "Wird gespeichert...",
+    "title": "Ausleihen",
+    "unknownItem": "Inventarobjekt"
   },
   "manageCodes": {
     "clearSelection": "Auswahl aufheben",
@@ -77,8 +352,18 @@
       "load": "Inventarelemente konnten nicht geladen werden.",
       "selectItem": "Wähle zuerst mindestens ein Element aus."
     },
+    "externalScanner": {
+      "close": "Scanner schließen",
+      "errors": {
+        "lookup": "Das gescannte Element konnte nicht gefunden werden."
+      },
+      "listening": "Barcode wird empfangen...",
+      "lookingUp": "Inventarelement wird gesucht...",
+      "ready": "Bereit für Eingaben vom externen Barcodescanner. Jetzt einen Code scannen.",
+      "title": "Externer Barcodescanner"
+    },
     "inventoryItems": "Inventarelemente",
-    "layout": "Layout",
+    "layout": "Anordnung",
     "loading": "Inventarelemente werden geladen...",
     "noItems": "Keine Inventarelemente gefunden.",
     "options": "Codeoptionen",
@@ -86,59 +371,91 @@
     "print": "Codes drucken",
     "scan": "Code scannen",
     "searchPlaceholder": "Elemente suchen",
-    "selectedCount": "{{selected}} von {{total}} ausgewählt",
     "selectAll": "Alle auswählen",
+    "selectedCount": "{{selected}} von {{total}} ausgewählt",
     "title": "QR-Codes und Barcodes",
     "types": {
       "area": "Bereich",
       "article": "Artikel",
-      "chest": "Kiste",
+      "box": "Kiste",
       "shelf": "Regal"
     },
-    "useExternalBarcodeScanner": "Externer Barcodescanner",
-    "externalScanner": {
-      "title": "Externer Barcodescanner",
-      "ready": "Bereit für Eingaben vom externen Barcodescanner. Jetzt einen Code scannen.",
-      "listening": "Barcode wird empfangen...",
-      "lookingUp": "Inventarelement wird gesucht...",
-      "close": "Scanner schließen",
-      "errors": {
-        "lookup": "Das gescannte Element konnte nicht gefunden werden."
-      }
-    }
+    "useExternalBarcodeScanner": "Externer Barcodescanner"
+  },
+  "navActions": {
+    "area": "Bereich",
+    "box": "Kiste",
+    "confirmDelete": "{{name}} löschen? Der Inhalt kann ebenfalls gelöscht werden.",
+    "delete": "Löschen",
+    "dismiss": "Ausblenden",
+    "editIdentifier": "Kennung bearbeiten",
+    "errors": {
+      "delete": "Element konnte nicht gelöscht werden.",
+      "identifier": "Kennung konnte nicht aktualisiert werden.",
+      "rename": "Element konnte nicht umbenannt werden."
+    },
+    "identifier": "Kennung",
+    "identifierTitle": "Kennung von {{kind}} bearbeiten",
+    "lowStock": "Niedriger Bestand: {{name}}",
+    "moreActions": "Weitere Aktionen",
+    "name": "Name",
+    "noActions": "Keine Aktionen verfügbar.",
+    "noNotifications": "Keine Benachrichtigungen.",
+    "notifications": "Benachrichtigungen",
+    "rename": "Umbenennen",
+    "renameTitle": "{{kind}} umbenennen",
+    "stockLevel": "Noch {{quantity}} vorhanden (Minimum {{minimum}})"
+  },
+  "search": {
+    "box": "Kiste",
+    "empty": "Keine Artikel gefunden.",
+    "errors": {
+      "load": "Inventare konnten nicht geladen werden.",
+      "search": "Artikel konnten nicht gesucht werden."
+    },
+    "inventory": "Inventar",
+    "loading": "Inventare werden geladen...",
+    "noInventory": "Kein Inventar verfügbar.",
+    "placeholder": "Elemente nach Namen suchen",
+    "prompt": "Gib einen Suchbegriff ein, um Artikel zu finden.",
+    "quantity": "{{count}} auf Lager",
+    "searchDescription": "Inventar durchsuchen",
+    "searchTitle": "Suche",
+    "submit": "Suche"
   },
   "settings": {
+    "UISettings": "UI Einstellungen",
+    "accountLoadError": "Kontodaten konnten nicht geladen werden.",
+    "accountName": "Anzeigename",
+    "accountPassword": "Neues Passwort",
+    "accountPasswordConfirm": "Neues Passwort bestätigen",
+    "accountSave": "Persönliches Konto speichern",
+    "accountSaving": "Wird gespeichert...",
+    "accountUsername": "Benutzername",
     "admin": {
-      "addUser": "Benutzer hinzufügen",
-      "userManagement": "Benutzerverwaltung",
       "actions": "Aktionen",
+      "addUser": "Benutzer hinzufügen",
       "administrator": "Administrator",
       "backupDescription": "Datenbank und alle von dieser Instanz gespeicherten Dateien herunterladen.",
       "backupError": "Instanz-Backup konnte nicht heruntergeladen werden.",
       "backupLoading": "Backup wird erstellt...",
       "backupTitle": "Instanz-Backup",
-      "downloadBackup": "Backup herunterladen",
-      "version": {
-        "title": "OpenInvento-Updates",
-        "description": "Nach einer neuen Version suchen und das Änderungsprotokoll ansehen.",
-        "checkButton": "Nach Updates suchen",
-        "checking": "Suche läuft...",
-        "checkError": "Release-Informationen konnten nicht abgerufen werden.",
-        "updateAvailable": "Version {{version}} ist verfügbar.",
-        "upToDate": "Diese Instanz verwendet die neueste Version ({{version}}).",
-        "noNotes": "Für dieses Release gibt es keine Änderungsnotizen.",
-        "noChangelog": "Seit dieser Version sind keine Änderungsnotizen verfügbar."
-      },
       "cancel": "Abbrechen",
       "confirmDelete": "{{name}} löschen?",
       "deleteUser": "Benutzer löschen",
       "deleteUserError": "Benutzer konnte nicht gelöscht werden.",
+      "downloadBackup": "Backup herunterladen",
       "editUser": "Benutzer bearbeiten",
       "email": "E-Mail",
       "enableEmailLogin": "Anmeldung per E-Mail aktivieren",
       "loadUsersError": "Benutzer konnten nicht geladen werden.",
       "loadingUsers": "Benutzer werden geladen...",
       "member": "Mitglied",
+      "modules": {
+        "description": "Wähle aus, welche optionalen Module in dieser Instanz verfügbar sind.",
+        "noAvailableModules": "Es sind keine optionalen Module installiert.",
+        "title": "Module"
+      },
       "name": "Name",
       "newUser": "Neuer Benutzer",
       "noEmail": "Keine E-Mail-Adresse",
@@ -149,81 +466,105 @@
       "role": "Rolle",
       "saveUser": "Benutzer speichern",
       "saveUserError": "Benutzer konnte nicht gespeichert werden.",
-      "username": "Benutzername"
+      "userManagement": "Benutzerverwaltung",
+      "username": "Benutzername",
+      "version": {
+        "checkButton": "Nach Updates suchen",
+        "checkError": "Release-Informationen konnten nicht abgerufen werden.",
+        "checking": "Suche läuft...",
+        "description": "Nach einer neuen Version suchen und das Änderungsprotokoll ansehen.",
+        "noChangelog": "Seit dieser Version sind keine Änderungsnotizen verfügbar.",
+        "noNotes": "Für dieses Release gibt es keine Änderungsnotizen.",
+        "title": "OpenInvento-Updates",
+        "upToDate": "Diese Instanz verwendet die neueste Version ({{version}}).",
+        "updateAvailable": "Version {{version}} ist verfügbar."
+      }
     },
-    "accountName": "Anzeigename",
-    "accountPassword": "Neues Passwort",
-    "accountPasswordConfirm": "Neues Passwort bestätigen",
-    "accountSave": "Persönliches Konto speichern",
-    "accountSaving": "Wird gespeichert...",
-    "accountUsername": "Benutzername",
-    "accountLoadError": "Kontodaten konnten nicht geladen werden.",
+    "adminTab": "Administratoreinstellungen",
+    "allowEmailLogin": "Anmeldung mit E-Mail-Adresse erlauben",
+    "allowEmailLoginDescription": "Wenn aktiviert, können sich Benutzer zusätzlich mit ihrer E-Mail-Adresse anmelden.",
     "apiKeys": {
-      "title": "API-Schlüssel",
-      "description": "Mit einem Schlüssel kannst du über die API auf dein Inventar zugreifen. Schlüssel haben dieselben Berechtigungen wie dein Konto.",
-      "createdOnce": "Kopiere diesen Schlüssel jetzt. Er wird nicht erneut angezeigt.",
       "copy": "Schlüssel kopieren",
-      "dismiss": "Schließen",
-      "namePlaceholder": "Name des Schlüssels",
-      "nameLabel": "Name des API-Schlüssels",
       "create": "API-Schlüssel erstellen",
+      "createError": "API-Schlüssel konnte nicht erstellt werden.",
+      "createdOnce": "Kopiere diesen Schlüssel jetzt. Er wird nicht erneut angezeigt.",
       "creating": "Wird erstellt...",
-      "loading": "API-Schlüssel werden geladen...",
+      "description": "Mit einem Schlüssel kannst du über die API auf dein Inventar zugreifen. Schlüssel haben dieselben Berechtigungen wie dein Konto.",
+      "dismiss": "Schließen",
       "empty": "Noch keine API-Schlüssel vorhanden.",
-      "revoked": "widerrufen",
+      "loadError": "API-Schlüssel konnten nicht geladen werden.",
+      "loading": "API-Schlüssel werden geladen...",
+      "nameLabel": "Name des API-Schlüssels",
+      "namePlaceholder": "Name des Schlüssels",
       "prefix": "Schlüsselpräfix: {{prefix}}",
       "rename": "Umbenennen",
       "renamePrompt": "Neuen Namen eingeben",
       "revoke": "Widerrufen",
       "revokeConfirm": "API-Schlüssel {{name}} widerrufen? Dies kann nicht rückgängig gemacht werden.",
-      "loadError": "API-Schlüssel konnten nicht geladen werden.",
-      "createError": "API-Schlüssel konnte nicht erstellt werden.",
-      "updateError": "API-Schlüssel konnte nicht umbenannt werden.",
-      "revokeError": "API-Schlüssel konnte nicht widerrufen werden."
+      "revokeError": "API-Schlüssel konnte nicht widerrufen werden.",
+      "revoked": "widerrufen",
+      "title": "API-Schlüssel",
+      "updateError": "API-Schlüssel konnte nicht umbenannt werden."
     },
     "description": "Wähle aus, wie die Benutzeroberfläche dargestellt werden soll.",
+    "disableMobileZoom": "Zoom auf Mobilgeräten deaktivieren",
+    "instanceSettingsLoadError": "Instanzeinstellungen konnten nicht geladen werden.",
+    "instanceSettingsSaveError": "Instanzeinstellungen konnten nicht gespeichert werden.",
+    "inventory": {
+      "addMember": "Person hinzufügen",
+      "dangerZone": "Gefahrenbereich",
+      "deleteConfirm": "{{name}} löschen? Der gesamte Inventarinhalt wird dauerhaft gelöscht.",
+      "deleteError": "Inventar konnte nicht gelöscht werden.",
+      "deleteInventory": "Inventar löschen",
+      "exportCsv": "CSV-Dateien exportieren",
+      "exportDescription": "Inventardaten und zugehörige Dateien als ZIP-Archiv mit CSV-Tabellen herunterladen.",
+      "exportError": "Inventar konnte nicht exportiert werden.",
+      "exportTitle": "Inventardaten exportieren",
+      "exporting": "CSV wird erstellt...",
+      "general": "Allgemein",
+      "invitesDisabled": "Das Hinzufügen von Personen ist für diese Instanz deaktiviert.",
+      "loadError": "Inventareinstellungen konnten nicht geladen werden.",
+      "loading": "Inventareinstellungen werden geladen...",
+      "members": "Geteilt mit",
+      "name": "Name",
+      "noMembers": "Keine Mitglieder gefunden.",
+      "removeMember": "Person entfernen",
+      "removeMemberConfirm": "{{name}} aus diesem Inventar entfernen?",
+      "saveError": "Inventarmitglieder konnten nicht aktualisiert werden.",
+      "selectPerson": "Person auswählen",
+      "title": "Inventareinstellungen"
+    },
+    "language": {
+      "description": "Wähle deine bevorzugte Sprache aus."
+    },
     "languageLabel": "Sprache",
+    "mobileZoomDescription": "Pinch- und Doppeltipp-Zoom in der App auf Touchgeräten verhindern.",
+    "mobileZoomTitle": "Mobiler Zoom",
     "personalAccount": "Persönliches Konto",
     "personalAccountDescription": "Benutzername, Anzeigename oder Passwort aktualisieren.",
     "tabsLabel": "Einstellungsbereiche",
-    "userTab": "Benutzereinstellungen",
-    "adminTab": "Administratoreinstellungen",
     "themeDark": "Dunkel",
     "themeLabel": "Design / Theme",
     "themeLight": "Hell",
     "themePlaceholder": "Design wählen",
     "themeSystem": "System",
     "title": "Einstellungen",
-    "allowEmailLogin": "Anmeldung mit E-Mail-Adresse erlauben",
-    "allowEmailLoginDescription": "Wenn aktiviert, können sich Benutzer zusätzlich mit ihrer E-Mail-Adresse anmelden.",
-    "instanceSettingsLoadError": "Instanzeinstellungen konnten nicht geladen werden.",
-    "instanceSettingsSaveError": "Instanzeinstellungen konnten nicht gespeichert werden.",
-    "inventory": {
-      "exportCsv": "CSV-Dateien exportieren",
-      "exportDescription": "Inventardaten und zugehörige Dateien als ZIP-Archiv mit CSV-Tabellen herunterladen.",
-      "exportError": "Inventar konnte nicht exportiert werden.",
-      "exporting": "CSV wird erstellt...",
-      "exportTitle": "Inventardaten exportieren"
-    }
-  },
-  "auth": {
-    "reset": {
-      "title": "Zugangsdaten aktualisieren",
-      "warning": "Aus Sicherheitsgründen musst du einen neuen Benutzernamen und ein neues Passwort festlegen.",
-      "newPassword": "Neues Passwort",
-      "confirmPassword": "Neues Passwort bestätigen",
-      "saving": "Wird gespeichert...",
-      "submit": "Zugangsdaten aktualisieren"
-    },
-    "signupDisabled": "Die öffentliche Kontoerstellung ist für diese Instanz derzeit deaktiviert."
+    "userTab": "Benutzereinstellungen"
   },
   "sidebar": {
-    "home": "Home",
-    "settings": "Einstellungen",
     "areas": "Bereiche",
+    "article": "Artikel",
+    "categoriesAndFields": "Kategorien und Felder",
+    "codeManagement": "Codeverwaltung",
+    "dashboard": "Dashboard",
     "favorites": "Favoriten",
+    "home": "Startseite",
+    "inventorySettings": "Inventareinstellungen",
+    "loans": "Ausleihen",
     "noAreas": "Noch keine Bereiche.",
     "noFavorites": "Noch keine Favoriten.",
-    "removeFavorite": "Aus Favoriten entfernen"
+    "removeFavorite": "Aus Favoriten entfernen",
+    "search": "Suche",
+    "settings": "Einstellungen"
   }
 }

@@ -3,21 +3,23 @@ import { deleteData, downloadFile, fetchData, patchData, postData } from "./base
 export type Inventory = { uuid: string; name: string; identifier: string; updated_at: string }
 export type Area = EntityBase
 export type Shelf = EntityBase & { area: string }
-export type Chest = EntityBase & { area: string; shelf: string | null; parent_chest: string | null }
+export type Box = EntityBase & { area: string; shelf: string | null; parent_box: string | null }
 export type Article = EntityBase & {
   description: string | null
   area: string | null
   shelf: string | null
-  chest: string | null
+  box: string | null
   quantity: number
   stock_tracking: boolean
   image: string | null
   icon: string | null
   category: string | null
-  custom_fields: Record<string, string | number | boolean | null>
+  field_values: ArticleFieldValue[]
   category_fields: CategoryField[]
 }
+export type SearchResult = (Article & { type: "article" }) | (Box & { type: "box" })
 export type ArticleAttachment = { id: number; original_name: string; url: string; size: number; created_at: string }
+export type ArticleFieldValue = { field: string; key: string; value: string | number | boolean | null; notify_on_date: boolean }
 export type CategoryField = EntityBase & { key: string; label: string; field_type: string; options: string[]; category: string | null }
 export type ArticleCategory = EntityBase & { fields: CategoryField[]; category_fields?: CategoryField[] }
 export type DashboardData = {
@@ -37,7 +39,7 @@ export type CodeLookupResult = {
   uuid: string
   identifier: string
   name: string
-  type: "article" | "area" | "shelf" | "chest" | "category" | "field"
+  type: "article" | "area" | "shelf" | "box" | "category" | "field"
 }
 
 const SELECTED_INVENTORY_KEY = "selectedInventoryUuid"
@@ -94,7 +96,7 @@ type EntityBase = {
   updated_at: string
 }
 
-type EntityPath = "areas" | "shelves" | "chests" | "articles" | "article-categories" | "category-fields"
+type EntityPath = "areas" | "shelves" | "boxes" | "articles" | "article-categories" | "category-fields"
 type CreatePayload = Record<string, unknown> | FormData
 
 export const inventoryApi = {
@@ -102,7 +104,7 @@ export const inventoryApi = {
   listInventories: () => fetchData<Inventory[]>("/api/inventories/"),
   listAreas: () => fetchData<Area[]>(scopedPath("/api/areas/")),
   listShelves: () => fetchData<Shelf[]>(scopedPath("/api/shelves/")),
-  listChests: () => fetchData<Chest[]>(scopedPath("/api/chests/")),
+  listBoxes: () => fetchData<Box[]>(scopedPath("/api/boxes/")),
   listArticles: () => fetchData<Article[]>(scopedPath("/api/articles/")),
   listArticleAttachments: (article: string) => fetchData<ArticleAttachment[]>(`/api/article-attachments/?article=${encodeURIComponent(article)}`),
   uploadArticleAttachment: (article: string, file: File) => {
@@ -118,7 +120,7 @@ export const inventoryApi = {
     patchData<T>(`/api/${kind}/${uuid}/`, payload),
   remove: (kind: EntityPath, uuid: string) => deleteData<void>(`/api/${kind}/${uuid}/`),
   searchInventory: (query: string, inventory: string) =>
-    fetchData<Article[]>(`/api/search/?q=${encodeURIComponent(query)}&inventory=${encodeURIComponent(inventory)}`),
+    fetchData<SearchResult[]>(`/api/search/?q=${encodeURIComponent(query)}&inventory=${encodeURIComponent(inventory)}`),
   lookupCode: (identifier: string) =>
     postData<CodeLookupResult>("/api/codes/lookup/", { identifier }),
   updateInventory: (inventory: string, name: string) =>

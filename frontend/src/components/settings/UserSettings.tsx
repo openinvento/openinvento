@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select"
 import { useNavigate } from "react-router"
 import { createAPIKey, getAPIKeys, renameAPIKey, revokeAPIKey, type APIKey } from "@/utils/api/settings"
+import { Switch } from "@/components/ui/switch"
 
 type ThemeOption = "light" | "dark" | "system"
 
@@ -34,6 +35,7 @@ export default function UserSettings() {
   const [apiKeyError, setApiKeyError] = useState<string | null>(null)
   const [apiKeysLoading, setApiKeysLoading] = useState(true)
   const [apiKeysSaving, setApiKeysSaving] = useState(false)
+  const [disableMobileZoom, setDisableMobileZoom] = useState(() => localStorage.getItem("disableMobileZoom") !== "false")
   
   const [theme, setTheme] = useState<ThemeOption>(() => {
     if (typeof window !== "undefined") {
@@ -148,6 +150,27 @@ export default function UserSettings() {
       localStorage.setItem("theme", nextTheme)
     }
     window.dispatchEvent(new Event("storage"))
+  }
+
+  function handleDisableMobileZoomChange(checked: boolean) {
+    setDisableMobileZoom(checked)
+    localStorage.setItem("disableMobileZoom", String(checked))
+    window.dispatchEvent(new Event("mobile-zoom-setting-changed"))
+  }
+
+  const languageName = (language: string) => {
+    switch (language) {
+      case "de":
+        return "Deutsch"
+      case "en":
+        return "English"
+      case "es":
+        return "Español"
+      case "fr":
+        return "Français"
+      default:
+        return language
+    }
   }
 
   return (
@@ -276,16 +299,30 @@ export default function UserSettings() {
         )}
       </section>
 
+
+      <h2 className="text-xl font-semibold">{t("settings.UISettings")}</h2>
+      <section className="border-b pb-7">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <label htmlFor="disable-mobile-zoom" className="text-sm font-medium">{t("settings.disableMobileZoom")}</label>
+            <p className="text-sm text-muted-foreground">{t("settings.mobileZoomDescription")}</p>
+          </div>
+          <Switch id="disable-mobile-zoom" checked={disableMobileZoom} onCheckedChange={handleDisableMobileZoomChange} aria-label={t("settings.disableMobileZoom")} />
+        </div>
+      </section>
+
       <div className="flex flex-row justify-between gap-6 ">
         <div className="flex flex-1 flex-col gap-2">
           <label className="text-sm font-medium">{t("settings.languageLabel")}</label>
-          <Select value={i18n.resolvedLanguage ?? "en"} onValueChange={(language) => language && i18n.changeLanguage(language)}>
+          <Select value={i18n.resolvedLanguage ?? "en"} itemToStringLabel={() => (languageName(i18n.resolvedLanguage ?? "en"))} onValueChange={(language) => language && i18n.changeLanguage(language)}>
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="de">Deutsch</SelectItem>
               <SelectItem value="en">English</SelectItem>
+              <SelectItem value="es">Español</SelectItem>
+              <SelectItem value="fr">Français</SelectItem>
             </SelectContent>
           </Select>
           <FieldDescription>{t("settings.language.description")}</FieldDescription>

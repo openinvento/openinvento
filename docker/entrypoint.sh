@@ -20,15 +20,15 @@ gunicorn \
     "${DJANGO_WSGI_MODULE}" &
 backend_pid=$!
 
-update_checker_pid=""
-case "${ENABLE_UPDATE_CHECKER:-true}" in
+scheduler_pid=""
+case "${ENABLE_TASK_SCHEDULER:-true}" in
     1|true|TRUE|yes|YES|on|ON)
-        echo "Starting the update notification checker..."
-        python manage.py run_update_checker &
-        update_checker_pid=$!
+        echo "Starting the daily task scheduler..."
+        python manage.py run_daily_scheduler &
+        scheduler_pid=$!
         ;;
     *)
-        echo "Automatic update checks are disabled."
+        echo "The daily task scheduler is disabled."
         ;;
 esac
 
@@ -36,7 +36,7 @@ echo "Starting nginx..."
 nginx -g "daemon off;" &
 nginx_pid=$!
 
-trap 'kill "$backend_pid" "$nginx_pid" 2>/dev/null || true; if [ -n "$update_checker_pid" ]; then kill "$update_checker_pid" 2>/dev/null || true; fi' INT TERM EXIT
+trap 'kill "$backend_pid" "$nginx_pid" 2>/dev/null || true; if [ -n "$scheduler_pid" ]; then kill "$scheduler_pid" 2>/dev/null || true; fi' INT TERM EXIT
 
 status=$?
 while kill -0 "$backend_pid" 2>/dev/null && kill -0 "$nginx_pid" 2>/dev/null; do
@@ -50,11 +50,9 @@ else
 fi
 
 kill "$backend_pid" "$nginx_pid" 2>/dev/null || true
-if [ -n "$update_checker_pid" ]; then
-    kill "$update_checker_pid" 2>/dev/null || true
+if [ -n "$scheduler_pid" ]; then
+    kill "$scheduler_pid" 2>/dev/null || true
+    wait "$scheduler_pid" 2>/dev/null || true
 fi
 wait "$backend_pid" "$nginx_pid" 2>/dev/null || true
-if [ -n "$update_checker_pid" ]; then
-    wait "$update_checker_pid" 2>/dev/null || true
-fi
 exit "$status"

@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { ArrowLeft, Pencil } from "lucide-react"
+import { ArrowLeft, Pencil, Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate, useParams } from "react-router"
 import { ArticleCard } from "@/components/inventory/entity-cards"
@@ -7,22 +7,22 @@ import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
 import { InventoryViewToggle, useInventoryViewMode } from "@/components/inventory/view-mode"
 import { InventoryDraggable } from "@/components/inventory/inventory-dnd"
-import { inventoryApi, type Area, type Article, type Chest, type Shelf } from "@/utils/api/inventory"
+import { inventoryApi, type Area, type Article, type Box, type Shelf } from "@/utils/api/inventory"
 
 function getLowStockBadge(article: Article, label: string) {
-  const minimumQuantity = article.custom_fields.minimum_quantity
+  const minimumQuantity = article.field_values.find((field) => field.key === "minimum_quantity")?.value
   return article.stock_tracking && typeof minimumQuantity === "number" && article.quantity <= minimumQuantity
     ? label
     : undefined
 }
 
-export default function ChestPage() {
-  const { chestId } = useParams()
+export default function BoxPage() {
+  const { boxId } = useParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
 
   const { viewMode, setViewMode } = useInventoryViewMode()
-  const [chest, setChest] = useState<Chest | null>(null)
+  const [box, setBox] = useState<Box | null>(null)
   const [articles, setArticles] = useState<Article[]>([])
   const [areas, setAreas] = useState<Area[]>([])
   const [shelves, setShelves] = useState<Shelf[]>([])
@@ -33,23 +33,23 @@ export default function ChestPage() {
   const [saving, setSaving] = useState(false)
 
   async function load() {
-    if (!chestId) return
+    if (!boxId) return
     setError("")
     try {
-      const [allChests, allArticles, allAreas, allShelves] = await Promise.all([inventoryApi.listChests(), inventoryApi.listArticles(), inventoryApi.listAreas(), inventoryApi.listShelves()])
-      const nextChest = allChests.find((item) => item.uuid === chestId) ?? null
-      setChest(nextChest)
-      setArticles(allArticles.filter((article) => article.chest === chestId))
+      const [allBoxes, allArticles, allAreas, allShelves] = await Promise.all([inventoryApi.listBoxes(), inventoryApi.listArticles(), inventoryApi.listAreas(), inventoryApi.listShelves()])
+      const nextBox = allBoxes.find((item) => item.uuid === boxId) ?? null
+      setBox(nextBox)
+      setArticles(allArticles.filter((article) => article.box === boxId))
       setAreas(allAreas)
       setShelves(allShelves)
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("chests.errors.load"))
+      setError(reason instanceof Error ? reason.message : t("boxes.errors.load"))
     }
   }
 
-  async function updateChest(event: FormEvent<HTMLFormElement>) {
+  async function updateBox(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!chest) return
+    if (!box) return
     const form = new FormData(event.currentTarget)
     const name = form.get("name")?.toString().trim()
     const area = form.get("area")?.toString()
@@ -58,13 +58,13 @@ export default function ChestPage() {
     setSaving(true)
     setError("")
     try {
-      const updated = await inventoryApi.update<Chest>("chests", chest.uuid, { name, area, shelf })
-      setChest(updated)
+      const updated = await inventoryApi.update<Box>("boxes", box.uuid, { name, area, shelf })
+      setBox(updated)
       setEditOpen(false)
       await load()
       window.dispatchEvent(new Event("openinvento:inventory-moved"))
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("chests.errors.edit"))
+      setError(reason instanceof Error ? reason.message : t("boxes.errors.edit"))
     } finally {
       setSaving(false)
     }
@@ -74,67 +74,71 @@ export default function ChestPage() {
     void load()
     window.addEventListener("openinvento:inventory-moved", load)
     return () => window.removeEventListener("openinvento:inventory-moved", load)
-  }, [chestId])
+  }, [boxId])
 
   async function remove(article: Article) {
-    if (!window.confirm(t("chests.confirmDelete", { name: article.name }))) return
+    if (!window.confirm(t("boxes.confirmDelete", { name: article.name }))) return
     try {
       await inventoryApi.remove("articles", article.uuid)
       await load()
       window.dispatchEvent(new Event("openinvento:inventory-moved"))
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("chests.errors.delete"))
+      setError(reason instanceof Error ? reason.message : t("boxes.errors.delete"))
     }
   }
 
   async function updateIdentifier(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!chest) return
+    if (!box) return
     const identifier = new FormData(event.currentTarget).get("identifier")?.toString().trim()
     if (!identifier) return
     setSaving(true)
     setError("")
     try {
-      const updated = await inventoryApi.update<Chest>("chests", chest.uuid, { identifier })
-      setChest(updated)
+      const updated = await inventoryApi.update<Box>("boxes", box.uuid, { identifier })
+      setBox(updated)
       setIdentifierOpen(false)
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("chests.errors.identifier"))
+      setError(reason instanceof Error ? reason.message : t("boxes.errors.identifier"))
     } finally {
       setSaving(false)
     }
   }
 
-  if (!chest && !error) return <p className="text-muted-foreground">{t("chests.loading")}</p>
+  if (!box && !error) return <p className="text-muted-foreground">{t("boxes.loading")}</p>
 
   return (
     <section className="w-full">
-      <Link to={chest?.area ? `/app/areas/${chest.area}` : "/app/areas"} className="mb-5 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <Link to={box?.area ? `/app/areas/${box.area}` : "/app/areas"} className="mb-5 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="size-4" />
-        {t("chests.backToArea")}
+        {t("boxes.backToArea")}
       </Link>
       {error && <p className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
-      {chest && <>
+      {box && <>
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">{chest.name}</h1>
-            <p className="mt-2 text-muted-foreground">{t("chests.articleCount", { count: articles.length })}</p>
+            <h1 className="text-3xl font-semibold tracking-tight">{box.name}</h1>
+            <p className="mt-2 text-muted-foreground">{t("boxes.articleCount", { count: articles.length })}</p>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button onClick={() => navigate(`/app/areas/${box.area}/articles/new?box=${box.uuid}`)}>
+              <Plus />
+              {t("dashboard.addArticle")}
+            </Button>
             <InventoryViewToggle viewMode={viewMode} setViewMode={setViewMode} />
 
             <Button variant="outline" onClick={() => setIdentifierOpen(true)}>
               <Pencil /> 
-              {t("chests.editIdentifier")}
+              {t("boxes.editIdentifier")}
             </Button>
-            <Button variant="outline" onClick={() => { setEditAreaId(chest.area); setEditOpen(true) }}>
+            <Button variant="outline" onClick={() => { setEditAreaId(box.area); setEditOpen(true) }}>
               <Pencil /> 
-              {t("chests.editChest")}
+              {t("boxes.editBox")}
             </Button>
           </div>
         </div>
         {articles.length === 0 ? (
-          <p className="rounded-2xl border border-dashed bg-muted/20 p-8 text-center text-sm text-muted-foreground">{t("chests.empty")}</p>
+          <p className="rounded-2xl border border-dashed bg-muted/20 p-8 text-center text-sm text-muted-foreground">{t("boxes.empty")}</p>
         ) : (
           <div className={viewMode === "list" ? "flex flex-col gap-2" : "grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"}>
             {articles.map((article) => 
@@ -150,21 +154,21 @@ export default function ChestPage() {
           </div>
         )}
       </>}
-      {chest && 
-      <InventoryModal title={t("chests.identifierTitle")} open={identifierOpen} submitting={saving}
+      {box && 
+      <InventoryModal title={t("boxes.identifierTitle")} open={identifierOpen} submitting={saving}
         onClose={() => setIdentifierOpen(false)} onSubmit={updateIdentifier}>
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         <label className="grid gap-1.5 text-sm font-medium">
           {t("navActions.identifier")}
-          <input autoFocus name="identifier" maxLength={30} defaultValue={chest.identifier} required className="h-10 rounded-lg border bg-background px-3 font-normal" />
+          <input autoFocus name="identifier" maxLength={30} defaultValue={box.identifier} required className="h-10 rounded-lg border bg-background px-3 font-normal" />
         </label>
       </InventoryModal>}
-      {chest && 
-      <InventoryModal title={t("chests.editTitle")} open={editOpen} submitting={saving} onClose={() => setEditOpen(false)} onSubmit={updateChest}>
+      {box && 
+      <InventoryModal title={t("boxes.editTitle")} open={editOpen} submitting={saving} onClose={() => setEditOpen(false)} onSubmit={updateBox}>
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
         <label className="grid gap-1.5 text-sm font-medium">
           {t("navActions.name")}
-          <input autoFocus name="name" maxLength={120} defaultValue={chest.name} required className="h-10 rounded-lg border bg-background px-3 font-normal" />
+          <input autoFocus name="name" maxLength={120} defaultValue={box.name} required className="h-10 rounded-lg border bg-background px-3 font-normal" />
         </label>
         <label className="grid gap-1.5 text-sm font-medium">
           {t("areas.detail.fields.area")}
@@ -174,7 +178,7 @@ export default function ChestPage() {
         </label>
         <label className="grid gap-1.5 text-sm font-medium">
           {t("areas.detail.fields.shelf")}
-          <select name="shelf" defaultValue={chest.shelf ?? ""} className="h-10 rounded-lg border bg-background px-3 font-normal">
+          <select name="shelf" defaultValue={box.shelf ?? ""} className="h-10 rounded-lg border bg-background px-3 font-normal">
             <option value="">{t("areas.detail.notOnShelf")}</option>
             {shelves.filter((shelf) => shelf.area === editAreaId).map((shelf) => <option key={shelf.uuid} value={shelf.uuid}>{shelf.name}</option>)}
           </select>

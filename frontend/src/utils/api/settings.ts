@@ -1,9 +1,12 @@
 import { deleteData, downloadFile, fetchData, patchData, postData } from "./base"
+import { refreshEnabledModules } from "./modules"
 
 
 export type InstanceSettings = {
   allow_email_login: boolean
   allow_signup: boolean
+  enabled_modules: string[]
+  available_modules: { name: string; label: string }[]
 }
 
 
@@ -12,7 +15,9 @@ export async function getInstanceSettings() {
 }
 
 export async function updateInstanceSettings(settings: Partial<InstanceSettings>) {
-  return patchData<InstanceSettings>('/api/instance-settings/', settings)
+  const updated = await patchData<InstanceSettings>('/api/instance-settings/', settings)
+  if (settings.enabled_modules !== undefined) refreshEnabledModules()
+  return updated
 }
 
 export async function downloadInstanceBackup() {

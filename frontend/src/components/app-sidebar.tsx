@@ -14,11 +14,12 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuestionIcon, QrCodeIcon, TextSearchIcon, WarehouseIcon } from "lucide-react"
+import { SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuestionIcon, QrCodeIcon, TextSearchIcon, WarehouseIcon, HandCoinsIcon } from "lucide-react"
 import { FAVORITES_CHANGED_EVENT, getFavorites, removeFavorite, type Favorite } from "@/utils/favorites"
 import i18n from "@/i18n"
 import { getSidebarData, type SidebarData } from "@/utils/api/general"
 import { inventoryApi, type Area } from "@/utils/api/inventory"
+import { getEnabledModules, MODULES_CHANGED_EVENT } from "@/utils/api/modules"
 
 // This is sample data.
 const data = {
@@ -57,6 +58,12 @@ const data = {
       ),
       isActive: false,
       badge: "10",
+    },
+    {
+      title: i18n.t("sidebar.loans"),
+      url: "/app/loans",
+      icon: <HandCoinsIcon />,
+      isActive: false,
     },
     {
       title: i18n.t("sidebar.codeManagement"),
@@ -176,6 +183,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [favorites, setFavorites] = React.useState<Favorite[]>([])
   const [sidebar, setSidebar] = React.useState<SidebarData | null>(null)
   const [areas, setAreas] = React.useState<Area[]>([])
+  const [enabledModules, setEnabledModules] = React.useState<string[]>([])
+
+  React.useEffect(() => {
+    const loadModules = () => void getEnabledModules().then(setEnabledModules).catch(() => setEnabledModules([]))
+    loadModules()
+    window.addEventListener(MODULES_CHANGED_EVENT, loadModules)
+    return () => window.removeEventListener(MODULES_CHANGED_EVENT, loadModules)
+  }, [])
 
   React.useEffect(() => {
     void getSidebarData().then(setSidebar).catch(() => setSidebar(null))
@@ -200,10 +215,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [])
 
   /* Auto set isActive based on the current URL location */
-  const dynamicNavMain = data.navMain.map((item) => ({
+  const dynamicNavMain = data.navMain
+    .filter((item) => item.url !== "/app/loans" || enabledModules.includes("loans"))
+    .map((item) => ({
     ...item,
     isActive: location.pathname === item.url || (item.url === "/app" && location.pathname === "/app/dashboard")
-  }))
+    }))
 
   return (
     <Sidebar className="border-r-0" {...props}>

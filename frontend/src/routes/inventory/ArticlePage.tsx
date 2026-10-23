@@ -8,7 +8,7 @@ import { removeFavorite } from "@/utils/favorites"
 import { getArticleIcon } from "@/components/inventory/article-icon-picker"
 import { ImageUploadField } from "@/components/inventory/image-upload-field"
 import { FullscreenImagePreview } from "@/components/inventory/fullscreen-image-preview"
-import { inventoryApi, type Area, type Article, type ArticleAttachment, type ArticleCategory, type CategoryField, type Chest, type Shelf } from "@/utils/api/inventory"
+import { inventoryApi, type Area, type Article, type ArticleAttachment, type ArticleCategory, type CategoryField, type Box, type Shelf } from "@/utils/api/inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 import { useTranslation } from "react-i18next"
 import { compressArticleImage } from "@/utils/article-image"
@@ -22,7 +22,7 @@ export default function ArticlePage() {
   const [article, setArticle] = useState<Article | null>(null)
   const [areas, setAreas] = useState<Area[]>([])
   const [shelves, setShelves] = useState<Shelf[]>([])
-  const [chests, setChests] = useState<Chest[]>([])
+  const [boxes, setBoxes] = useState<Box[]>([])
   const [categories, setCategories] = useState<ArticleCategory[]>([])
   const [categoryFields, setCategoryFields] = useState<CategoryField[]>([])
   const [globalFields, setGlobalFields] = useState<CategoryField[]>([])
@@ -34,7 +34,7 @@ export default function ArticlePage() {
   const [selectedArea, setSelectedArea] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedShelf, setSelectedShelf] = useState<string | null>(null)
-  const [selectedChest, setSelectedChest] = useState<string | null>(null)
+  const [selectedBox, setSelectedBox] = useState<string | null>(null)
   const [image, setImage] = useState<File | null>(null)
   const [imageChanged, setImageChanged] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -69,7 +69,7 @@ export default function ArticlePage() {
 
   useEffect(() => { void (async () => { 
     try {
-      const [allArticles, nextAreas, nextShelves, nextChests, nextCategories, nextFields] = await Promise.all([inventoryApi.listArticles(), inventoryApi.listAreas(), inventoryApi.listShelves(), inventoryApi.listChests(), inventoryApi.listCategories(), inventoryApi.listCategoryFields()]); 
+      const [allArticles, nextAreas, nextShelves, nextBoxes, nextCategories, nextFields] = await Promise.all([inventoryApi.listArticles(), inventoryApi.listAreas(), inventoryApi.listShelves(), inventoryApi.listBoxes(), inventoryApi.listCategories(), inventoryApi.listCategoryFields()]);
       const nextArticle = allArticles.find((item) => item.uuid === articleId) ?? null
       setArticle(nextArticle)
       if (nextArticle) setAttachments(await inventoryApi.listArticleAttachments(nextArticle.uuid))
@@ -77,10 +77,10 @@ export default function ArticlePage() {
       setSelectedArea(nextArticle?.area ?? null)
       setSelectedCategory(nextArticle?.category ?? null)
       setSelectedShelf(nextArticle?.shelf ?? null)
-      setSelectedChest(nextArticle?.chest ?? null)
+      setSelectedBox(nextArticle?.box ?? null)
       setAreas(nextAreas); 
       setShelves(nextShelves); 
-      setChests(nextChests) 
+      setBoxes(nextBoxes)
       setCategories(nextCategories)
       setCategoryFields(nextFields.filter((field) => field.category !== null))
       setGlobalFields(nextFields.filter((field) => field.category === null))
@@ -93,21 +93,37 @@ export default function ArticlePage() {
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!article) return
-    const form = new FormData(event.currentTarget)
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
     const value = (key: string) => form.get(key)?.toString() || null
     setSaving(true); setError("")
     try {
-      const customFields = Object.fromEntries(
-        articleFields.map((field) => [
-          field.key, 
-          field.field_type === "boolean"
-            ? form.get(`custom_${field.key}`) === "true"
-            : field.field_type === "number"
-              ? (form.get(`custom_${field.key}`)?.toString() ? Number(form.get(`custom_${field.key}`)) : null)
-              : form.get(`custom_${field.key}`)?.toString() || ""
-        ])
-      );
+      const activeFieldIds = new Set(articleFields.map((field) => field.uuid))
+      const fieldValues = [
+        ...article.field_values.filter((fieldValue) => !activeFieldIds.has(fieldValue.field)),
+        ...articleFields.flatMap((field) => {
+          const previous = article.field_values.find((fieldValue) => fieldValue.field === field.uuid)
+          const valueControl = formElement.elements.namedItem(`custom_${field.key}`)
+          const notifyControl = formElement.elements.namedItem(`notify_date_${field.key}`)
+          if (!valueControl && !previous) return []
 
+          const rawValue = form.get(`custom_${field.key}`)?.toString()
+          const value = !valueControl
+            ? previous?.value ?? null
+            : field.field_type === "boolean"
+              ? rawValue === "true"
+              : field.field_type === "number"
+                ? rawValue ? Number(rawValue) : null
+                : rawValue ?? ""
+          const notifyOnDate = field.field_type !== "date"
+            ? false
+            : notifyControl
+              ? form.get(`notify_date_${field.key}`) === "true"
+              : previous?.notify_on_date ?? false
+
+          return [{ field: field.uuid, key: field.key, value, notify_on_date: notifyOnDate }]
+        }),
+      ]
       const payload = new FormData()
       payload.append("name", form.get("name")?.toString().trim() || "")
       payload.append("identifier", form.get("identifier")?.toString().trim() || "")
@@ -116,9 +132,9 @@ export default function ArticlePage() {
       payload.append("stock_tracking", String(stockTracking))
       payload.append("area", value("area") || "")
       payload.append("shelf", value("shelf") || "")
-      payload.append("chest", value("chest") || "")
+      payload.append("box", value("box") || "")
       payload.append("category", value("category") || "")
-      payload.append("custom_fields", JSON.stringify(customFields))
+      payload.append("field_values", JSON.stringify(fieldValues))
       if (image) payload.append("image", image)
       else if (imageChanged) payload.append("image", "")
 
@@ -129,7 +145,7 @@ export default function ArticlePage() {
       window.dispatchEvent(new Event("openinvento:inventory-moved"))
 
       // Redirect to the area page if the article was saved successfully
-      setPendingNavigation(next.area ? `/app/areas/${next.area}` : "/app/areas")
+      setPendingNavigation(next.box ? `/app/boxes/${next.box}` : next.area ? `/app/areas/${next.area}` : "/app/areas")
 
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : t("articles.page.errors.save")) 
@@ -200,7 +216,7 @@ export default function ArticlePage() {
   if (!article) return <section><Link to="/app/areas" className="inline-flex items-center gap-1 text-sm text-muted-foreground"><ArrowLeft className="size-4" /> {t("articles.page.areas")}</Link><p className="mt-6 text-muted-foreground">{error || t("articles.page.loading")}</p></section>
   
   const relevantShelves = shelves.filter((shelf) => !selectedArea || shelf.area === selectedArea)
-  const relevantChests = chests.filter((chest) => !selectedArea || chest.area === selectedArea)
+  const relevantBoxes = boxes.filter((box) => !selectedArea || box.area === selectedArea)
   const articleFields = [...categoryFields.filter((field) => field.category === selectedCategory), ...globalFields]
   const stockFields = articleFields.filter((field) => field.key === "minimum_quantity" || field.key === "stock_level")
   const otherFields = articleFields.filter((field) => field.key !== "minimum_quantity" && field.key !== "stock_level")
@@ -300,7 +316,7 @@ export default function ArticlePage() {
                   onChange={(event) => {
                     setSelectedArea(event.target.value || null)
                     setSelectedShelf(null)
-                    setSelectedChest(null)
+                    setSelectedBox(null)
                   }}
                 >
                   <option value="">{t("articles.page.noArea")}</option>
@@ -338,16 +354,16 @@ export default function ArticlePage() {
                 </select>
               </Field>
 
-              <Field label={t("articles.page.fields.chest")}>
+              <Field label={t("articles.page.fields.box")}>
                 <select
-                  name="chest"
-                  value={selectedChest ?? ""}
-                  onChange={(event) => setSelectedChest(event.target.value || null)}
+                  name="box"
+                  value={selectedBox ?? ""}
+                  onChange={(event) => setSelectedBox(event.target.value || null)}
                 >
-                  <option value="">{t("articles.page.noChest")}</option>
-                  {relevantChests.map((chest) => (
-                    <option key={chest.uuid} value={chest.uuid}>
-                      {chest.name}
+                  <option value="">{t("articles.page.noBox")}</option>
+                  {relevantBoxes.map((box) => (
+                    <option key={box.uuid} value={box.uuid}>
+                      {box.name}
                     </option>
                   ))}
                 </select>
@@ -383,7 +399,7 @@ export default function ArticlePage() {
                 {otherFields.map((field) => 
                   <Field key={field.uuid} label={getFieldLabel(field)}>
                     {field.field_type === "select" ? (
-                      <select name={`custom_${field.key}`} defaultValue={article.custom_fields[field.key]?.toString() ?? ""}>
+                      <select name={`custom_${field.key}`} defaultValue={article.field_values.find((item) => item.field === field.uuid)?.value?.toString() ?? ""}>
                         <option value="">{t("articles.page.fields.selectValue")}</option>
                         {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
                       </select>
@@ -391,13 +407,30 @@ export default function ArticlePage() {
                       <Switch
                         name={`custom_${field.key}`}
                         value="true"
-                        defaultChecked={article.custom_fields[field.key] === true}
+                        defaultChecked={article.field_values.find((item) => item.field === field.uuid)?.value === true}
                       />
+                    ) : field.field_type === "date" ? (
+                      <div className="grid gap-2">
+                        <input
+                          name={`custom_${field.key}`}
+                          type="date"
+                          defaultValue={article.field_values.find((item) => item.field === field.uuid)?.value?.toString() ?? ""}
+                        />
+                        <span className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm font-normal">
+                          <span>{t("categoriesAndFields.dateNotifications")}</span>
+                          <Switch
+                            name={`notify_date_${field.key}`}
+                            value="true"
+                            defaultChecked={article.field_values.find((item) => item.field === field.uuid)?.notify_on_date ?? false}
+                            aria-label={t("categoriesAndFields.dateNotifications")}
+                          />
+                        </span>
+                      </div>
                     ) : (
                       <input
                         name={`custom_${field.key}`}
-                        type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"}
-                        defaultValue={article.custom_fields[field.key]?.toString() ?? ""}
+                        type={field.field_type === "number" ? "number" : "text"}
+                        defaultValue={article.field_values.find((item) => item.field === field.uuid)?.value?.toString() ?? ""}
                       />
                     )}
                   </Field>)
@@ -421,7 +454,7 @@ export default function ArticlePage() {
                     {stockFields.map((field) => 
                       <Field key={field.uuid} label={getFieldLabel(field)}>
                         {field.field_type === "select" ? (
-                          <select name={`custom_${field.key}`} defaultValue={article.custom_fields[field.key]?.toString() ?? ""}>
+                          <select name={`custom_${field.key}`} defaultValue={article.field_values.find((item) => item.field === field.uuid)?.value?.toString() ?? ""}>
                             <option value="">{t("articles.page.fields.selectValue")}</option>
                             {field.options.map((option) => <option key={option} value={option}>{option}</option>)}
                           </select>
@@ -429,13 +462,30 @@ export default function ArticlePage() {
                           <Switch
                             name={`custom_${field.key}`}
                             value="true"
-                            defaultChecked={article.custom_fields[field.key] === true}
+                            defaultChecked={article.field_values.find((item) => item.field === field.uuid)?.value === true}
                           />
+                        ) : field.field_type === "date" ? (
+                          <div className="grid gap-2">
+                            <input
+                              name={`custom_${field.key}`}
+                              type="date"
+                              defaultValue={article.field_values.find((item) => item.field === field.uuid)?.value?.toString() ?? ""}
+                            />
+                            <span className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm font-normal">
+                              <span>{t("categoriesAndFields.dateNotifications")}</span>
+                              <Switch
+                                name={`notify_date_${field.key}`}
+                                value="true"
+                                defaultChecked={article.field_values.find((item) => item.field === field.uuid)?.notify_on_date ?? false}
+                                aria-label={t("categoriesAndFields.dateNotifications")}
+                              />
+                            </span>
+                          </div>
                         ) : (
                           <input
                             name={`custom_${field.key}`}
-                            type={field.field_type === "number" ? "number" : field.field_type === "date" ? "date" : "text"}
-                            defaultValue={article.custom_fields[field.key]?.toString() ?? ""}
+                            type={field.field_type === "number" ? "number" : "text"}
+                            defaultValue={article.field_values.find((item) => item.field === field.uuid)?.value?.toString() ?? ""}
                           />
                         )}
                       </Field>)

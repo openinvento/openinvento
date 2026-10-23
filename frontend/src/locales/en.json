@@ -2,6 +2,10 @@
   "accounts": {
     "logoutBtn": "Logout"
   },
+  "actions": {
+    "delete": "Delete",
+    "rename": "Rename"
+  },
   "areas": {
     "areaName": "Area name",
     "confirmDelete": "Delete {{name}}? Its inventory contents may be deleted too.",
@@ -10,7 +14,7 @@
     "detail": {
       "actions": {
         "article": "Article",
-        "chest": "Chest",
+        "box": "Box",
         "shelf": "Shelf"
       },
       "allAreas": "All areas",
@@ -26,8 +30,8 @@
       },
       "fields": {
         "area": "Area",
+        "box": "Box",
         "category": "Category",
-        "chest": "Chest",
         "description": "Description",
         "icon": "Icon",
         "name": "Name",
@@ -44,15 +48,15 @@
         "edit": "Edit {{kind}}",
         "new": "New {{kind}}"
       },
+      "noBox": "No box",
       "noCategory": "No category",
-      "noChest": "No chest",
       "notOnShelf": "Not on a shelf",
       "nothingStored": "Nothing stored here yet.",
       "otherFields": "Other fields",
       "otherItems": "Other items",
       "renameShelf": "Rename shelf",
       "stockFields": "Stock thresholds",
-      "summary": "{{articles}} articles · {{chests}} chests · {{shelves}} shelves"
+      "summary": "{{articles}} articles · {{boxes}} boxes · {{shelves}} shelves"
     },
     "empty": {
       "noAreas": {
@@ -99,8 +103,8 @@
       },
       "fields": {
         "area": "Area",
+        "box": "Box",
         "category": "Category",
-        "chest": "Chest",
         "chooseImage": "Choose image",
         "description": "Description",
         "identifier": "Identifier",
@@ -122,8 +126,8 @@
       },
       "loading": "Loading article...",
       "noArea": "No area",
+      "noBox": "No box",
       "noCategory": "No category",
-      "noChest": "No chest",
       "noShelf": "No shelf",
       "saveChanges": "Save changes",
       "saving": "Saving...",
@@ -165,6 +169,23 @@
     },
     "signupDisabled": "Public account signup is currently disabled for this instance."
   },
+  "boxes": {
+    "articleCount": "{{count}} articles",
+    "backToArea": "Back to area",
+    "confirmDelete": "Delete {{name}}?",
+    "editBox": "Edit box",
+    "editIdentifier": "Edit identifier",
+    "editTitle": "Edit box",
+    "empty": "No articles are stored in this box yet.",
+    "errors": {
+      "delete": "Could not delete article.",
+      "edit": "Could not update this box.",
+      "identifier": "Could not update the identifier.",
+      "load": "Could not load this box."
+    },
+    "identifierTitle": "Edit box identifier",
+    "loading": "Loading box..."
+  },
   "categoriesAndFields": {
     "addCategory": "Add category",
     "addField": "Add field",
@@ -177,6 +198,8 @@
     "createCategory": "Create category",
     "delete": "Delete",
     "description": "Define the information stored on each article.",
+    "dateNotifications": "Notify on this date",
+    "dateNotificationsDescription": "Create a notification on this date for articles using this field.",
     "edit": "Edit",
     "editCategory": "Edit category",
     "editField": "Edit field",
@@ -214,23 +237,6 @@
     "optionsPlaceholder": "Comma-separated values",
     "title": "Categories and fields"
   },
-  "chests": {
-    "articleCount": "{{count}} articles",
-    "backToArea": "Back to area",
-    "confirmDelete": "Delete {{name}}?",
-    "editChest": "Edit chest",
-    "editIdentifier": "Edit identifier",
-    "editTitle": "Edit chest",
-    "empty": "No articles are stored in this chest yet.",
-    "errors": {
-      "delete": "Could not delete article.",
-      "edit": "Could not update this chest.",
-      "identifier": "Could not update the identifier.",
-      "load": "Could not load this chest."
-    },
-    "identifierTitle": "Edit chest identifier",
-    "loading": "Loading chest..."
-  },
   "dashboard": {
     "addArticle": "Add an article",
     "addArticleDescription": "Save something new to your inventory.",
@@ -254,13 +260,13 @@
     "quickActions": "Quick actions",
     "recentUpdates": "Recent updates",
     "search": "Search",
-    "searchPlaceholder": "Search your articles...",
+    "searchPlaceholder": "Search your items...",
     "title": "Start",
     "types": {
       "area": "Area",
       "article": "Article",
+      "box": "Box",
       "category": "Category",
-      "chest": "Chest",
       "field": "Field",
       "shelf": "Shelf"
     },
@@ -284,6 +290,7 @@
       "expiry": "Expiry date",
       "has_insurance": "Has insurance",
       "isbn": "ISBN",
+      "minimum_quantity": "Minimum quantity",
       "pages": "Pages",
       "prescription_required": "Prescription required",
       "purchase_date": "Purchase date",
@@ -292,6 +299,7 @@
       "read_status": "Read status",
       "serial_number": "Serial number",
       "size": "Size",
+      "stock_level": "Inventory level",
       "warranty_months": "Warranty period in months"
     },
     "view": {
@@ -299,6 +307,37 @@
       "label": "Inventory layout",
       "list": "List view"
     }
+  },
+  "loans": {
+    "article": "Articles",
+    "box": "Boxes",
+    "create": "Record loan",
+    "description": "Track articles and boxes borrowed from your inventory.",
+    "due": "Due",
+    "dueDate": "Due date (optional)",
+    "empty": "No loans recorded yet.",
+    "errors": {
+      "create": "Error during creating a loan.",
+      "inventoryLoad": "Error during loading inventory items.",
+      "load": "Error during loading loans.",
+      "return": "Error during marking the loan as returned."
+    },
+    "history": "Your loans",
+    "item": "Item",
+    "itemType": "Item type",
+    "loading": "Loading loans...",
+    "markReturned": "Mark returned",
+    "newLoan": "Record a loan",
+    "noDueDate": "No due date",
+    "noItems": "No items available in this inventory.",
+    "notes": "Notes (optional)",
+    "notesLabel": "Notes",
+    "quantity": "Quantity",
+    "returned": "Returned {{date}}",
+    "returning": "Returning...",
+    "saving": "Saving...",
+    "title": "Loans",
+    "unknownItem": "Inventory item"
   },
   "manageCodes": {
     "clearSelection": "Clear selection",
@@ -312,6 +351,16 @@
       "generate": "Unable to generate the codes.",
       "load": "Unable to load inventory items.",
       "selectItem": "Select at least one item first."
+    },
+    "externalScanner": {
+      "close": "Close scanner",
+      "errors": {
+        "lookup": "Unable to find the scanned item."
+      },
+      "listening": "Receiving barcode...",
+      "lookingUp": "Finding the inventory item...",
+      "ready": "Ready for input from external barcode scanner. Scan a code now.",
+      "title": "External barcode scanner"
     },
     "inventoryItems": "Inventory Items",
     "layout": "Layout",
@@ -328,24 +377,14 @@
     "types": {
       "area": "Area",
       "article": "Article",
-      "chest": "Chest",
+      "box": "Box",
       "shelf": "Shelf"
     },
-    "useExternalBarcodeScanner": "External Barcode Scanner",
-    "externalScanner": {
-      "title": "External barcode scanner",
-      "ready": "Ready for input from external barcode scanner. Scan a code now.",
-      "listening": "Receiving barcode...",
-      "lookingUp": "Finding the inventory item...",
-      "close": "Close scanner",
-      "errors": {
-        "lookup": "Unable to find the scanned item."
-      }
-    }
+    "useExternalBarcodeScanner": "External Barcode Scanner"
   },
   "navActions": {
     "area": "area",
-    "chest": "chest",
+    "box": "box",
     "confirmDelete": "Delete {{name}}? Its contents may be deleted too.",
     "delete": "Delete",
     "dismiss": "Dismiss",
@@ -368,6 +407,7 @@
     "stockLevel": "{{quantity}} left (minimum {{minimum}})"
   },
   "search": {
+    "box": "Box",
     "empty": "No articles found.",
     "errors": {
       "load": "Could not load inventories.",
@@ -376,7 +416,7 @@
     "inventory": "Inventory",
     "loading": "Loading inventories...",
     "noInventory": "No inventory available.",
-    "placeholder": "Search articles by name",
+    "placeholder": "Search items by name",
     "prompt": "Enter a search term to find articles.",
     "quantity": "{{count}} in stock",
     "searchDescription": "Search your inventory",
@@ -384,6 +424,7 @@
     "submit": "Search"
   },
   "settings": {
+    "UISettings": "UI Settings",
     "accountLoadError": "Could not load your account details.",
     "accountName": "Display name",
     "accountPassword": "New password",
@@ -410,6 +451,11 @@
       "loadUsersError": "Could not load users.",
       "loadingUsers": "Loading users...",
       "member": "Member",
+      "modules": {
+        "description": "Choose which optional modules are available in this instance",
+        "noAvailableModules": "No optional modules are installed.",
+        "title": "Modules"
+      },
       "name": "Name",
       "newUser": "New user",
       "noEmail": "No email address",
@@ -461,6 +507,7 @@
       "updateError": "Could not rename API key."
     },
     "description": "Select how the user interface should be displayed.",
+    "disableMobileZoom": "Disable zoom on mobile devices",
     "instanceSettingsLoadError": "Could not load instance settings.",
     "instanceSettingsSaveError": "Could not save instance settings.",
     "inventory": {
@@ -491,6 +538,8 @@
       "description": "Select which language do you prefer"
     },
     "languageLabel": "Language",
+    "mobileZoomDescription": "Prevent pinch and double-tap zoom in the app on touch devices.",
+    "mobileZoomTitle": "Mobile zoom",
     "personalAccount": "Personal account",
     "personalAccountDescription": "Update your username, display name, or password.",
     "tabsLabel": "Settings sections",
@@ -504,11 +553,14 @@
   },
   "sidebar": {
     "areas": "Areas",
+    "article": "Article",
     "categoriesAndFields": "Categories and Fields",
     "codeManagement": "Code Management",
+    "dashboard": "Dashboard",
     "favorites": "Favorites",
     "home": "Home",
     "inventorySettings": "Inventory Settings",
+    "loans": "Loans",
     "noAreas": "No areas yet.",
     "noFavorites": "No favorites yet.",
     "removeFavorite": "Remove from Favorites",

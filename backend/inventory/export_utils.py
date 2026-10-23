@@ -11,8 +11,8 @@ from .models import (
     Article,
     ArticleAttachment,
     ArticleCategory,
+    Box,
     CategoryField,
-    Chest,
     Shelf,
 )
 from .serializers import (
@@ -20,8 +20,8 @@ from .serializers import (
     ArticleAttachmentSerializer,
     ArticleCategorySerializer,
     ArticleSerializer,
+    BoxSerializer,
     CategoryFieldSerializer,
-    ChestSerializer,
     InventorySerializer,
     ShelfSerializer,
 )
@@ -77,16 +77,16 @@ def generate_inventory_csv_export(inventory):
                     list(Area.objects.filter(inventory=inventory).order_by("created_at")))
         write_table(archive, "shelves.csv", ShelfSerializer,
                     list(Shelf.objects.filter(inventory=inventory).select_related("area").order_by("created_at")))
-        write_table(archive, "chests.csv", ChestSerializer,
-                    list(Chest.objects.filter(inventory=inventory).select_related("area", "shelf", "parent_chest").order_by("created_at")))
+        write_table(archive, "boxes.csv", BoxSerializer,
+                    list(Box.objects.filter(inventory=inventory).select_related("area", "shelf", "parent_box").order_by("created_at")))
         write_table(archive, "categories.csv", ArticleCategorySerializer,
                     list(ArticleCategory.objects.filter(inventory=inventory).order_by("created_at")))
         write_table(archive, "category_fields.csv", CategoryFieldSerializer,
                     list(CategoryField.objects.filter(inventory=inventory).select_related("category").order_by("created_at")))
 
         articles = list(Article.objects.filter(inventory=inventory).select_related(
-            "area", "shelf", "chest", "category"
-        ).prefetch_related("attachments").order_by("created_at"))
+            "area", "shelf", "box", "category"
+        ).prefetch_related("attachments", "field_values__field").order_by("created_at"))
         write_table(
             archive,
             "articles.csv",
@@ -103,10 +103,6 @@ def generate_inventory_csv_export(inventory):
             ArticleAttachmentSerializer,
             attachments,
             excluded=("id",),
-            extras={
-                "article_uuid": lambda attachment, _record: str(attachment.article_id),
-                "archive_file": lambda attachment, _record: archive_media(attachment.file),
-            },
         )
 
     archive_file.seek(0)
