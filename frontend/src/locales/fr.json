@@ -409,6 +409,15 @@
     "renameTitle": "Renommer {{kind}}",
     "stockLevel": "{{quantity}} restant(s) (minimum : {{minimum}})"
   },
+  "quickActions": {
+    "close": "Fermer les actions rapides",
+    "comingSoon": "Bientôt disponible",
+    "createArticle": "Créer un article",
+    "createArticleFromBarcode": "Créer un article à partir d'un code-barres",
+    "magicComingSoonMessage": "L’import d’articles assisté par IA arrive bientôt.",
+    "magicImport": "Import magique d’article",
+    "open": "Ouvrir les actions rapides"
+  },
   "search": {
     "box": "Boîte",
     "empty": "Aucun article trouvé.",

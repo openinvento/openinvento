@@ -409,6 +409,15 @@
     "renameTitle": "Rename {{kind}}",
     "stockLevel": "{{quantity}} left (minimum {{minimum}})"
   },
+  "quickActions": {
+    "close": "Close quick actions",
+    "comingSoon": "Coming soon",
+    "createArticle": "Create article",
+    "createArticleFromBarcode": "Create article from barcode",
+    "magicComingSoonMessage": "AI powered article import is coming soon.",
+    "magicImport": "Magic article import",
+    "open": "Open quick actions"
+  },
   "search": {
     "box": "Box",
     "empty": "No articles found.",
