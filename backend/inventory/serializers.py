@@ -352,15 +352,19 @@ class ArticleSerializer(InventoryScopedSerializer):
 class ArticleAttachmentSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
     size = serializers.IntegerField(source="file.size", read_only=True)
+    is_image = serializers.SerializerMethodField()
 
     class Meta:
         model = ArticleAttachment
-        fields = ("id", "original_name", "url", "size", "created_at")
+        fields = ("id", "original_name", "url", "size", "is_image", "created_at")
         read_only_fields = fields
 
     def get_url(self, obj):
         media_path = reverse("media", kwargs={"path": obj.file.name})
         return _trusted_media_url(self.context.get("request"), media_path)
+
+    def get_is_image(self, obj):
+        return obj.file.name.lower().endswith((".jpg", ".jpeg", ".png"))
 
 
 class CategoryFieldSerializer(InventoryScopedSerializer):
