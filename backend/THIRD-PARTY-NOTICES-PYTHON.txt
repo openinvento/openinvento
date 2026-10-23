@@ -30,7 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 asgiref
-BSD License
+BSD-3-Clause
 Copyright (c) Django Software Foundation and individual contributors.
 All rights reserved.
 
