@@ -1,9 +1,8 @@
+import os
+import tempfile
 import uuid
 from typing import ClassVar
 
-from account_auth.authentication import StandardOrAPIKeyAuthMixin
-from account_auth.models import CustomUser
-from account_auth.serializers import UserSerializer
 from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Count
@@ -16,6 +15,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from account_auth.authentication import StandardOrAPIKeyAuthMixin
+from account_auth.models import CustomUser
+from account_auth.serializers import UserSerializer
+from ai_features.object_detection.main import LUCIDE_ARTICLE_ICONS
+
 from .code_utils import generate_codes_pdf
 from .export_utils import generate_inventory_csv_export
 from .models import (
@@ -23,8 +27,8 @@ from .models import (
     Article,
     ArticleAttachment,
     ArticleCategory,
-    CategoryField,
     Box,
+    CategoryField,
     Inventory,
     Shelf,
 )
@@ -34,11 +38,13 @@ from .serializers import (
     ArticleAttachmentSerializer,
     ArticleCategorySerializer,
     ArticleSerializer,
-    CategoryFieldSerializer,
     BoxSerializer,
+    CategoryFieldSerializer,
     InventorySerializer,
     ShelfSerializer,
 )
+
+ARTICLE_LUCIDE_ICONS = frozenset(LUCIDE_ARTICLE_ICONS)
 
 
 class InventoryViewSet(StandardOrAPIKeyAuthMixin, viewsets.ReadOnlyModelViewSet):
@@ -107,7 +113,6 @@ class InventoryScopedAPIView(APIView):
         return self.request.user.inventories.all()
 
 # endregion Base classes
-
 
 # region Inventory Settings/ Management Views
 class InventoryMembersView(InventoryAccessMixin, APIView):
@@ -436,3 +441,62 @@ class CodePdfView(InventoryScopedAPIView):
         return response
 
 # endregion QR/ BARCODE VIEWS
+
+# region Magic inventoy import
+class MagicArticleImportView(InventoryScopedAPIView):
+    """Analyze an uploaded image and return article-shaped drafts for review."""
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request):
+        image = request.FILES.get("image")
+        if image is None:
+            return Response({"image": "An image file is required."}, status=400)
+        if image.content_type not in {"image/jpeg", "image/png"}:
+            return Response({"image": "Upload a JPEG or PNG image."}, status=400)
+        if image.size > settings.MAX_FILE_SIZE:
+            return Response({"image": "The image exceeds the maximum upload size."}, status=400)
+        inventory_uuid = request.data.get("inventory")
+        if not inventory_uuid or not self.get_accessible_inventories().filter(uuid=inventory_uuid).exists():
+            return Response({"inventory": "Select an inventory you can access."}, status=400)
+
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            return Response({"error": "Image import is not configured. Set GEMINI_API_KEY on the server."}, status=503)
+
+        suffix = ".png" if image.content_type == "image/png" else ".jpg"
+        temporary_path = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as temporary_image:
+                temporary_path = temporary_image.name
+                for chunk in image.chunks():
+                    temporary_image.write(chunk)
+            from ai_features.object_detection.main import analyze_image_to_json_objects
+            result = analyze_image_to_json_objects("gemini", temporary_path, api_key=api_key)
+            if not isinstance(result, dict) or not isinstance(result.get("objects"), list):
+                raise ValueError("Image analysis returned an invalid response.")
+            articles = []
+            for item in result.get("objects", []):
+                try:
+                    quantity = max(1, int(item.get("quantity", 1)))
+                except (TypeError, ValueError):
+                    quantity = 1
+                detected_icon = item.get("icon")
+                articles.append({
+                    "name": str(item.get("name", "")).strip()[:100],
+                    "description": str(item.get("description", "")).strip()[:750],
+                    "quantity": quantity,
+                    "icon": detected_icon if isinstance(detected_icon, str) and detected_icon in ARTICLE_LUCIDE_ICONS else "Package",
+                    "area": None,
+                    "shelf": None,
+                    "box": None,
+                    "category": None,
+                    "stock_tracking": False,
+                })
+            return Response({"articles": [article for article in articles if article["name"]]})
+        except Exception as error:
+            return Response({"error": str(error)}, status=502)
+        finally:
+            if temporary_path and os.path.exists(temporary_path):
+                os.unlink(temporary_path)
+
+# endregion Magic inventoy import
