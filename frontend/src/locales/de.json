@@ -409,6 +409,15 @@
     "renameTitle": "{{kind}} umbenennen",
     "stockLevel": "Noch {{quantity}} vorhanden (Minimum {{minimum}})"
   },
+  "quickActions": {
+    "close": "Schnellaktionen schließen",
+    "comingSoon": "Demnächst verfügbar",
+    "createArticle": "Artikel erstellen",
+    "createArticleFromBarcode": "Artikel von Barcode erstellen",
+    "magicComingSoonMessage": "Der KI-gestützte Artikelimport kommt bald.",
+    "magicImport": "Magischer Artikelimport",
+    "open": "Schnellaktionen öffnen"
+  },
   "search": {
     "box": "Kiste",
     "empty": "Keine Artikel gefunden.",

@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { ArrowLeft, Pencil, Plus } from "lucide-react"
+import { ArrowLeft, Pencil } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate, useParams } from "react-router"
 import { ArticleCard } from "@/components/inventory/entity-cards"
@@ -7,6 +7,7 @@ import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
 import { InventoryViewToggle, useInventoryViewMode } from "@/components/inventory/view-mode"
 import { InventoryDraggable } from "@/components/inventory/inventory-dnd"
+import { FloatingCreateButton } from "@/components/inventory/FloatingCreateButton"
 import { inventoryApi, type Area, type Article, type Box, type Shelf } from "@/utils/api/inventory"
 
 function getLowStockBadge(article: Article, label: string) {
@@ -121,10 +122,6 @@ export default function BoxPage() {
             <p className="mt-2 text-muted-foreground">{t("boxes.articleCount", { count: articles.length })}</p>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
-            <Button onClick={() => navigate(`/app/areas/${box.area}/articles/new?box=${box.uuid}`)}>
-              <Plus />
-              {t("dashboard.addArticle")}
-            </Button>
             <InventoryViewToggle viewMode={viewMode} setViewMode={setViewMode} />
 
             <Button variant="outline" onClick={() => setIdentifierOpen(true)}>
@@ -154,6 +151,7 @@ export default function BoxPage() {
           </div>
         )}
       </>}
+      {box && <FloatingCreateButton articleTo={`/app/areas/${box.area}/articles/new?box=${box.uuid}`} />}
       {box && 
       <InventoryModal title={t("boxes.identifierTitle")} open={identifierOpen} submitting={saving}
         onClose={() => setIdentifierOpen(false)} onSubmit={updateIdentifier}>

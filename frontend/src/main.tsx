@@ -20,6 +20,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import './i18n.ts' // Initialize i18next
 import ErrorPage from './routes/Error.tsx'
 import SearchPage from './routes/inventory/SearchPage.tsx'
+import MagicArticleImportPage from './routes/inventory/MagicArticleImportPage.tsx'
 import { SessionGuard } from './components/auth/session-guard.tsx'
 import ManageCategoriesAndFieldsPage from './routes/inventory/ManageCategoriesAndFields.tsx'
 import ManageCodes from './routes/inventory/ManageCodes.tsx'
@@ -127,6 +128,10 @@ const router = createBrowserRouter([
       {
         path: "search",
         element: <SearchPage />,
+      },
+      {
+        path: "magic-article-import",
+        element: <MagicArticleImportPage />,
       },
       {
         path: "areas",

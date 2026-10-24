@@ -134,6 +134,7 @@ INSTALLED_APPS = [
     "rest_framework_api_key",
 
     "inventory",
+    "third_party_providers",
     "account_auth",
     "openinvento.apps.OpenInventoConfig",
 ]

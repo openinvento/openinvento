@@ -409,6 +409,15 @@
     "renameTitle": "Cambiar el nombre de {{kind}}",
     "stockLevel": "{{quantity}} restantes (mínimo {{minimum}})"
   },
+  "quickActions": {
+    "close": "Cerrar acciones rápidas",
+    "comingSoon": "Próximamente",
+    "createArticle": "Crear artículo",
+    "createArticleFromBarcode": "Crear artículo a partir de código de barras.",
+    "magicComingSoonMessage": "La importación de artículos con IA llegará pronto.",
+    "magicImport": "Importación mágica de artículos",
+    "open": "Abrir acciones rápidas"
+  },
   "search": {
     "box": "Caja",
     "empty": "No se encontraron artículos.",

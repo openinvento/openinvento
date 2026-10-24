@@ -14,6 +14,7 @@ from .views import (
     ExportInventoryView,
     InventoryManageView,
     InventoryMembersView,
+    MagicArticleImportView,
     InventoryViewSet,
     SearchView,
     ShelfViewSet,
@@ -29,6 +30,7 @@ router.register(r"category-fields", CategoryFieldViewSet, basename="category-fie
 router.register(r"articles", ArticleViewSet, basename="article")
 
 urlpatterns = [
+    path("articles/magic-import/", MagicArticleImportView.as_view(), name="magic-article-import"),
     path("article-attachments/", ArticleAttachmentsView.as_view(), name="article-attachments"),
     path("inventories/<uuid:inventory_uuid>/members/", InventoryMembersView.as_view(), name="inventory-members"),
     path("inventories/<uuid:inventory_uuid>/members/<uuid:user_uuid>/", InventoryMembersView.as_view(), name="inventory-member-delete"),
