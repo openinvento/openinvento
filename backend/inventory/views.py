@@ -459,9 +459,10 @@ class MagicArticleImportView(InventoryScopedAPIView):
         if not inventory_uuid or not self.get_accessible_inventories().filter(uuid=inventory_uuid).exists():
             return Response({"inventory": "Select an inventory you can access."}, status=400)
 
-        api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key:
-            return Response({"error": "Image import is not configured. Set GEMINI_API_KEY on the server."}, status=503)
+        from third_party_providers.services import get_inventory_provider_api_key
+        api_key = get_inventory_provider_api_key(inventory_uuid, "gemini", "object_detection_llm")
+        if api_key is None:
+            return Response({"error": "Add a Gemini API key in this inventory's settings to use image import."}, status=503)
 
         suffix = ".png" if image.content_type == "image/png" else ".jpg"
         temporary_path = None

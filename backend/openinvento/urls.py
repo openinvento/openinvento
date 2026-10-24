@@ -2,6 +2,7 @@
 from account_auth import urls as auth_urls
 from django.urls import include, path, re_path
 from inventory import urls as inventory_api_urls
+from third_party_providers import urls as third_party_provider_urls
 from modules.registry import get_available_modules
 
 from .views import (
@@ -23,6 +24,7 @@ urlpatterns = [
     #path('admin/', admin.site.urls),
     
     path("api/", include(inventory_api_urls)),
+    path("api/", include(third_party_provider_urls)),
     path("api/", include(auth_urls)),
 ]
 
