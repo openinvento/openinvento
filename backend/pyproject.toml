@@ -15,7 +15,10 @@ dependencies = [
     "django-ratelimit==4.1.0",
     "reportlab>=5.0.1",
     "requests==2.34.2",
-    "djangorestframework-api-key==3.1.0"
+    "djangorestframework-api-key==3.1.0",
+    "google-genai>=1.0.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
 ]
 
 [tool.setuptools]
