@@ -416,6 +416,37 @@
     "createArticleFromBarcode": "Artikel von Barcode erstellen",
     "magicComingSoonMessage": "Der KI-gestützte Artikelimport kommt bald.",
     "magicImport": "Magischer Artikelimport",
+    "magicImportPage": {
+      "analyzing": "Wird analysiert...",
+      "chooseImage": "Bild auswählen",
+      "createArticles": "{{count}} Artikel erstellen",
+      "createdMany": "{{saved}} Artikel erstellt.",
+      "createdManyWithFailures": "{{saved}} Artikel erstellt; {{failed}} konnten nicht gespeichert werden.",
+      "createdOne": "{{saved}} Artikel erstellt.",
+      "createdOneWithFailures": "{{saved}} Artikel erstellt; {{failed}} konnte nicht gespeichert werden.",
+      "description": "Nimm ein Foto auf und verwandle die darin enthaltenen Elemente in bearbeitbare Artikel.",
+      "descriptionLabel": "Beschreibung",
+      "errors": {
+        "analyze": "Dieses Foto konnte nicht analysiert werden.",
+        "invalidImage": "Wähle ein JPEG- oder PNG-Bild aus.",
+        "loadInventories": "Inventare konnten nicht geladen werden.",
+        "saveSome": "Einige Artikel konnten nicht gespeichert werden."
+      },
+      "identifyItems": "Elemente erkennen",
+      "importFromPhoto": "Aus einem Foto importieren",
+      "instructions": "Wir erkennen die sichtbaren Elemente und bereiten für jedes einen Artikel vor. Überprüfe Namen, Mengen und Beschreibungen, bevor du sie erstellst.",
+      "name": "Name",
+      "noInventory": "Erstelle ein Inventar oder wähle eines aus, um fortzufahren.",
+      "noObjects": "Keine erkennbaren Objekte gefunden. Versuche ein anderes Foto.",
+      "previewPlaceholder": "Hier wird eine Vorschau deines Fotos angezeigt",
+      "quantity": "Menge",
+      "removeItem": "Element {{count}} entfernen",
+      "reviewArticles": "Artikel überprüfen",
+      "reviewDescription": "Bearbeite Details, entferne Elemente und erstelle sie anschließend gemeinsam.",
+      "saving": "Wird gespeichert...",
+      "selectedPhoto": "Ausgewähltes Foto",
+      "takePhoto": "Foto aufnehmen"
+    },
     "open": "Schnellaktionen öffnen"
   },
   "search": {
@@ -540,6 +571,24 @@
       "members": "Geteilt mit",
       "name": "Name",
       "noMembers": "Keine Mitglieder gefunden.",
+      "providers": {
+        "addKey": "Schlüssel hinzufügen",
+        "description": "Gemini-Zugangsdaten werden für dieses Inventar gespeichert und vom magischen Artikelimport verwendet.",
+        "gemini": "Google Gemini",
+        "keyLabel": "Gemini-API-Schlüssel",
+        "keyPlaceholder": "Gemini-API-Schlüssel",
+        "keySaved": "API-Schlüssel gespeichert",
+        "nameLabel": "Name des Anbieters",
+        "namePlaceholder": "Name des Anbieters",
+        "remove": "Anbieter entfernen",
+        "title": "Drittanbieter",
+        "typeLabel": "Anbietertyp",
+        "types": {
+          "barcode_lookup": "Barcode-Suche",
+          "llm": "LLM",
+          "object_detection_llm": "LLM zur Objekterkennung"
+        }
+      },
       "removeMember": "Person entfernen",
       "removeMemberConfirm": "{{name}} aus diesem Inventar entfernen?",
       "saveError": "Inventarmitglieder konnten nicht aktualisiert werden.",

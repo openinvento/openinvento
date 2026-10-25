@@ -416,6 +416,37 @@
     "createArticleFromBarcode": "Crear artículo a partir de código de barras.",
     "magicComingSoonMessage": "La importación de artículos con IA llegará pronto.",
     "magicImport": "Importación mágica de artículos",
+    "magicImportPage": {
+      "analyzing": "Analizando...",
+      "chooseImage": "Elegir imagen",
+      "createArticles": "Crear {{count}} artículos",
+      "createdMany": "Se crearon {{saved}} artículos.",
+      "createdManyWithFailures": "Se crearon {{saved}} artículos; no se pudieron guardar {{failed}}.",
+      "createdOne": "Se creó {{saved}} artículo.",
+      "createdOneWithFailures": "Se creó {{saved}} artículo; no se pudo guardar {{failed}}.",
+      "description": "Toma una foto y convierte los elementos que contiene en artículos editables.",
+      "descriptionLabel": "Descripción",
+      "errors": {
+        "analyze": "No se pudo analizar esta foto.",
+        "invalidImage": "Elige una imagen JPEG o PNG.",
+        "loadInventories": "No se pudieron cargar los inventarios.",
+        "saveSome": "No se pudieron guardar algunos artículos."
+      },
+      "identifyItems": "Identificar elementos",
+      "importFromPhoto": "Importar desde una foto",
+      "instructions": "Identificaremos los elementos visibles y prepararemos un artículo para cada uno. Revisa los nombres, las cantidades y las descripciones antes de crearlos.",
+      "name": "Nombre",
+      "noInventory": "Crea o selecciona un inventario para continuar.",
+      "noObjects": "No se encontraron objetos reconocibles. Prueba con otra foto.",
+      "previewPlaceholder": "La vista previa de tu foto aparecerá aquí",
+      "quantity": "Cantidad",
+      "removeItem": "Eliminar elemento {{count}}",
+      "reviewArticles": "Revisar artículos",
+      "reviewDescription": "Edita los detalles, elimina elementos y créalos juntos.",
+      "saving": "Guardando...",
+      "selectedPhoto": "Foto seleccionada",
+      "takePhoto": "Tomar una foto"
+    },
     "open": "Abrir acciones rápidas"
   },
   "search": {
@@ -540,6 +571,24 @@
       "members": "Compartido con",
       "name": "Nombre",
       "noMembers": "No se encontraron miembros.",
+      "providers": {
+        "addKey": "Añadir clave",
+        "description": "Las credenciales de Gemini se almacenan para este inventario y las usa la importación mágica de artículos.",
+        "gemini": "Google Gemini",
+        "keyLabel": "Clave de API de Gemini",
+        "keyPlaceholder": "Clave de API de Gemini",
+        "keySaved": "Clave de API guardada",
+        "nameLabel": "Nombre del proveedor",
+        "namePlaceholder": "Nombre del proveedor",
+        "remove": "Eliminar proveedor",
+        "title": "Proveedores externos",
+        "typeLabel": "Tipo de proveedor",
+        "types": {
+          "barcode_lookup": "Búsqueda de código de barras",
+          "llm": "LLM",
+          "object_detection_llm": "LLM de detección de objetos"
+        }
+      },
       "removeMember": "Quitar persona",
       "removeMemberConfirm": "¿Quitar a {{name}} de este inventario?",
       "saveError": "No se pudieron actualizar los miembros del inventario.",
