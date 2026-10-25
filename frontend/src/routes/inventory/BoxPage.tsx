@@ -23,6 +23,7 @@ export default function BoxPage() {
   const { t } = useTranslation()
 
   const { viewMode, setViewMode } = useInventoryViewMode()
+  const [area, setArea] = useState<Area | null>(null)
   const [box, setBox] = useState<Box | null>(null)
   const [articles, setArticles] = useState<Article[]>([])
   const [areas, setAreas] = useState<Area[]>([])
@@ -39,6 +40,7 @@ export default function BoxPage() {
     try {
       const [allBoxes, allArticles, allAreas, allShelves] = await Promise.all([inventoryApi.listBoxes(), inventoryApi.listArticles(), inventoryApi.listAreas(), inventoryApi.listShelves()])
       const nextBox = allBoxes.find((item) => item.uuid === boxId) ?? null
+      setArea(allAreas.find((item) => item.uuid === nextBox?.area) || null)
       setBox(nextBox)
       setArticles(allArticles.filter((article) => article.box === boxId))
       setAreas(allAreas)
@@ -151,7 +153,7 @@ export default function BoxPage() {
           </div>
         )}
       </>}
-      {box && <FloatingCreateButton articleTo={`/app/areas/${box.area}/articles/new?box=${box.uuid}`} />}
+      {area && box && <FloatingCreateButton areaId={area.uuid} boxId={box.uuid} articleTo={`/app/areas/${box.area}/articles/new?box=${box.uuid}`} />}
       {box && 
       <InventoryModal title={t("boxes.identifierTitle")} open={identifierOpen} submitting={saving}
         onClose={() => setIdentifierOpen(false)} onSubmit={updateIdentifier}>

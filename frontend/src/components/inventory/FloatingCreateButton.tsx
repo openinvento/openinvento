@@ -5,9 +5,11 @@ import { Barcode, FilePlus2, Plus, Sparkles, X } from "lucide-react"
 
 type InventoryQuickActionsProps = {
   articleTo: string
+  areaId?: string | undefined,
+  boxId?: string | undefined,
 }
 
-export function FloatingCreateButton({ articleTo }: InventoryQuickActionsProps) {
+export function FloatingCreateButton({ articleTo, areaId, boxId }: InventoryQuickActionsProps) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
 
@@ -24,7 +26,7 @@ export function FloatingCreateButton({ articleTo }: InventoryQuickActionsProps) 
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 sm:bottom-8 sm:right-8">
       <div className={`flex flex-col items-end gap-3 transition-all duration-200 motion-reduce:transition-none ${open ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"}`} aria-hidden={!open}>
         <Link
-          to="/app/magic-article-import"
+          to={`/app/magic-article-import?area=${areaId}&box=${boxId}`}
           tabIndex={open ? 0 : -1}
           onClick={() => setOpen(false)}
           className="inline-flex items-center gap-2 rounded-full border bg-background px-4 py-3 text-sm font-medium text-foreground shadow-lg hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

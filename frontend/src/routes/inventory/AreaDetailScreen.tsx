@@ -176,8 +176,6 @@ export default function AreaDetailScreen() {
       <Button className="p-4" variant="outline" onClick={() => setModal({ kind: "box" })}><Plus /> {t("areas.detail.actions.box")}</Button>
       </div>
     </div>
-    
-    <FloatingCreateButton articleTo={`/app/areas/${areaId}/articles/new`} />
 
     <InventoryDropTarget target={{ kind: "area", id: areaId ?? "" }}>
 
@@ -330,7 +328,7 @@ export default function AreaDetailScreen() {
 
     </InventoryModal>
 
-    {area && <FloatingCreateButton articleTo={`/app/areas/${areaId}/articles/new`} />}
+    {area && <FloatingCreateButton areaId={areaId} articleTo={`/app/areas/${areaId}/articles/new`} />}
 
   </section>)
 }
