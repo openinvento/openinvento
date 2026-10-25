@@ -201,7 +201,7 @@ export default function InventorySettingsPage() {
               </Button>
             </section>
 
-            <section id="third-party-providers" className="mb-10 grid gap-4 rounded-xl border p-5 scroll-mt-6">
+            <section id="third-party-providers" className="mb-10 grid gap-4 rounded-xl scroll-mt-6">
               <div><h2 className="text-xl font-semibold">{t("settings.inventory.providers.title")}</h2><p className="text-sm text-muted-foreground">{t("settings.inventory.providers.description")}</p></div>
               {providers.map((configured) => <div key={configured.uuid} className="flex items-center justify-between rounded-lg bg-muted/30 px-4 py-3"><div className="flex items-center gap-3">{configured.has_api_key && <KeyRound className="size-4" />}<div><p className="font-medium">{configured.name} · {configurations.find((item) => item.provider === configured.provider && item.type === configured.type)?.display_name ?? configured.provider}</p><p className="text-xs text-muted-foreground">{configurations.find((item) => item.provider === configured.provider && item.type === configured.type)?.type_label ?? configured.type}{configured.has_api_key ? ` · ${t("settings.inventory.providers.keySaved")}` : ""}</p></div></div><Button type="button" variant="ghost" size="icon-sm" aria-label={t("settings.inventory.providers.remove")} disabled={saving} onClick={() => void removeProvider(configured.uuid)}><Trash2 className="text-destructive" /></Button></div>)}
               
