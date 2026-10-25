@@ -83,7 +83,7 @@ export default function InventorySettingsPage() {
     try {
       await inventoryApi.createThirdPartyProvider({ inventory: membership.inventory.uuid, provider: configuration.provider, type: configuration.type, name: providerName.trim(), ...(configuration.requires_api_key ? { api_key: providerKey.trim() } : {}), ...(configuration.requires_model ? { model_name: providerModel.trim() } : {}), ...(configuration.requires_api_url && providerUrl.trim() ? { api_url: providerUrl.trim() } : {}) })
       setProviderKey("")
-      setProviderModel("")
+      setProviderModel(configuration.default_model ?? "")
       setProviderUrl("")
       setProviderName("")
       setProviders(await inventoryApi.listThirdPartyProviders(membership.inventory.uuid))
