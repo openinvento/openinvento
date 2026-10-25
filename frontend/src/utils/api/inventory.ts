@@ -1,6 +1,8 @@
 import { deleteData, downloadFile, fetchData, patchData, postData } from "./base"
 
 export type Inventory = { uuid: string; name: string; identifier: string; updated_at: string }
+export type ThirdPartyProviderType = "barcode_lookup" | "object_detection_llm" | "llm"
+export type ThirdPartyProvider = { uuid: string; inventory: string; provider: "gemini"; type: ThirdPartyProviderType; name: string; has_api_key: boolean; created_at: string; updated_at: string }
 export type Area = EntityBase
 export type Shelf = EntityBase & { area: string }
 export type Box = EntityBase & { area: string; shelf: string | null; parent_box: string | null }
@@ -17,6 +19,7 @@ export type Article = EntityBase & {
   field_values: ArticleFieldValue[]
   category_fields: CategoryField[]
 }
+export type MagicArticleDraft = Pick<Article, "name" | "description" | "quantity" | "icon" | "area" | "shelf" | "box" | "category" | "stock_tracking">
 export type SearchResult = (Article & { type: "article" }) | (Box & { type: "box" })
 export type ArticleAttachment = { id: number; original_name: string; url: string; size: number; is_image: boolean; created_at: string }
 export type ArticleFieldValue = { field: string; key: string; value: string | number | boolean | null; notify_on_date: boolean }
@@ -102,6 +105,10 @@ type CreatePayload = Record<string, unknown> | FormData
 export const inventoryApi = {
   getDashboard: () => fetchData<DashboardData>(scopedPath("/api/dashboard/")),
   listInventories: () => fetchData<Inventory[]>("/api/inventories/"),
+  listThirdPartyProviders: (inventory: string) => fetchData<ThirdPartyProvider[]>(`/api/third-party-providers/?inventory=${encodeURIComponent(inventory)}`),
+  createThirdPartyProvider: (payload: { inventory: string; provider: "gemini"; type: ThirdPartyProviderType; name: string; api_key: string }) => postData<ThirdPartyProvider>("/api/third-party-providers/", payload),
+  updateThirdPartyProvider: (uuid: string, payload: { name?: string; api_key?: string }) => patchData<ThirdPartyProvider>(`/api/third-party-providers/${uuid}/`, payload),
+  deleteThirdPartyProvider: (uuid: string) => deleteData<void>(`/api/third-party-providers/${uuid}/`),
   listAreas: () => fetchData<Area[]>(scopedPath("/api/areas/")),
   listShelves: () => fetchData<Shelf[]>(scopedPath("/api/shelves/")),
   listBoxes: () => fetchData<Box[]>(scopedPath("/api/boxes/")),
@@ -116,6 +123,12 @@ export const inventoryApi = {
   listCategories: () => fetchData<ArticleCategory[]>(scopedPath("/api/article-categories/")),
   listCategoryFields: () => fetchData<CategoryField[]>(scopedPath("/api/category-fields/")),
   create: <T>(kind: EntityPath, payload: CreatePayload) => postData<T>(`/api/${kind}/`, payload),
+  magicImport: (inventory: string, image: File) => {
+    const payload = new FormData()
+    payload.append("inventory", inventory)
+    payload.append("image", image)
+    return postData<{ articles: MagicArticleDraft[] }>("/api/articles/magic-import/", payload)
+  },
   update: <T>(kind: EntityPath, uuid: string, payload: CreatePayload) =>
     patchData<T>(`/api/${kind}/${uuid}/`, payload),
   remove: (kind: EntityPath, uuid: string) => deleteData<void>(`/api/${kind}/${uuid}/`),
