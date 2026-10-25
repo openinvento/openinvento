@@ -328,7 +328,7 @@ export default function AreaDetailScreen() {
 
     </InventoryModal>
 
-    {area && <FloatingCreateButton areaId={areaId} articleTo={`/app/areas/${areaId}/articles/new`} />}
+    {area && !modal && <FloatingCreateButton areaId={areaId} articleTo={`/app/areas/${areaId}/articles/new`} />}
 
   </section>)
 }
