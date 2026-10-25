@@ -601,7 +601,11 @@
           "barcode_lookup": "Búsqueda de código de barras",
           "llm": "LLM",
           "object_detection_llm": "LLM de detección de objetos"
-        }
+        },
+        "modelLabel": "Modelo",
+        "modelPlaceholder": "p. ej., llava",
+        "urlLabel": "URL del servidor Ollama (opcional)",
+        "urlPlaceholder": "http://localhost:11434"
       },
       "removeMember": "Quitar persona",
       "removeMemberConfirm": "¿Quitar a {{name}} de este inventario?",

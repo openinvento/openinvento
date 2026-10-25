@@ -41,6 +41,8 @@ export default function InventorySettingsPage() {
   const [configurationIndex, setConfigurationIndex] = useState(0)
   const [providerName, setProviderName] = useState("")
   const [providerKey, setProviderKey] = useState("")
+  const [providerModel, setProviderModel] = useState("")
+  const [providerUrl, setProviderUrl] = useState("")
   const providerConfigurationGroups = configurations.reduce<Array<{ label: string; items: ThirdPartyProviderConfiguration[] }>>((groups, configuration) => {
     const group = groups.find((item) => item.label === configuration.type_label)
     if (group) group.items.push(configuration)
@@ -73,12 +75,14 @@ export default function InventorySettingsPage() {
 
   async function saveProvider() {
     const configuration = configurations[configurationIndex]
-    if (!membership || !configuration || !providerName.trim() || (configuration.requires_api_key && !providerKey.trim())) return
+    if (!membership || !configuration || !providerName.trim() || (configuration.requires_api_key && !providerKey.trim()) || (configuration.requires_model && !providerModel.trim())) return
     setSaving(true)
     setError("")
     try {
-      await inventoryApi.createThirdPartyProvider({ inventory: membership.inventory.uuid, provider: configuration.provider, type: configuration.type, name: providerName.trim(), ...(configuration.requires_api_key ? { api_key: providerKey.trim() } : {}) })
+      await inventoryApi.createThirdPartyProvider({ inventory: membership.inventory.uuid, provider: configuration.provider, type: configuration.type, name: providerName.trim(), ...(configuration.requires_api_key ? { api_key: providerKey.trim() } : {}), ...(configuration.requires_model ? { model_name: providerModel.trim() } : {}), ...(configuration.requires_api_url && providerUrl.trim() ? { api_url: providerUrl.trim() } : {}) })
       setProviderKey("")
+      setProviderModel("")
+      setProviderUrl("")
       setProviderName("")
       setProviders(await inventoryApi.listThirdPartyProviders(membership.inventory.uuid))
     } catch (reason) { setError(reason instanceof Error ? reason.message : t("settings.inventory.saveError")) }
@@ -207,6 +211,8 @@ export default function InventorySettingsPage() {
                     if (!configuration) return
                     setConfigurationIndex(configurations.indexOf(configuration))
                     setProviderKey("")
+                    setProviderModel("")
+                    setProviderUrl("")
                   }}
                   itemToStringValue={(configuration) => `${configuration.provider}:${configuration.type}`}
                   itemToStringLabel={(configuration) => configuration.display_name}
@@ -228,7 +234,9 @@ export default function InventorySettingsPage() {
 
                 <Input aria-label={t("settings.inventory.providers.nameLabel")} value={providerName} onChange={(event) => setProviderName(event.target.value)} placeholder={t("settings.inventory.providers.namePlaceholder")} />
                 {configurations[configurationIndex]?.requires_api_key && <Input aria-label={t("settings.inventory.providers.keyLabel")} type="password" autoComplete="new-password" value={providerKey} onChange={(event) => setProviderKey(event.target.value)} placeholder={t("settings.inventory.providers.keyPlaceholder")} />}
-                <Button type="button" onClick={() => void saveProvider()} disabled={saving || !providerName.trim() || !configurations[configurationIndex] || (configurations[configurationIndex]?.requires_api_key && !providerKey.trim())}><Plus />{t("settings.inventory.providers.addProvider")}</Button>
+                {configurations[configurationIndex]?.requires_model && <Input aria-label={t("settings.inventory.providers.modelLabel")} value={providerModel} onChange={(event) => setProviderModel(event.target.value)} placeholder={t("settings.inventory.providers.modelPlaceholder")} />}
+                {configurations[configurationIndex]?.requires_api_url && <Input aria-label={t("settings.inventory.providers.urlLabel")} value={providerUrl} onChange={(event) => setProviderUrl(event.target.value)} placeholder={t("settings.inventory.providers.urlPlaceholder")} />}
+                <Button type="button" onClick={() => void saveProvider()} disabled={saving || !providerName.trim() || !configurations[configurationIndex] || (configurations[configurationIndex]?.requires_api_key && !providerKey.trim()) || (configurations[configurationIndex]?.requires_model && !providerModel.trim())}><Plus />{t("settings.inventory.providers.addProvider")}</Button>
               </div>
             </section>
 
