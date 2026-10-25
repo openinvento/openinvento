@@ -460,7 +460,7 @@ class MagicArticleImportView(InventoryScopedAPIView):
             return Response({"inventory": "Select an inventory you can access."}, status=400)
 
         from third_party_providers.services import get_inventory_provider_api_key
-        api_key = get_inventory_provider_api_key(inventory_uuid, "gemini", "object_detection_llm")
+        api_key = get_inventory_provider_api_key(inventory_uuid=inventory_uuid, provider_type="object_detection_llm")
         if api_key is None:
             return Response({"error": "Add a Gemini API key in this inventory's settings to use image import."}, status=503)
 
@@ -471,8 +471,10 @@ class MagicArticleImportView(InventoryScopedAPIView):
                 temporary_path = temporary_image.name
                 for chunk in image.chunks():
                     temporary_image.write(chunk)
+
             from ai_features.object_detection.main import analyze_image_to_json_objects
             result = analyze_image_to_json_objects("gemini", temporary_path, api_key=api_key)
+
             if not isinstance(result, dict) or not isinstance(result.get("objects"), list):
                 raise ValueError("Image analysis returned an invalid response.")
             articles = []
