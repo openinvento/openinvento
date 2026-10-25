@@ -79,6 +79,10 @@
     "renameArea": "Rename área",
     "title": "áreas"
   },
+  "articleBarcodeImport": {
+    "description": "Escanee el código de barras de un producto para buscarlo y agregarlo aquí",
+    "scannedArticles": "Artículos escaneados"
+  },
   "articles": {
     "page": {
       "areas": "áreas",
@@ -410,6 +414,7 @@
     "stockLevel": "{{quantity}} restantes (mínimo {{minimum}})"
   },
   "quickActions": {
+    "barcodeImport": "Importar artículos desde código de barras.",
     "close": "Cerrar acciones rápidas",
     "comingSoon": "Próximamente",
     "createArticle": "Crear artículo",

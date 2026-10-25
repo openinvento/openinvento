@@ -79,6 +79,10 @@
     "renameArea": "Bereich umbenennen",
     "title": "Bereiche"
   },
+  "articleBarcodeImport": {
+    "description": "Scanne ein Produkt-Barcode, um es hier hinzuzufügen",
+    "scannedArticles": "Gescannte Artikel"
+  },
   "articles": {
     "page": {
       "areas": "Bereiche",
@@ -410,6 +414,7 @@
     "stockLevel": "Noch {{quantity}} vorhanden (Minimum {{minimum}})"
   },
   "quickActions": {
+    "barcodeImport": "Importiere Artikel mit Barcode",
     "close": "Schnellaktionen schließen",
     "comingSoon": "Demnächst verfügbar",
     "createArticle": "Artikel erstellen",

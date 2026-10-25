@@ -79,6 +79,10 @@
     "renameArea": "Rename area",
     "title": "Areas"
   },
+  "articleBarcodeImport": {
+    "description": "Scan a product barcode to look it up and add it here",
+    "scannedArticles": "Scanned Articles"
+  },
   "articles": {
     "page": {
       "areas": "Areas",

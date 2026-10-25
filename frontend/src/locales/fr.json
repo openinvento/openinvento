@@ -79,6 +79,10 @@
     "renameArea": "Renommer la zone",
     "title": "Zones"
   },
+  "articleBarcodeImport": {
+    "description": "Scannez le code-barres d'un produit pour le rechercher et ajoutez-le ici",
+    "scannedArticles": "Articles scannés"
+  },
   "articles": {
     "page": {
       "areas": "Zones",
@@ -410,6 +414,7 @@
     "stockLevel": "{{quantity}} restant(s) (minimum : {{minimum}})"
   },
   "quickActions": {
+    "barcodeImport": "Importer des articles à partir d'un code-barres",
     "close": "Fermer les actions rapides",
     "comingSoon": "Bientôt disponible",
     "createArticle": "Créer un article",
