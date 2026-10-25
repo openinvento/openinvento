@@ -33,7 +33,6 @@ export function FloatingCreateButton({ articleTo, areaId, boxId }: InventoryQuic
         >
           <Sparkles className="size-4" />
           <span>{t("quickActions.magicImport")}</span>
-          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{t("quickActions.comingSoon")}</span>
         </Link>
         <Link
           to={`/app/barcode-article-import?area=${areaId}&box=${boxId}`}
@@ -43,7 +42,6 @@ export function FloatingCreateButton({ articleTo, areaId, boxId }: InventoryQuic
         >
           <Barcode className="size-4" />
           {t("quickActions.createArticleFromBarcode")}
-          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{t("quickActions.comingSoon")}</span>
         </Link>
         <Link
           to={articleTo}
