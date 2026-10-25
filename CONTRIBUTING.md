@@ -16,7 +16,7 @@ OpenInvento Contributor License Agreement.
 When opening a pull request, you must accept the Contributor License Agreement.
 The required comment is:
 
-> I have read and understood the OpenInvento Contributor License Agreement, and I hereby agree to its terms.
+> I have read and understood the Contributor License Agreement, and I hereby agree to its terms.
 
 By posting this comment, you confirm that:
 
