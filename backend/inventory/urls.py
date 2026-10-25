@@ -6,6 +6,7 @@ from .views import (
     ArticleAttachmentsView,
     ArticleCategoryViewSet,
     ArticleViewSet,
+    BarcodeProductLookupView,
     BoxViewSet,
     CategoryFieldViewSet,
     CodeLookupView,
@@ -14,8 +15,8 @@ from .views import (
     ExportInventoryView,
     InventoryManageView,
     InventoryMembersView,
-    MagicArticleImportView,
     InventoryViewSet,
+    MagicArticleImportView,
     SearchView,
     ShelfViewSet,
 )
@@ -39,5 +40,6 @@ urlpatterns = [
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
     path("search/", SearchView.as_view(), name="search"),
     path("codes/lookup/", CodeLookupView.as_view(), name="code-lookup"),
+    path("barcodes/lookup/", BarcodeProductLookupView.as_view(), name="barcode-product-lookup"),
     path("codes/pdf/", CodePdfView.as_view(), name="code-pdf"),
 ] + router.urls

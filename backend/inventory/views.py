@@ -367,6 +367,41 @@ CODE_MODELS = (
     (CategoryField, "field"),
 )
 
+class BarcodeProductLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
+    """Look up a scanned product through the inventory's configured catalog provider."""
+
+    def post(self, request):
+        barcode = str(request.data.get("barcode", "")).strip()
+        inventory_uuid = request.data.get("inventory")
+        if not barcode or len(barcode) > 80:
+            return Response({"error": "A valid barcode is required."}, status=400)
+        if not inventory_uuid or not self.get_accessible_inventories().filter(uuid=inventory_uuid).exists():
+            return Response({"error": "Select an inventory you can access."}, status=400)
+        from third_party_providers.models import ThirdPartyProvider
+        if not ThirdPartyProvider.objects.filter(inventory__uuid=inventory_uuid, type="barcode_lookup", provider="openfoodfacts").exists():
+            return Response({"error": "Configure Open Food Facts as a barcode lookup provider in inventory settings."}, status=503)
+        import json
+        from urllib.error import HTTPError, URLError
+        from urllib.request import Request, urlopen
+        try:
+            req = Request(f"https://world.openfoodfacts.org/api/v2/product/{barcode}.json", headers={"User-Agent": "OpenInvento/1.0 (barcode lookup)"})
+            with urlopen(req, timeout=8) as response:
+                payload = json.loads(response.read())
+            product = payload.get("product") or {}
+            if payload.get("status") != 1 or not product:
+                return Response({"error": "No product was found for this barcode."}, status=404)
+            return Response({
+                "barcode": barcode,
+                "name": product.get("product_name") or product.get("product_name_en") or "",
+                "brand": product.get("brands") or "",
+                "description": product.get("generic_name") or product.get("quantity") or "",
+                "image": product.get("image_front_url") or product.get("image_url"),
+                "source": "Open Food Facts",
+            })
+        except (HTTPError, URLError, TimeoutError, ValueError) as error:
+            return Response({"error": "Open Food Facts could not be reached."}, status=502)
+
+
 class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     def post(self, request, *args, **kwargs):
         identifier = str(request.data.get("identifier", "")).strip()
