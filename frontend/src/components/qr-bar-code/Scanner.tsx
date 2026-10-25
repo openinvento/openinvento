@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 
 type ScannerProps = {
 	onClose: () => void
-	onCodeDetected: (identifier: string) => Promise<void>
+	onCodeDetected: (barcode: string) => Promise<void>
 }
 
 export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
