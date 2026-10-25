@@ -27,6 +27,7 @@ export default function InventorySettingsPage() {
   const [error, setError] = useState("")
   const [providers, setProviders] = useState<Awaited<ReturnType<typeof inventoryApi.listThirdPartyProviders>>>([])
   const [providerName, setProviderName] = useState("Gemini")
+  const [provider, setProvider] = useState<"gemini" | "openfoodfacts">("gemini")
   const [providerKey, setProviderKey] = useState("")
   const [providerType, setProviderType] = useState<ThirdPartyProviderType>("object_detection_llm")
 
@@ -57,7 +58,7 @@ export default function InventorySettingsPage() {
     setSaving(true)
     setError("")
     try {
-      await inventoryApi.createThirdPartyProvider({ inventory: membership.inventory.uuid, provider: "gemini", type: providerType, name: providerName.trim(), api_key: providerKey.trim() })
+      await inventoryApi.createThirdPartyProvider({ inventory: membership.inventory.uuid, provider, type: providerType, name: providerName.trim(), api_key: providerKey.trim() })
       setProviderKey("")
       setProviders(await inventoryApi.listThirdPartyProviders(membership.inventory.uuid))
     } catch (reason) { setError(reason instanceof Error ? reason.message : t("settings.inventory.saveError")) }
@@ -178,7 +179,8 @@ export default function InventorySettingsPage() {
               <div><h2 className="text-xl font-semibold">{t("settings.inventory.providers.title")}</h2><p className="text-sm text-muted-foreground">{t("settings.inventory.providers.description")}</p></div>
               {providers.map((provider) => <div key={provider.uuid} className="flex items-center justify-between rounded-lg bg-muted/30 px-4 py-3"><div className="flex items-center gap-3"><KeyRound className="size-4" /><div><p className="font-medium">{provider.name} · {t("settings.inventory.providers.gemini")}</p><p className="text-xs text-muted-foreground">{t(`settings.inventory.providers.types.${provider.type}`)} · {t("settings.inventory.providers.keySaved")}</p></div></div><Button type="button" variant="ghost" size="icon-sm" aria-label={t("settings.inventory.providers.remove")} disabled={saving} onClick={() => void removeProvider(provider.uuid)}><Trash2 className="text-destructive" /></Button></div>)}
               <div className="grid gap-3 sm:grid-cols-[1fr_1fr_1.5fr_auto]">
-                <Input aria-label={t("settings.inventory.providers.nameLabel")} value={providerName} onChange={(event) => setProviderName(event.target.value)} placeholder={t("settings.inventory.providers.namePlaceholder")} />
+              <select aria-label={t("settings.inventory.providers.providerLabel")} value={provider} onChange={(event) => setProvider(event.target.value as "gemini" | "openfoodfacts")} className="h-9 rounded-md border bg-background px-3 text-sm"><option value="gemini">Google Gemini</option><option value="openfoodfacts">Open Food Facts</option></select>
+              <Input aria-label={t("settings.inventory.providers.nameLabel")} value={providerName} onChange={(event) => setProviderName(event.target.value)} placeholder={t("settings.inventory.providers.namePlaceholder")} />
                 <select aria-label={t("settings.inventory.providers.typeLabel")} value={providerType} onChange={(event) => setProviderType(event.target.value as ThirdPartyProviderType)} className="h-9 rounded-md border bg-background px-3 text-sm"><option value="barcode_lookup">{t("settings.inventory.providers.types.barcode_lookup")}</option><option value="object_detection_llm">{t("settings.inventory.providers.types.object_detection_llm")}</option><option value="llm">{t("settings.inventory.providers.types.llm")}</option></select>
                 <Input aria-label={t("settings.inventory.providers.keyLabel")} type="password" autoComplete="new-password" value={providerKey} onChange={(event) => setProviderKey(event.target.value)} placeholder={t("settings.inventory.providers.keyPlaceholder")} />
                 <Button type="button" onClick={() => void saveProvider()} disabled={saving || !providerName.trim() || !providerKey.trim()}><Plus />{t("settings.inventory.providers.addKey")}</Button>

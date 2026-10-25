@@ -37,7 +37,6 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 
 				if (detectedCode) {
 					hasDetectedCodeRef.current = true
-					stopScanner()
 					setStatus("looking-up")
 					try {
 						await onCodeDetected(detectedCode.rawValue)
@@ -45,6 +44,12 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 						if (isActive) {
 							setStatus("error")
 							setError(lookupError instanceof Error ? lookupError.message : "Unable to find the scanned item.")
+						}
+					} finally {
+						if (isActive) {
+							hasDetectedCodeRef.current = false
+							setStatus("scanning")
+							frameRef.current = requestAnimationFrame(() => void scan(detector))
 						}
 					}
 					return

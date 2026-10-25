@@ -2,7 +2,8 @@ import { deleteData, downloadFile, fetchData, patchData, postData } from "./base
 
 export type Inventory = { uuid: string; name: string; identifier: string; updated_at: string }
 export type ThirdPartyProviderType = "barcode_lookup" | "object_detection_llm" | "llm"
-export type ThirdPartyProvider = { uuid: string; inventory: string; provider: "gemini"; type: ThirdPartyProviderType; name: string; has_api_key: boolean; created_at: string; updated_at: string }
+export type ThirdPartyProvider = { uuid: string; inventory: string; provider: "gemini" | "openfoodfacts"; type: ThirdPartyProviderType; name: string; has_api_key: boolean; created_at: string; updated_at: string }
+export type BarcodeProduct = { barcode: string; name: string; brand: string; description: string; image: string | null; source: string }
 export type Area = EntityBase
 export type Shelf = EntityBase & { area: string }
 export type Box = EntityBase & { area: string; shelf: string | null; parent_box: string | null }
@@ -106,7 +107,7 @@ export const inventoryApi = {
   getDashboard: () => fetchData<DashboardData>(scopedPath("/api/dashboard/")),
   listInventories: () => fetchData<Inventory[]>("/api/inventories/"),
   listThirdPartyProviders: (inventory: string) => fetchData<ThirdPartyProvider[]>(`/api/third-party-providers/?inventory=${encodeURIComponent(inventory)}`),
-  createThirdPartyProvider: (payload: { inventory: string; provider: "gemini"; type: ThirdPartyProviderType; name: string; api_key: string }) => postData<ThirdPartyProvider>("/api/third-party-providers/", payload),
+  createThirdPartyProvider: (payload: { inventory: string; provider: ThirdPartyProvider["provider"]; type: ThirdPartyProviderType; name: string; api_key: string }) => postData<ThirdPartyProvider>("/api/third-party-providers/", payload),
   updateThirdPartyProvider: (uuid: string, payload: { name?: string; api_key?: string }) => patchData<ThirdPartyProvider>(`/api/third-party-providers/${uuid}/`, payload),
   deleteThirdPartyProvider: (uuid: string) => deleteData<void>(`/api/third-party-providers/${uuid}/`),
   listAreas: () => fetchData<Area[]>(scopedPath("/api/areas/")),
@@ -136,6 +137,8 @@ export const inventoryApi = {
     fetchData<SearchResult[]>(`/api/search/?q=${encodeURIComponent(query)}&inventory=${encodeURIComponent(inventory)}`),
   lookupCode: (identifier: string) =>
     postData<CodeLookupResult>("/api/codes/lookup/", { identifier }),
+  lookupBarcodeProduct: (barcode: string, inventory: string) =>
+    postData<BarcodeProduct>("/api/barcodes/lookup/", { barcode, inventory }),
   updateInventory: (inventory: string, name: string) =>
     patchData<Inventory>(`/api/inventories/${inventory}/`, { name }),
   exportInventoryCsv: (inventory: string) =>

@@ -1,32 +1,71 @@
-import Scanner from "@/components/qr-bar-code/Scanner"
-import BaseScreen from "@/layouts/BaseScreen"
+import { useCallback, useEffect, useState } from "react"
+import { Check, LoaderCircle, Plus, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router"
+import Scanner from "@/components/qr-bar-code/Scanner"
+import { Button } from "@/components/ui/button"
+import BaseScreen from "@/layouts/BaseScreen"
+import { getSelectedInventory, inventoryApi, type BarcodeProduct, type Inventory } from "@/utils/api/inventory"
 
+type ScannedArticle = BarcodeProduct & { id: string; added: boolean }
 
 export default function BarcodeArticleImportPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [inventory, setInventory] = useState<Inventory | null>(null)
+  const [articles, setArticles] = useState<ScannedArticle[]>([])
+  const [error, setError] = useState("")
+  const [saving, setSaving] = useState<string | null>(null)
+  const area = new URLSearchParams(window.location.search).get("area")
+  const box = new URLSearchParams(window.location.search).get("box")
 
+  useEffect(() => {
+    void inventoryApi.listInventories().then((items) => setInventory(getSelectedInventory(items)))
+      .catch((reason) => setError(reason instanceof Error ? reason.message : "Could not load inventory."))
+  }, [])
 
-  const areaId = new URLSearchParams(window.location.search).get("area") || undefined
-  const boxId = new URLSearchParams(window.location.search).get("box") || undefined
+  const handleCodeDetected = useCallback(async (barcode: string) => {
+    if (!inventory) throw new Error("Select an inventory before scanning.")
+    setError("")
+    const product = await inventoryApi.lookupBarcodeProduct(barcode, inventory.uuid)
+    if (!product.name) throw new Error("The product has no name in Open Food Facts.")
+    setArticles((current) => current.some((item) => item.barcode === barcode) ? current : [...current, { ...product, id: crypto.randomUUID(), added: false }])
+  }, [inventory])
 
-  const handleCodeDetected = (code: string) => {
-    // Handle the detected code here, e.g., navigate to a specific page or perform an action
-    console.log("Detected code:", code)
-
-    return navigate(-1)
+  const addArticle = async (article: ScannedArticle) => {
+    if (!inventory) return
+    setSaving(article.id)
+    setError("")
+    try {
+      await inventoryApi.create("articles", { inventory: inventory.uuid, name: article.name, description: [article.brand, article.description, `Barcode: ${article.barcode}`].filter(Boolean).join(" · "), quantity: 1, area, box, stock_tracking: false })
+      setArticles((current) => current.map((item) => item.id === article.id ? { ...item, added: true } : item))
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not add article.") }
+    finally { setSaving(null) }
   }
-
-  // TODO: suport mass creation like in
 
   return (
     <BaseScreen title={t("quickActions.barcodeImport")}>
-     <div>
-      <Scanner onCodeDetected={async (code) => await handleCodeDetected(code)} onClose={() => navigate(-1)} />
-
-     </div>
+      <div className="flex gap-6 flex-wrap lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
+        <Scanner onCodeDetected={handleCodeDetected} onClose={() => navigate(-1)} />
+        <section className="min-h-40 flex-1 rounded-xl border bg-card p-4 shadow-sm">
+          <h2 className="mb-4 text-lg font-semibold">{t("articleBarcodeImport.scannedArticles")} ({articles.length})</h2>
+          {error && <p role="alert" className="mb-3 rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
+          {articles.length === 0 ? <p className="text-sm text-muted-foreground">{t("articleBarcodeImport.description")}.</p> :
+            <ul className="space-y-3">{articles.map((article) => <li key={article.id} className="flex gap-3 rounded-lg border p-3">
+              {article.image && <img src={article.image} alt="" className="size-16 rounded object-contain" />}
+              <div className="min-w-0 flex-1"><p className="font-medium">{article.name}</p><p className="text-sm text-muted-foreground">{[article.brand, article.description].filter(Boolean).join(" · ") || article.barcode}</p><p className="text-xs text-muted-foreground">{article.barcode}</p></div>
+              {article.added ? 
+                <Check className="mt-1 size-5 text-green-600" aria-label="Added" /> 
+                : <Button size="icon-sm" variant="outline" aria-label={`Add ${article.name}`} disabled={saving !== null} onClick={() => void addArticle(article)}>
+                    {saving === article.id ? <LoaderCircle className="animate-spin" /> : <Plus />}
+                  </Button>}
+                  
+              <Button size="icon-sm" variant="ghost" aria-label={`Remove ${article.name}`} onClick={() => setArticles((current) => current.filter((item) => item.id !== article.id))}>
+                <Trash2 />
+              </Button>
+            </li>)}</ul>}
+        </section>
+      </div>
     </BaseScreen>
   )
 }
