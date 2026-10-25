@@ -7,6 +7,8 @@ PROVIDER_CONFIGURATIONS = (
         "display_name": "Google Gemini",
         "type_label": "Object detection LLM",
         "requires_api_key": True,
+        "requires_model": True,
+        "default_model": "gemini-3.5-flash-lite",
     },
     {
         "provider": "ollama",
@@ -32,6 +34,8 @@ PROVIDER_CONFIGURATIONS = (
         "display_name": "Google Gemini",
         "type_label": "LLM",
         "requires_api_key": True,
+        "requires_model": True,
+        "default_model": "gemini-3.5-flash-lite",
     },
     {
         "provider": "openfoodfacts",

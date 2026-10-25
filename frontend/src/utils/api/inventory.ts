@@ -2,7 +2,7 @@ import { deleteData, downloadFile, fetchData, patchData, postData } from "./base
 
 export type Inventory = { uuid: string; name: string; identifier: string; updated_at: string }
 export type ThirdPartyProviderType = string
-export type ThirdPartyProviderConfiguration = { provider: string; type: ThirdPartyProviderType; display_name: string; type_label: string; requires_api_key: boolean; requires_model?: boolean; requires_api_url?: boolean }
+export type ThirdPartyProviderConfiguration = { provider: string; type: ThirdPartyProviderType; display_name: string; type_label: string; requires_api_key: boolean; requires_model?: boolean; requires_api_url?: boolean; default_model?: string }
 export type ThirdPartyProvider = { uuid: string; inventory: string; provider: string; type: ThirdPartyProviderType; name: string; model_name: string; api_url: string; has_api_key: boolean; created_at: string; updated_at: string }
 export type BarcodeProduct = { barcode: string; name: string; brand: string; description: string; image: string | null; source: string }
 export type Area = EntityBase

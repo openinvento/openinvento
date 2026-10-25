@@ -56,7 +56,9 @@ export default function InventorySettingsPage() {
     const inventories = await inventoryApi.listInventories()
 
     try {
-      setConfigurations(await inventoryApi.listThirdPartyProviderConfigurations())
+      const availableConfigurations = await inventoryApi.listThirdPartyProviderConfigurations()
+      setConfigurations(availableConfigurations)
+      setProviderModel(availableConfigurations[0]?.default_model ?? "")
       let inventoryUuid = getSelectedInventoryUuid()
       if (!inventoryUuid) {
         inventoryUuid = getSelectedInventory(inventories)?.uuid ?? null
@@ -211,7 +213,7 @@ export default function InventorySettingsPage() {
                     if (!configuration) return
                     setConfigurationIndex(configurations.indexOf(configuration))
                     setProviderKey("")
-                    setProviderModel("")
+                    setProviderModel(configuration.default_model ?? "")
                     setProviderUrl("")
                   }}
                   itemToStringValue={(configuration) => `${configuration.provider}:${configuration.type}`}

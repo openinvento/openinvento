@@ -603,7 +603,7 @@
           "object_detection_llm": "LLM zur Objekterkennung"
         },
         "modelLabel": "Modell",
-        "modelPlaceholder": "z. B. llava",
+        "modelPlaceholder": "Modell, z. B. llava",
         "urlLabel": "Ollama-Server-URL (optional)",
         "urlPlaceholder": "http://localhost:11434"
       },

@@ -593,7 +593,7 @@
         "keyPlaceholder": "API key",
         "keySaved": "API key saved",
         "modelLabel": "Model",
-        "modelPlaceholder": "e.g. llava",
+        "modelPlaceholder": "Model, e.g. llava",
         "nameLabel": "Provider name",
         "namePlaceholder": "Provider name",
         "noConfigurations": "No provider configurations available.",

@@ -34,6 +34,8 @@ class ThirdPartyProviderSerializer(serializers.ModelSerializer):
         configuration = get_provider_configuration(provider, provider_type)
         if configuration is None:
             raise serializers.ValidationError({"provider": "This provider configuration is not available."})
+        if self.instance is None and "model_name" not in attrs and configuration.get("default_model"):
+            attrs["model_name"] = configuration["default_model"]
         key_value = attrs.get("api_key", None)
         has_existing_key = self.instance is not None and bool(self.instance.encrypted_api_key)
         if configuration["requires_api_key"] and not (key_value or has_existing_key):
