@@ -33,7 +33,11 @@ export default function MagicArticleImportPage() {
     void inventoryApi.listInventories().then(async (items) => {
       const selected = getSelectedInventory(items)
       setInventory(selected)
-      if (selected) setProviders((await inventoryApi.listThirdPartyProviders(selected.uuid)).filter((provider) => provider.type === "object_detection_llm"))
+      if (selected) {
+        const availableProviders = (await inventoryApi.listThirdPartyProviders(selected.uuid)).filter((provider) => provider.type === "object_detection_llm")
+        setProviders(availableProviders)
+        if (availableProviders.length === 1) setProviderId(availableProviders[0].uuid)
+      }
     }).catch((reason) => setError(reason instanceof Error ? reason.message : t("quickActions.magicImportPage.errors.loadInventories")))
   }, [])
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])

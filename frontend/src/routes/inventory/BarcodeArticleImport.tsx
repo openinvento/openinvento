@@ -26,7 +26,11 @@ export default function BarcodeArticleImportPage() {
     void inventoryApi.listInventories().then(async (items) => {
       const selected = getSelectedInventory(items)
       setInventory(selected)
-      if (selected) setProviders((await inventoryApi.listThirdPartyProviders(selected.uuid)).filter((provider) => provider.type === "barcode_lookup"))
+      if (selected) {
+        const availableProviders = (await inventoryApi.listThirdPartyProviders(selected.uuid)).filter((provider) => provider.type === "barcode_lookup")
+        setProviders(availableProviders)
+        if (availableProviders.length === 1) setProviderId(availableProviders[0].uuid)
+      }
     })
       .catch((reason) => setError(reason instanceof Error ? reason.message : "Could not load inventory."))
   }, [])
