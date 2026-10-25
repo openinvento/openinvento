@@ -602,7 +602,7 @@
           "llm": "LLM",
           "object_detection_llm": "LLM de détection d’objets"
         },
-        "modelLabel": "Mod?le",
+        "modelLabel": "Modèle",
         "modelPlaceholder": "ex. llava",
         "urlLabel": "URL du serveur Ollama (facultatif)",
         "urlPlaceholder": "http://localhost:11434"
