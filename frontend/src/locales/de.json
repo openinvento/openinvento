@@ -46,7 +46,7 @@
       "lowStock": "Niedriger Bestand",
       "modal": {
         "edit": "{{kind}} bearbeiten",
-        "new": "Neue/r {{kind}}"
+        "new": "Neue {{kind}}"
       },
       "noBox": "Keine Kiste",
       "noCategory": "Keine Kategorie",
@@ -416,7 +416,6 @@
   "quickActions": {
     "barcodeImport": "Importiere Artikel mit Barcode",
     "close": "Schnellaktionen schließen",
-    "comingSoon": "Demnächst verfügbar",
     "createArticle": "Artikel erstellen",
     "createArticleFromBarcode": "Artikel von Barcode erstellen",
     "magicComingSoonMessage": "Der KI-gestützte Artikelimport kommt bald.",

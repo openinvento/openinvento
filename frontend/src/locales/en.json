@@ -416,7 +416,6 @@
   "quickActions": {
     "barcodeImport": "Import articles from barcode",
     "close": "Close quick actions",
-    "comingSoon": "Coming soon",
     "createArticle": "Create article",
     "createArticleFromBarcode": "Create article from barcode",
     "magicComingSoonMessage": "AI powered article import is coming soon.",

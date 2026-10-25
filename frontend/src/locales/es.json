@@ -416,7 +416,6 @@
   "quickActions": {
     "barcodeImport": "Importar artículos desde código de barras.",
     "close": "Cerrar acciones rápidas",
-    "comingSoon": "Próximamente",
     "createArticle": "Crear artículo",
     "createArticleFromBarcode": "Crear artículo a partir de código de barras.",
     "magicComingSoonMessage": "La importación de artículos con IA llegará pronto.",
