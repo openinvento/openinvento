@@ -83,14 +83,6 @@
     "description": "Scan a product barcode to look it up and add it here",
     "scannedArticles": "Scanned Articles"
   },
-  "providerSelection": {
-    "addProvider": "Add provider",
-    "barcodeLabel": "Barcode lookup provider",
-    "choose": "Select a provider",
-    "magicLabel": "Object detection provider",
-    "noneConfigured": "No provider configured. Add a provider in inventory settings.",
-    "noneSelected": "No provider selected."
-  },
   "articles": {
     "page": {
       "areas": "Areas",
@@ -420,6 +412,14 @@
     "rename": "Rename",
     "renameTitle": "Rename {{kind}}",
     "stockLevel": "{{quantity}} left (minimum {{minimum}})"
+  },
+  "providerSelection": {
+    "addProvider": "Add provider",
+    "barcodeLabel": "Barcode lookup provider",
+    "choose": "Select a provider",
+    "magicLabel": "Object detection provider",
+    "noneConfigured": "No provider configured. Add a provider in inventory settings.",
+    "noneSelected": "No provider selected."
   },
   "quickActions": {
     "barcodeImport": "Import articles from barcode",

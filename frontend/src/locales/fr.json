@@ -413,6 +413,14 @@
     "renameTitle": "Renommer {{kind}}",
     "stockLevel": "{{quantity}} restant(s) (minimum : {{minimum}})"
   },
+  "providerSelection": {
+    "addProvider": "Ajouter un fournisseur",
+    "barcodeLabel": "Fournisseur de recherche de codes-barres",
+    "choose": "Sélectionnez un fournisseur",
+    "magicLabel": "Fournisseur de détection d'objets",
+    "noneConfigured": "Aucun fournisseur configuré. \nAjoutez un fournisseur dans les paramètres d'inventaire.",
+    "noneSelected": "Aucun fournisseur sélectionné."
+  },
   "quickActions": {
     "barcodeImport": "Importer des articles à partir d'un code-barres",
     "close": "Fermer les actions rapides",
@@ -577,13 +585,15 @@
       "noMembers": "Aucun membre trouvé.",
       "providers": {
         "addKey": "Ajouter la clé",
+        "addProvider": "Ajouter un fournisseur",
+        "configurationLabel": "Configuration du fournisseur",
         "description": "Les identifiants Gemini sont stockés pour cet inventaire et utilisés par l’import magique d’articles.",
-        "gemini": "Google Gemini",
         "keyLabel": "Clé API Gemini",
         "keyPlaceholder": "Clé API Gemini",
         "keySaved": "Clé API enregistrée",
         "nameLabel": "Nom du fournisseur",
         "namePlaceholder": "Nom du fournisseur",
+        "noConfigurations": "Aucune configuration de fournisseur disponible.",
         "remove": "Supprimer le fournisseur",
         "title": "Fournisseurs tiers",
         "typeLabel": "Type de fournisseur",
