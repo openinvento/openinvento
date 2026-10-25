@@ -1,6 +1,6 @@
 import * as LucideIcons from "lucide-react"
 import { useState } from "react"
-import type { LucideIcon } from "lucide-react"
+import { Shapes, type LucideIcon } from "lucide-react"
 
 const iconMap = LucideIcons as unknown as Record<string, LucideIcon>
 const nonIconExports = new Set(["Icon", "DynamicIcon"])
@@ -13,9 +13,9 @@ export function getArticleIcon(name: string | null | undefined): LucideIcon {
   return (name && !nonIconExports.has(name) && iconMap[name]) || LucideIcons.Package
 }
 
-type Props = { value: string | null | undefined; onChange: (value: string) => void }
+type Props = { value: string | null | undefined; onChange: (value: string) => void; hideIconPreview?: boolean }
 
-export function ArticleIconPicker({ value, onChange }: Props) {
+export function ArticleIconPicker({ value, onChange, hideIconPreview: hideIconPreview = false }: Props) {
   const [query, setQuery] = useState("")
   const [expanded, setExpanded] = useState(false)
   const selectedIcon = getArticleIcon(value)
@@ -23,18 +23,31 @@ export function ArticleIconPicker({ value, onChange }: Props) {
 
   return (
     <div className="grid gap-2">
-      <button
-        type="button"
-        onClick={() => setExpanded((current) => !current)}
-        aria-expanded={expanded}
-        className="flex items-center gap-3 rounded-lg border bg-muted/30 p-2 text-left transition hover:border-foreground/20"
-      >
-        <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-          {(() => { const Icon = selectedIcon; return <Icon className="size-5" /> })()}
-        </span>
-        <span className="min-w-0 flex-1 text-sm">{value || "Package"}</span>
-        <span className="text-xs text-muted-foreground">{expanded ? "Hide icons" : "Choose icon"}</span>
-      </button>
+      {hideIconPreview ? (
+        <button
+          type="button"
+          onClick={() => setExpanded((current) => !current)}
+          aria-expanded={expanded}
+          aria-label="Choose icon"
+          title="Choose icon"
+          className="inline-flex size-9 items-center justify-center rounded-lg border bg-background text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          <Shapes className="size-4" />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setExpanded((current) => !current)}
+          aria-expanded={expanded}
+          className="flex items-center gap-3 rounded-lg border bg-muted/30 p-2 text-left transition hover:border-foreground/20"
+        >
+          <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+            {(() => { const Icon = selectedIcon; return <Icon className="size-5" /> })()}
+          </span>
+          <span className="min-w-0 flex-1 text-sm">{value || "Package"}</span>
+          <span className="text-xs text-muted-foreground">{expanded ? "Hide icons" : "Choose icon"}</span>
+        </button>
+      )}
       {expanded && <>
         <input
           value={query}

@@ -438,6 +438,7 @@
       "createdOneWithFailures": "{{saved}} article created; {{failed}} could not be saved.",
       "description": "Take a photo and turn the items in it into editable articles.",
       "descriptionLabel": "Description",
+      "chooseArticleImage": "Choose an image for this article",
       "errors": {
         "analyze": "Could not analyze this photo.",
         "invalidImage": "Choose a JPEG or PNG image.",

@@ -1,16 +1,13 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react"
-import { Camera, ImagePlus, LoaderCircle, Package, PlusIcon, Save, Sparkles, Trash2 } from "lucide-react"
+import { Camera, ImagePlus, LoaderCircle, Package, PlusIcon, Save, Sparkles } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import BaseScreen from "@/layouts/BaseScreen"
-import { ArticleIconPicker, getArticleIcon } from "@/components/inventory/article-icon-picker"
 import ThirdPartyProviderSelector from "@/components/inventory/ThirdPartyProviderSelector"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { getSelectedInventory, inventoryApi, type Inventory, type MagicArticleDraft, type ThirdPartyProvider } from "@/utils/api/inventory"
+import { getSelectedInventory, inventoryApi, type Inventory, type ThirdPartyProvider } from "@/utils/api/inventory"
 import { useNavigate } from "react-router"
+import { type Draft, ArticleDraftCard } from "@/components/inventory/ArticleDraftIcon"
 
-type Draft = MagicArticleDraft & { id: string }
 
 export default function MagicArticleImportPage() {
   const { t } = useTranslation()
@@ -72,8 +69,22 @@ export default function MagicArticleImportPage() {
     }
   }
 
-  function updateDraft(id: string, changes: Partial<MagicArticleDraft>) {
+  function updateDraft(id: string, changes: Partial<Draft>) {
     setDrafts((current) => current.map((draft) => draft.id === id ? { ...draft, ...changes } : draft))
+  }
+
+  function chooseDraftImage(event: ChangeEvent<HTMLInputElement>, id: string) {
+    const file = event.target.files?.[0]
+    event.target.value = ""
+    if (!file) return
+    if (!(file.type === "image/jpeg" || file.type === "image/png")) {
+      setError(t("quickActions.magicImportPage.errors.invalidImage"))
+      return
+    }
+    const reader = new FileReader()
+    reader.onload = () => updateDraft(id, { image: file, imagePreview: String(reader.result) })
+    reader.readAsDataURL(file)
+    setError("")
   }
 
   async function saveAll() {
@@ -81,8 +92,14 @@ export default function MagicArticleImportPage() {
     setSaving(true)
     setError("")
     setNotice("")
-    const results = await Promise.allSettled(drafts.map(({ id: _id, ...article }) => 
-      inventoryApi.create("articles", { ...article, inventory: inventory.uuid, area: areaId, box: boxId })))
+    const results = await Promise.allSettled(drafts.map(({ id: _id, image, imagePreview: _imagePreview, ...article }) => {
+      const payload = new FormData()
+      Object.entries({ ...article, inventory: inventory.uuid, area: areaId, box: boxId }).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) payload.append(key, String(value))
+      })
+      if (image) payload.append("image", image)
+      return inventoryApi.create("articles", payload)
+    }))
     const failed = results.filter((result) => result.status === "rejected")
     const saved = results.length - failed.length
     setDrafts((current) => failed.length ? current.filter((_, index) => results[index]?.status === "rejected") : [])
@@ -138,20 +155,20 @@ export default function MagicArticleImportPage() {
         {error && <p role="alert" className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         {notice && <p role="status" className="rounded-lg bg-primary/10 p-3 text-sm">{notice}</p>}
 
-        {drafts.length > 0 && <section className="grid gap-4">
-          <div><h2 className="text-xl font-semibold">{t("quickActions.magicImportPage.reviewArticles")}</h2><p className="mt-1 text-sm text-muted-foreground">{t("quickActions.magicImportPage.reviewDescription")}</p></div>
-          {drafts.map((draft, index) => <article key={draft.id} className="grid gap-4 rounded-xl border p-4 sm:grid-cols-[auto_minmax(0,1fr)_minmax(120px,0.3fr)_auto] sm:items-start">
-            <div className="grid gap-2">
-              {(() => { const Icon = getArticleIcon(draft.icon); return <span className="grid size-9 place-items-center rounded-lg bg-muted" aria-hidden="true"><Icon className="size-5" /></span> })()}
-              <ArticleIconPicker value={draft.icon} onChange={(icon) => updateDraft(draft.id, { icon })} />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="grid gap-1.5 text-sm font-medium">{t("quickActions.magicImportPage.name")}<Input value={draft.name} maxLength={100} onChange={(event) => updateDraft(draft.id, { name: event.target.value })} /></label>
-              <label className="grid gap-1.5 text-sm font-medium sm:col-span-2">{t("quickActions.magicImportPage.descriptionLabel")}<Textarea value={draft.description ?? ""} maxLength={750} rows={2} onChange={(event) => updateDraft(draft.id, { description: event.target.value })} /></label>
-            </div>
-            <label className="grid gap-1.5 text-sm font-medium">{t("quickActions.magicImportPage.quantity")}<Input type="number" min="1" value={draft.quantity} onChange={(event) => updateDraft(draft.id, { quantity: Math.max(1, Number(event.target.value)) })} /></label>
-            <Button type="button" variant="ghost" size="icon" aria-label={t("quickActions.magicImportPage.removeItem", { count: index + 1 })} onClick={() => setDrafts((current) => current.filter((item) => item.id !== draft.id))}><Trash2 className="text-destructive" /></Button>
-          </article>)}
+        {drafts.length > 0 && <section className="flex flex-col gap-4">
+          <div>
+            <h2 className="text-xl font-semibold">{t("quickActions.magicImportPage.reviewArticles")}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t("quickActions.magicImportPage.reviewDescription")}</p>
+          </div>
+          {drafts.map((draft, index) => 
+          <ArticleDraftCard
+            key={draft.id}
+            draft={draft}
+            index={index}
+            onChange={updateDraft}
+            onImageChange={chooseDraftImage}
+            onRemove={(id) => setDrafts((current) => current.filter((item) => item.id !== id))}
+          />)}
           <div className="flex justify-end">
             <Button className="px-8 py-5" onClick={() => void saveAll()} disabled={saving || drafts.some((draft) => !draft.name.trim())}>
               <Save />{saving ? t("quickActions.magicImportPage.saving") : t("quickActions.magicImportPage.createArticles", { count: drafts.length })}
