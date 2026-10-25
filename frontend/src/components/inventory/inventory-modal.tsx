@@ -29,7 +29,7 @@ export function InventoryModal({ title, open, submitting, children, onClose, onS
         <h2 id="inventory-modal-title" className="text-lg font-semibold">{title}</h2>
         <Button type="button" variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close modal"><X /></Button>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-8 sm:py-6">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-8 sm:py-6 [&_input]:text-base [&_select]:text-base [&_textarea]:text-base">
         <div className="space-y-4">{children}</div>
       </div>
       <div className="flex shrink-0 justify-end gap-2 border-t bg-background px-4 py-3 sm:px-6 sm:py-4">

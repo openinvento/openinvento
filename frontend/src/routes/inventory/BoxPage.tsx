@@ -153,7 +153,7 @@ export default function BoxPage() {
           </div>
         )}
       </>}
-      {area && box && <FloatingCreateButton areaId={area.uuid} boxId={box.uuid} articleTo={`/app/areas/${box.area}/articles/new?box=${box.uuid}`} />}
+      {area && box && !identifierOpen && !editOpen && <FloatingCreateButton areaId={area.uuid} boxId={box.uuid} articleTo={`/app/areas/${box.area}/articles/new?box=${box.uuid}`} />}
       {box && 
       <InventoryModal title={t("boxes.identifierTitle")} open={identifierOpen} submitting={saving}
         onClose={() => setIdentifierOpen(false)} onSubmit={updateIdentifier}>
