@@ -27,6 +27,7 @@ import ManageCodes from './routes/inventory/ManageCodes.tsx'
 import ResetCredentialsPage from './routes/auth/ResetCredentials.tsx'
 import LoansPage from '../modules/loans/LoansPage.tsx'
 import { getEnabledModules, MODULES_CHANGED_EVENT } from './utils/api/modules'
+import BarcodeArticleImportPage from './routes/inventory/BarcodeArticleImport.tsx'
 
 function EnabledModuleRoute({ name, children }: { name: string; children: ReactNode }) {
   const [enabled, setEnabled] = useState<boolean | null>(null)
@@ -132,6 +133,10 @@ const router = createBrowserRouter([
       {
         path: "magic-article-import",
         element: <MagicArticleImportPage />,
+      },
+      {
+        path: "barcode-article-import",
+        element: <BarcodeArticleImportPage />,
       },
       {
         path: "areas",

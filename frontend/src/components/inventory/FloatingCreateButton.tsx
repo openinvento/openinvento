@@ -36,7 +36,7 @@ export function FloatingCreateButton({ articleTo, areaId, boxId }: InventoryQuic
           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{t("quickActions.comingSoon")}</span>
         </Link>
         <Link
-          to={articleTo}
+          to={`/app/barcode-article-import?area=${areaId}&box=${boxId}`}
           tabIndex={open ? 0 : -1}
           onClick={() => setOpen(false)}
           className="inline-flex items-center gap-2 rounded-full border bg-background px-4 py-3 text-sm font-medium text-foreground shadow-lg hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
