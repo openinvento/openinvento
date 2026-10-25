@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
-import { Download, TriangleAlert, UserMinus, UserPlus } from "lucide-react"
+import { Download, KeyRound, Plus, Trash2, TriangleAlert, UserMinus, UserPlus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import BaseScreen from "@/layouts/BaseScreen"
 import { Button } from "@/components/ui/button"
@@ -10,6 +10,7 @@ import {
   getSelectedInventoryUuid,
   inventoryApi,
   type InventoryMembership,
+  type ThirdPartyProviderType,
 } from "@/utils/api/inventory"
 import { Input } from "@/components/ui/input"
 
@@ -24,6 +25,10 @@ export default function InventorySettingsPage() {
   const [saving, setSaving] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [error, setError] = useState("")
+  const [providers, setProviders] = useState<Awaited<ReturnType<typeof inventoryApi.listThirdPartyProviders>>>([])
+  const [providerName, setProviderName] = useState("Gemini")
+  const [providerKey, setProviderKey] = useState("")
+  const [providerType, setProviderType] = useState<ThirdPartyProviderType>("object_detection_llm")
 
   async function load() {
     setLoading(true)
@@ -37,6 +42,7 @@ export default function InventorySettingsPage() {
       }
       if (!inventoryUuid) return
       const loadedMembership = await inventoryApi.getMembership(inventoryUuid)
+      setProviders(await inventoryApi.listThirdPartyProviders(inventoryUuid))
       setInventoryName(loadedMembership.inventory.name)
       setMembership(loadedMembership)
     } catch (reason) {
@@ -44,6 +50,28 @@ export default function InventorySettingsPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function saveProvider() {
+    if (!membership || !providerName.trim() || !providerKey.trim()) return
+    setSaving(true)
+    setError("")
+    try {
+      await inventoryApi.createThirdPartyProvider({ inventory: membership.inventory.uuid, provider: "gemini", type: providerType, name: providerName.trim(), api_key: providerKey.trim() })
+      setProviderKey("")
+      setProviders(await inventoryApi.listThirdPartyProviders(membership.inventory.uuid))
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t("settings.inventory.saveError")) }
+    finally { setSaving(false) }
+  }
+
+  async function removeProvider(uuid: string) {
+    if (!membership) return
+    setSaving(true)
+    try {
+      await inventoryApi.deleteThirdPartyProvider(uuid)
+      setProviders(await inventoryApi.listThirdPartyProviders(membership.inventory.uuid))
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t("settings.inventory.saveError")) }
+    finally { setSaving(false) }
   }
 
   useEffect(() => {
@@ -144,6 +172,17 @@ export default function InventorySettingsPage() {
               <Button type="button" variant="outline" onClick={() => void exportInventory()} disabled={exporting}>
                 <Download /> {exporting ? t("settings.inventory.exporting") : t("settings.inventory.exportCsv")}
               </Button>
+            </section>
+
+            <section className="mb-10 grid gap-4 rounded-xl border p-5">
+              <div><h2 className="text-xl font-semibold">Third-party providers</h2><p className="text-sm text-muted-foreground">Gemini credentials are stored for this inventory and used by Magic Article Import.</p></div>
+              {providers.map((provider) => <div key={provider.uuid} className="flex items-center justify-between rounded-lg bg-muted/30 px-4 py-3"><div className="flex items-center gap-3"><KeyRound className="size-4" /><div><p className="font-medium">{provider.name} · Google Gemini</p><p className="text-xs text-muted-foreground">{provider.type.replaceAll("_", " ")} · API key saved</p></div></div><Button type="button" variant="ghost" size="icon-sm" aria-label="Remove provider" disabled={saving} onClick={() => void removeProvider(provider.uuid)}><Trash2 className="text-destructive" /></Button></div>)}
+              <div className="grid gap-3 sm:grid-cols-[1fr_1fr_1.5fr_auto]">
+                <Input aria-label="Provider name" value={providerName} onChange={(event) => setProviderName(event.target.value)} placeholder="Provider name" />
+                <select aria-label="Provider type" value={providerType} onChange={(event) => setProviderType(event.target.value as ThirdPartyProviderType)} className="h-9 rounded-md border bg-background px-3 text-sm"><option value="barcode_lookup">Barcode lookup</option><option value="object_detection_llm">Object detection LLM</option><option value="llm">LLM</option></select>
+                <Input aria-label="Gemini API key" type="password" autoComplete="new-password" value={providerKey} onChange={(event) => setProviderKey(event.target.value)} placeholder="Gemini API key" />
+                <Button type="button" onClick={() => void saveProvider()} disabled={saving || !providerName.trim() || !providerKey.trim()}><Plus />Add key</Button>
+              </div>
             </section>
 
             <div className="mb-4 flex items-end justify-between gap-4">
