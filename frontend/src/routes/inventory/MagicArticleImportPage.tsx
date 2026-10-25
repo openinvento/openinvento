@@ -95,9 +95,9 @@ export default function MagicArticleImportPage() {
   }
 
   return (
-    <BaseScreen title={t("quickActions.magicImport")} description={t("quickActions.magicImportPage.description")} actions={drafts.length > 0 ? <Button onClick={() => void saveAll()} disabled={saving}><Save />{saving ? t("quickActions.magicImportPage.saving") : t("quickActions.magicImportPage.createArticles", { count: drafts.length })}</Button> : undefined}>
-      <div className="mx-auto grid max-w-5xl gap-6">
-        <section className="grid gap-5 rounded-xl border bg-muted/15 p-5 md:grid-cols-[minmax(0,1fr)_minmax(250px,0.8fr)] md:items-center">
+    <BaseScreen title={t("quickActions.magicImport")} description={t("quickActions.magicImportPage.description")}>
+      <div className="mx-auto grid gap-6">
+        <section className="grid gap-5 rounded-xl  bg-muted/15 p-5 md:grid-cols-[minmax(0,1fr)_minmax(250px,0.8fr)] md:items-center">
           <div>
             <label className="mb-2 block text-sm font-medium" htmlFor="magic-provider">{t("providerSelection.magicLabel")}</label>
             <div className="mb-4 flex flex-wrap gap-2">
@@ -106,9 +106,14 @@ export default function MagicArticleImportPage() {
                 <PlusIcon />{t("providerSelection.addProvider")}
               </Button>
             </div>
-            {providers.length === 0 ? <p className="mb-3 text-sm text-muted-foreground">{t("providerSelection.noneConfigured")}</p> : !providerId && <p className="mb-3 text-sm text-muted-foreground">{t("providerSelection.noneSelected")}</p>}
-            <div className="mb-3 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary"><Sparkles className="size-5" /></div>
-            <h2 className="text-lg font-semibold">{t("quickActions.magicImportPage.importFromPhoto")}</h2>
+            {providers.length === 0 ? <p className="mb-3 text-sm text-muted-foreground">{t("providerSelection.noneConfigured")}</p> 
+            : !providerId && <p className="mb-3 text-sm text-muted-foreground">{t("providerSelection.noneSelected")}</p>}
+            
+            <div className="flex items-center gap-3 mb-3 mt-5">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><Sparkles className="size-5" /></div>
+              <h2 className="text-lg font-semibold">{t("quickActions.magicImportPage.importFromPhoto")}</h2>
+            </div>
+
             <p className="mt-1 text-sm text-muted-foreground">{t("quickActions.magicImportPage.instructions")}</p>
             <div className="mt-5 flex flex-wrap gap-2">
               <Button onClick={() => cameraInput.current?.click()} disabled={!inventory || busy}><Camera />{t("quickActions.magicImportPage.takePhoto")}</Button>
@@ -121,7 +126,13 @@ export default function MagicArticleImportPage() {
           <div className="flex min-h-48 items-center justify-center overflow-hidden rounded-lg border border-dashed bg-background">
             {preview ? <img src={preview} alt={t("quickActions.magicImportPage.selectedPhoto")} className="max-h-72 w-full object-contain" /> : <div className="text-center text-muted-foreground"><Package className="mx-auto mb-2 size-8" /><span className="text-sm">{t("quickActions.magicImportPage.previewPlaceholder")}</span></div>}
           </div>
-          {image && <div className="flex items-center justify-between gap-3 md:col-span-2"><span className="truncate text-sm text-muted-foreground">{image.name}</span><Button onClick={() => void analyze()} disabled={busy || !inventory || !providerId}>{busy ? <><LoaderCircle className="animate-spin" />{t("quickActions.magicImportPage.analyzing")}</> : <><Sparkles />{t("quickActions.magicImportPage.identifyItems")}</>}</Button></div>}
+          {image && 
+          <div className="flex items-center justify-between gap-3 md:col-span-2">
+            <span className="truncate text-sm text-muted-foreground">{image.name}</span>
+
+            <Button className="px-8 py-5" onClick={() => void analyze()} disabled={busy || !inventory || !providerId}>{busy 
+            ? <><LoaderCircle className="animate-spin" />{t("quickActions.magicImportPage.analyzing")}</> 
+            : <><Sparkles />{t("quickActions.magicImportPage.identifyItems")}</>}</Button></div>}
         </section>
 
         {error && <p role="alert" className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
@@ -141,7 +152,11 @@ export default function MagicArticleImportPage() {
             <label className="grid gap-1.5 text-sm font-medium">{t("quickActions.magicImportPage.quantity")}<Input type="number" min="1" value={draft.quantity} onChange={(event) => updateDraft(draft.id, { quantity: Math.max(1, Number(event.target.value)) })} /></label>
             <Button type="button" variant="ghost" size="icon" aria-label={t("quickActions.magicImportPage.removeItem", { count: index + 1 })} onClick={() => setDrafts((current) => current.filter((item) => item.id !== draft.id))}><Trash2 className="text-destructive" /></Button>
           </article>)}
-          <div className="flex justify-end"><Button onClick={() => void saveAll()} disabled={saving || drafts.some((draft) => !draft.name.trim())}><Save />{saving ? t("quickActions.magicImportPage.saving") : t("quickActions.magicImportPage.createArticles", { count: drafts.length })}</Button></div>
+          <div className="flex justify-end">
+            <Button className="px-8 py-5" onClick={() => void saveAll()} disabled={saving || drafts.some((draft) => !draft.name.trim())}>
+              <Save />{saving ? t("quickActions.magicImportPage.saving") : t("quickActions.magicImportPage.createArticles", { count: drafts.length })}
+            </Button>
+          </div>
         </section>}
       </div>
     </BaseScreen>
