@@ -378,8 +378,16 @@ class BarcodeProductLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView
         if not inventory_uuid or not self.get_accessible_inventories().filter(uuid=inventory_uuid).exists():
             return Response({"error": "Select an inventory you can access."}, status=400)
         from third_party_providers.models import ThirdPartyProvider
-        if not ThirdPartyProvider.objects.filter(inventory__uuid=inventory_uuid, type="barcode_lookup", provider="openfoodfacts").exists():
-            return Response({"error": "Configure Open Food Facts as a barcode lookup provider in inventory settings."}, status=503)
+        provider_uuid = request.data.get("provider")
+        try:
+            provider_uuid = uuid.UUID(str(provider_uuid)) if provider_uuid else None
+        except (ValueError, TypeError, AttributeError):
+            provider_uuid = None
+        configured_provider = ThirdPartyProvider.objects.filter(
+            uuid=provider_uuid, inventory__uuid=inventory_uuid, type="barcode_lookup", provider="openfoodfacts"
+        ).first() if provider_uuid else None
+        if configured_provider is None:
+            return Response({"error": "Select a configured barcode lookup provider in inventory settings."}, status=503)
         import json
         from urllib.error import HTTPError, URLError
         from urllib.request import Request, urlopen
@@ -494,13 +502,19 @@ class MagicArticleImportView(InventoryScopedAPIView):
         if not inventory_uuid or not self.get_accessible_inventories().filter(uuid=inventory_uuid).exists():
             return Response({"inventory": "Select an inventory you can access."}, status=400)
 
-        from third_party_providers.services import get_inventory_provider_api_key
-        provider_data = get_inventory_provider_api_key(inventory_uuid=inventory_uuid, provider_type="object_detection_llm")
-        print("Provider data:", provider_data)  # Debugging line
-        if provider_data is None:
-            return Response({"error": "Add a Gemini API key in this inventory's settings to use image import."}, status=503)
-            
-        provider, api_key = provider_data
+        from third_party_providers.models import ThirdPartyProvider
+        provider_uuid = request.data.get("provider")
+        try:
+            provider_uuid = uuid.UUID(str(provider_uuid)) if provider_uuid else None
+        except (ValueError, TypeError, AttributeError):
+            provider_uuid = None
+        configured_provider = ThirdPartyProvider.objects.filter(
+            uuid=provider_uuid, inventory__uuid=inventory_uuid, type="object_detection_llm"
+        ).first() if provider_uuid else None
+        if configured_provider is None:
+            return Response({"error": "Select a configured object detection provider in inventory settings."}, status=503)
+
+        provider, api_key = configured_provider.provider, configured_provider.api_key
         if api_key is None:
             return Response({"error": "Add a Gemini API key in this inventory's settings to use image import."}, status=503)
 
