@@ -2,6 +2,7 @@ import os
 import tempfile
 import uuid
 from typing import ClassVar
+from venv import logger
 
 from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -375,7 +376,11 @@ class BarcodeProductLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView
         inventory_uuid = request.data.get("inventory")
         if not barcode or len(barcode) > 80:
             return Response({"error": "A valid barcode is required."}, status=400)
-        if not inventory_uuid or not self.get_accessible_inventories().filter(uuid=inventory_uuid).exists():
+        try:
+            uuid.UUID(str(inventory_uuid))
+        except (ValueError, TypeError, AttributeError):
+            inventory_uuid = None
+        if inventory_uuid is None or not self.get_accessible_inventories().filter(uuid=inventory_uuid).exists():
             return Response({"error": "Select an inventory you can access."}, status=400)
         from third_party_providers.models import ThirdPartyProvider
         provider_uuid = request.data.get("provider")
@@ -556,8 +561,9 @@ class MagicArticleImportView(InventoryScopedAPIView):
                     "stock_tracking": False,
                 })
             return Response({"articles": [article for article in articles if article["name"]]})
-        except Exception as error:
-            return Response({"error": str(error)}, status=502)
+        except Exception:
+            logger.exception("Error during magic article import")
+            return Response({"error": "Image analysis failed."}, status=502)
         finally:
             if temporary_path and os.path.exists(temporary_path):
                 os.unlink(temporary_path)
