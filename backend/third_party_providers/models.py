@@ -6,7 +6,7 @@ from inventory.models import Inventory
 
 
 class ThirdPartyProvider(models.Model):
-    PROVIDERS = (("gemini", "Google Gemini"),)
+    PROVIDERS = (("gemini", "Google Gemini"), ("openfoodfacts", "Open Food Facts"))
     TYPES = (
         ("barcode_lookup", "Barcode lookup"),
         ("object_detection_llm", "Object detection LLM"),
