@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react"
-import { Check, LoaderCircle, Plus, Trash2 } from "lucide-react"
+import { Check, LoaderCircle, Plus, PlusIcon, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router"
 import Scanner from "@/components/qr-bar-code/Scanner"
+import ThirdPartyProviderSelector from "@/components/inventory/ThirdPartyProviderSelector"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
-import { getSelectedInventory, inventoryApi, type BarcodeProduct, type Inventory } from "@/utils/api/inventory"
+import { getSelectedInventory, inventoryApi, type BarcodeProduct, type Inventory, type ThirdPartyProvider } from "@/utils/api/inventory"
 
 type ScannedArticle = BarcodeProduct & { id: string; added: boolean }
 
@@ -13,6 +14,8 @@ export default function BarcodeArticleImportPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [inventory, setInventory] = useState<Inventory | null>(null)
+  const [providers, setProviders] = useState<ThirdPartyProvider[]>([])
+  const [providerId, setProviderId] = useState("")
   const [articles, setArticles] = useState<ScannedArticle[]>([])
   const [error, setError] = useState("")
   const [saving, setSaving] = useState<string | null>(null)
@@ -20,17 +23,21 @@ export default function BarcodeArticleImportPage() {
   const box = new URLSearchParams(window.location.search).get("box")
 
   useEffect(() => {
-    void inventoryApi.listInventories().then((items) => setInventory(getSelectedInventory(items)))
+    void inventoryApi.listInventories().then(async (items) => {
+      const selected = getSelectedInventory(items)
+      setInventory(selected)
+      if (selected) setProviders((await inventoryApi.listThirdPartyProviders(selected.uuid)).filter((provider) => provider.type === "barcode_lookup"))
+    })
       .catch((reason) => setError(reason instanceof Error ? reason.message : "Could not load inventory."))
   }, [])
 
   const handleCodeDetected = useCallback(async (barcode: string) => {
     if (!inventory) throw new Error("Select an inventory before scanning.")
     setError("")
-    const product = await inventoryApi.lookupBarcodeProduct(barcode, inventory.uuid)
+    const product = await inventoryApi.lookupBarcodeProduct(barcode, inventory.uuid, providerId || null)
     if (!product.name) throw new Error("The product has no name in Open Food Facts.")
     setArticles((current) => current.some((item) => item.barcode === barcode) ? current : [...current, { ...product, id: crypto.randomUUID(), added: false }])
-  }, [inventory])
+  }, [inventory, providerId])
 
   const addArticle = async (article: ScannedArticle) => {
     if (!inventory) return
@@ -46,6 +53,16 @@ export default function BarcodeArticleImportPage() {
   return (
     <BaseScreen title={t("quickActions.barcodeImport")}>
       <div className="flex gap-6 flex-wrap lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.8fr)]">
+        <section className="w-full rounded-xl border bg-card p-4 shadow-sm">
+          <label className="mb-2 block text-sm font-medium" htmlFor="barcode-provider">{t("providerSelection.barcodeLabel")}</label>
+          <div className="flex flex-wrap gap-2">
+            <div className="min-w-64 flex-1"><ThirdPartyProviderSelector id="barcode-provider" label={t("providerSelection.barcodeLabel")} emptyLabel={t("providerSelection.noneConfigured")} providers={providers} providerId={providerId} onProviderChange={setProviderId} /></div>
+            <Button variant="outline" onClick={() => navigate("/app/inventory-settings#third-party-providers")}>
+              <PlusIcon />{t("providerSelection.addProvider")}
+            </Button>
+          </div>
+          {providers.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">{t("providerSelection.noneConfigured")}</p> : !providerId && <p className="mt-2 text-sm text-muted-foreground">{t("providerSelection.noneSelected")}</p>}
+        </section>
         <Scanner onCodeDetected={handleCodeDetected} onClose={() => navigate(-1)} />
         <section className="min-h-40 flex-1 rounded-xl border bg-card p-4 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold">{t("articleBarcodeImport.scannedArticles")} ({articles.length})</h2>

@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState, type ChangeEvent } from "react"
-import { Camera, ImagePlus, LoaderCircle, Package, Save, Sparkles, Trash2 } from "lucide-react"
+import { Camera, ImagePlus, LoaderCircle, Package, PlusIcon, Save, Sparkles, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import BaseScreen from "@/layouts/BaseScreen"
 import { ArticleIconPicker, getArticleIcon } from "@/components/inventory/article-icon-picker"
+import ThirdPartyProviderSelector from "@/components/inventory/ThirdPartyProviderSelector"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { getSelectedInventory, inventoryApi, type Inventory, type MagicArticleDraft } from "@/utils/api/inventory"
+import { getSelectedInventory, inventoryApi, type Inventory, type MagicArticleDraft, type ThirdPartyProvider } from "@/utils/api/inventory"
 import { useNavigate } from "react-router"
 
 type Draft = MagicArticleDraft & { id: string }
@@ -18,6 +19,8 @@ export default function MagicArticleImportPage() {
   const cameraInput = useRef<HTMLInputElement>(null)
   const fileInput = useRef<HTMLInputElement>(null)
   const [inventory, setInventory] = useState<Inventory | null>(null)
+  const [providers, setProviders] = useState<ThirdPartyProvider[]>([])
+  const [providerId, setProviderId] = useState("")
   const [image, setImage] = useState<File | null>(null)
   const [preview, setPreview] = useState("")
   const [drafts, setDrafts] = useState<Draft[]>([])
@@ -30,7 +33,11 @@ export default function MagicArticleImportPage() {
   const boxId = new URLSearchParams(window.location.search).get("box") || undefined
 
   useEffect(() => {
-    void inventoryApi.listInventories().then((items) => setInventory(getSelectedInventory(items))).catch((reason) => setError(reason instanceof Error ? reason.message : t("quickActions.magicImportPage.errors.loadInventories")))
+    void inventoryApi.listInventories().then(async (items) => {
+      const selected = getSelectedInventory(items)
+      setInventory(selected)
+      if (selected) setProviders((await inventoryApi.listThirdPartyProviders(selected.uuid)).filter((provider) => provider.type === "object_detection_llm"))
+    }).catch((reason) => setError(reason instanceof Error ? reason.message : t("quickActions.magicImportPage.errors.loadInventories")))
   }, [])
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
 
@@ -55,7 +62,7 @@ export default function MagicArticleImportPage() {
     setError("")
     setNotice("")
     try {
-      const result = await inventoryApi.magicImport(inventory.uuid, image)
+      const result = await inventoryApi.magicImport(inventory.uuid, image, providerId || null)
       setDrafts(result.articles.map((article, index) => ({ ...article, id: `${Date.now()}-${index}` })))
       if (result.articles.length === 0) setNotice(t("quickActions.magicImportPage.noObjects"))
     } catch (reason) {
@@ -92,6 +99,14 @@ export default function MagicArticleImportPage() {
       <div className="mx-auto grid max-w-5xl gap-6">
         <section className="grid gap-5 rounded-xl border bg-muted/15 p-5 md:grid-cols-[minmax(0,1fr)_minmax(250px,0.8fr)] md:items-center">
           <div>
+            <label className="mb-2 block text-sm font-medium" htmlFor="magic-provider">{t("providerSelection.magicLabel")}</label>
+            <div className="mb-4 flex flex-wrap gap-2">
+              <div className="min-w-64 flex-1"><ThirdPartyProviderSelector id="magic-provider" label={t("providerSelection.magicLabel")} emptyLabel={t("providerSelection.noneConfigured")} providers={providers} providerId={providerId} onProviderChange={setProviderId} /></div>
+              <Button variant="outline" onClick={() => navigate("/app/inventory-settings#third-party-providers")}>
+                <PlusIcon />{t("providerSelection.addProvider")}
+              </Button>
+            </div>
+            {providers.length === 0 ? <p className="mb-3 text-sm text-muted-foreground">{t("providerSelection.noneConfigured")}</p> : !providerId && <p className="mb-3 text-sm text-muted-foreground">{t("providerSelection.noneSelected")}</p>}
             <div className="mb-3 flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary"><Sparkles className="size-5" /></div>
             <h2 className="text-lg font-semibold">{t("quickActions.magicImportPage.importFromPhoto")}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{t("quickActions.magicImportPage.instructions")}</p>
@@ -106,7 +121,7 @@ export default function MagicArticleImportPage() {
           <div className="flex min-h-48 items-center justify-center overflow-hidden rounded-lg border border-dashed bg-background">
             {preview ? <img src={preview} alt={t("quickActions.magicImportPage.selectedPhoto")} className="max-h-72 w-full object-contain" /> : <div className="text-center text-muted-foreground"><Package className="mx-auto mb-2 size-8" /><span className="text-sm">{t("quickActions.magicImportPage.previewPlaceholder")}</span></div>}
           </div>
-          {image && <div className="flex items-center justify-between gap-3 md:col-span-2"><span className="truncate text-sm text-muted-foreground">{image.name}</span><Button onClick={() => void analyze()} disabled={busy || !inventory}>{busy ? <><LoaderCircle className="animate-spin" />{t("quickActions.magicImportPage.analyzing")}</> : <><Sparkles />{t("quickActions.magicImportPage.identifyItems")}</>}</Button></div>}
+          {image && <div className="flex items-center justify-between gap-3 md:col-span-2"><span className="truncate text-sm text-muted-foreground">{image.name}</span><Button onClick={() => void analyze()} disabled={busy || !inventory || !providerId}>{busy ? <><LoaderCircle className="animate-spin" />{t("quickActions.magicImportPage.analyzing")}</> : <><Sparkles />{t("quickActions.magicImportPage.identifyItems")}</>}</Button></div>}
         </section>
 
         {error && <p role="alert" className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
