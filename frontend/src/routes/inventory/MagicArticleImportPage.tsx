@@ -106,13 +106,14 @@ export default function MagicArticleImportPage() {
     }))
     const failed = results.filter((result) => result.status === "rejected")
     const saved = results.length - failed.length
-    setDrafts((current) => failed.length ? current.filter((_, index) => results[index]?.status === "rejected") : [])
+    const failedIds = new Set(drafts.filter((_, index) => results[index].status === "rejected").map((draft) => draft.id))
+    setDrafts((current) => current.filter((draft) => failedIds.has(draft.id)))
     setNotice(failed.length
       ? t(saved === 1 ? "quickActions.magicImportPage.createdOneWithFailures" : "quickActions.magicImportPage.createdManyWithFailures", { saved, failed: failed.length })
       : t(saved === 1 ? "quickActions.magicImportPage.createdOne" : "quickActions.magicImportPage.createdMany", { saved }))
     if (failed.length) setError(failed[0].status === "rejected" && failed[0].reason instanceof Error ? failed[0].reason.message : t("quickActions.magicImportPage.errors.saveSome"))
     setSaving(false)
-    navigate(-1)
+    if (!failed.length) navigate(-1)
   }
 
   return (
