@@ -6,7 +6,7 @@ from inventory.models import Inventory
 
 
 class ThirdPartyProvider(models.Model):
-    PROVIDERS = (("gemini", "Google Gemini"), ("openfoodfacts", "Open Food Facts"))
+    PROVIDERS = (("gemini", "Google Gemini"), ("openfoodfacts", "Open Food Facts"), ("ollama", "Ollama"))
     TYPES = (
         ("barcode_lookup", "Barcode lookup"),
         ("object_detection_llm", "Object detection LLM"),
@@ -20,6 +20,8 @@ class ThirdPartyProvider(models.Model):
     name = models.CharField(max_length=100)
     # For DB operations use the api_key property, which will encrypt/decrypt automatically
     encrypted_api_key = models.TextField()
+    model_name = models.CharField(max_length=200, blank=True)
+    api_url = models.URLField(max_length=500, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
