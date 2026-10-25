@@ -515,7 +515,7 @@ class MagicArticleImportView(InventoryScopedAPIView):
             return Response({"error": "Select a configured object detection provider in inventory settings."}, status=503)
 
         provider, api_key = configured_provider.provider, configured_provider.api_key
-        if api_key is None:
+        if provider == "gemini" and not api_key:
             return Response({"error": "Add a Gemini API key in this inventory's settings to use image import."}, status=503)
 
         suffix = ".png" if image.content_type == "image/png" else ".jpg"
@@ -527,7 +527,13 @@ class MagicArticleImportView(InventoryScopedAPIView):
                     temporary_image.write(chunk)
 
             from ai_features.object_detection.main import analyze_image_to_json_objects
-            result = analyze_image_to_json_objects(provider, temporary_path, api_key=api_key)
+            result = analyze_image_to_json_objects(
+                provider,
+                temporary_path,
+                api_key=api_key,
+                model=configured_provider.model_name or None,
+                api_url=configured_provider.api_url or None,
+            )
 
             if not isinstance(result, dict) or not isinstance(result.get("objects"), list):
                 raise ValueError("Image analysis returned an invalid response.")

@@ -10,12 +10,14 @@ class ThirdPartyProviderSerializer(serializers.ModelSerializer):
     provider = serializers.CharField(max_length=40)
     type = serializers.CharField(max_length=40)
     api_key = serializers.CharField(write_only=True, required=False, allow_blank=False)
+    model_name = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    api_url = serializers.URLField(max_length=500, required=False, allow_blank=True)
     inventory = serializers.PrimaryKeyRelatedField(queryset=Inventory.objects.none())
     has_api_key = serializers.SerializerMethodField()
 
     class Meta:
         model = ThirdPartyProvider
-        fields = ("uuid", "inventory", "provider", "type", "name", "api_key", "has_api_key", "created_at", "updated_at")
+        fields = ("uuid", "inventory", "provider", "type", "name", "api_key", "model_name", "api_url", "has_api_key", "created_at", "updated_at")
         read_only_fields = ("uuid", "has_api_key", "created_at", "updated_at")
 
     def __init__(self, *args, **kwargs):
@@ -36,6 +38,8 @@ class ThirdPartyProviderSerializer(serializers.ModelSerializer):
         has_existing_key = self.instance is not None and bool(self.instance.encrypted_api_key)
         if configuration["requires_api_key"] and not (key_value or has_existing_key):
             raise serializers.ValidationError({"api_key": "An API key is required."})
+        if configuration.get("requires_model") and not (attrs.get("model_name", getattr(self.instance, "model_name", "")).strip()):
+            raise serializers.ValidationError({"model_name": "A model name is required."})
         if self.instance is not None and "inventory" in attrs and attrs["inventory"].pk != self.instance.inventory_id:
             raise serializers.ValidationError({"inventory": "A provider cannot be moved to another inventory."})
         return attrs

@@ -30,8 +30,11 @@ class BaseObjectDetection:
 
 
 # General function - used in the backend
-def analyze_image_to_json_objects(ai_provider, image_path: str, api_key: str | None = None, model: str | None = None):
+def analyze_image_to_json_objects(ai_provider, image_path: str, api_key: str | None = None, model: str | None = None, api_url: str | None = None):
     if ai_provider == "gemini":
         from .gemini import GeminiObjectDetection
         return GeminiObjectDetection(model_path=model or "gemini-3.5-flash-lite", api_key=api_key).detect_objects(image_path)
+    if ai_provider == "ollama":
+        from .ollama import OllamaObjectDetection
+        return OllamaObjectDetection(model_path=model or "llava", api_key=api_key or "", api_url=api_url).detect_objects(image_path)
     raise ValueError(f"Unsupported object detection provider: {ai_provider}")
