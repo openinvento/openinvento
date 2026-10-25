@@ -83,6 +83,14 @@
     "description": "Scan a product barcode to look it up and add it here",
     "scannedArticles": "Scanned Articles"
   },
+  "providerSelection": {
+    "addProvider": "Add provider",
+    "barcodeLabel": "Barcode lookup provider",
+    "choose": "Select a provider",
+    "magicLabel": "Object detection provider",
+    "noneConfigured": "No provider configured. Add a provider in inventory settings.",
+    "noneSelected": "No provider selected."
+  },
   "articles": {
     "page": {
       "areas": "Areas",
@@ -577,13 +585,15 @@
       "noMembers": "No members found.",
       "providers": {
         "addKey": "Add key",
-        "description": "Gemini credentials are stored for this inventory and used by Magic Article Import.",
-        "gemini": "Google Gemini",
-        "keyLabel": "Gemini API key",
-        "keyPlaceholder": "Gemini API key",
+        "addProvider": "Add provider",
+        "configurationLabel": "Provider configuration",
+        "description": "Configure external services for this inventory. Required credentials are stored securely.",
+        "keyLabel": "API key",
+        "keyPlaceholder": "API key",
         "keySaved": "API key saved",
         "nameLabel": "Provider name",
         "namePlaceholder": "Provider name",
+        "noConfigurations": "No provider configurations available.",
         "remove": "Remove provider",
         "title": "Third-party providers",
         "typeLabel": "Provider type",
