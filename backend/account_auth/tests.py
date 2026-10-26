@@ -6,7 +6,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase, override_settings
 from django.utils import timezone
-from inventory.models import Area, Inventory
+from inventory.models import Inventory, InventoryEntry, InventoryEntryType
 from rest_framework.test import APIClient
 
 from .models import CustomUser, InstanceSettings, UserAPIKey
@@ -193,10 +193,10 @@ class APIKeyManagementTests(TestCase):
 		)
 		self.inventory = Inventory.objects.create(name='User inventory')
 		self.inventory.users.add(self.user)
-		self.area = Area.objects.create(name='User area', inventory=self.inventory)
+		self.area = InventoryEntry.objects.create(name='User area', type=InventoryEntryType.objects.get(key='area'), inventory=self.inventory)
 		self.other_inventory = Inventory.objects.create(name='Other inventory')
 		self.other_inventory.users.add(self.other_user)
-		Area.objects.create(name='Other area', inventory=self.other_inventory)
+		InventoryEntry.objects.create(name='Other area', type=InventoryEntryType.objects.get(key='area'), inventory=self.other_inventory)
 
 	def create_key(self, user=None, name='automation'):
 		api_key, secret = UserAPIKey.objects.create_key(name=name, user=user or self.user)
@@ -242,7 +242,7 @@ class APIKeyManagementTests(TestCase):
 		_, secret = self.create_key()
 		self.authenticate_with_key(secret)
 
-		response = self.client.get('/api/areas/')
+		response = self.client.get('/api/entries/?type=area')
 
 		self.assertEqual(response.status_code, 200)
 		self.assertEqual([area['uuid'] for area in response.data], [str(self.area.uuid)])
@@ -259,20 +259,20 @@ class APIKeyManagementTests(TestCase):
 
 	def test_invalid_revoked_and_expired_api_keys_are_rejected(self):
 		self.authenticate_with_key('invalid.key')
-		invalid_response = self.client.get('/api/areas/')
+		invalid_response = self.client.get('/api/entries/?type=area')
 		self.assertEqual(invalid_response.status_code, 401)
 
 		revoked_key, revoked_secret = self.create_key(name='revoked')
 		revoked_key.revoked = True
 		revoked_key.save()
 		self.authenticate_with_key(revoked_secret)
-		self.assertEqual(self.client.get('/api/areas/').status_code, 401)
+		self.assertEqual(self.client.get('/api/entries/?type=area').status_code, 401)
 
 		_, expired_secret = UserAPIKey.objects.create_key(
 			name='expired', user=self.user, expiry_date=timezone.now() - timedelta(days=1),
 		)
 		self.authenticate_with_key(expired_secret)
-		self.assertEqual(self.client.get('/api/areas/').status_code, 401)
+		self.assertEqual(self.client.get('/api/entries/?type=area').status_code, 401)
 
 	def test_api_key_endpoint_requires_authentication(self):
 		response = self.client.get('/api/api-keys/')
