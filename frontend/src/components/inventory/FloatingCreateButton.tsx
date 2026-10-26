@@ -40,7 +40,7 @@ export function FloatingCreateButton({ articleTo, areaId, boxId }: InventoryQuic
           <span>{t("quickActions.magicImport")}</span>
         </Link>
         <Link
-          to={`/app/barcode-article-import?${importSuffix}`}
+          to={`/app/barcode-article-import${importSuffix}`}
           tabIndex={open ? 0 : -1}
           onClick={() => setOpen(false)}
           className="inline-flex items-center gap-2 rounded-full border bg-background px-4 py-3 text-sm font-medium text-foreground shadow-lg hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

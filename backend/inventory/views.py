@@ -477,7 +477,7 @@ class BarcodeProductLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView
             return Response({"error": "Select a configured barcode lookup provider in inventory settings."}, status=503)
         try:
             OPENFOODFACTS_API_URL = "https://world.openfoodfacts.org/api/v2/product/"
-            req = Request(f"{OPENFOODFACTS_API_URL}{quote(barcode, safe='')} .json", headers={"User-Agent": "OpenInvento/1.0 (barcode lookup)"})
+            req = Request(f"{OPENFOODFACTS_API_URL}{quote(barcode, safe='')}.json", headers={"User-Agent": "OpenInvento/1.0 (barcode lookup)"})
             with urlopen(req, timeout=8) as response:
                 payload = json.loads(response.read())
             product = payload.get("product") or {}
