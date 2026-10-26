@@ -20,12 +20,14 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import './i18n.ts' // Initialize i18next
 import ErrorPage from './routes/Error.tsx'
 import SearchPage from './routes/inventory/SearchPage.tsx'
+import MagicArticleImportPage from './routes/inventory/MagicArticleImportPage.tsx'
 import { SessionGuard } from './components/auth/session-guard.tsx'
 import ManageCategoriesAndFieldsPage from './routes/inventory/ManageCategoriesAndFields.tsx'
 import ManageCodes from './routes/inventory/ManageCodes.tsx'
 import ResetCredentialsPage from './routes/auth/ResetCredentials.tsx'
 import LoansPage from '../modules/loans/LoansPage.tsx'
 import { getEnabledModules, MODULES_CHANGED_EVENT } from './utils/api/modules'
+import BarcodeArticleImportPage from './routes/inventory/BarcodeArticleImport.tsx'
 
 function EnabledModuleRoute({ name, children }: { name: string; children: ReactNode }) {
   const [enabled, setEnabled] = useState<boolean | null>(null)
@@ -127,6 +129,14 @@ const router = createBrowserRouter([
       {
         path: "search",
         element: <SearchPage />,
+      },
+      {
+        path: "magic-article-import",
+        element: <MagicArticleImportPage />,
+      },
+      {
+        path: "barcode-article-import",
+        element: <BarcodeArticleImportPage />,
       },
       {
         path: "areas",

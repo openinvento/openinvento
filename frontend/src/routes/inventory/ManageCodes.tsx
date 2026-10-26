@@ -48,8 +48,8 @@ export default function ManageCodes() {
 	const [isGenerating, setIsGenerating] = useState(false)
 	const [error, setError] = useState("")
 
-	async function handleCodeDetected(identifier: string) {
-		const result = await inventoryApi.lookupCode(identifier)
+	async function handleCodeDetected(code: string) {
+		const result = await inventoryApi.lookupCode(code)
 		switch (result.type) {
 			case "article":
 				navigate(`/app/articles/${result.uuid}`)

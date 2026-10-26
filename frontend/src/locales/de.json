@@ -46,7 +46,7 @@
       "lowStock": "Niedriger Bestand",
       "modal": {
         "edit": "{{kind}} bearbeiten",
-        "new": "Neue/r {{kind}}"
+        "new": "Neue {{kind}}"
       },
       "noBox": "Keine Kiste",
       "noCategory": "Keine Kategorie",
@@ -78,6 +78,10 @@
     "newArea": "Neuer Bereich",
     "renameArea": "Bereich umbenennen",
     "title": "Bereiche"
+  },
+  "articleBarcodeImport": {
+    "description": "Scanne ein Produkt-Barcode, um es hier hinzuzufügen",
+    "scannedArticles": "Gescannte Artikel"
   },
   "articles": {
     "page": {
@@ -409,6 +413,55 @@
     "renameTitle": "{{kind}} umbenennen",
     "stockLevel": "Noch {{quantity}} vorhanden (Minimum {{minimum}})"
   },
+  "providerSelection": {
+    "addProvider": "Provider hinzufügen",
+    "barcodeLabel": "Barcode Provider",
+    "choose": "Wähle einen Provider",
+    "magicLabel": "Objekterkennungs-Provider",
+    "noneConfigured": "Kein Provider konfiguriert. Füge einen in den Inventareinstellungen hinzu",
+    "noneSelected": "Kein Provider ausgewählt"
+  },
+  "quickActions": {
+    "barcodeImport": "Importiere Artikel mit Barcode",
+    "close": "Schnellaktionen schließen",
+    "createArticle": "Artikel erstellen",
+    "createArticleFromBarcode": "Artikel von Barcode erstellen",
+    "magicComingSoonMessage": "Der KI-gestützte Artikelimport kommt bald.",
+    "magicImport": "Magischer Artikelimport",
+    "magicImportPage": {
+      "analyzing": "Wird analysiert...",
+      "chooseArticleImage": "Wähle ein Bild für diesen Artikel",
+      "chooseImage": "Bild auswählen",
+      "createArticles": "{{count}} Artikel erstellen",
+      "createdMany": "{{saved}} Artikel erstellt.",
+      "createdManyWithFailures": "{{saved}} Artikel erstellt; {{failed}} konnten nicht gespeichert werden.",
+      "createdOne": "{{saved}} Artikel erstellt.",
+      "createdOneWithFailures": "{{saved}} Artikel erstellt; {{failed}} konnte nicht gespeichert werden.",
+      "description": "Nimm ein Foto auf und verwandle die darin enthaltenen Elemente in bearbeitbare Artikel.",
+      "descriptionLabel": "Beschreibung",
+      "errors": {
+        "analyze": "Dieses Foto konnte nicht analysiert werden.",
+        "invalidImage": "Wähle ein JPEG- oder PNG-Bild aus.",
+        "loadInventories": "Inventare konnten nicht geladen werden.",
+        "saveSome": "Einige Artikel konnten nicht gespeichert werden."
+      },
+      "identifyItems": "Elemente erkennen",
+      "importFromPhoto": "Aus einem Foto importieren",
+      "instructions": "Wir erkennen die sichtbaren Elemente und bereiten für jedes einen Artikel vor. Überprüfe Namen, Mengen und Beschreibungen, bevor du sie erstellst.",
+      "name": "Name",
+      "noInventory": "Erstelle ein Inventar oder wähle eines aus, um fortzufahren.",
+      "noObjects": "Keine erkennbaren Objekte gefunden. Versuche ein anderes Foto.",
+      "previewPlaceholder": "Hier wird eine Vorschau deines Fotos angezeigt",
+      "quantity": "Menge",
+      "removeItem": "Element {{count}} entfernen",
+      "reviewArticles": "Artikel überprüfen",
+      "reviewDescription": "Bearbeite Details, entferne Elemente und erstelle sie anschließend gemeinsam.",
+      "saving": "Wird gespeichert...",
+      "selectedPhoto": "Ausgewähltes Foto",
+      "takePhoto": "Foto aufnehmen"
+    },
+    "open": "Schnellaktionen öffnen"
+  },
   "search": {
     "box": "Kiste",
     "empty": "Keine Artikel gefunden.",
@@ -531,6 +584,31 @@
       "members": "Geteilt mit",
       "name": "Name",
       "noMembers": "Keine Mitglieder gefunden.",
+      "providers": {
+        "addKey": "Schlüssel hinzufügen",
+        "addProvider": "Anbieter hinzufügen",
+        "configurationLabel": "Anbieterkonfiguration",
+        "description": "Konfiguriere externe Dienste für dieses Inventar. Erforderliche Zugangsdaten werden sicher gespeichert.",
+        "keyLabel": "API-Schlüssel",
+        "keyPlaceholder": "API-Schlüssel",
+        "keySaved": "API-Schlüssel gespeichert",
+        "modelLabel": "Modell",
+        "modelPlaceholder": "Modell, z. B. llava",
+        "nameLabel": "Name des Anbieters",
+        "namePlaceholder": "Name des Anbieters",
+        "noConfigurations": "Keine Anbieterkonfigurationen verfügbar.",
+        "remove": "Anbieter entfernen",
+        "title": "Drittanbieter",
+        "typeLabel": "Anbietertyp",
+        "types": {
+          "barcode_lookup": "Barcode-Suche",
+          "llm": "LLM",
+          "object_detection_llm": "LLM zur Objekterkennung"
+        },
+        "ollamaUrlNotice": "Die Ollama-Server-URL muss vom Instanzadministrator ?ber die Umgebungsvariable OLLAMA_API_URL konfiguriert werden.",
+        "urlLabel": "Ollama-Server-URL (optional)",
+        "urlPlaceholder": "http://localhost:11434"
+      },
       "removeMember": "Person entfernen",
       "removeMemberConfirm": "{{name}} aus diesem Inventar entfernen?",
       "saveError": "Inventarmitglieder konnten nicht aktualisiert werden.",

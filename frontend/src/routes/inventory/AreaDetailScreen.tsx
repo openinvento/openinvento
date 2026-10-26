@@ -8,6 +8,7 @@ import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
 import { InventoryViewToggle, useInventoryViewMode } from "@/components/inventory/view-mode"
 import { InventoryDraggable, InventoryDropTarget } from "@/components/inventory/inventory-dnd"
+import { FloatingCreateButton } from "@/components/inventory/FloatingCreateButton"
 import {
   getSelectedInventory,
   inventoryApi,
@@ -173,12 +174,11 @@ export default function AreaDetailScreen() {
       
       <Button className="p-4" variant="outline" onClick={() => setModal({ kind: "shelf" })}><Plus /> {t("areas.detail.actions.shelf")}</Button>
       <Button className="p-4" variant="outline" onClick={() => setModal({ kind: "box" })}><Plus /> {t("areas.detail.actions.box")}</Button>
-      <Button className="p-4" onClick={() => navigate(`/app/areas/${areaId}/articles/new`)}><Plus /> {t("areas.detail.actions.article")}</Button>
       </div>
     </div>
-    
-    {/* Inventory contents */}
+
     <InventoryDropTarget target={{ kind: "area", id: areaId ?? "" }}>
+
     <div className="space-y-6">
       {/* Articles can live directly in an area without a shelf. */}
       {articles.filter((article) => article.shelf === null && article.box === null).length > 0 && (
@@ -327,6 +327,8 @@ export default function AreaDetailScreen() {
       )}
 
     </InventoryModal>
+
+    {area && !modal && <FloatingCreateButton areaId={areaId} articleTo={`/app/areas/${areaId}/articles/new`} />}
 
   </section>)
 }

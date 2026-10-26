@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { ArrowLeft, Pencil, Plus } from "lucide-react"
+import { ArrowLeft, Pencil } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate, useParams } from "react-router"
 import { ArticleCard } from "@/components/inventory/entity-cards"
@@ -7,6 +7,7 @@ import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
 import { InventoryViewToggle, useInventoryViewMode } from "@/components/inventory/view-mode"
 import { InventoryDraggable } from "@/components/inventory/inventory-dnd"
+import { FloatingCreateButton } from "@/components/inventory/FloatingCreateButton"
 import { inventoryApi, type Area, type Article, type Box, type Shelf } from "@/utils/api/inventory"
 
 function getLowStockBadge(article: Article, label: string) {
@@ -22,6 +23,7 @@ export default function BoxPage() {
   const { t } = useTranslation()
 
   const { viewMode, setViewMode } = useInventoryViewMode()
+  const [area, setArea] = useState<Area | null>(null)
   const [box, setBox] = useState<Box | null>(null)
   const [articles, setArticles] = useState<Article[]>([])
   const [areas, setAreas] = useState<Area[]>([])
@@ -38,6 +40,7 @@ export default function BoxPage() {
     try {
       const [allBoxes, allArticles, allAreas, allShelves] = await Promise.all([inventoryApi.listBoxes(), inventoryApi.listArticles(), inventoryApi.listAreas(), inventoryApi.listShelves()])
       const nextBox = allBoxes.find((item) => item.uuid === boxId) ?? null
+      setArea(allAreas.find((item) => item.uuid === nextBox?.area) || null)
       setBox(nextBox)
       setArticles(allArticles.filter((article) => article.box === boxId))
       setAreas(allAreas)
@@ -121,10 +124,6 @@ export default function BoxPage() {
             <p className="mt-2 text-muted-foreground">{t("boxes.articleCount", { count: articles.length })}</p>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
-            <Button onClick={() => navigate(`/app/areas/${box.area}/articles/new?box=${box.uuid}`)}>
-              <Plus />
-              {t("dashboard.addArticle")}
-            </Button>
             <InventoryViewToggle viewMode={viewMode} setViewMode={setViewMode} />
 
             <Button variant="outline" onClick={() => setIdentifierOpen(true)}>
@@ -154,6 +153,7 @@ export default function BoxPage() {
           </div>
         )}
       </>}
+      {area && box && !identifierOpen && !editOpen && <FloatingCreateButton areaId={area.uuid} boxId={box.uuid} articleTo={`/app/areas/${box.area}/articles/new?box=${box.uuid}`} />}
       {box && 
       <InventoryModal title={t("boxes.identifierTitle")} open={identifierOpen} submitting={saving}
         onClose={() => setIdentifierOpen(false)} onSubmit={updateIdentifier}>

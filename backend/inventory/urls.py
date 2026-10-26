@@ -6,6 +6,7 @@ from .views import (
     ArticleAttachmentsView,
     ArticleCategoryViewSet,
     ArticleViewSet,
+    BarcodeProductLookupView,
     BoxViewSet,
     CategoryFieldViewSet,
     CodeLookupView,
@@ -15,6 +16,7 @@ from .views import (
     InventoryManageView,
     InventoryMembersView,
     InventoryViewSet,
+    MagicArticleImportView,
     SearchView,
     ShelfViewSet,
 )
@@ -29,6 +31,7 @@ router.register(r"category-fields", CategoryFieldViewSet, basename="category-fie
 router.register(r"articles", ArticleViewSet, basename="article")
 
 urlpatterns = [
+    path("articles/magic-import/", MagicArticleImportView.as_view(), name="magic-article-import"),
     path("article-attachments/", ArticleAttachmentsView.as_view(), name="article-attachments"),
     path("inventories/<uuid:inventory_uuid>/members/", InventoryMembersView.as_view(), name="inventory-members"),
     path("inventories/<uuid:inventory_uuid>/members/<uuid:user_uuid>/", InventoryMembersView.as_view(), name="inventory-member-delete"),
@@ -37,5 +40,6 @@ urlpatterns = [
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
     path("search/", SearchView.as_view(), name="search"),
     path("codes/lookup/", CodeLookupView.as_view(), name="code-lookup"),
+    path("barcodes/lookup/", BarcodeProductLookupView.as_view(), name="barcode-product-lookup"),
     path("codes/pdf/", CodePdfView.as_view(), name="code-pdf"),
 ] + router.urls

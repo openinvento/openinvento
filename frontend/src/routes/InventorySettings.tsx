@@ -1,15 +1,27 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
-import { Download, TriangleAlert, UserMinus, UserPlus } from "lucide-react"
+import { Download, KeyRound, Plus, Trash2, TriangleAlert, UserMinus, UserPlus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import BaseScreen from "@/layouts/BaseScreen"
 import { Button } from "@/components/ui/button"
+import {
+  Combobox,
+  ComboboxCollection,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxGroup,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxLabel,
+  ComboboxList,
+} from "@/components/ui/combobox"
 import {
   clearSelectedInventory,
   getSelectedInventory,
   getSelectedInventoryUuid,
   inventoryApi,
   type InventoryMembership,
+  type ThirdPartyProviderConfiguration,
 } from "@/utils/api/inventory"
 import { Input } from "@/components/ui/input"
 
@@ -24,6 +36,18 @@ export default function InventorySettingsPage() {
   const [saving, setSaving] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [error, setError] = useState("")
+  const [providers, setProviders] = useState<Awaited<ReturnType<typeof inventoryApi.listThirdPartyProviders>>>([])
+  const [configurations, setConfigurations] = useState<ThirdPartyProviderConfiguration[]>([])
+  const [configurationIndex, setConfigurationIndex] = useState(0)
+  const [providerName, setProviderName] = useState("")
+  const [providerKey, setProviderKey] = useState("")
+  const [providerModel, setProviderModel] = useState("")
+  const providerConfigurationGroups = configurations.reduce<Array<{ label: string; items: ThirdPartyProviderConfiguration[] }>>((groups, configuration) => {
+    const group = groups.find((item) => item.label === configuration.type_label)
+    if (group) group.items.push(configuration)
+    else groups.push({ label: configuration.type_label, items: [configuration] })
+    return groups
+  }, [])
 
   async function load() {
     setLoading(true)
@@ -31,12 +55,16 @@ export default function InventorySettingsPage() {
     const inventories = await inventoryApi.listInventories()
 
     try {
+      const availableConfigurations = await inventoryApi.listThirdPartyProviderConfigurations()
+      setConfigurations(availableConfigurations)
+      setProviderModel(availableConfigurations[0]?.default_model ?? "")
       let inventoryUuid = getSelectedInventoryUuid()
       if (!inventoryUuid) {
         inventoryUuid = getSelectedInventory(inventories)?.uuid ?? null
       }
       if (!inventoryUuid) return
       const loadedMembership = await inventoryApi.getMembership(inventoryUuid)
+      setProviders(await inventoryApi.listThirdPartyProviders(inventoryUuid))
       setInventoryName(loadedMembership.inventory.name)
       setMembership(loadedMembership)
     } catch (reason) {
@@ -44,6 +72,35 @@ export default function InventorySettingsPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function saveProvider() {
+    const configuration = configurations[configurationIndex]
+    if (!membership || !configuration || !providerName.trim() || (configuration.requires_api_key && !providerKey.trim()) || (configuration.requires_model && !providerModel.trim())) return
+    setSaving(true)
+    setError("")
+    try {
+      await inventoryApi.createThirdPartyProvider(
+        { inventory: membership.inventory.uuid, provider: configuration.provider, type: configuration.type, name: providerName.trim(), ...(configuration.requires_api_key 
+          ? { api_key: providerKey.trim() } 
+          : {}), ...(configuration.requires_model ? { model_name: providerModel.trim() } : {}) 
+        })
+      setProviderKey("")
+      setProviderModel(configuration.default_model ?? "")
+      setProviderName("")
+      setProviders(await inventoryApi.listThirdPartyProviders(membership.inventory.uuid))
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t("settings.inventory.saveError")) }
+    finally { setSaving(false) }
+  }
+
+  async function removeProvider(uuid: string) {
+    if (!membership) return
+    setSaving(true)
+    try {
+      await inventoryApi.deleteThirdPartyProvider(uuid)
+      setProviders(await inventoryApi.listThirdPartyProviders(membership.inventory.uuid))
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t("settings.inventory.saveError")) }
+    finally { setSaving(false) }
   }
 
   useEffect(() => {
@@ -144,6 +201,47 @@ export default function InventorySettingsPage() {
               <Button type="button" variant="outline" onClick={() => void exportInventory()} disabled={exporting}>
                 <Download /> {exporting ? t("settings.inventory.exporting") : t("settings.inventory.exportCsv")}
               </Button>
+            </section>
+
+            <section id="third-party-providers" className="mb-10 grid gap-4 rounded-xl scroll-mt-6">
+              <div><h2 className="text-xl font-semibold">{t("settings.inventory.providers.title")}</h2><p className="text-sm text-muted-foreground">{t("settings.inventory.providers.description")}</p></div>
+              {providers.map((configured) => <div key={configured.uuid} className="flex items-center justify-between rounded-lg bg-muted/30 px-4 py-3"><div className="flex items-center gap-3">{configured.has_api_key && <KeyRound className="size-4" />}<div><p className="font-medium">{configured.name} · {configurations.find((item) => item.provider === configured.provider && item.type === configured.type)?.display_name ?? configured.provider}</p><p className="text-xs text-muted-foreground">{configurations.find((item) => item.provider === configured.provider && item.type === configured.type)?.type_label ?? configured.type}{configured.has_api_key ? ` · ${t("settings.inventory.providers.keySaved")}` : ""}</p></div></div><Button type="button" variant="ghost" size="icon-sm" aria-label={t("settings.inventory.providers.remove")} disabled={saving} onClick={() => void removeProvider(configured.uuid)}><Trash2 className="text-destructive" /></Button></div>)}
+              
+              <div className="grid gap-3 sm:grid-cols-[1.2fr_1fr_1.5fr_auto]">
+                <Combobox<ThirdPartyProviderConfiguration>
+                  items={providerConfigurationGroups}
+                  value={configurations[configurationIndex] ?? null}
+                  onValueChange={(configuration) => {
+                    if (!configuration) return
+                    setConfigurationIndex(configurations.indexOf(configuration))
+                    setProviderKey("")
+                    setProviderModel(configuration.default_model ?? "")
+                  }}
+                  itemToStringValue={(configuration) => `${configuration.provider}:${configuration.type}`}
+                  itemToStringLabel={(configuration) => configuration.display_name}
+                  disabled={configurations.length === 0 || saving}
+                >
+                  <ComboboxInput className="h-9 w-full" aria-label={t("settings.inventory.providers.configurationLabel")} placeholder={t("settings.inventory.providers.configurationLabel")} />
+                  <ComboboxContent>
+                    <ComboboxEmpty>{t("settings.inventory.providers.noConfigurations")}</ComboboxEmpty>
+                    <ComboboxList>
+                      {(group) => <ComboboxGroup key={group.label} items={group.items}>
+                        <ComboboxLabel>{group.label}</ComboboxLabel>
+                        <ComboboxCollection>
+                          {(configuration) => <ComboboxItem key={`${configuration.provider}:${configuration.type}`} value={configuration}>{configuration.display_name}</ComboboxItem>}
+                        </ComboboxCollection>
+                      </ComboboxGroup>}
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
+
+                <Input aria-label={t("settings.inventory.providers.nameLabel")} value={providerName} onChange={(event) => setProviderName(event.target.value)} placeholder={t("settings.inventory.providers.namePlaceholder")} />
+                {configurations[configurationIndex]?.requires_api_key && <Input aria-label={t("settings.inventory.providers.keyLabel")} type="password" autoComplete="new-password" value={providerKey} onChange={(event) => setProviderKey(event.target.value)} placeholder={t("settings.inventory.providers.keyPlaceholder")} />}
+                {configurations[configurationIndex]?.requires_model && <Input aria-label={t("settings.inventory.providers.modelLabel")} value={providerModel} onChange={(event) => setProviderModel(event.target.value)} placeholder={t("settings.inventory.providers.modelPlaceholder")} />}
+                <Button type="button" onClick={() => void saveProvider()} disabled={saving || !providerName.trim() || !configurations[configurationIndex] || (configurations[configurationIndex]?.requires_api_key && !providerKey.trim()) || (configurations[configurationIndex]?.requires_model && !providerModel.trim())}><Plus />{t("settings.inventory.providers.addProvider")}</Button>
+                {configurations[configurationIndex]?.provider === "ollama" && <p className="text-sm text-muted-foreground sm:col-span-full">{t("settings.inventory.providers.ollamaUrlNotice")}</p>}
+
+              </div>
             </section>
 
             <div className="mb-4 flex items-end justify-between gap-4">

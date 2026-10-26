@@ -35,6 +35,7 @@ else:
     HAS_CORSHEADERS = True
 
 DEBUG = os.getenv("DEBUG", "false").strip().lower() in {"1", "true", "yes", "on"}
+OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://localhost:11434").strip().rstrip("/")
 envSecretKey = os.getenv("SECRET_KEY")
 
 
@@ -134,6 +135,7 @@ INSTALLED_APPS = [
     "rest_framework_api_key",
 
     "inventory",
+    "third_party_providers",
     "account_auth",
     "openinvento.apps.OpenInventoConfig",
 ]

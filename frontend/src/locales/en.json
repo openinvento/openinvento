@@ -79,6 +79,10 @@
     "renameArea": "Rename area",
     "title": "Areas"
   },
+  "articleBarcodeImport": {
+    "description": "Scan a product barcode to look it up and add it here",
+    "scannedArticles": "Scanned Articles"
+  },
   "articles": {
     "page": {
       "areas": "Areas",
@@ -409,6 +413,55 @@
     "renameTitle": "Rename {{kind}}",
     "stockLevel": "{{quantity}} left (minimum {{minimum}})"
   },
+  "providerSelection": {
+    "addProvider": "Add provider",
+    "barcodeLabel": "Barcode lookup provider",
+    "choose": "Select a provider",
+    "magicLabel": "Object detection provider",
+    "noneConfigured": "No provider configured. Add a provider in inventory settings.",
+    "noneSelected": "No provider selected."
+  },
+  "quickActions": {
+    "barcodeImport": "Import articles from barcode",
+    "close": "Close quick actions",
+    "createArticle": "Create article",
+    "createArticleFromBarcode": "Create article from barcode",
+    "magicComingSoonMessage": "AI powered article import is coming soon.",
+    "magicImport": "Magic article import",
+    "magicImportPage": {
+      "analyzing": "Analyzing...",
+      "chooseImage": "Choose image",
+      "createArticles": "Create {{count}} articles",
+      "createdMany": "{{saved}} articles created.",
+      "createdManyWithFailures": "{{saved}} articles created; {{failed}} could not be saved.",
+      "createdOne": "{{saved}} article created.",
+      "createdOneWithFailures": "{{saved}} article created; {{failed}} could not be saved.",
+      "description": "Take a photo and turn the items in it into editable articles.",
+      "descriptionLabel": "Description",
+      "chooseArticleImage": "Choose an image for this article",
+      "errors": {
+        "analyze": "Could not analyze this photo.",
+        "invalidImage": "Choose a JPEG or PNG image.",
+        "loadInventories": "Could not load inventories.",
+        "saveSome": "Some articles could not be saved."
+      },
+      "identifyItems": "Identify items",
+      "importFromPhoto": "Import from a photo",
+      "instructions": "We'll identify the visible items and prepare an article for each one. Review the names, quantities and descriptions before creating them.",
+      "name": "Name",
+      "noInventory": "Create or select an inventory to continue.",
+      "noObjects": "No recognizable objects were found. Try another photo.",
+      "previewPlaceholder": "Your photo preview appears here",
+      "quantity": "Quantity",
+      "removeItem": "Remove item {{count}}",
+      "reviewArticles": "Review articles",
+      "reviewDescription": "Edit any details, remove items, then create them together.",
+      "saving": "Saving...",
+      "selectedPhoto": "Selected photo",
+      "takePhoto": "Take a photo"
+    },
+    "open": "Open quick actions"
+  },
   "search": {
     "box": "Box",
     "empty": "No articles found.",
@@ -531,6 +584,31 @@
       "members": "Shared with",
       "name": "Name",
       "noMembers": "No members found.",
+      "providers": {
+        "addKey": "Add key",
+        "addProvider": "Add provider",
+        "configurationLabel": "Provider configuration",
+        "description": "Configure external services for this inventory. Required credentials are stored securely.",
+        "keyLabel": "API key",
+        "keyPlaceholder": "API key",
+        "keySaved": "API key saved",
+        "modelLabel": "Model",
+        "modelPlaceholder": "Model, e.g. llava",
+        "nameLabel": "Provider name",
+        "namePlaceholder": "Provider name",
+        "noConfigurations": "No provider configurations available.",
+        "ollamaUrlNotice": "The Ollama server URL must be configured by the instance administrator using the OLLAMA_API_URL environment variable.",
+        "remove": "Remove provider",
+        "title": "Third-party providers",
+        "typeLabel": "Provider type",
+        "urlLabel": "Ollama server URL (optional)",
+        "urlPlaceholder": "http://localhost:11434",
+        "types": {
+          "barcode_lookup": "Barcode lookup",
+          "llm": "LLM",
+          "object_detection_llm": "Object detection LLM"
+        }
+      },
       "removeMember": "Remove person",
       "removeMemberConfirm": "Remove {{name}} from this inventory?",
       "saveError": "Could not update inventory members.",

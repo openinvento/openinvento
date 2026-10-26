@@ -1,9 +1,14 @@
+import http.client
+import json
+import os
+import tempfile
 import uuid
 from typing import ClassVar
+from urllib.error import HTTPError, URLError
+from urllib.parse import quote
+from urllib.request import Request, urlopen
+from venv import logger
 
-from account_auth.authentication import StandardOrAPIKeyAuthMixin
-from account_auth.models import CustomUser
-from account_auth.serializers import UserSerializer
 from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Count
@@ -16,6 +21,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from account_auth.authentication import StandardOrAPIKeyAuthMixin
+from account_auth.models import CustomUser
+from account_auth.serializers import UserSerializer
+from ai_features.object_detection.main import LUCIDE_ARTICLE_ICONS
+
 from .code_utils import generate_codes_pdf
 from .export_utils import generate_inventory_csv_export
 from .models import (
@@ -23,8 +33,8 @@ from .models import (
     Article,
     ArticleAttachment,
     ArticleCategory,
-    CategoryField,
     Box,
+    CategoryField,
     Inventory,
     Shelf,
 )
@@ -34,11 +44,13 @@ from .serializers import (
     ArticleAttachmentSerializer,
     ArticleCategorySerializer,
     ArticleSerializer,
-    CategoryFieldSerializer,
     BoxSerializer,
+    CategoryFieldSerializer,
     InventorySerializer,
     ShelfSerializer,
 )
+
+ARTICLE_LUCIDE_ICONS = frozenset(LUCIDE_ARTICLE_ICONS)
 
 
 class InventoryViewSet(StandardOrAPIKeyAuthMixin, viewsets.ReadOnlyModelViewSet):
@@ -107,7 +119,6 @@ class InventoryScopedAPIView(APIView):
         return self.request.user.inventories.all()
 
 # endregion Base classes
-
 
 # region Inventory Settings/ Management Views
 class InventoryMembersView(InventoryAccessMixin, APIView):
@@ -436,3 +447,143 @@ class CodePdfView(InventoryScopedAPIView):
         return response
 
 # endregion QR/ BARCODE VIEWS
+
+# region Magic inventoy import/ barcode lookup
+
+class BarcodeProductLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
+    """Look up a scanned product through the inventory's configured catalog provider."""
+
+    def post(self, request):
+        barcode = str(request.data.get("barcode", "")).strip()
+        inventory_uuid = request.data.get("inventory")
+        if not barcode or len(barcode) > 80:
+            return Response({"error": "A valid barcode is required."}, status=400)
+        try:
+            uuid.UUID(str(inventory_uuid))
+        except (ValueError, TypeError, AttributeError):
+            inventory_uuid = None
+        if inventory_uuid is None or not self.get_accessible_inventories().filter(uuid=inventory_uuid).exists():
+            return Response({"error": "Select an inventory you can access."}, status=400)
+        from third_party_providers.models import ThirdPartyProvider
+        provider_uuid = request.data.get("provider")
+        try:
+            provider_uuid = uuid.UUID(str(provider_uuid)) if provider_uuid else None
+        except (ValueError, TypeError, AttributeError):
+            provider_uuid = None
+        configured_provider = ThirdPartyProvider.objects.filter(
+            uuid=provider_uuid, inventory__uuid=inventory_uuid, type="barcode_lookup", provider="openfoodfacts"
+        ).first() if provider_uuid else None
+        if configured_provider is None:
+            return Response({"error": "Select a configured barcode lookup provider in inventory settings."}, status=503)
+        try:
+            OPENFOODFACTS_API_URL = "https://world.openfoodfacts.org/api/v2/product/"
+            req = Request(f"{OPENFOODFACTS_API_URL}{quote(barcode, safe='')}.json", headers={"User-Agent": "OpenInvento/1.0 (barcode lookup)"})
+            with urlopen(req, timeout=8) as response:
+                payload = json.loads(response.read())
+            product = payload.get("product") or {}
+            if payload.get("status") != 1 or not product:
+                return Response({"error": "No product was found for this barcode."}, status=404)
+            return Response({
+                "barcode": barcode,
+                "name": product.get("product_name") or product.get("product_name_en") or "",
+                "brand": product.get("brands") or "",
+                "description": product.get("generic_name") or product.get("quantity") or "",
+                "image": product.get("image_front_url") or product.get("image_url"),
+                "source": "Open Food Facts",
+            })
+        except HTTPError as error:
+            if error.code == 404:
+                return Response({"error": "No product was found for this barcode."}, status=404)
+            return Response({"error": "Open Food Facts could not be reached."}, status=502)
+        except (URLError, TimeoutError, ValueError, http.client.HTTPException):
+             return Response({"error": "Open Food Facts could not be reached."}, status=502)
+
+class MagicArticleImportView(InventoryScopedAPIView):
+    """Analyze an uploaded image and return article-shaped drafts for review."""
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request):
+        image = request.FILES.get("image")
+        if image is None:
+            return Response({"image": "An image file is required."}, status=400)
+        if image.content_type not in {"image/jpeg", "image/png"}:
+            return Response({"image": "Upload a JPEG or PNG image."}, status=400)
+
+        from PIL import Image, UnidentifiedImageError
+        try:
+            with Image.open(image) as probe:
+                probe.verify()
+                if probe.format not in {"JPEG", "PNG"}:
+                    raise UnidentifiedImageError
+            image.seek(0)
+        except (UnidentifiedImageError, OSError, Image.DecompressionBombError, SyntaxError):
+            return Response({"image": "Upload a valid JPEG or PNG image."}, status=400)
+            
+        
+        if image.size > settings.MAX_FILE_SIZE:
+            return Response({"image": "The image exceeds the maximum upload size."}, status=400)
+        inventory_uuid = request.data.get("inventory")
+        if not inventory_uuid or not self.get_accessible_inventories().filter(uuid=inventory_uuid).exists():
+            return Response({"inventory": "Select an inventory you can access."}, status=400)
+
+        from third_party_providers.models import ThirdPartyProvider
+        provider_uuid = request.data.get("provider")
+        try:
+            provider_uuid = uuid.UUID(str(provider_uuid)) if provider_uuid else None
+        except (ValueError, TypeError, AttributeError):
+            provider_uuid = None
+        configured_provider = ThirdPartyProvider.objects.filter(
+            uuid=provider_uuid, inventory__uuid=inventory_uuid, type="object_detection_llm"
+        ).first() if provider_uuid else None
+        if configured_provider is None:
+            return Response({"error": "Select a configured object detection provider in inventory settings."}, status=503)
+
+        provider, api_key = configured_provider.provider, configured_provider.api_key
+        if provider == "gemini" and not api_key:
+            return Response({"error": "Add a Gemini API key in this inventory's settings to use image import."}, status=503)
+
+        suffix = ".png" if image.content_type == "image/png" else ".jpg"
+        temporary_path = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as temporary_image:
+                temporary_path = temporary_image.name
+                for chunk in image.chunks():
+                    temporary_image.write(chunk)
+
+            from ai_features.object_detection.main import analyze_image_to_json_objects
+            result = analyze_image_to_json_objects(
+                provider,
+                temporary_path,
+                api_key=api_key,
+                model=configured_provider.model_name or None,
+            )
+
+            if not isinstance(result, dict) or not isinstance(result.get("objects"), list):
+                raise ValueError("Image analysis returned an invalid response.")
+            articles = []
+            for item in result.get("objects", []):
+                try:
+                    quantity = max(1, int(item.get("quantity", 1)))
+                except (TypeError, ValueError):
+                    quantity = 1
+                detected_icon = item.get("icon")
+                articles.append({
+                    "name": str(item.get("name", "")).strip()[:100],
+                    "description": str(item.get("description", "")).strip()[:750],
+                    "quantity": quantity,
+                    "icon": detected_icon if isinstance(detected_icon, str) and detected_icon in ARTICLE_LUCIDE_ICONS else "Package",
+                    "area": None,
+                    "shelf": None,
+                    "box": None,
+                    "category": None,
+                    "stock_tracking": False,
+                })
+            return Response({"articles": [article for article in articles if article["name"]]})
+        except Exception:
+            logger.exception("Error during magic article import")
+            return Response({"error": "Image analysis failed."}, status=502)
+        finally:
+            if temporary_path and os.path.exists(temporary_path):
+                os.unlink(temporary_path)
+
+# endregion Magic inventoy import

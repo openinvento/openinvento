@@ -10,11 +10,30 @@ from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.utils.text import slugify
+from PIL import Image, UnidentifiedImageError
 
 
 def validate_file_size(value):
     if value.size > settings.MAX_FILE_SIZE:
         raise ValidationError(f"Die Datei darf maximal {settings.MAX_FILE_SIZE / (1024 * 1024)} MB groß sein.")
+
+def validate_pure_image(image_file):
+    image_file.seek(0)
+    try:
+        with Image.open(image_file) as img:
+            if img.format not in ("JPEG", "PNG"):
+                raise ValidationError("Invalid image format. Only JPEG and PNG are allowed.")
+            img.verify()
+    except (UnidentifiedImageError, OSError, SyntaxError):
+        raise ValidationError("Invalid image file.")
+    finally:
+        image_file.seek(0)
+
+def validate_attachment_content(value):
+    ext = os.path.splitext(value.name)[1].lower()
+    if ext in [".jpg", ".jpeg", ".png"]:
+        validate_pure_image(value)
+
 
 def article_image_upload_path(instance, filename):
     file_ext = os.path.splitext(os.path.basename(filename))[1].lower()
@@ -108,7 +127,11 @@ class Article(InventoryComponent):
         null=True, 
         blank=True, 
         upload_to=article_image_upload_path, 
-        validators=[FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png"]), validate_file_size]
+        validators=[
+            FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png"]), 
+            validate_file_size,
+            validate_pure_image
+        ]
     )
     icon = models.CharField(max_length=40, blank=True, null=True)
     category = models.ForeignKey('ArticleCategory', on_delete=models.SET_NULL, null=True, blank=True)
@@ -121,7 +144,11 @@ class ArticleAttachment(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="attachments")
     file = models.FileField(
         upload_to=article_attachment_upload_path,
-        validators=[FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png", "pdf", "doc", "docx", "odt", "txt", "rtf", "xls", "xlsx", "csv", "ppt", "pptx", "zip"]), validate_file_size],
+        validators=[
+            FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png", "pdf", "doc", "docx", "odt", "txt", "rtf", "xls", "xlsx", "csv", "ppt", "pptx", "zip"]), 
+            validate_file_size,
+            validate_attachment_content
+        ],
     )
     original_name = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)

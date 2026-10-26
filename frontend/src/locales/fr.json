@@ -79,6 +79,10 @@
     "renameArea": "Renommer la zone",
     "title": "Zones"
   },
+  "articleBarcodeImport": {
+    "description": "Scannez le code-barres d'un produit pour le rechercher et ajoutez-le ici",
+    "scannedArticles": "Articles scannés"
+  },
   "articles": {
     "page": {
       "areas": "Zones",
@@ -409,6 +413,55 @@
     "renameTitle": "Renommer {{kind}}",
     "stockLevel": "{{quantity}} restant(s) (minimum : {{minimum}})"
   },
+  "providerSelection": {
+    "addProvider": "Ajouter un fournisseur",
+    "barcodeLabel": "Fournisseur de recherche de codes-barres",
+    "choose": "Sélectionnez un fournisseur",
+    "magicLabel": "Fournisseur de détection d'objets",
+    "noneConfigured": "Aucun fournisseur configuré. \nAjoutez un fournisseur dans les paramètres d'inventaire.",
+    "noneSelected": "Aucun fournisseur sélectionné."
+  },
+  "quickActions": {
+    "barcodeImport": "Importer des articles à partir d'un code-barres",
+    "close": "Fermer les actions rapides",
+    "createArticle": "Créer un article",
+    "createArticleFromBarcode": "Créer un article à partir d'un code-barres",
+    "magicComingSoonMessage": "L’import d’articles assisté par IA arrive bientôt.",
+    "magicImport": "Import magique d’article",
+    "magicImportPage": {
+      "analyzing": "Analyse en cours…",
+      "chooseArticleImage": "Choisissez une image pour cet article",
+      "chooseImage": "Choisir une image",
+      "createArticles": "Créer {{count}} articles",
+      "createdMany": "{{saved}} articles créés.",
+      "createdManyWithFailures": "{{saved}} articles créés ; {{failed}} n’ont pas pu être enregistrés.",
+      "createdOne": "{{saved}} article créé.",
+      "createdOneWithFailures": "{{saved}} article créé ; {{failed}} n’a pas pu être enregistré.",
+      "description": "Prenez une photo et transformez les éléments qu’elle contient en articles modifiables.",
+      "descriptionLabel": "Description",
+      "errors": {
+        "analyze": "Impossible d’analyser cette photo.",
+        "invalidImage": "Choisissez une image JPEG ou PNG.",
+        "loadInventories": "Impossible de charger les inventaires.",
+        "saveSome": "Certains articles n’ont pas pu être enregistrés."
+      },
+      "identifyItems": "Identifier les éléments",
+      "importFromPhoto": "Importer depuis une photo",
+      "instructions": "Nous identifierons les éléments visibles et préparerons un article pour chacun. Vérifiez les noms, les quantités et les descriptions avant de les créer.",
+      "name": "Nom",
+      "noInventory": "Créez ou sélectionnez un inventaire pour continuer.",
+      "noObjects": "Aucun objet reconnaissable trouvé. Essayez une autre photo.",
+      "previewPlaceholder": "L’aperçu de votre photo apparaîtra ici",
+      "quantity": "Quantité",
+      "removeItem": "Supprimer l’élément {{count}}",
+      "reviewArticles": "Vérifier les articles",
+      "reviewDescription": "Modifiez les détails, supprimez les éléments, puis créez-les ensemble.",
+      "saving": "Enregistrement…",
+      "selectedPhoto": "Photo sélectionnée",
+      "takePhoto": "Prendre une photo"
+    },
+    "open": "Ouvrir les actions rapides"
+  },
   "search": {
     "box": "Boîte",
     "empty": "Aucun article trouvé.",
@@ -531,6 +584,31 @@
       "members": "Partagé avec",
       "name": "Nom",
       "noMembers": "Aucun membre trouvé.",
+      "providers": {
+        "addKey": "Ajouter la clé",
+        "addProvider": "Ajouter un fournisseur",
+        "configurationLabel": "Configuration du fournisseur",
+        "description": "Les identifiants Gemini sont stockés pour cet inventaire et utilisés par l’import magique d’articles.",
+        "keyLabel": "Clé API Gemini",
+        "keyPlaceholder": "Clé API Gemini",
+        "keySaved": "Clé API enregistrée",
+        "modelLabel": "Modèle",
+        "modelPlaceholder": "ex. llava",
+        "nameLabel": "Nom du fournisseur",
+        "namePlaceholder": "Nom du fournisseur",
+        "noConfigurations": "Aucune configuration de fournisseur disponible.",
+        "remove": "Supprimer le fournisseur",
+        "title": "Fournisseurs tiers",
+        "typeLabel": "Type de fournisseur",
+        "types": {
+          "barcode_lookup": "Recherche de code-barres",
+          "llm": "LLM",
+          "object_detection_llm": "LLM de détection d’objets"
+        },
+        "ollamaUrlNotice": "L?URL du serveur Ollama doit ?tre configur?e par l?administrateur de l?instance via la variable d?environnement OLLAMA_API_URL.",
+        "urlLabel": "URL du serveur Ollama (facultatif)",
+        "urlPlaceholder": "http://localhost:11434"
+      },
       "removeMember": "Retirer une personne",
       "removeMemberConfirm": "Retirer {{name}} de cet inventaire ?",
       "saveError": "Impossible de mettre à jour les membres de l’inventaire.",
