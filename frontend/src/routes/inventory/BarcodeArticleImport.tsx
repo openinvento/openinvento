@@ -21,6 +21,7 @@ export default function BarcodeArticleImportPage() {
   const [saving, setSaving] = useState<string | null>(null)
   const area = new URLSearchParams(window.location.search).get("area")
   const box = new URLSearchParams(window.location.search).get("box")
+  const handleScannerClose = useCallback(() => navigate(-1), [navigate])
 
   useEffect(() => {
     void inventoryApi.listInventories().then(async (items) => {
@@ -67,7 +68,7 @@ export default function BarcodeArticleImportPage() {
           </div>
           {providers.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">{t("providerSelection.noneConfigured")}</p> : !providerId && <p className="mt-2 text-sm text-muted-foreground">{t("providerSelection.noneSelected")}</p>}
         </section>
-        <Scanner onCodeDetected={handleCodeDetected} onClose={() => navigate(-1)} />
+        <Scanner onCodeDetected={handleCodeDetected} onClose={handleScannerClose} />
         <section className="min-h-40 flex-1 rounded-xl border bg-card p-4 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold">{t("articleBarcodeImport.scannedArticles")} ({articles.length})</h2>
           {error && <p role="alert" className="mb-3 rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
