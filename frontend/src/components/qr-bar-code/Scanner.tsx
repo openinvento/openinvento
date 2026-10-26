@@ -29,13 +29,13 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 		}
 
 		const scan = async (detector: BarcodeDetector) => {
-			if (!isActive || hasDetectedCodeRef.current || !videoRef.current) return
+			if (!isActive || !videoRef.current) return
 
 			try {
 				const detectedCodes = await detector.detect(videoRef.current)
 				const detectedCode = detectedCodes[0]
 
-				if (detectedCode) {
+				if (detectedCode && !hasDetectedCodeRef.current) {
 					hasDetectedCodeRef.current = true
 					setStatus("looking-up")
 					try {
@@ -47,12 +47,15 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 						}
 					} finally {
 						if (isActive) {
-							hasDetectedCodeRef.current = false
 							setStatus("scanning")
 							frameRef.current = requestAnimationFrame(() => void scan(detector))
 						}
 					}
 					return
+				}
+
+				if (!detectedCode) {
+					hasDetectedCodeRef.current = false
 				}
 			} catch {
 				if (isActive) {
