@@ -82,7 +82,7 @@ export default function BarcodeArticleImportPage() {
                     {saving === article.id ? <LoaderCircle className="animate-spin" /> : <Plus />}
                   </Button>}
                   
-              <Button size="icon-sm" variant="ghost" aria-label={`Remove ${article.name}`} onClick={() => setArticles((current) => current.filter((item) => item.id !== article.id))}>
+              <Button size="icon-sm" variant="ghost" aria-label={`Remove ${article.name}`} disabled={saving === article.id} onClick={() => setArticles((current) => current.filter((item) => item.id !== article.id))}>
                 <Trash2 />
               </Button>
             </li>)}</ul>}
