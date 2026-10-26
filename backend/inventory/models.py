@@ -12,6 +12,33 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 from PIL import Image, UnidentifiedImageError
 
+INVENTORY_ENTRY_TYPE_CONFIG = {
+    "area": {
+        "name": "Area",
+        "allowed_parent_types": [],
+        "allowed_child_types": ["shelf", "box", "article"],
+        "allow_root": True,
+    },
+    "shelf": {
+        "name": "Shelf",
+        "allowed_parent_types": ["area"],
+        "allowed_child_types": ["box", "article"],
+        "allow_root": False,
+    },
+    "box": {
+        "name": "Box",
+        "allowed_parent_types": ["area", "shelf", "box"],
+        "allowed_child_types": ["box", "article"],
+        "allow_root": False,
+    },
+    "article": {
+        "name": "Article",
+        "allowed_parent_types": ["area", "shelf", "box", "article"],
+        "allowed_child_types": ["article"],
+        "allow_root": True,
+    },
+}
+
 
 def validate_file_size(value):
     if value.size > settings.MAX_FILE_SIZE:
@@ -100,13 +127,12 @@ class InventoryEntryType(models.Model):
     key = models.CharField(max_length=20, unique=True, choices=(
         (AREA, "Area"), (SHELF, "Shelf"), (BOX, "Box"), (ARTICLE, "Article"),
     ))
-    name = models.CharField(max_length=50)
-    allowed_parent_types = models.JSONField(default=list, blank=True)
-    allowed_child_types = models.JSONField(default=list, blank=True)
-    allow_root = models.BooleanField(default=False)
-
     class Meta:
         ordering = ("key",)
+
+    @property
+    def name(self):
+        return INVENTORY_ENTRY_TYPE_CONFIG[self.key]["name"]
 
     def __str__(self):
         return self.name
@@ -137,18 +163,21 @@ class InventoryEntry(models.Model):
     def save(self, *args, **kwargs):
         if not self.identifier:
             self.identifier = generate_random_code()
-        self.full_clean(exclude=None)
+        self.full_clean(exclude=None) # Run validations
         super().save(*args, **kwargs)
 
     def clean(self):
+        """ Validate that the parent and category belong to the same inventory and that the parent-child relationship is valid."""
         super().clean()
         if self.category_id and self.category.inventory_id != self.inventory_id:
             raise ValidationError({"category": "Category must belong to the same inventory."})
         if self.parent_id:
             if self.parent.inventory_id != self.inventory_id:
                 raise ValidationError({"parent": "Parent must belong to the same inventory."})
-            if (self.parent.type.key not in self.type.allowed_parent_types
-                    or self.type.key not in self.parent.type.allowed_child_types):
+            type_config = INVENTORY_ENTRY_TYPE_CONFIG[self.type.key]
+            parent_config = INVENTORY_ENTRY_TYPE_CONFIG[self.parent.type.key]
+            if (self.parent.type.key not in type_config["allowed_parent_types"]
+                    or self.type.key not in parent_config["allowed_child_types"]):
                 raise ValidationError({"parent": "This parent type is not allowed for this entry."})
             node = self.parent
             seen = set()
@@ -157,7 +186,7 @@ class InventoryEntry(models.Model):
                     raise ValidationError({"parent": "An entry cannot be its own ancestor."})
                 seen.add(node.pk)
                 node = node.parent
-        elif not self.type.allow_root:
+        elif not INVENTORY_ENTRY_TYPE_CONFIG[self.type.key]["allow_root"]:
             raise ValidationError({"parent": "This entry type requires a parent."})
 
     def __str__(self):

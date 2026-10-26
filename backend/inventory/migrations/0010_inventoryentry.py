@@ -1,6 +1,7 @@
 import django.core.validators
 import django.db.models.deletion
 import inventory.models
+from inventory.models import INVENTORY_ENTRY_TYPE_CONFIG
 import uuid
 from django.db import migrations, models
 
@@ -9,20 +10,10 @@ def copy_inventory_objects(apps, schema_editor):
     database = schema_editor.connection.alias
     InventoryEntry = apps.get_model("inventory", "InventoryEntry")
     InventoryEntryType = apps.get_model("inventory", "InventoryEntryType")
-    type_parent_rules = {
-        "area": [], "shelf": ["area"], "box": ["area", "shelf", "box"],
-        "article": ["area", "shelf", "box", "article"],
-    }
-    type_child_rules = {
-        "area": ["shelf", "box", "article"], "shelf": ["box", "article"],
-        "box": ["box", "article"], "article": ["article"],
-    }
-    root_types = {"area", "article"}
     type_rows = {}
-    for key, allowed in type_parent_rules.items():
+    for key, config in INVENTORY_ENTRY_TYPE_CONFIG.items():
         type_rows[key], _ = InventoryEntryType.objects.using(database).get_or_create(
-            key=key, defaults={"name": key.title(), "allowed_parent_types": allowed,
-                               "allowed_child_types": type_child_rules[key], "allow_root": key in root_types}
+            key=key, defaults=config
         )
     mapping = {}
     for model_name, entry_type in (("Area", "area"), ("Shelf", "shelf"), ("Box", "box"), ("Article", "article")):
