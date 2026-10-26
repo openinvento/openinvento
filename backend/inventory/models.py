@@ -45,7 +45,7 @@ def article_image_upload_path(instance, filename):
 def article_attachment_upload_path(instance, filename):
     file_ext = os.path.splitext(os.path.basename(filename))[1].lower()
     safe_name = slugify(os.path.splitext(os.path.basename(filename))[0])[:80] or "attachment"
-    return os.path.join("article-attachments", str(instance.article.uuid), f"{uuid.uuid4()}-{safe_name}{file_ext}")
+    return os.path.join("article-attachments", str(instance.entry.uuid), f"{uuid.uuid4()}-{safe_name}{file_ext}")
 
 def generate_random_code(length=10):
     characters = string.ascii_letters + string.digits
@@ -74,7 +74,7 @@ class Inventory(models.Model):
 
 class InventoryComponent(models.Model):
     """
-    Base class for all components of the inventory (Area, Shelf, Box, Article, ArticleCategory).
+    Base class for inventory metadata components such as categories and category fields.
     """
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     identifier = models.CharField(max_length=30, blank=True)
@@ -90,58 +90,82 @@ class InventoryComponent(models.Model):
             self.identifier = generate_random_code()
         super().save(*args, **kwargs)
 
-class Area(InventoryComponent):
-    name = models.CharField(max_length=100)
 
-    def __str__(self):
-        return f"Area: {self.name} ({self.inventory.name})"
+class InventoryEntryType(models.Model):
+    AREA = "area"
+    SHELF = "shelf"
+    BOX = "box"
+    ARTICLE = "article"
 
-class Shelf(InventoryComponent):
-    name = models.CharField(max_length=100)
-    area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name="shelves")
+    key = models.CharField(max_length=20, unique=True, choices=(
+        (AREA, "Area"), (SHELF, "Shelf"), (BOX, "Box"), (ARTICLE, "Article"),
+    ))
+    name = models.CharField(max_length=50)
+    allowed_parent_types = models.JSONField(default=list, blank=True)
+    allowed_child_types = models.JSONField(default=list, blank=True)
+    allow_root = models.BooleanField(default=False)
 
-    def __str__(self):
-        return f"Shelf: {self.name} -> {self.area.name}"
-
-class Box(InventoryComponent):
-    name = models.CharField(max_length=100)
-    area = models.ForeignKey(Area, on_delete=models.CASCADE, related_name="boxes")
-    shelf = models.ForeignKey(Shelf, on_delete=models.CASCADE, null=True, blank=True, related_name='boxes')
-    parent_box = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='sub_boxes')
+    class Meta:
+        ordering = ("key",)
 
     def __str__(self):
         return self.name
 
-class Article(InventoryComponent):
-    name = models.CharField(max_length=100)
+
+class InventoryEntry(models.Model):
+    """A physical place or an article, stored in the inventory tree."""
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    identifier = models.CharField(max_length=30, blank=True)
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name="entries")
+    name = models.CharField(max_length=255)
+    type = models.ForeignKey(InventoryEntryType, on_delete=models.PROTECT, related_name="entries")
+    parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, related_name="children")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     description = models.CharField(blank=True, null=True, max_length=750)
-    
-    area = models.ForeignKey(Area, on_delete=models.CASCADE, null=True, blank=True)
-    shelf = models.ForeignKey(Shelf, on_delete=models.CASCADE, null=True, blank=True)
-    box = models.ForeignKey(Box, on_delete=models.SET_NULL, null=True, blank=True, related_name='contained_articles')
-    
     quantity = models.IntegerField(default=1)
     stock_tracking = models.BooleanField(default=False)
-    
-    image = models.ImageField(
-        null=True, 
-        blank=True, 
-        upload_to=article_image_upload_path, 
-        validators=[
-            FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png"]), 
-            validate_file_size,
-            validate_pure_image
-        ]
-    )
+    image = models.ImageField(null=True, blank=True, upload_to=article_image_upload_path, validators=[
+        FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png"]), validate_file_size, validate_pure_image
+    ])
     icon = models.CharField(max_length=40, blank=True, null=True)
-    category = models.ForeignKey('ArticleCategory', on_delete=models.SET_NULL, null=True, blank=True)
+    category = models.ForeignKey("ArticleCategory", on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def save(self, *args, **kwargs):
+        if not self.identifier:
+            self.identifier = generate_random_code()
+        self.full_clean(exclude=None)
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        super().clean()
+        if self.category_id and self.category.inventory_id != self.inventory_id:
+            raise ValidationError({"category": "Category must belong to the same inventory."})
+        if self.parent_id:
+            if self.parent.inventory_id != self.inventory_id:
+                raise ValidationError({"parent": "Parent must belong to the same inventory."})
+            if (self.parent.type.key not in self.type.allowed_parent_types
+                    or self.type.key not in self.parent.type.allowed_child_types):
+                raise ValidationError({"parent": "This parent type is not allowed for this entry."})
+            node = self.parent
+            seen = set()
+            while node is not None:
+                if node.pk == self.pk or node.pk in seen:
+                    raise ValidationError({"parent": "An entry cannot be its own ancestor."})
+                seen.add(node.pk)
+                node = node.parent
+        elif not self.type.allow_root:
+            raise ValidationError({"parent": "This entry type requires a parent."})
 
     def __str__(self):
-        return f"{self.name} ({self.quantity}x)"
+        return self.name
 
 
 class ArticleAttachment(models.Model):
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="attachments")
+    entry = models.ForeignKey(InventoryEntry, on_delete=models.CASCADE, related_name="attachments")
     file = models.FileField(
         upload_to=article_attachment_upload_path,
         validators=[
@@ -157,7 +181,7 @@ class ArticleAttachment(models.Model):
         return self.original_name
 
 
-@receiver(pre_delete, sender=Article)
+@receiver(pre_delete, sender=InventoryEntry)
 def delete_article_image_file(sender, instance, **kwargs):
     if instance.image:
         instance.image.delete(save=False)
@@ -228,7 +252,7 @@ class CategoryField(InventoryComponent):
 
 
 class ArticleFieldValue(models.Model):
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="field_values")
+    entry = models.ForeignKey(InventoryEntry, on_delete=models.CASCADE, related_name="field_values")
     field = models.ForeignKey(CategoryField, on_delete=models.CASCADE, related_name="article_values")
     value = models.JSONField(default=None, blank=True, null=True)
     notify_on_date = models.BooleanField(default=False)
@@ -236,10 +260,10 @@ class ArticleFieldValue(models.Model):
     class Meta:
         constraints = (
             models.UniqueConstraint(
-                fields=("article", "field"),
-                name="unique_article_field_value",
+                fields=("entry", "field"),
+                name="unique_entry_field_value",
             ),
         )
 
     def __str__(self):
-        return f"{self.article}: {self.field.label}"
+        return f"{self.entry}: {self.field.label}"
