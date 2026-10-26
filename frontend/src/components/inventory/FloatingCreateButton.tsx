@@ -22,11 +22,16 @@ export function FloatingCreateButton({ articleTo, areaId, boxId }: InventoryQuic
     return () => window.removeEventListener("keydown", closeOnEscape)
   }, [open])
 
+  const importQuery = new URLSearchParams()
+  if (areaId) importQuery.set("area", areaId)
+  if (boxId) importQuery.set("box", boxId)
+  const importSuffix = importQuery.size ? `?${importQuery}` : ""
+
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 sm:bottom-8 sm:right-8">
       <div className={`flex flex-col items-end gap-3 transition-all duration-200 motion-reduce:transition-none ${open ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"}`} aria-hidden={!open}>
         <Link
-          to={`/app/magic-article-import?area=${areaId}&box=${boxId}`}
+          to={`/app/magic-article-import${importSuffix}`}
           tabIndex={open ? 0 : -1}
           onClick={() => setOpen(false)}
           className="inline-flex items-center gap-2 rounded-full border bg-background px-4 py-3 text-sm font-medium text-foreground shadow-lg hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -35,7 +40,7 @@ export function FloatingCreateButton({ articleTo, areaId, boxId }: InventoryQuic
           <span>{t("quickActions.magicImport")}</span>
         </Link>
         <Link
-          to={`/app/barcode-article-import?area=${areaId}&box=${boxId}`}
+          to={`/app/barcode-article-import?${importSuffix}`}
           tabIndex={open ? 0 : -1}
           onClick={() => setOpen(false)}
           className="inline-flex items-center gap-2 rounded-full border bg-background px-4 py-3 text-sm font-medium text-foreground shadow-lg hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
