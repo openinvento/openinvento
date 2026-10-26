@@ -508,6 +508,17 @@ class MagicArticleImportView(InventoryScopedAPIView):
             return Response({"image": "An image file is required."}, status=400)
         if image.content_type not in {"image/jpeg", "image/png"}:
             return Response({"image": "Upload a JPEG or PNG image."}, status=400)
+
+        from PIL import Image, UnidentifiedImageError
+        try:
+            with Image.open(image) as probe:
+                probe.verify()
+                if probe.format not in {"JPEG", "PNG"}:
+                    raise UnidentifiedImageError
+            image.seek(0)
+        except (UnidentifiedImageError, OSError, Image.DecompressionBombError):
+            return Response({"image": "Upload a valid JPEG or PNG image."}, status=400)
+        
         if image.size > settings.MAX_FILE_SIZE:
             return Response({"image": "The image exceeds the maximum upload size."}, status=400)
         inventory_uuid = request.data.get("inventory")
