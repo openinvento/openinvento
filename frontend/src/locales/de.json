@@ -417,7 +417,7 @@
     "addProvider": "Provider hinzufügen",
     "barcodeLabel": "Barcode Provider",
     "choose": "Wähle einen Provider",
-    "magicLabel": "Objekt-Erkennnungs-Provider",
+    "magicLabel": "Objekterkennungs-Provider",
     "noneConfigured": "Kein Provider konfiguriert. Füge einen in den Inventareinstellungen hinzu",
     "noneSelected": "Kein Provider ausgewählt"
   },
