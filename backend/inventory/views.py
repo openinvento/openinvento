@@ -1,7 +1,12 @@
+import http.client
+import json
 import os
 import tempfile
 import uuid
 from typing import ClassVar
+from urllib.error import HTTPError, URLError
+from urllib.parse import quote
+from urllib.request import Request, urlopen
 from venv import logger
 
 from django.conf import settings
@@ -368,53 +373,6 @@ CODE_MODELS = (
     (CategoryField, "field"),
 )
 
-class BarcodeProductLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
-    """Look up a scanned product through the inventory's configured catalog provider."""
-
-    def post(self, request):
-        barcode = str(request.data.get("barcode", "")).strip()
-        inventory_uuid = request.data.get("inventory")
-        if not barcode or len(barcode) > 80:
-            return Response({"error": "A valid barcode is required."}, status=400)
-        try:
-            uuid.UUID(str(inventory_uuid))
-        except (ValueError, TypeError, AttributeError):
-            inventory_uuid = None
-        if inventory_uuid is None or not self.get_accessible_inventories().filter(uuid=inventory_uuid).exists():
-            return Response({"error": "Select an inventory you can access."}, status=400)
-        from third_party_providers.models import ThirdPartyProvider
-        provider_uuid = request.data.get("provider")
-        try:
-            provider_uuid = uuid.UUID(str(provider_uuid)) if provider_uuid else None
-        except (ValueError, TypeError, AttributeError):
-            provider_uuid = None
-        configured_provider = ThirdPartyProvider.objects.filter(
-            uuid=provider_uuid, inventory__uuid=inventory_uuid, type="barcode_lookup", provider="openfoodfacts"
-        ).first() if provider_uuid else None
-        if configured_provider is None:
-            return Response({"error": "Select a configured barcode lookup provider in inventory settings."}, status=503)
-        import json
-        from urllib.error import HTTPError, URLError
-        from urllib.request import Request, urlopen
-        try:
-            req = Request(f"https://world.openfoodfacts.org/api/v2/product/{barcode}.json", headers={"User-Agent": "OpenInvento/1.0 (barcode lookup)"})
-            with urlopen(req, timeout=8) as response:
-                payload = json.loads(response.read())
-            product = payload.get("product") or {}
-            if payload.get("status") != 1 or not product:
-                return Response({"error": "No product was found for this barcode."}, status=404)
-            return Response({
-                "barcode": barcode,
-                "name": product.get("product_name") or product.get("product_name_en") or "",
-                "brand": product.get("brands") or "",
-                "description": product.get("generic_name") or product.get("quantity") or "",
-                "image": product.get("image_front_url") or product.get("image_url"),
-                "source": "Open Food Facts",
-            })
-        except (HTTPError, URLError, TimeoutError, ValueError) as error:
-            return Response({"error": "Open Food Facts could not be reached."}, status=502)
-
-
 class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     def post(self, request, *args, **kwargs):
         identifier = str(request.data.get("identifier", "")).strip()
@@ -490,7 +448,56 @@ class CodePdfView(InventoryScopedAPIView):
 
 # endregion QR/ BARCODE VIEWS
 
-# region Magic inventoy import
+# region Magic inventoy import/ barcode lookup
+
+class BarcodeProductLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
+    """Look up a scanned product through the inventory's configured catalog provider."""
+
+    def post(self, request):
+        barcode = str(request.data.get("barcode", "")).strip()
+        inventory_uuid = request.data.get("inventory")
+        if not barcode or len(barcode) > 80:
+            return Response({"error": "A valid barcode is required."}, status=400)
+        try:
+            uuid.UUID(str(inventory_uuid))
+        except (ValueError, TypeError, AttributeError):
+            inventory_uuid = None
+        if inventory_uuid is None or not self.get_accessible_inventories().filter(uuid=inventory_uuid).exists():
+            return Response({"error": "Select an inventory you can access."}, status=400)
+        from third_party_providers.models import ThirdPartyProvider
+        provider_uuid = request.data.get("provider")
+        try:
+            provider_uuid = uuid.UUID(str(provider_uuid)) if provider_uuid else None
+        except (ValueError, TypeError, AttributeError):
+            provider_uuid = None
+        configured_provider = ThirdPartyProvider.objects.filter(
+            uuid=provider_uuid, inventory__uuid=inventory_uuid, type="barcode_lookup", provider="openfoodfacts"
+        ).first() if provider_uuid else None
+        if configured_provider is None:
+            return Response({"error": "Select a configured barcode lookup provider in inventory settings."}, status=503)
+        try:
+            OPENFOODFACTS_API_URL = "https://world.openfoodfacts.org/api/v2/product/"
+            req = Request(f"{OPENFOODFACTS_API_URL}{quote(barcode, safe='')} .json", headers={"User-Agent": "OpenInvento/1.0 (barcode lookup)"})
+            with urlopen(req, timeout=8) as response:
+                payload = json.loads(response.read())
+            product = payload.get("product") or {}
+            if payload.get("status") != 1 or not product:
+                return Response({"error": "No product was found for this barcode."}, status=404)
+            return Response({
+                "barcode": barcode,
+                "name": product.get("product_name") or product.get("product_name_en") or "",
+                "brand": product.get("brands") or "",
+                "description": product.get("generic_name") or product.get("quantity") or "",
+                "image": product.get("image_front_url") or product.get("image_url"),
+                "source": "Open Food Facts",
+            })
+        except HTTPError as error:
+            if error.code == 404:
+                return Response({"error": "No product was found for this barcode."}, status=404)
+            return Response({"error": "Open Food Facts could not be reached."}, status=502)
+        except (URLError, TimeoutError, ValueError, http.client.HTTPException):
+             return Response({"error": "Open Food Facts could not be reached."}, status=502)
+
 class MagicArticleImportView(InventoryScopedAPIView):
     """Analyze an uploaded image and return article-shaped drafts for review."""
     parser_classes = (MultiPartParser, FormParser)
