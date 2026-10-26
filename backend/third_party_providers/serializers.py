@@ -11,7 +11,7 @@ class ThirdPartyProviderSerializer(serializers.ModelSerializer):
     type = serializers.CharField(max_length=40)
     api_key = serializers.CharField(write_only=True, required=False, allow_blank=False)
     model_name = serializers.CharField(max_length=200, required=False, allow_blank=True)
-    api_url = serializers.URLField(max_length=500, required=False, allow_blank=True)
+    api_url = serializers.URLField(max_length=500, required=False, allow_blank=True, write_only=True)
     inventory = serializers.PrimaryKeyRelatedField(queryset=Inventory.objects.none())
     has_api_key = serializers.SerializerMethodField()
 
@@ -29,6 +29,8 @@ class ThirdPartyProviderSerializer(serializers.ModelSerializer):
         return bool(obj.encrypted_api_key)
 
     def validate(self, attrs):
+        if attrs.get("api_url"):
+            raise serializers.ValidationError({"api_url": "Ollama's server URL is configured by the deployment."})
         provider = attrs.get("provider", getattr(self.instance, "provider", None))
         provider_type = attrs.get("type", getattr(self.instance, "type", None))
         configuration = get_provider_configuration(provider, provider_type)

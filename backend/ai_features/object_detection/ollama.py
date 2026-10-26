@@ -2,6 +2,7 @@ import base64
 import json
 
 import requests
+from django.conf import settings
 from PIL import Image
 
 from .main import LUCIDE_ARTICLE_ICONS, PROMPT, BaseObjectDetection
@@ -22,7 +23,7 @@ class OllamaObjectDetection(BaseObjectDetection):
         super().__init__(model_path, api_key, api_url)
 
     def load_model(self):
-        return self.api_url or "http://localhost:11434"
+        return settings.OLLAMA_API_URL
 
     def detect_objects(self, image_path: str):
         icon_names = ", ".join(LUCIDE_ARTICLE_ICONS)
@@ -58,7 +59,10 @@ class OllamaObjectDetection(BaseObjectDetection):
                 },
                 headers={"Authorization": f"Bearer {self.api_key}"} if self.api_key else {},
                 timeout=180,
+                allow_redirects=False,
             )
+            if 300 <= response.status_code < 400:
+                raise RuntimeError("Ollama server returned a redirect, which is not allowed.")
             response.raise_for_status()
             content = response.json()["message"]["content"]
             result = json.loads(content)

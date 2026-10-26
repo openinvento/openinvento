@@ -555,7 +555,6 @@ class MagicArticleImportView(InventoryScopedAPIView):
                 temporary_path,
                 api_key=api_key,
                 model=configured_provider.model_name or None,
-                api_url=configured_provider.api_url or None,
             )
 
             if not isinstance(result, dict) or not isinstance(result.get("objects"), list):

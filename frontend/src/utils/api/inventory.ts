@@ -2,8 +2,8 @@ import { deleteData, downloadFile, fetchData, patchData, postData } from "./base
 
 export type Inventory = { uuid: string; name: string; identifier: string; updated_at: string }
 export type ThirdPartyProviderType = string
-export type ThirdPartyProviderConfiguration = { provider: string; type: ThirdPartyProviderType; display_name: string; type_label: string; requires_api_key: boolean; requires_model?: boolean; requires_api_url?: boolean; default_model?: string }
-export type ThirdPartyProvider = { uuid: string; inventory: string; provider: string; type: ThirdPartyProviderType; name: string; model_name: string; api_url: string; has_api_key: boolean; created_at: string; updated_at: string }
+export type ThirdPartyProviderConfiguration = { provider: string; type: ThirdPartyProviderType; display_name: string; type_label: string; requires_api_key: boolean; requires_model?: boolean; default_model?: string }
+export type ThirdPartyProvider = { uuid: string; inventory: string; provider: string; type: ThirdPartyProviderType; name: string; model_name: string; has_api_key: boolean; created_at: string; updated_at: string }
 export type BarcodeProduct = { barcode: string; name: string; brand: string; description: string; image: string | null; source: string }
 export type Area = EntityBase
 export type Shelf = EntityBase & { area: string }
@@ -109,7 +109,7 @@ export const inventoryApi = {
   listInventories: () => fetchData<Inventory[]>("/api/inventories/"),
   listThirdPartyProviders: (inventory: string) => fetchData<ThirdPartyProvider[]>(`/api/third-party-providers/?inventory=${encodeURIComponent(inventory)}`),
   listThirdPartyProviderConfigurations: () => fetchData<ThirdPartyProviderConfiguration[]>("/api/third-party-providers/configurations/"),
-  createThirdPartyProvider: (payload: { inventory: string; provider: string; type: ThirdPartyProviderType; name: string; api_key?: string; model_name?: string; api_url?: string }) => postData<ThirdPartyProvider>("/api/third-party-providers/", payload),
+  createThirdPartyProvider: (payload: { inventory: string; provider: string; type: ThirdPartyProviderType; name: string; api_key?: string; model_name?: string }) => postData<ThirdPartyProvider>("/api/third-party-providers/", payload),
   updateThirdPartyProvider: (uuid: string, payload: { name?: string; api_key?: string }) => patchData<ThirdPartyProvider>(`/api/third-party-providers/${uuid}/`, payload),
   deleteThirdPartyProvider: (uuid: string) => deleteData<void>(`/api/third-party-providers/${uuid}/`),
   listAreas: () => fetchData<Area[]>(scopedPath("/api/areas/")),

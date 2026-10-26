@@ -35,6 +35,7 @@ else:
     HAS_CORSHEADERS = True
 
 DEBUG = os.getenv("DEBUG", "false").strip().lower() in {"1", "true", "yes", "on"}
+OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://localhost:11434").strip().rstrip("/")
 envSecretKey = os.getenv("SECRET_KEY")
 
 

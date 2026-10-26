@@ -597,6 +597,7 @@
         "nameLabel": "Provider name",
         "namePlaceholder": "Provider name",
         "noConfigurations": "No provider configurations available.",
+        "ollamaUrlNotice": "The Ollama server URL must be configured by the instance administrator using the OLLAMA_API_URL environment variable.",
         "remove": "Remove provider",
         "title": "Third-party providers",
         "typeLabel": "Provider type",

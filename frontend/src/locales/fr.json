@@ -605,6 +605,7 @@
           "llm": "LLM",
           "object_detection_llm": "LLM de détection d’objets"
         },
+        "ollamaUrlNotice": "L?URL du serveur Ollama doit ?tre configur?e par l?administrateur de l?instance via la variable d?environnement OLLAMA_API_URL.",
         "urlLabel": "URL du serveur Ollama (facultatif)",
         "urlPlaceholder": "http://localhost:11434"
       },

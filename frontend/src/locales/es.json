@@ -605,6 +605,7 @@
           "llm": "LLM",
           "object_detection_llm": "LLM de detección de objetos"
         },
+        "ollamaUrlNotice": "El administrador de la instancia debe configurar la URL del servidor Ollama mediante la variable de entorno OLLAMA_API_URL.",
         "urlLabel": "URL del servidor Ollama (opcional)",
         "urlPlaceholder": "http://localhost:11434"
       },

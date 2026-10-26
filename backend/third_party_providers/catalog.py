@@ -17,7 +17,6 @@ PROVIDER_CONFIGURATIONS = (
         "type_label": "Object detection LLM",
         "requires_api_key": False,
         "requires_model": True,
-        "requires_api_url": True,
     },
     {
         "provider": "ollama",
@@ -26,7 +25,6 @@ PROVIDER_CONFIGURATIONS = (
         "type_label": "LLM",
         "requires_api_key": False,
         "requires_model": True,
-        "requires_api_url": True,
     },
     {
         "provider": "gemini",
