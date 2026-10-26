@@ -430,6 +430,7 @@
     "magicImport": "Importación mágica de artículos",
     "magicImportPage": {
       "analyzing": "Analizando...",
+      "chooseArticleImage": "Elige una imagen para este artículo",
       "chooseImage": "Elegir imagen",
       "createArticles": "Crear {{count}} artículos",
       "createdMany": "Se crearon {{saved}} artículos.",
@@ -591,6 +592,8 @@
         "keyLabel": "Clave de API de Gemini",
         "keyPlaceholder": "Clave de API de Gemini",
         "keySaved": "Clave de API guardada",
+        "modelLabel": "Modelo",
+        "modelPlaceholder": "p. ej., llava",
         "nameLabel": "Nombre del proveedor",
         "namePlaceholder": "Nombre del proveedor",
         "noConfigurations": "No hay configuraciones de proveedor disponibles.",
@@ -602,8 +605,6 @@
           "llm": "LLM",
           "object_detection_llm": "LLM de detección de objetos"
         },
-        "modelLabel": "Modelo",
-        "modelPlaceholder": "p. ej., llava",
         "urlLabel": "URL del servidor Ollama (opcional)",
         "urlPlaceholder": "http://localhost:11434"
       },

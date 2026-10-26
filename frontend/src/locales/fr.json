@@ -430,6 +430,7 @@
     "magicImport": "Import magique d’article",
     "magicImportPage": {
       "analyzing": "Analyse en cours…",
+      "chooseArticleImage": "Choisissez une image pour cet article",
       "chooseImage": "Choisir une image",
       "createArticles": "Créer {{count}} articles",
       "createdMany": "{{saved}} articles créés.",
@@ -591,6 +592,8 @@
         "keyLabel": "Clé API Gemini",
         "keyPlaceholder": "Clé API Gemini",
         "keySaved": "Clé API enregistrée",
+        "modelLabel": "Modèle",
+        "modelPlaceholder": "ex. llava",
         "nameLabel": "Nom du fournisseur",
         "namePlaceholder": "Nom du fournisseur",
         "noConfigurations": "Aucune configuration de fournisseur disponible.",
@@ -602,8 +605,6 @@
           "llm": "LLM",
           "object_detection_llm": "LLM de détection d’objets"
         },
-        "modelLabel": "Modèle",
-        "modelPlaceholder": "ex. llava",
         "urlLabel": "URL du serveur Ollama (facultatif)",
         "urlPlaceholder": "http://localhost:11434"
       },

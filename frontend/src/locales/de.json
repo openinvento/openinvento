@@ -430,6 +430,7 @@
     "magicImport": "Magischer Artikelimport",
     "magicImportPage": {
       "analyzing": "Wird analysiert...",
+      "chooseArticleImage": "Wähle ein Bild für diesen Artikel",
       "chooseImage": "Bild auswählen",
       "createArticles": "{{count}} Artikel erstellen",
       "createdMany": "{{saved}} Artikel erstellt.",
@@ -591,6 +592,8 @@
         "keyLabel": "API-Schlüssel",
         "keyPlaceholder": "API-Schlüssel",
         "keySaved": "API-Schlüssel gespeichert",
+        "modelLabel": "Modell",
+        "modelPlaceholder": "Modell, z. B. llava",
         "nameLabel": "Name des Anbieters",
         "namePlaceholder": "Name des Anbieters",
         "noConfigurations": "Keine Anbieterkonfigurationen verfügbar.",
@@ -602,8 +605,6 @@
           "llm": "LLM",
           "object_detection_llm": "LLM zur Objekterkennung"
         },
-        "modelLabel": "Modell",
-        "modelPlaceholder": "Modell, z. B. llava",
         "urlLabel": "Ollama-Server-URL (optional)",
         "urlPlaceholder": "http://localhost:11434"
       },
