@@ -7,23 +7,17 @@ from pathlib import PurePosixPath
 from shutil import copyfileobj
 
 from .models import (
-    Area,
-    Article,
     ArticleAttachment,
     ArticleCategory,
-    Box,
     CategoryField,
-    Shelf,
+    InventoryEntry,
 )
 from .serializers import (
-    AreaSerializer,
     ArticleAttachmentSerializer,
     ArticleCategorySerializer,
-    ArticleSerializer,
-    BoxSerializer,
     CategoryFieldSerializer,
+    InventoryEntrySerializer,
     InventorySerializer,
-    ShelfSerializer,
 )
 
 
@@ -73,30 +67,16 @@ def generate_inventory_csv_export(inventory):
         writer.writerow(inventory_data)
         archive.writestr("inventory.csv", output.getvalue().encode("utf-8-sig"))
 
-        write_table(archive, "areas.csv", AreaSerializer,
-                    list(Area.objects.filter(inventory=inventory).order_by("created_at")))
-        write_table(archive, "shelves.csv", ShelfSerializer,
-                    list(Shelf.objects.filter(inventory=inventory).select_related("area").order_by("created_at")))
-        write_table(archive, "boxes.csv", BoxSerializer,
-                    list(Box.objects.filter(inventory=inventory).select_related("area", "shelf", "parent_box").order_by("created_at")))
+        entries = list(InventoryEntry.objects.filter(inventory=inventory).select_related("parent", "category").order_by("created_at"))
+        write_table(archive, "entries.csv", InventoryEntrySerializer, entries,
+                    extras={"image_archive_file": lambda entry, _record: archive_media(entry.image)})
         write_table(archive, "categories.csv", ArticleCategorySerializer,
                     list(ArticleCategory.objects.filter(inventory=inventory).order_by("created_at")))
         write_table(archive, "category_fields.csv", CategoryFieldSerializer,
                     list(CategoryField.objects.filter(inventory=inventory).select_related("category").order_by("created_at")))
 
-        articles = list(Article.objects.filter(inventory=inventory).select_related(
-            "area", "shelf", "box", "category"
-        ).prefetch_related("attachments", "field_values__field").order_by("created_at"))
-        write_table(
-            archive,
-            "articles.csv",
-            ArticleSerializer,
-            articles,
-            extras={"image_archive_file": lambda article, _record: archive_media(article.image)},
-        )
-
-        attachments = list(ArticleAttachment.objects.filter(article__inventory=inventory)
-                           .select_related("article").order_by("id"))
+        attachments = list(ArticleAttachment.objects.filter(entry__inventory=inventory)
+                           .select_related("entry").order_by("id"))
         write_table(
             archive,
             "attachments.csv",
