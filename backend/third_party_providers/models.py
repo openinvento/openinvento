@@ -37,4 +37,5 @@ class ThirdPartyProvider(models.Model):
     @api_key.setter
     def api_key(self, value):
         from .secrets import encrypt_secret
+        # Save the encrypted value to the database field
         self.encrypted_api_key = encrypt_secret(value)

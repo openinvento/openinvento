@@ -26,7 +26,7 @@ class ThirdPartyProviderSerializer(serializers.ModelSerializer):
         self.fields["inventory"].queryset = request.user.inventories.all() if request and request.user.is_authenticated else Inventory.objects.none()
 
     def get_has_api_key(self, obj):
-        return bool(obj.api_key)
+        return bool(obj.encrypted_api_key)
 
     def validate(self, attrs):
         provider = attrs.get("provider", getattr(self.instance, "provider", None))
@@ -49,7 +49,9 @@ class ThirdPartyProviderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         api_key = validated_data.pop("api_key", "")
         instance = ThirdPartyProvider(**validated_data)
-        instance.api_key = api_key
+        if api_key:
+            instance.api_key = api_key
+            # the api_key setter will handle encryption and saving to the encrypted_api_key field
         instance.save()
         return instance
 
