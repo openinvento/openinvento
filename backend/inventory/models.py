@@ -30,7 +30,7 @@ def validate_pure_image(image_file):
         image_file.seek(0)
 
 def validate_attachment_content(value):
-    ext = os.path.splitext(value.name).lower()
+    ext = os.path.splitext(value.name)[1].lower()
     if ext in [".jpg", ".jpeg", ".png"]:
         validate_pure_image(value)
 

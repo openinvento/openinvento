@@ -516,8 +516,9 @@ class MagicArticleImportView(InventoryScopedAPIView):
                 if probe.format not in {"JPEG", "PNG"}:
                     raise UnidentifiedImageError
             image.seek(0)
-        except (UnidentifiedImageError, OSError, Image.DecompressionBombError):
+        except (UnidentifiedImageError, OSError, Image.DecompressionBombError, SyntaxError):
             return Response({"image": "Upload a valid JPEG or PNG image."}, status=400)
+            
         
         if image.size > settings.MAX_FILE_SIZE:
             return Response({"image": "The image exceeds the maximum upload size."}, status=400)
