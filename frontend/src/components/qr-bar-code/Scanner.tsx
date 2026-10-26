@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { BarcodeDetector } from "barcode-detector"
-import { Camera, LoaderCircle, X } from "lucide-react"
+import { Camera, LoaderCircle, RotateCcw, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
@@ -37,12 +37,13 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 
 				if (detectedCode && !hasDetectedCodeRef.current) {
 					hasDetectedCodeRef.current = true
+					setError(null)
 					setStatus("looking-up")
 					try {
 						await onCodeDetected(detectedCode.rawValue)
 					} catch (lookupError) {
 						if (isActive) {
-							setStatus("error")
+							setStatus("scanning")
 							setError(lookupError instanceof Error ? lookupError.message : "Unable to find the scanned item.")
 						}
 					} finally {
@@ -131,6 +132,22 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 				{status === "error" && (
 					<div className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-white">
 						{error}
+					</div>
+				)}
+				{status === "scanning" && error && (
+					<div className="absolute inset-x-4 bottom-4 flex items-center justify-between gap-3 rounded-md bg-slate-950/85 p-3 text-left text-sm text-white">
+						<span>{error}</span>
+						<Button
+							aria-label="Retry lookup"
+							size="icon"
+							variant="ghost"
+							onClick={() => {
+								setError(null)
+								hasDetectedCodeRef.current = false
+							}}
+						>
+							<RotateCcw />
+						</Button>
 					</div>
 				)}
 				{status === "scanning" && <div className="pointer-events-none absolute inset-[18%] rounded-lg border-2 border-white/80" />}
