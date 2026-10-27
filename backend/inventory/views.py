@@ -113,10 +113,10 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(pk__in=entry_ids)
 
             if getattr(self, "entry_type", None):
-                queryset = queryset.filter(type__key=self.entry_type)
+                queryset = queryset.filter(type=self.entry_type)
             # If the payload includes a `type` parameter, we filter to only include entries of the specified type.
             elif self.request.query_params.get("type"):
-                queryset = queryset.filter(type__key=self.request.query_params["type"])
+                queryset = queryset.filter(type=self.request.query_params["type"])
 
             # If the payload includes an `include_ancestors` parameter, we include all ancestor entries of the specified entries.
             if self.request.query_params.get("include_ancestors") == "true":
@@ -261,12 +261,12 @@ class DashboardView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         )
 
         counts = {
-            "areas": InventoryEntry.objects.filter(inventory__in=inventories, type__key="area").count(),
-            "articles": InventoryEntry.objects.filter(inventory__in=inventories, type__key="article").count(),
+            "areas": InventoryEntry.objects.filter(inventory__in=inventories, type="area").count(),
+            "articles": InventoryEntry.objects.filter(inventory__in=inventories, type="article").count(),
             "categories": ArticleCategory.objects.filter(inventory__in=inventories).count(),
         }
         category_counts = (
-            InventoryEntry.objects.filter(inventory__in=inventories, type__key="article")
+            InventoryEntry.objects.filter(inventory__in=inventories, type="article")
             .values("category__name")
             .annotate(count=Count("uuid"))
             .order_by("-count", "category__name")
@@ -277,7 +277,7 @@ class DashboardView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
             if len(item) == 2:
                 entry_type, object_type = item
                 model, name_field = InventoryEntry, "name"
-                queryset = model.objects.filter(inventory__in=inventories, type__key=entry_type)
+                queryset = model.objects.filter(inventory__in=inventories, type=entry_type)
             else:
                 model, object_type, name_field = item
                 queryset = model.objects.filter(inventory__in=inventories)
@@ -304,7 +304,7 @@ class DashboardView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
 class InventoryEntryViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     queryset = InventoryEntry.objects.all() # We use a base queryset here, but the actual queryset is filtered in get_queryset() based on accessible inventories and query parameters.
     serializer_class = InventoryEntrySerializer
-    select_related_fields = ("inventory", "type", "parent", "parent__type", "category")
+    select_related_fields = ("inventory", "parent", "category")
     ordering = ("name",)
 
 
@@ -328,7 +328,7 @@ class ArticleAttachmentsView(InventoryScopedAPIView):
         if not entry_uuid:
             return None
         return get_object_or_404(
-            InventoryEntry.objects.filter(inventory__in=self.get_accessible_inventories(), type__key="article"),
+            InventoryEntry.objects.filter(inventory__in=self.get_accessible_inventories(), type="article"),
             uuid=entry_uuid,
         )
 
@@ -384,7 +384,7 @@ class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
             inventory__in=self.get_accessible_inventories(),
             inventory__uuid=inventory,
             name__icontains=query
-        ).filter(type__key__in=("article", "box")).select_related("inventory", "type", "parent", "parent__type", "category").prefetch_related("field_values__field")
+        ).filter(type__in=("article", "box")).select_related("inventory", "parent", "category").prefetch_related("field_values__field")
         results = InventoryEntrySerializer(entries, many=True, context={"request": request}).data
         return Response(results)
 
@@ -412,7 +412,7 @@ class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
                 identifier=identifier,
             )
             if entry_type:
-                queryset = queryset.filter(type__key=entry_type)
+                queryset = queryset.filter(type=entry_type)
             item = queryset.first()
             if item is not None:
                 return Response({
@@ -463,7 +463,7 @@ class CodePdfView(InventoryScopedAPIView):
             for model, entry_type, object_type in CODE_MODELS:
                 queryset = model.objects.filter(uuid=item_uuid, inventory__in=accessible)
                 if entry_type:
-                    queryset = queryset.filter(type__key=entry_type)
+                    queryset = queryset.filter(type=entry_type)
                 match = queryset.first()
                 if match is not None:
                     selected_items.append((match, object_type))
