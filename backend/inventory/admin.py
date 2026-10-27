@@ -7,4 +7,3 @@ from .models import *
 
 admin.site.register(Inventory)
 admin.site.register(InventoryEntry)
-admin.site.register(InventoryEntryType)
