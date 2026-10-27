@@ -47,7 +47,7 @@ export async function moveInventoryItem(
     return
   }
 
-  await moveShelf(item.id, target, locations)
+  await moveShelf(item.id, target)
 }
 
 async function moveArticle(
@@ -117,7 +117,6 @@ async function moveBox(
 async function moveShelf(
   shelfId: string,
   target: InventoryDndTarget,
-  locations: InventoryLocations,
 ) {
   if (target.kind !== "area") return
 
