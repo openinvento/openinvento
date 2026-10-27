@@ -61,9 +61,7 @@ export function NavActions() {
 
     void (async () => {
       try {
-        const item: Area | Box | undefined = areaId
-          ? (await inventoryApi.listAreas()).find((area) => area.uuid === areaId)
-          : (await inventoryApi.listBoxes()).find((box) => box.uuid === boxId)
+        const item: Area | Box | null = await inventoryApi.getEntry<Area | Box>((areaId ?? boxId)!)
         if (!active || !item) return
         const kind = areaId ? "areas" : "boxes"
         setEntity({ uuid: item.uuid, name: item.name, identifier: item.identifier, kind })
