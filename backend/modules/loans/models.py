@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
@@ -27,6 +28,15 @@ class Loan(models.Model):
     class Meta:
         ordering = ("-lent_at",)
         constraints = ()
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        super().clean()
+        if self.entry_id and self.entry.type not in {"article", "box"}:
+            raise ValidationError({"entry": "Only articles and boxes can be loaned."})
 
     @property
     def is_returned(self):

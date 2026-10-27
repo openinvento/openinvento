@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from rest_framework.test import APIClient
 
@@ -51,6 +52,17 @@ class LoanAPITests(TestCase):
         self.assertEqual(response.status_code, 201, response.data)
         loan = Loan.objects.get()
         self.assertEqual(loan.entry, self.box)
+
+    def test_model_rejects_area_and_shelf_loans(self):
+        for entry in (self.area, self.shelf):
+            with self.subTest(entry=entry.type), self.assertRaises(ValidationError):
+                Loan.objects.create(entry=entry, lent_by=self.user)
+
+    def test_model_allows_article_and_box_loans(self):
+        Loan.objects.create(entry=self.article, lent_by=self.user)
+        Loan.objects.create(entry=self.box, lent_by=self.user)
+
+        self.assertEqual(Loan.objects.count(), 2)
 
     def test_create_rejects_missing_or_multiple_items(self):
         for payload in (
