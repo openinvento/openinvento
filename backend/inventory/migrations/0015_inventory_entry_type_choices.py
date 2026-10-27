@@ -23,8 +23,9 @@ class Migration(migrations.Migration):
             name="type_key",
             field=models.CharField(max_length=20, null=True),
         ),
-        migrations.RunPython(copy_type_keys_to_charfield, migrations.RunPython.noop),
+        migrations.RunPython(copy_type_keys_to_charfield),
         migrations.RemoveField(model_name="inventoryentry", name="type"),
+        migrations.RunPython(migrations.RunPython.noop),
         migrations.DeleteModel(name="InventoryEntryType"),
         migrations.RenameField(
             model_name="inventoryentry",
