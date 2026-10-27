@@ -8,7 +8,7 @@ def sync_low_stock_notifications(user):
     inventories = Inventory.objects.all() if user.is_superuser else user.inventories.all()
     articles = InventoryEntry.objects.filter(
         inventory__in=inventories,
-        type__key="article",
+        type="article",
         stock_tracking=True,
     ).select_related("inventory").prefetch_related("field_values__field")
 

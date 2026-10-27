@@ -10,7 +10,7 @@ from django.utils import timezone
 from account_auth.models import CustomUser, Notification
 from inventory.jobs.date_field_sync import sync_date_field_notifications
 
-from .models import ArticleAttachment, ArticleCategory, ArticleFieldValue, CategoryField, Inventory, InventoryEntry, InventoryEntryType
+from .models import ArticleAttachment, ArticleCategory, ArticleFieldValue, CategoryField, Inventory, InventoryEntry
 
 
 class TypedEntryFacade:
@@ -26,10 +26,10 @@ class TypedEntryFacade:
 		if self.key == "shelf": parent = parent or area
 		if self.key == "box": parent = parent or parent_box or shelf or area
 		if self.key == "article": parent = parent or box or shelf or area
-		return InventoryEntry.objects.create(type=InventoryEntryType.objects.get(key=self.key), parent=parent, **kwargs)
+		return InventoryEntry.objects.create(type=self.key, parent=parent, **kwargs)
 
 	def get(self, **kwargs):
-		return InventoryEntry.objects.get(type__key=self.key, **kwargs)
+		return InventoryEntry.objects.get(type=self.key, **kwargs)
 
 
 Article = type("Article", (), {"objects": TypedEntryFacade("article")})

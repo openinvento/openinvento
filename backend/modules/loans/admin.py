@@ -11,4 +11,4 @@ class LoanAdmin(admin.ModelAdmin):
 
     @admin.display(description="Entry type")
     def entry_type(self, loan):
-        return loan.entry.type.name
+        return loan.entry.get_type_display()
