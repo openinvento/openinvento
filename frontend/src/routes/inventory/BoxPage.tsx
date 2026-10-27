@@ -62,10 +62,11 @@ export default function BoxPage() {
     const area = form.get("area")?.toString()
     const shelf = form.get("shelf")?.toString() || null
     if (!name || !area) return
+    const parent_box = area === box.area && shelf === box.shelf ? box.parent_box : null
     setSaving(true)
     setError("")
     try {
-      const updated = await inventoryApi.update<Box>("boxes", box.uuid, { name, area, shelf })
+      const updated = await inventoryApi.update<Box>("boxes", box.uuid, { name, area, shelf, parent_box })
       setBox(updated)
       setEditOpen(false)
       await load()

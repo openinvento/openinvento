@@ -104,6 +104,13 @@ export default function AreaDetailScreen() {
         ...basePayload,
         shelf: optional("shelf"),
       }
+      if (
+        modal.item?.type === "box" &&
+        selectedArea === modal.item.area &&
+        payload.shelf === modal.item.shelf
+      ) {
+        payload.parent_box = modal.item.parent_box
+      }
     }
 
     setSaving(true)
