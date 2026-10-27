@@ -13,9 +13,10 @@ class LoanViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        return Loan.objects.filter(lent_by=self.request.user).select_related(
-            "article", "box", "lent_by"
-        )
+        return Loan.objects.filter(
+            lent_by=self.request.user,
+            entry__inventory__users=self.request.user,
+        ).select_related("entry", "lent_by")
 
     def perform_create(self, serializer):
         serializer.save(lent_by=self.request.user)

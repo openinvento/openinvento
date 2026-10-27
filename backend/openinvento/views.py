@@ -1,22 +1,26 @@
+""" General API views for OpenInvento instance. """
+
+import logging
 import os
 import tempfile
 import zipfile
-import logging
 from pathlib import Path
 
 from django.conf import settings
 from django.http import FileResponse, Http404, JsonResponse
-from account_auth.models import InstanceSettings
-from account_auth.serializers import InstanceSettingsSerializer
-from inventory.models import Article, ArticleAttachment
-from rest_framework import permissions, status
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from account_auth.models import InstanceSettings
+from account_auth.serializers import InstanceSettingsSerializer
+from inventory.models import ArticleAttachment, InventoryEntry
+from modules.registry import get_available_modules
+
 from .instance_notifications import get_current_version
 from .version_fetching import VersionFetcher
-from modules.registry import get_available_modules
 
 #TODO: Add option to serve user uploads through Nginx or a connected S3 storage bucket
 
@@ -133,13 +137,14 @@ def protected_media_view(request, path):
     if media_root not in file_path.parents or not file_path.is_file():
         raise Http404("File not found")
 
-    accessible_inventories = Article.objects.filter(inventory__users=request.user)
+    accessible_inventories = InventoryEntry.objects.filter(inventory__users=request.user)
+    # Check if the file is either an inventory image or an article attachment related to accessible inventories
     if not accessible_inventories.filter(image=path).exists() and not ArticleAttachment.objects.filter(
-        file=path, article__in=accessible_inventories
+        file=path, entry__in=accessible_inventories
     ).exists():
         raise Http404("File not found")
 
-    attachment = ArticleAttachment.objects.filter(file=path, article__in=accessible_inventories).first()
+    attachment = ArticleAttachment.objects.filter(file=path, entry__in=accessible_inventories).first()
     filename = attachment.original_name if attachment else file_path.name
     response = FileResponse(file_path.open("rb"), as_attachment=attachment is not None, filename=filename)
     response["Content-Disposition"] = f'attachment; filename="{filename}"' if attachment else f'inline; filename="{filename}"'

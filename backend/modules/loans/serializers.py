@@ -1,48 +1,27 @@
-from inventory.models import Article, Box
 from rest_framework import serializers
+
+from inventory.models import InventoryEntry
 
 from .models import Loan
 
 
 class LoanSerializer(serializers.ModelSerializer):
-    article = serializers.PrimaryKeyRelatedField(
-        queryset=Article.objects.none(), required=False, allow_null=True
-    )
-    box = serializers.PrimaryKeyRelatedField(
-        queryset=Box.objects.none(), required=False, allow_null=True
-    )
+    entry = serializers.PrimaryKeyRelatedField(queryset=InventoryEntry.objects.none())
+    entry_name = serializers.CharField(source="entry.name", read_only=True)
+    entry_type = serializers.CharField(source="entry.type", read_only=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         request = self.context.get("request")
         if request is not None and request.user.is_authenticated:
-            self.fields["article"].queryset = Article.objects.filter(
-                inventory__users=request.user
-            )
-            self.fields["box"].queryset = Box.objects.filter(
-                inventory__users=request.user
-            )
+            self.fields["entry"].queryset = InventoryEntry.objects.filter(inventory__users=request.user)
 
-    def validate(self, attrs):
-        article = attrs.get("article", getattr(self.instance, "article", None))
-        box = attrs.get("box", getattr(self.instance, "box", None))
-        if (article is None) == (box is None):
-            raise serializers.ValidationError(
-                "Select exactly one of article or box."
-            )
-        return attrs
+    def validate_entry(self, entry):
+        if entry.type not in {"article", "box"}:
+            raise serializers.ValidationError("Only articles and boxes can be loaned.")
+        return entry
 
     class Meta:
         model = Loan
-        fields = (
-            "id",
-            "article",
-            "box",
-            "lent_by",
-            "quantity",
-            "lent_at",
-            "due_at",
-            "returned_at",
-            "notes",
-        )
-        read_only_fields = ("id", "lent_by", "lent_at", "returned_at")
+        fields = ("id", "entry", "entry_name", "entry_type", "lent_by", "quantity", "lent_at", "due_at", "returned_at", "notes")
+        read_only_fields = ("id", "lent_by", "lent_at", "returned_at", "entry_name", "entry_type")

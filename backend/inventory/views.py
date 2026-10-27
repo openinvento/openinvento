@@ -29,25 +29,19 @@ from ai_features.object_detection.main import LUCIDE_ARTICLE_ICONS
 from .code_utils import generate_codes_pdf
 from .export_utils import generate_inventory_csv_export
 from .models import (
-    Area,
-    Article,
     ArticleAttachment,
     ArticleCategory,
-    Box,
     CategoryField,
     Inventory,
-    Shelf,
+    InventoryEntry,
 )
 from .permissions import IsInventoryMember
 from .serializers import (
-    AreaSerializer,
     ArticleAttachmentSerializer,
     ArticleCategorySerializer,
-    ArticleSerializer,
-    BoxSerializer,
     CategoryFieldSerializer,
+    InventoryEntrySerializer,
     InventorySerializer,
-    ShelfSerializer,
 )
 
 ARTICLE_LUCIDE_ICONS = frozenset(LUCIDE_ARTICLE_ICONS)
@@ -81,11 +75,64 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
         return self.request.user.inventories.all()
 
     def get_queryset(self):
+        """ Get the queryset for the viewset, filtered by accessible inventories and optional query parameters. """
         # Basic scoping for GET, PUT, PATCH, DELETE
         queryset = super().get_queryset().filter(inventory__in=self.get_accessible_inventories())
         inventory_uuid = self.request.query_params.get("inventory")
         if inventory_uuid:
             queryset = queryset.filter(inventory__uuid=inventory_uuid)
+
+        if queryset.model is InventoryEntry:
+            # For InventoryEntry, we support additional filtering by parent/ancestor and type.
+            accessible_entries = InventoryEntry.objects.filter(inventory__in=self.get_accessible_inventories())
+            if inventory_uuid:
+                accessible_entries = accessible_entries.filter(inventory__uuid=inventory_uuid)
+            
+            # If the payload includes a `within` parameter, we filter to only include entries that are descendants of the specified entry.
+            if self.request.query_params.get("within"):
+                try:
+                    root_id = uuid.UUID(self.request.query_params["within"])
+                except (ValueError, TypeError, AttributeError):
+                    return queryset.none()
+                if not accessible_entries.filter(pk=root_id).exists():
+                    return queryset.none()
+                descendant_ids = {root_id}
+                frontier = {root_id}
+                while frontier:
+                    children = set(accessible_entries.filter(parent_id__in=frontier).values_list("pk", flat=True))
+                    frontier = children - descendant_ids
+                    descendant_ids.update(frontier)
+                queryset = queryset.filter(pk__in=descendant_ids)
+
+            # If the payload includes an `ids` parameter, we filter to only include entries with the specified IDs.
+            if self.request.query_params.get("ids"):
+                try:
+                    entry_ids = [uuid.UUID(value) for value in self.request.query_params["ids"].split(",") if value]
+                except (ValueError, TypeError, AttributeError):
+                    return queryset.none()
+                queryset = queryset.filter(pk__in=entry_ids)
+
+            if getattr(self, "entry_type", None):
+                queryset = queryset.filter(type=self.entry_type)
+            # If the payload includes a `type` parameter, we filter to only include entries of the specified type.
+            elif self.request.query_params.get("type"):
+                queryset = queryset.filter(type=self.request.query_params["type"])
+
+            # If the payload includes an `include_ancestors` parameter, we include all ancestor entries of the specified entries.
+            if self.request.query_params.get("include_ancestors") == "true":
+                result_ids = set(queryset.values_list("pk", flat=True))
+                frontier = set(queryset.exclude(parent_id__isnull=True).values_list("parent_id", flat=True)) # frontier is the set of parent IDs of the current result set
+                while frontier:
+                    parents = list(
+                        accessible_entries.filter(pk__in=frontier).values_list("pk", "parent_id")
+                    )
+                    next_frontier = set()
+                    for parent_id, grandparent_id in parents:
+                        result_ids.add(parent_id)
+                        if grandparent_id and grandparent_id not in result_ids:
+                            next_frontier.add(grandparent_id)
+                    frontier = next_frontier
+                queryset = accessible_entries.filter(pk__in=result_ids)
         
         if self.select_related_fields:
             queryset = queryset.select_related(*self.select_related_fields)
@@ -113,6 +160,7 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
 
 class InventoryScopedAPIView(APIView):
     """ Base class for API views that are scoped to a specific inventory.  (Handle inventory + authentication)"""
+    """ Advanced filterings like entryType is handled in the specific APIViews"""
     permission_classes = (IsAuthenticated, IsInventoryMember)
 
     def get_accessible_inventories(self):
@@ -204,30 +252,37 @@ class DashboardView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         if inventory_uuid:
             inventories = inventories.filter(uuid=inventory_uuid)
         scoped_models = (
-            (Area, "area", "name"),
-            (Shelf, "shelf", "name"),
-            (Box, "box", "name"),
-            (Article, "article", "name"),
+            ("area", "area"),
+            ("shelf", "shelf"),
+            ("box", "box"),
+            ("article", "article"),
             (ArticleCategory, "category", "name"),
             (CategoryField, "field", "label"),
         )
 
         counts = {
-            "areas": Area.objects.filter(inventory__in=inventories).count(),
-            "articles": Article.objects.filter(inventory__in=inventories).count(),
+            "areas": InventoryEntry.objects.filter(inventory__in=inventories, type="area").count(),
+            "articles": InventoryEntry.objects.filter(inventory__in=inventories, type="article").count(),
             "categories": ArticleCategory.objects.filter(inventory__in=inventories).count(),
         }
         category_counts = (
-            Article.objects.filter(inventory__in=inventories)
+            InventoryEntry.objects.filter(inventory__in=inventories, type="article")
             .values("category__name")
             .annotate(count=Count("uuid"))
             .order_by("-count", "category__name")
         )
 
         last_added = []
-        for model, object_type, name_field in scoped_models:
+        for item in scoped_models:
+            if len(item) == 2:
+                entry_type, object_type = item
+                model, name_field = InventoryEntry, "name"
+                queryset = model.objects.filter(inventory__in=inventories, type=entry_type)
+            else:
+                model, object_type, name_field = item
+                queryset = model.objects.filter(inventory__in=inventories)
             fields = {"uuid", name_field, "created_at"}
-            for item in model.objects.filter(inventory__in=inventories).values(*fields).order_by("-created_at")[:10]:
+            for item in queryset.values(*fields).order_by("-created_at")[:10]:
                 last_added.append({
                     "uuid": str(item["uuid"]),
                     "name": item[name_field],
@@ -246,21 +301,11 @@ class DashboardView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         })
 
 
-class AreaViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
-    queryset = Area.objects.all()
-    serializer_class = AreaSerializer
-
-
-class ShelfViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
-    queryset = Shelf.objects.all()
-    serializer_class = ShelfSerializer
-    select_related_fields = ("inventory", "area")
-
-
-class BoxViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
-    queryset = Box.objects.all()
-    serializer_class = BoxSerializer
-    select_related_fields = ("inventory", "area", "shelf", "parent_box")
+class InventoryEntryViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
+    queryset = InventoryEntry.objects.all() # We use a base queryset here, but the actual queryset is filtered in get_queryset() based on accessible inventories and query parameters.
+    serializer_class = InventoryEntrySerializer
+    select_related_fields = ("inventory", "parent", "category")
+    ordering = ("name",)
 
 
 class ArticleCategoryViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
@@ -274,39 +319,34 @@ class CategoryFieldViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     select_related_fields = ("inventory", "category")
 
 
-class ArticleViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
-    queryset = Article.objects.all()
-    serializer_class = ArticleSerializer
-    select_related_fields = ("inventory", "area", "shelf", "box", "category")
-    prefetch_related_fields = ("field_values__field",)
-
-
 class ArticleAttachmentsView(InventoryScopedAPIView):
+    """ API view for managing attachments for inventory entries of type 'article'."""
     parser_classes = (MultiPartParser, FormParser)
 
-    def get_article(self, request):
-        article_uuid = request.query_params.get("article")
-        if not article_uuid:
+    def get_entry(self, request):
+        entry_uuid = request.query_params.get("entry")
+        if not entry_uuid:
             return None
         return get_object_or_404(
-            Article.objects.filter(inventory__in=self.get_accessible_inventories()), uuid=article_uuid
+            InventoryEntry.objects.filter(inventory__in=self.get_accessible_inventories(), type="article"),
+            uuid=entry_uuid,
         )
 
     def get(self, request):
-        article = self.get_article(request)
-        if article is None:
-            return Response({"article": "An article UUID is required."}, status=400)
-        items = article.attachments.order_by("created_at")
+        entry = self.get_entry(request)
+        if entry is None:
+            return Response({"entry": "An entry UUID is required."}, status=400)
+        items = entry.attachments.order_by("created_at")
         return Response(ArticleAttachmentSerializer(items, many=True, context={"request": request}).data)
 
     def post(self, request):
-        article = self.get_article(request)
-        if article is None:
-            return Response({"article": "An article UUID is required."}, status=400)
+        entry = self.get_entry(request)
+        if entry is None:
+            return Response({"entry": "An entry UUID is required."}, status=400)
         uploaded = request.FILES.get("file")
         if uploaded is None:
             return Response({"file": "A file is required."}, status=400)
-        attachment = ArticleAttachment(article=article, original_name=uploaded.name[:255], file=uploaded)
+        attachment = ArticleAttachment(entry=entry, original_name=uploaded.name[:255], file=uploaded)
         try:
             attachment.full_clean()
         except DjangoValidationError as error:
@@ -320,7 +360,7 @@ class ArticleAttachmentsView(InventoryScopedAPIView):
         if not attachment_id:
             return Response({"id": "An attachment ID is required."}, status=400)
         attachment = get_object_or_404(
-            ArticleAttachment.objects.filter(article__inventory__in=self.get_accessible_inventories()),
+            ArticleAttachment.objects.filter(entry__inventory__in=self.get_accessible_inventories()),
             pk=attachment_id,
         )
         attachment.file.delete(save=False)
@@ -340,37 +380,24 @@ class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         inventory = request.query_params.get("inventory")
         if not inventory:
             return Response({"error": "Query parameter 'inventory' is required."}, status=400)
-        articles = Article.objects.filter(
+        entries = InventoryEntry.objects.filter(
             inventory__in=self.get_accessible_inventories(),
             inventory__uuid=inventory,
             name__icontains=query
-        ).select_related("inventory", "area", "shelf", "box", "category")
-        articles = articles.prefetch_related("field_values__field")
-        boxes = Box.objects.filter(
-            inventory__in=self.get_accessible_inventories(),
-            inventory__uuid=inventory,
-            name__icontains=query,
-        ).select_related("inventory", "area", "shelf", "parent_box")
-
-        results = [
-            {**item, "type": "article"}
-            for item in ArticleSerializer(articles, many=True).data
-        ] + [
-            {**item, "type": "box"}
-            for item in BoxSerializer(boxes, many=True).data
-        ]
+        ).filter(type__in=("article", "box")).select_related("inventory", "parent", "category").prefetch_related("field_values__field")
+        results = InventoryEntrySerializer(entries, many=True, context={"request": request}).data
         return Response(results)
 
 
 # region QR/ BARCODE VIEWS
 
-CODE_MODELS = (
-    (Article, "article"),
-    (Box, "box"),
-    (Shelf, "shelf"),
-    (Area, "area"),
-    (ArticleCategory, "category"),
-    (CategoryField, "field"),
+CODE_MODELS = ( # (model, entry_type, object_type) tuples for code lookup
+    (InventoryEntry, "article", "article"),
+    (InventoryEntry, "box", "box"),
+    (InventoryEntry, "shelf", "shelf"),
+    (InventoryEntry, "area", "area"),
+    (ArticleCategory, None, "category"),
+    (CategoryField, None, "field"),
 )
 
 class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
@@ -379,11 +406,14 @@ class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         if not identifier:
             return Response({"error": "identifier is required."}, status=400)
 
-        for model, object_type in CODE_MODELS:
-            item = model.objects.filter(
+        for model, entry_type, object_type in CODE_MODELS:
+            queryset = model.objects.filter(
                 inventory__in=self.get_accessible_inventories(),
                 identifier=identifier,
-            ).first()
+            )
+            if entry_type:
+                queryset = queryset.filter(type=entry_type)
+            item = queryset.first()
             if item is not None:
                 return Response({
                     "uuid": str(item.uuid),
@@ -430,8 +460,11 @@ class CodePdfView(InventoryScopedAPIView):
                 continue
 
             match = None
-            for model, object_type in CODE_MODELS:
-                match = model.objects.filter(uuid=item_uuid, inventory__in=accessible).first()
+            for model, entry_type, object_type in CODE_MODELS:
+                queryset = model.objects.filter(uuid=item_uuid, inventory__in=accessible)
+                if entry_type:
+                    queryset = queryset.filter(type=entry_type)
+                match = queryset.first()
                 if match is not None:
                     selected_items.append((match, object_type))
                     break

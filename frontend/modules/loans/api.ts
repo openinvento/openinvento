@@ -2,8 +2,9 @@ import { fetchData, postData } from "@/utils/api/base"
 
 export type Loan = {
   id: number
-  article: string | null
-  box: string | null
+  entry: string
+  entry_name: string
+  entry_type: "article" | "box"
   lent_by: string | null
   quantity: number
   lent_at: string
@@ -15,8 +16,7 @@ export type Loan = {
 export const loansApi = {
   list: () => fetchData<Loan[]>("/api/loans/"),
   create: (payload: {
-    article: string | null
-    box: string | null
+    entry: string
     quantity: number
     due_at: string | null
     notes: string

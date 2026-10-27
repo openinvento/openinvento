@@ -143,15 +143,18 @@ export function InventoryDndBoundary({ children }: { children: ReactNode }) {
   const [error, setError] = useState("")
 
   const load = useCallback(async () => {
-    const [nextShelves, nextBoxes, nextArticles] = await Promise.all([
-      inventoryApi.listShelves(),
-      inventoryApi.listBoxes(),
-      inventoryApi.listArticles(),
-    ])
-    setShelves(nextShelves)
-    setBoxes(nextBoxes)
-    setArticles(nextArticles)
-  }, [])
+    const scopedRoute = location.pathname.match(/^\/app\/(?:areas|boxes)\/([^/]+)\/?$/)
+    if (!scopedRoute) {
+      setShelves([])
+      setBoxes([])
+      setArticles([])
+      return
+    }
+    const entries = await inventoryApi.listEntries({ within: scopedRoute[1] })
+    setShelves(entries.filter((entry) => entry.type === "shelf") as Shelf[])
+    setBoxes(entries.filter((entry) => entry.type === "box") as Box[])
+    setArticles(entries.filter((entry) => entry.type === "article") as Article[])
+  }, [location.pathname])
 
   useEffect(() => {
     void load().catch(() => undefined)

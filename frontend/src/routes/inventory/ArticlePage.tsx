@@ -72,21 +72,32 @@ export default function ArticlePage() {
 
   useEffect(() => { void (async () => { 
     try {
-      const [allArticles, nextAreas, nextShelves, nextBoxes, nextCategories, nextFields] = await Promise.all([inventoryApi.listArticles(), inventoryApi.listAreas(), inventoryApi.listShelves(), inventoryApi.listBoxes(), inventoryApi.listCategories(), inventoryApi.listCategoryFields()]);
-      const nextArticle = allArticles.find((item) => item.uuid === articleId) ?? null
-      setArticle(nextArticle)
-      if (nextArticle) setAttachments(await inventoryApi.listArticleAttachments(nextArticle.uuid))
-      setStockTracking(nextArticle?.stock_tracking ?? false)
-      setSelectedArea(nextArticle?.area ?? null)
-      setSelectedCategory(nextArticle?.category ?? null)
-      setSelectedShelf(nextArticle?.shelf ?? null)
-      setSelectedBox(nextArticle?.box ?? null)
-      setAreas(nextAreas); 
+      if (!articleId) throw new Error(t("articles.page.errors.load"))
+      const [fetchedArticle, fetchedAreas, fetchedCategories, fetchedFields] = await Promise.all([
+        inventoryApi.getEntry<Article>(articleId),
+        inventoryApi.listAreas(),
+        inventoryApi.listCategories(),
+        inventoryApi.listCategoryFields(),
+      ])
+      const [nextShelves, nextBoxes] = fetchedArticle?.area
+        ? await Promise.all([
+            inventoryApi.listShelves({ within: fetchedArticle.area }),
+            inventoryApi.listBoxes({ within: fetchedArticle.area }),
+          ])
+        : [[], []]
+      setArticle(fetchedArticle)
+      if (fetchedArticle) setAttachments(await inventoryApi.listArticleAttachments(fetchedArticle.uuid))
+      setStockTracking(fetchedArticle?.stock_tracking ?? false)
+      setSelectedArea(fetchedArticle?.area ?? null)
+      setSelectedCategory(fetchedArticle?.category ?? null)
+      setSelectedShelf(fetchedArticle?.shelf ?? null)
+      setSelectedBox(fetchedArticle?.box ?? null)
+      setAreas(fetchedAreas); 
       setShelves(nextShelves); 
       setBoxes(nextBoxes)
-      setCategories(nextCategories)
-      setCategoryFields(nextFields.filter((field) => field.category !== null))
-      setGlobalFields(nextFields.filter((field) => field.category === null))
+      setCategories(fetchedCategories)
+      setCategoryFields(fetchedFields.filter((field) => field.category !== null))
+      setGlobalFields(fetchedFields.filter((field) => field.category === null))
     } 
     catch (reason) {
       setError(reason instanceof Error ? reason.message : t("articles.page.errors.load")) } })()
@@ -340,9 +351,22 @@ export default function ArticlePage() {
                   name="area"
                   value={selectedArea ?? ""}
                   onChange={(event) => {
-                    setSelectedArea(event.target.value || null)
+                    const area = event.target.value || null
+                    setSelectedArea(area)
                     setSelectedShelf(null)
                     setSelectedBox(null)
+                    if (area) {
+                      void Promise.all([
+                        inventoryApi.listShelves({ within: area }),
+                        inventoryApi.listBoxes({ within: area }),
+                      ]).then(([fetchedShelves, fetchedBoxes]) => {
+                        setShelves(fetchedShelves)
+                        setBoxes(fetchedBoxes)
+                      })
+                    } else {
+                      setShelves([])
+                      setBoxes([])
+                    }
                   }}
                 >
                   <option value="">{t("articles.page.noArea")}</option>
