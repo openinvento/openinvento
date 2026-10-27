@@ -302,7 +302,14 @@ export default function AreaDetailScreen() {
 
       {modal?.item && <label className="grid gap-1.5 text-sm font-medium">
         {t("areas.detail.fields.area")}
-        <select name="area" value={editAreaId} onChange={(event) => setEditAreaId(event.target.value)} className="h-10 rounded-lg border bg-background px-3 font-normal">
+        <select name="area" value={editAreaId} 
+          onChange={(event) => {
+            const newArea = event.target.value
+            setEditAreaId(newArea);
+            void inventoryApi.listShelves({ within: newArea }).then(setAllShelves).catch(() => setAllShelves([]))
+          }} 
+          className="h-10 rounded-lg border bg-background px-3 font-normal">
+          
           {allAreas.map((option) => <option key={option.uuid} value={option.uuid}>{option.name}</option>)}
         </select>
       </label>}
