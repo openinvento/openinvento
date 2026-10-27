@@ -53,20 +53,19 @@ export default function AreaDetailScreen() {
     if (!areaId) return
     setError("")
     try {
-      const [inventories, allAreas, allShelves, allBoxes, allArticles] = await Promise.all([
+      const [inventories, allAreas, scopedEntries] = await Promise.all([
         inventoryApi.listInventories(),
         inventoryApi.listAreas(),
-        inventoryApi.listShelves(),
-        inventoryApi.listBoxes(),
-        inventoryApi.listArticles(),
+        inventoryApi.listEntries({ within: areaId }),
       ])
       setInventory(getSelectedInventory(inventories))
       setArea(allAreas.find((item) => item.uuid === areaId) ?? null)
       setAllAreas(allAreas)
-      setShelves(allShelves.filter((item) => item.area === areaId))
-      setAllShelves(allShelves)
-      setBoxes(allBoxes.filter((item) => item.area === areaId))
-      setArticles(allArticles.filter((item) => item.area === areaId))
+      const scopedShelves = scopedEntries.filter((item) => item.type === "shelf") as Shelf[]
+      setShelves(scopedShelves)
+      setAllShelves(scopedShelves)
+      setBoxes(scopedEntries.filter((item) => item.type === "box") as Box[])
+      setArticles(scopedEntries.filter((item) => item.type === "article") as Article[])
     } catch (reason) {
       setError(
         reason instanceof Error

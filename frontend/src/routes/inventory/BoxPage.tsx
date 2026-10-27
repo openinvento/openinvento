@@ -38,11 +38,15 @@ export default function BoxPage() {
     if (!boxId) return
     setError("")
     try {
-      const [allBoxes, allArticles, allAreas, allShelves] = await Promise.all([inventoryApi.listBoxes(), inventoryApi.listArticles(), inventoryApi.listAreas(), inventoryApi.listShelves()])
-      const nextBox = allBoxes.find((item) => item.uuid === boxId) ?? null
+      const nextBox = await inventoryApi.getEntry<Box>(boxId)
+      const [allArticles, allAreas, allShelves] = await Promise.all([
+        inventoryApi.listArticles({ within: boxId }),
+        inventoryApi.listAreas(),
+        nextBox?.area ? inventoryApi.listShelves({ within: nextBox.area }) : Promise.resolve([]),
+      ])
       setArea(allAreas.find((item) => item.uuid === nextBox?.area) || null)
       setBox(nextBox)
-      setArticles(allArticles.filter((article) => article.box === boxId))
+      setArticles(allArticles)
       setAreas(allAreas)
       setShelves(allShelves)
     } catch (reason) {
@@ -172,7 +176,11 @@ export default function BoxPage() {
         </label>
         <label className="grid gap-1.5 text-sm font-medium">
           {t("areas.detail.fields.area")}
-          <select name="area" value={editAreaId} onChange={(event) => setEditAreaId(event.target.value)} className="h-10 rounded-lg border bg-background px-3 font-normal">
+          <select name="area" value={editAreaId} onChange={(event) => {
+            const area = event.target.value
+            setEditAreaId(area)
+            void inventoryApi.listShelves({ within: area }).then(setShelves)
+          }} className="h-10 rounded-lg border bg-background px-3 font-normal">
             {areas.map((area) => <option key={area.uuid} value={area.uuid}>{area.name}</option>)}
           </select>
         </label>
