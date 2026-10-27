@@ -34,7 +34,8 @@ RUN pip install --no-cache-dir .
 
 COPY backend/ .
 COPY --from=frontend-build /app/frontend/dist /usr/share/nginx/html
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY docker/nginx.conf /etc/nginx/nginx.conf
 
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
