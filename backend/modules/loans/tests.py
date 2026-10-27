@@ -2,7 +2,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser
-from inventory.models import Inventory, InventoryEntry, InventoryEntryType
+from inventory.models import Inventory, InventoryEntry
 
 from .models import Loan
 
@@ -18,10 +18,10 @@ class LoanAPITests(TestCase):
         )
         self.inventory = Inventory.objects.create(name="Loan inventory")
         self.inventory.users.add(self.user, self.other_user)
-        self.area = InventoryEntry.objects.create(name="Storage", inventory=self.inventory, type=InventoryEntryType.objects.get(key="area"))
-        self.shelf = InventoryEntry.objects.create(name="Main shelf", parent=self.area, inventory=self.inventory, type=InventoryEntryType.objects.get(key="shelf"))
-        self.article = InventoryEntry.objects.create(name="Projector", inventory=self.inventory, parent=self.area, type=InventoryEntryType.objects.get(key="article"))
-        self.box = InventoryEntry.objects.create(name="Equipment box", inventory=self.inventory, parent=self.shelf, type=InventoryEntryType.objects.get(key="box"))
+        self.area = InventoryEntry.objects.create(name="Storage", inventory=self.inventory, type="area")
+        self.shelf = InventoryEntry.objects.create(name="Main shelf", parent=self.area, inventory=self.inventory, type="shelf")
+        self.article = InventoryEntry.objects.create(name="Projector", inventory=self.inventory, parent=self.area, type="article")
+        self.box = InventoryEntry.objects.create(name="Equipment box", parent=self.shelf, inventory=self.inventory, type="box")
         self.client.force_authenticate(user=self.user)
 
     def test_create_article_loan_without_borrower(self):

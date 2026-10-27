@@ -6,8 +6,9 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase, override_settings
 from django.utils import timezone
-from inventory.models import Inventory, InventoryEntry, InventoryEntryType
 from rest_framework.test import APIClient
+
+from inventory.models import Inventory, InventoryEntry
 
 from .models import CustomUser, InstanceSettings, UserAPIKey
 
@@ -193,10 +194,10 @@ class APIKeyManagementTests(TestCase):
 		)
 		self.inventory = Inventory.objects.create(name='User inventory')
 		self.inventory.users.add(self.user)
-		self.area = InventoryEntry.objects.create(name='User area', type=InventoryEntryType.objects.get(key='area'), inventory=self.inventory)
+		self.area = InventoryEntry.objects.create(name='User area', type='area', inventory=self.inventory)
 		self.other_inventory = Inventory.objects.create(name='Other inventory')
 		self.other_inventory.users.add(self.other_user)
-		InventoryEntry.objects.create(name='Other area', type=InventoryEntryType.objects.get(key='area'), inventory=self.other_inventory)
+		InventoryEntry.objects.create(name='Other area', type='area', inventory=self.other_inventory)
 
 	def create_key(self, user=None, name='automation'):
 		api_key, secret = UserAPIKey.objects.create_key(name=name, user=user or self.user)
