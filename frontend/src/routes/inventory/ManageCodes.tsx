@@ -5,7 +5,7 @@ import { LoaderCircle, Printer, ScanBarcode, ScanLine, X } from "lucide-react"
 import Scanner from "@/components/qr-bar-code/Scanner"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
-import { inventoryApi, type CodePdfOptions } from "@/utils/api/inventory"
+import { inventoryApi, type CodePdfOptions, type Shelf } from "@/utils/api/inventory"
 import { useTranslation } from "react-i18next"
 import { Input } from "@/components/ui/input"
 
@@ -58,7 +58,7 @@ export default function ManageCodes() {
 				navigate(`/app/areas/${result.uuid}`)
 				break
 			case "shelf": {
-				const shelf = (await inventoryApi.listShelves()).find((item) => item.uuid === result.uuid)
+				const shelf = await inventoryApi.getEntry<Shelf>(result.uuid)
 				if (!shelf) throw new Error(t("manageCodes.externalScanner.errors.lookup"))
 				navigate(`/app/areas/${shelf.area}`)
 				break
