@@ -47,7 +47,7 @@ class ProtectedImageField(serializers.ImageField):
 
 class InventoryEntrySerializer(serializers.ModelSerializer):
     """ Serializer for InventoryEntry model, including validation for parent-child relationships and field values. """
-    type = serializers.SlugRelatedField(slug_field="key", queryset=InventoryEntryType.objects.all())
+    type = serializers.ChoiceField(choices=InventoryEntryType.choices)
     parent = serializers.PrimaryKeyRelatedField(queryset=InventoryEntry.objects.none(), required=False, allow_null=True)
     category = serializers.PrimaryKeyRelatedField(queryset=ArticleCategory.objects.none(), required=False, allow_null=True)
     image = ProtectedImageField(required=False, allow_null=True)
@@ -74,17 +74,17 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
         inventory = attrs.get("inventory", getattr(self.instance, "inventory", None))
         parent = attrs.get("parent", getattr(self.instance, "parent", None))
         entry_type = attrs.get("type", getattr(self.instance, "type", None))
-        entry_type_key = entry_type.key if isinstance(entry_type, InventoryEntryType) else entry_type
+        entry_type_key = entry_type
         if inventory is None:
             raise serializers.ValidationError({"inventory": "Inventory is required."})
         if parent and parent.inventory_id != inventory.pk:
             raise serializers.ValidationError({"parent": "Parent must belong to the same inventory."})
         type_config = INVENTORY_ENTRY_TYPE_CONFIG.get(entry_type_key, {})
-        parent_config = INVENTORY_ENTRY_TYPE_CONFIG.get(parent.type.key, {}) if parent else {}
-        if parent and (parent.type.key not in type_config.get("allowed_parent_types", [])
+        parent_config = INVENTORY_ENTRY_TYPE_CONFIG.get(parent.type, {}) if parent else {}
+        if parent and (parent.type not in type_config.get("allowed_parent_types", [])
                        or entry_type_key not in parent_config.get("allowed_child_types", [])):
             raise serializers.ValidationError({"parent": "This parent type is not allowed for this entry."})
-        if not parent and isinstance(entry_type, InventoryEntryType) and not type_config.get("allow_root", False):
+        if not parent and not type_config.get("allow_root", False):
             raise serializers.ValidationError({"parent": "This entry type requires a parent."})
         if self.instance and parent:
             node = parent
@@ -120,10 +120,10 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
     def get_field_values(self, obj):
         return [{"field": str(row.field_id), "key": row.field.key, "value": row.value,
                  "notify_on_date": row.notify_on_date}
-                for row in obj.field_values.select_related("field").all()] if obj.type.key == "article" else []
+                for row in obj.field_values.select_related("field").all()] if obj.type == "article" else []
 
     def get_category_fields(self, obj):
-        if obj.type.key != "article":
+        if obj.type != "article":
             return []
         fields = CategoryField.objects.filter(inventory=obj.inventory)
         if obj.category_id:
@@ -150,7 +150,7 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
         """Save field values for an article entry. This method is called during create and update operations."""
         if values is None:
             return
-        if entry.type.key != "article":
+        if entry.type != "article":
             raise serializers.ValidationError({"field_values_input": "Only articles can have field values."})
         allowed = {str(field.uuid): field for field in CategoryField.objects.filter(inventory=entry.inventory)}
         seen = set()

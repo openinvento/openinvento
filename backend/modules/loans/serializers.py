@@ -17,7 +17,7 @@ class LoanSerializer(serializers.ModelSerializer):
             self.fields["entry"].queryset = InventoryEntry.objects.filter(inventory__users=request.user)
 
     def validate_entry(self, entry):
-        if entry.type.key not in {"article", "box"}:
+        if entry.type not in {"article", "box"}:
             raise serializers.ValidationError("Only articles and boxes can be loaned.")
         return entry
 
