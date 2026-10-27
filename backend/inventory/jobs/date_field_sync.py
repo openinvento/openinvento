@@ -10,13 +10,14 @@ def sync_date_field_notifications(user):
     inventories = Inventory.objects.all() if user.is_superuser else user.inventories.all()
     today = timezone.localdate().isoformat()
     field_values = ArticleFieldValue.objects.filter(
-        article__inventory__in=inventories,
+        entry__inventory__in=inventories,
         field__field_type="date",
         notify_on_date=True,
         value=today,
-    ).select_related("article__inventory", "article__category", "field")
+    ).select_related("entry__inventory", "entry__category", "field")
+    
     for field_value in field_values:
-        article = field_value.article
+        article = field_value.entry
         field = field_value.field
         if field.category_id not in (None, article.category_id):
             continue

@@ -1,13 +1,14 @@
 from django.contrib.auth import get_user_model
 
 from account_auth.models import Notification
-from inventory.models import Article, Inventory
+from inventory.models import Inventory, InventoryEntry
 
 
 def sync_low_stock_notifications(user):
     inventories = Inventory.objects.all() if user.is_superuser else user.inventories.all()
-    articles = Article.objects.filter(
+    articles = InventoryEntry.objects.filter(
         inventory__in=inventories,
+        type__key="article",
         stock_tracking=True,
     ).select_related("inventory").prefetch_related("field_values__field")
 
