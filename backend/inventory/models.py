@@ -17,7 +17,7 @@ INVENTORY_ENTRY_TYPE_CONFIG = {
         "name": "Area",
         "allowed_parent_types": [],
         "allowed_child_types": ["shelf", "box", "article"],
-        "allow_root": True,
+        "allow_root": True, # Areas can be root entries in the inventory tree
     },
     "shelf": {
         "name": "Shelf",
@@ -127,6 +127,8 @@ class InventoryEntryType(models.Model):
     key = models.CharField(max_length=20, unique=True, choices=(
         (AREA, "Area"), (SHELF, "Shelf"), (BOX, "Box"), (ARTICLE, "Article"),
     ))
+
+    # other configs are in INVENTORY_ENTRY_TYPE_CONFIG, so we don't need to store them in the database
     class Meta:
         ordering = ("key",)
 
