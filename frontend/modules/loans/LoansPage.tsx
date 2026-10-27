@@ -62,8 +62,7 @@ export default function LoansPage() {
     setError(null)
     try {
       const loan = await loansApi.create({
-        article: selectedArticle?.uuid ?? null,
-        box: selectedBox?.uuid ?? null,
+        entry: selectedArticle?.uuid ?? selectedBox?.uuid ?? "",
         quantity: selectedKind === "article" ? quantity : 1,
         due_at: dueAt ? new Date(dueAt).toISOString() : null,
         notes,
@@ -141,13 +140,13 @@ export default function LoansPage() {
           ) : (
             <div className="overflow-hidden rounded-xl border">
               {loans.map((loan) => {
-                const itemLabel = itemNames.get(`${loan.article ? "article" : "box"}:${loan.article ?? loan.box}`) ?? t("loans.unknownItem")
+                const itemLabel = loan.entry_name || itemNames.get(`${loan.entry_type}:${loan.entry}`) || t("loans.unknownItem")
                 return (
                   <div key={loan.id} className="flex flex-wrap items-center justify-between gap-4 border-b p-4 last:border-b-0">
                     <div className="flex min-w-0 items-center gap-3">
                       <ArchiveIcon className="size-4 shrink-0 text-muted-foreground" />
                       <div className="min-w-0">
-                        <p className="truncate font-medium">{itemLabel}{loan.article && loan.quantity > 1 ? ` × ${loan.quantity}` : ""}</p>
+                        <p className="truncate font-medium">{itemLabel}{loan.entry_type === "article" && loan.quantity > 1 ? ` × ${loan.quantity}` : ""}</p>
                         <p className="text-sm text-muted-foreground">{t("loans.due")}: {formatDate(loan.due_at)}</p>
                         {loan.notes && <p className="text-sm text-muted-foreground">{t("loans.notesLabel")}: {loan.notes}</p>}
                       </div>
