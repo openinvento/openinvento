@@ -70,6 +70,20 @@ class LoanAPITests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual([item["id"] for item in response.data], [own_loan.id])
 
+    def test_loan_history_excludes_entries_from_inaccessible_inventories(self):
+        inaccessible_inventory = Inventory.objects.create(name="Inaccessible inventory")
+        inaccessible_article = InventoryEntry.objects.create(
+            name="Hidden projector",
+            inventory=inaccessible_inventory,
+            type="article",
+        )
+        hidden_loan = Loan.objects.create(entry=inaccessible_article, lent_by=self.user)
+
+        response = self.client.get("/api/loans/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(hidden_loan.id, [item["id"] for item in response.data])
+
     def test_mark_loan_returned(self):
         loan = Loan.objects.create(entry=self.article, lent_by=self.user)
 
