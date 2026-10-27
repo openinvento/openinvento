@@ -23,7 +23,6 @@ async function moveBoxWithContents(
   area: string,
   shelf: string | null,
   parent: string | null,
-  locations: InventoryLocations,
 ) {
   await inventoryApi.update("boxes", boxId, {
     area,
@@ -31,19 +30,6 @@ async function moveBoxWithContents(
     parent_box: parent,
   })
 
-  const containedArticles = locations.articles.filter((article) => article.box === boxId)
-  await Promise.all(
-    containedArticles.map((article) =>
-      inventoryApi.update("articles", article.uuid, { area, shelf }),
-    ),
-  )
-
-  const childBoxes = locations.boxes.filter((box) => box.parent_box === boxId)
-  await Promise.all(
-    childBoxes.map((child) =>
-      moveBoxWithContents(child.uuid, area, shelf, boxId, locations),
-    ),
-  )
 }
 
 export async function moveInventoryItem(
@@ -109,7 +95,7 @@ async function moveBox(
   if (!box) throw new Error("The box could not be found.")
 
   if (target.kind === "area") {
-    await moveBoxWithContents(boxId, target.id, null, null, locations)
+    await moveBoxWithContents(boxId, target.id, null, null)
     return
   }
 
@@ -117,7 +103,7 @@ async function moveBox(
     const shelf = locations.shelves.find((entry) => entry.uuid === target.id)
     if (!shelf) throw new Error("The destination shelf could not be found.")
 
-    await moveBoxWithContents(boxId, shelf.area, shelf.uuid, null, locations)
+    await moveBoxWithContents(boxId, shelf.area, shelf.uuid, null)
     return
   }
 
@@ -125,7 +111,7 @@ async function moveBox(
   if (!parent) throw new Error("The destination box could not be found.")
   if (parent.uuid === box.uuid) return
 
-  await moveBoxWithContents(boxId, parent.area, parent.shelf, parent.uuid, locations)
+  await moveBoxWithContents(boxId, parent.area, parent.shelf, parent.uuid)
 }
 
 async function moveShelf(
@@ -137,24 +123,4 @@ async function moveShelf(
 
   await inventoryApi.update("shelves", shelfId, { area: target.id })
 
-  const articlesOnShelf = locations.articles.filter(
-    (article) => article.shelf === shelfId && article.box === null,
-  )
-  await Promise.all(
-    articlesOnShelf.map((article) =>
-      inventoryApi.update("articles", article.uuid, {
-        area: target.id,
-        shelf: shelfId,
-      }),
-    ),
-  )
-
-  const boxesOnShelf = locations.boxes.filter(
-    (box) => box.shelf === shelfId && box.parent_box === null,
-  )
-  await Promise.all(
-    boxesOnShelf.map((box) =>
-      moveBoxWithContents(box.uuid, target.id, shelfId, null, locations),
-    ),
-  )
 }
