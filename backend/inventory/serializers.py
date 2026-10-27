@@ -84,6 +84,9 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"inventory": "Inventory is required."})
         if parent and parent.inventory_id != inventory.pk:
             raise serializers.ValidationError({"parent": "Parent must belong to the same inventory."})
+        category = attrs.get("category", getattr(self.instance, "category", None))
+        if category and category.inventory_id != inventory.pk:
+            raise serializers.ValidationError({"category": "Category must belong to the same inventory."})
         type_config = INVENTORY_ENTRY_TYPE_CONFIG.get(entry_type_key, {})
         parent_config = INVENTORY_ENTRY_TYPE_CONFIG.get(parent.type, {}) if parent else {}
         if parent and (parent.type not in type_config.get("allowed_parent_types", [])
