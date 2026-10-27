@@ -118,26 +118,14 @@ class InventoryComponent(models.Model):
         super().save(*args, **kwargs)
 
 
-class InventoryEntryType(models.Model):
-    AREA = "area"
-    SHELF = "shelf"
-    BOX = "box"
-    ARTICLE = "article"
-
-    key = models.CharField(max_length=20, unique=True, choices=(
-        (AREA, "Area"), (SHELF, "Shelf"), (BOX, "Box"), (ARTICLE, "Article"),
-    ))
-
-    # other configs are in INVENTORY_ENTRY_TYPE_CONFIG, so we don't need to store them in the database
-    class Meta:
-        ordering = ("key",)
-
-    @property
-    def name(self):
-        return INVENTORY_ENTRY_TYPE_CONFIG[self.key]["name"]
-
-    def __str__(self):
-        return self.name
+class InventoryEntryType(models.TextChoices):
+    # Use it as InventoryEntry.type.AREA for example
+    # AREA = "area"
+    # AREA.label = "Area"
+    AREA = "area", "Area"
+    SHELF = "shelf", "Shelf"
+    BOX = "box", "Box"
+    ARTICLE = "article", "Article"
 
 
 class InventoryEntry(models.Model):
@@ -146,7 +134,7 @@ class InventoryEntry(models.Model):
     identifier = models.CharField(max_length=30, blank=True)
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name="entries")
     name = models.CharField(max_length=255)
-    type = models.ForeignKey(InventoryEntryType, on_delete=models.PROTECT, related_name="entries")
+    type = models.CharField(max_length=20, choices=InventoryEntryType.choices)
     parent = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, related_name="children")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -176,10 +164,10 @@ class InventoryEntry(models.Model):
         if self.parent_id:
             if self.parent.inventory_id != self.inventory_id:
                 raise ValidationError({"parent": "Parent must belong to the same inventory."})
-            type_config = INVENTORY_ENTRY_TYPE_CONFIG[self.type.key]
-            parent_config = INVENTORY_ENTRY_TYPE_CONFIG[self.parent.type.key]
-            if (self.parent.type.key not in type_config["allowed_parent_types"]
-                    or self.type.key not in parent_config["allowed_child_types"]):
+            type_config = INVENTORY_ENTRY_TYPE_CONFIG[self.type]
+            parent_config = INVENTORY_ENTRY_TYPE_CONFIG[self.parent.type]
+            if (self.parent.type not in type_config["allowed_parent_types"]
+                    or self.type not in parent_config["allowed_child_types"]):
                 raise ValidationError({"parent": "This parent type is not allowed for this entry."})
             node = self.parent
             seen = set()
@@ -188,7 +176,7 @@ class InventoryEntry(models.Model):
                     raise ValidationError({"parent": "An entry cannot be its own ancestor."})
                 seen.add(node.pk)
                 node = node.parent
-        elif not INVENTORY_ENTRY_TYPE_CONFIG[self.type.key]["allow_root"]:
+        elif not INVENTORY_ENTRY_TYPE_CONFIG[self.type]["allow_root"]:
             raise ValidationError({"parent": "This entry type requires a parent."})
 
     def __str__(self):
