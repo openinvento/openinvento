@@ -71,6 +71,11 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         """Validate the inventory entry, ensuring that the parent and type are consistent with the inventory and that field values are valid for articles."""
+        if self.instance is not None: # self.instance is the current db object
+            if "type" in attrs and attrs["type"] != self.instance.type:
+                raise serializers.ValidationError({"type": "The entry type cannot be changed."})
+            if "inventory" in attrs and attrs["inventory"].pk != self.instance.inventory_id and self.instance.children.exists():
+                raise serializers.ValidationError({"inventory": "Entries with children cannot change inventory."})
         inventory = attrs.get("inventory", getattr(self.instance, "inventory", None))
         parent = attrs.get("parent", getattr(self.instance, "parent", None))
         entry_type = attrs.get("type", getattr(self.instance, "type", None))
