@@ -2,36 +2,30 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    AreaViewSet,
     ArticleAttachmentsView,
     ArticleCategoryViewSet,
-    ArticleViewSet,
     BarcodeProductLookupView,
-    BoxViewSet,
     CategoryFieldViewSet,
     CodeLookupView,
     CodePdfView,
     DashboardView,
     ExportInventoryView,
+    InventoryEntryViewSet,
     InventoryManageView,
     InventoryMembersView,
     InventoryViewSet,
     MagicArticleImportView,
     SearchView,
-    ShelfViewSet,
 )
 
 router = DefaultRouter()
 router.register(r"inventories", InventoryViewSet, basename="inventory")
-router.register(r"areas", AreaViewSet, basename="area")
-router.register(r"shelves", ShelfViewSet, basename="shelf")
-router.register(r"boxes", BoxViewSet, basename="box")
+router.register(r"entries", InventoryEntryViewSet, basename="inventory-entry")
 router.register(r"article-categories", ArticleCategoryViewSet, basename="article-category")
 router.register(r"category-fields", CategoryFieldViewSet, basename="category-field")
-router.register(r"articles", ArticleViewSet, basename="article")
 
 urlpatterns = [
-    path("articles/magic-import/", MagicArticleImportView.as_view(), name="magic-article-import"),
+    path("entries/magic-import/", MagicArticleImportView.as_view(), name="magic-article-import"),
     path("article-attachments/", ArticleAttachmentsView.as_view(), name="article-attachments"),
     path("inventories/<uuid:inventory_uuid>/members/", InventoryMembersView.as_view(), name="inventory-members"),
     path("inventories/<uuid:inventory_uuid>/members/<uuid:user_uuid>/", InventoryMembersView.as_view(), name="inventory-member-delete"),
