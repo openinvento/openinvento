@@ -159,6 +159,8 @@ class InventoryEntry(models.Model):
     def clean(self):
         """ Validate that the parent and category belong to the same inventory and that the parent-child relationship is valid."""
         super().clean()
+        if self.type not in INVENTORY_ENTRY_TYPE_CONFIG:
+            raise ValidationError({"type": f"Invalid entry type: {self.type}"})
         if self.category_id and self.category.inventory_id != self.inventory_id:
             raise ValidationError({"category": "Category must belong to the same inventory."})
         if self.parent_id:
