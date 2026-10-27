@@ -38,20 +38,20 @@ export default function ArticleCreateScreen() {
     void (async () => {
       if (!areaId) return
       try {
-        const [inventories, areas, nextShelves, nextBoxes, nextCategories, nextFields] = await Promise.all([
+        const [inventories, areas, fetchedShelves, fetchedBoxes, fetchedCategories, fetchedFields] = await Promise.all([
           inventoryApi.listInventories(),
           inventoryApi.listAreas(),
-          inventoryApi.listShelves(),
-          inventoryApi.listBoxes(),
+          inventoryApi.listShelves({ within: areaId }),
+          inventoryApi.listBoxes({ within: areaId }),
           inventoryApi.listCategories(),
           inventoryApi.listCategoryFields(),
         ])
         setInventory(getSelectedInventory(inventories))
         setAreaName(areas.find((area) => area.uuid === areaId)?.name ?? "")
-        setShelves(nextShelves.filter((shelf) => shelf.area === areaId))
-        setBoxes(nextBoxes.filter((box) => box.area === areaId))
-        setCategories(nextCategories)
-        setFields(nextFields)
+        setShelves(fetchedShelves)
+        setBoxes(fetchedBoxes)
+        setCategories(fetchedCategories)
+        setFields(fetchedFields)
       } catch (reason) {
         setError(reason instanceof Error ? reason.message : t("areas.detail.errors.load"))
       }
