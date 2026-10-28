@@ -190,7 +190,11 @@ export default function ArticleCreateScreen() {
           </Field>
           <Field label={t("areas.detail.fields.box")}>
             <Select name="box" value={selectedBox} onValueChange={(value) => setSelectedBox(value ?? "")}>
-              <SelectTrigger className="w-full"><SelectValue placeholder={t("areas.detail.noBox")} /></SelectTrigger>
+              <SelectTrigger className="w-full">
+              <SelectValue placeholder={t("areas.detail.noBox")}>
+                {selectedBox ? boxes.find((box) => box.uuid === selectedBox)?.name ?? selectedBox : t("areas.detail.noBox")}
+              </SelectValue>
+              </SelectTrigger>
               <SelectContent><SelectItem value="">{t("areas.detail.noBox")}</SelectItem>{boxes.map((box) => <SelectItem key={box.uuid} value={box.uuid}>{box.name}</SelectItem>)}</SelectContent>
             </Select>
           </Field>
