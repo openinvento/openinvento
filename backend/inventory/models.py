@@ -149,7 +149,13 @@ class InventoryEntry(models.Model):
 
     class Meta:
         ordering = ("name",)
-
+        constraints = (
+            models.UniqueConstraint(
+                fields=("identifier", "inventory"),
+                name="unique_inventory_entry_identifier",
+            )
+        )
+    
     def save(self, *args, **kwargs):
         if not self.identifier:
             self.identifier = generate_random_code()

@@ -406,39 +406,25 @@ class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
 
 # region QR/ BARCODE VIEWS
 
-CODE_MODELS = ( # (model, entry_type, object_type) tuples for code lookup
-    (InventoryEntry, "article", "article"),
-    (InventoryEntry, "box", "box"),
-    (InventoryEntry, "shelf", "shelf"),
-    (InventoryEntry, "area", "area"),
-    (ArticleCategory, None, "category"),
-    (CategoryField, None, "field"),
-)
-
 class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     def post(self, request, *args, **kwargs):
         identifier = str(request.data.get("identifier", "")).strip()
         if not identifier:
             return Response({"error": "identifier is required."}, status=400)
 
-        for model, entry_type, object_type in CODE_MODELS:
-            queryset = model.objects.filter(
-                inventory__in=self.get_accessible_inventories(),
-                identifier=identifier,
-            )
-            if entry_type:
-                queryset = queryset.filter(type=entry_type)
-            item = queryset.first()
-            if item is not None:
-                return Response({
-                    "uuid": str(item.uuid),
-                    "identifier": item.identifier,
-                    "name": getattr(item, "name", getattr(item, "label", str(item))),
-                    "type": object_type,
-                })
+        item = InventoryEntry.objects.filter(
+            inventory__in=self.get_accessible_inventories(),
+            identifier=identifier,
+        ).first()
+        if item is not None:
+            return Response({
+                "uuid": str(item.uuid),
+                "identifier": item.identifier,
+                "name": getattr(item, "name", str(item)),
+                "type": item.type,
+            })
 
         return Response({"error": "No inventory item was found for this code."}, status=404)
-
 
 class CodePdfView(InventoryScopedAPIView):
     page_sizes: ClassVar[dict[str, tuple[str, int, int]]] = {
@@ -474,15 +460,12 @@ class CodePdfView(InventoryScopedAPIView):
                 invalid_uuids.append(str(raw_uuid))
                 continue
 
-            match = None
-            for model, entry_type, object_type in CODE_MODELS:
-                queryset = model.objects.filter(uuid=item_uuid, inventory__in=accessible)
-                if entry_type:
-                    queryset = queryset.filter(type=entry_type)
-                match = queryset.first()
-                if match is not None:
-                    selected_items.append((match, object_type))
-                    break
+            match = InventoryEntry.objects.filter(
+                uuid=item_uuid,
+                inventory__in=accessible,
+            ).first()
+            if match is not None:
+                selected_items.append((match, match.type))
             if match is None:
                 invalid_uuids.append(str(raw_uuid))
 
