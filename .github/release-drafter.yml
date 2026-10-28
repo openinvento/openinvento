@@ -26,7 +26,7 @@ categories:
   - type: 'version-resolver'
     semver-increment: 'patch'
 change-template: |
-  - $TITLE (#$NUMBER) $AUTHORS
+  - **$TITLE** (#$NUMBER) $AUTHORS
     $BODY
 replacers:
   - target: change-body
@@ -34,7 +34,7 @@ replacers:
     not-found: empty
 # Add # and @ to prevent mentions. Add ` to prevent code blocks.
 change-title-escapes: '\<*_&'
-footer: "Thank you for using Openinvento! If you like this project, please consider giving it a star on GitHub and spreading the word. Your support helps us continue to improve and maintain Openinvento for everyone!"
+footer: "\n\nThank you for using Openinvento! If you like this project, please consider giving it a star on GitHub and spreading the word. Your support helps us continue to improve and maintain Openinvento for everyone!"
 template: |
   ## Changes
 
