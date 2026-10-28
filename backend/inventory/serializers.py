@@ -1,12 +1,11 @@
 from urllib.parse import urlsplit
 
 from django.conf import settings
-from django.db.models import Q
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
 from .models import (
-    INVENTORY_ENTRY_TYPE_CONFIG,
     ArticleAttachment,
     ArticleCategory,
     ArticleFieldValue,
@@ -85,26 +84,17 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
         entry_type_key = entry_type
         if inventory is None:
             raise serializers.ValidationError({"inventory": "Inventory is required."})
-        if parent and parent.inventory_id != inventory.pk:
-            raise serializers.ValidationError({"parent": "Parent must belong to the same inventory."})
-        category = attrs.get("category", getattr(self.instance, "category", None))
-        if category and category.inventory_id != inventory.pk:
-            raise serializers.ValidationError({"category": "Category must belong to the same inventory."})
-        type_config = INVENTORY_ENTRY_TYPE_CONFIG.get(entry_type_key, {})
-        parent_config = INVENTORY_ENTRY_TYPE_CONFIG.get(parent.type, {}) if parent else {}
-        if parent and (parent.type not in type_config.get("allowed_parent_types", [])
-                       or entry_type_key not in parent_config.get("allowed_child_types", [])):
-            raise serializers.ValidationError({"parent": "This parent type is not allowed for this entry."})
-        if not parent and not type_config.get("allow_root", False):
-            raise serializers.ValidationError({"parent": "This entry type requires a parent."})
-        if self.instance and parent:
-            node = parent
-            seen = set()
-            while node and node.pk not in seen:
-                if node.pk == self.instance.pk:
-                    raise serializers.ValidationError({"parent": "An entry cannot be its own ancestor."})
-                seen.add(node.pk)
-                node = node.parent
+        candidate = self.instance or InventoryEntry()
+        candidate.inventory = inventory
+        candidate.parent = parent
+        candidate.type = entry_type_key
+        candidate.category = attrs.get("category", getattr(self.instance, "category", None))
+        if self.instance:
+            candidate.pk = self.instance.pk
+        try:
+            candidate.full_clean(exclude=["image", "name"], validate_unique=False)
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError(exc.message_dict) from exc
         
         values = attrs.get("_field_values")
         if values is not None:
@@ -131,16 +121,19 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
     def get_field_values(self, obj):
         return [{"field": str(row.field_id), "key": row.field.key, "value": row.value,
                  "notify_on_date": row.notify_on_date}
-                for row in obj.field_values.select_related("field").all()] if obj.type == "article" else []
+                for row in obj.field_values.all()] if obj.type == "article" else []
 
     def get_category_fields(self, obj):
         if obj.type != "article":
             return []
-        fields = CategoryField.objects.filter(inventory=obj.inventory)
-        if obj.category_id:
-            fields = fields.filter(Q(category__isnull=True) | Q(category_id=obj.category_id))
-        else:
-            fields = fields.filter(category__isnull=True)
+        fields = getattr(obj.inventory, "_category_fields", None)
+        if fields is None:
+            fields = CategoryField.objects.filter(inventory=obj.inventory)
+        fields = (
+            [field for field in fields if field.category_id is None or field.category_id == obj.category_id]
+            if obj.category_id
+            else [field for field in fields if field.category_id is None]
+        )
         return CategoryFieldSerializer(fields, many=True).data
 
     def create(self, validated_data):
