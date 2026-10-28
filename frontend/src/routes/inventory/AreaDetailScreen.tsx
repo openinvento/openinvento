@@ -45,6 +45,7 @@ export default function AreaDetailScreen() {
   const [boxes, setBoxes] = useState<Box[]>([])
   const [articles, setArticles] = useState<Article[]>([])
   const [modal, setModal] = useState<{ kind: CreateKind; item?: Shelf | Box } | null>(null)
+  const [boxPendingDeletion, setBoxPendingDeletion] = useState<Box | null>(null)
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
   const [openShelves, setOpenShelves] = useState<Record<string, boolean>>({})
@@ -155,6 +156,25 @@ export default function AreaDetailScreen() {
     }
   }
 
+  async function deleteBox(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!boxPendingDeletion) return
+    const form = new FormData(event.currentTarget)
+    const deleteContents = form.get("delete-contents") === "with"
+    setSaving(true)
+    setError("")
+    try {
+      await inventoryApi.remove("boxes", boxPendingDeletion.uuid, { delete_contents: deleteContents })
+      setBoxPendingDeletion(null)
+      await load()
+      window.dispatchEvent(new Event("openinvento:inventory-moved"))
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : t("areas.detail.errors.delete"))
+    } finally {
+      setSaving(false)
+    }
+  }
+
   if (!area && !error) {
     return <p className="text-muted-foreground">{t("areas.detail.loading")}</p>
   }
@@ -238,7 +258,7 @@ export default function AreaDetailScreen() {
             setModal({ kind: "box", item: box })
           }}
           onDeleteBox={(box) =>
-            void remove("boxes", box.uuid, box.name)
+            setBoxPendingDeletion(box)
           }
           onOpenArticle={(article) =>
             navigate(`/app/articles/${article.uuid}`)
@@ -277,7 +297,7 @@ export default function AreaDetailScreen() {
                         setModal({ kind: "box", item: box })
                       }}
                       onDelete={() =>
-                        void remove("boxes", box.uuid, box.name)
+                        setBoxPendingDeletion(box)
                       }
                     />
                   </InventoryDropTarget>
@@ -339,6 +359,35 @@ export default function AreaDetailScreen() {
         </label>
       )}
 
+    </InventoryModal>
+
+    <InventoryModal
+      title={boxPendingDeletion ? t("areas.detail.deleteBoxTitle", { name: boxPendingDeletion.name }) : ""}
+      open={boxPendingDeletion !== null}
+      submitting={saving}
+      submitLabel={t("areas.detail.deleteBox")}
+      submittingLabel={t("areas.detail.deleting")}
+      onClose={() => setBoxPendingDeletion(null)}
+      onSubmit={deleteBox}
+    >
+      <p className="text-sm text-muted-foreground">{t("areas.detail.deleteBoxDescription")}</p>
+      <fieldset className="grid gap-3">
+        <legend className="sr-only">{t("areas.detail.deleteBoxChoice")}</legend>
+        <label className="flex cursor-pointer gap-3 rounded-lg border p-3 has-checked:border-primary has-checked:bg-primary/5">
+          <input autoFocus type="radio" name="delete-contents" value="keep" defaultChecked className="mt-1" />
+          <span>
+            <span className="block font-medium">{t("areas.detail.deleteBoxKeepContents")}</span>
+            <span className="block text-sm text-muted-foreground">{t("areas.detail.deleteBoxKeepContentsDescription")}</span>
+          </span>
+        </label>
+        <label className="flex cursor-pointer gap-3 rounded-lg border p-3 has-checked:border-destructive has-checked:bg-destructive/5">
+          <input type="radio" name="delete-contents" value="with" className="mt-1" />
+          <span>
+            <span className="block font-medium">{t("areas.detail.deleteBoxWithContents")}</span>
+            <span className="block text-sm text-muted-foreground">{t("areas.detail.deleteBoxWithContentsDescription")}</span>
+          </span>
+        </label>
+      </fieldset>
     </InventoryModal>
 
     {area && !modal && <FloatingCreateButton areaId={areaId} articleTo={`/app/areas/${areaId}/articles/new`} />}

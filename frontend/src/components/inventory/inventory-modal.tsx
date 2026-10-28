@@ -4,9 +4,9 @@ import { useEffect, type FormEvent, type ReactNode } from "react"
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-type Props = { title: string; open: boolean; submitting?: boolean; children: ReactNode; onClose: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void }
+type Props = { title: string; open: boolean; submitting?: boolean; submitLabel?: string; submittingLabel?: string; children: ReactNode; onClose: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void }
 
-export function InventoryModal({ title, open, submitting, children, onClose, onSubmit }: Props) {
+export function InventoryModal({ title, open, submitting, submitLabel = "Save", submittingLabel = "Saving...", children, onClose, onSubmit }: Props) {
   useEffect(() => {
     if (!open) return
     const close = (event: KeyboardEvent) => event.key === "Escape" && onClose()
@@ -34,7 +34,7 @@ export function InventoryModal({ title, open, submitting, children, onClose, onS
       </div>
       <div className="flex shrink-0 justify-end gap-2 border-t bg-background px-4 py-3 sm:px-6 sm:py-4">
         <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-        <Button type="submit" disabled={submitting}>{submitting ? "Saving..." : "Save"}</Button>
+        <Button type="submit" disabled={submitting}>{submitting ? submittingLabel : submitLabel}</Button>
       </div>
     </form>
   </div>

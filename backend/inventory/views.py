@@ -11,7 +11,8 @@ from venv import logger
 
 from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.db.models import Count
+from django.db import transaction
+from django.db.models import Count, Prefetch
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
@@ -305,7 +306,21 @@ class InventoryEntryViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     queryset = InventoryEntry.objects.all() # We use a base queryset here, but the actual queryset is filtered in get_queryset() based on accessible inventories and query parameters.
     serializer_class = InventoryEntrySerializer
     select_related_fields = ("inventory", "parent", "category")
+    prefetch_related_fields = (
+        "field_values__field",
+        Prefetch("inventory__categoryfield_set", queryset=CategoryField.objects.all(), to_attr="_category_fields"),
+    )
     ordering = ("name",)
+
+    @transaction.atomic
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.type == "box":
+            delete_contents = request.data.get("delete_contents", False) in (True, "true", "1", "on")
+            if not delete_contents:
+                instance.children.update(parent_id=instance.parent_id)
+        self.perform_destroy(instance)
+        return Response(status=204)
 
 
 class ArticleCategoryViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
