@@ -153,7 +153,7 @@ class InventoryEntry(models.Model):
             models.UniqueConstraint(
                 fields=("identifier", "inventory"),
                 name="unique_inventory_entry_identifier",
-            )
+            ),
         )
     
     def save(self, *args, **kwargs):
