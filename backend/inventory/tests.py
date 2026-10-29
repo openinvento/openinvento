@@ -219,6 +219,33 @@ class InventoryIsolationTests(TestCase):
 		)
 		self.assertEqual(patch_response.status_code, 200)
 
+	def test_deleting_box_reparents_contents_to_its_parent(self):
+		self.authenticate()
+		nested_box = Box.objects.create(name="Nested box", inventory=self.inventory, parent=self.box)
+		article = Article.objects.create(name="Box article", inventory=self.inventory, parent=self.box)
+
+		response = self.client.delete(f"/api/entries/{self.box.uuid}/")
+
+		self.assertEqual(response.status_code, 204)
+		nested_box.refresh_from_db()
+		article.refresh_from_db()
+		self.assertEqual(nested_box.parent_id, self.shelf.uuid)
+		self.assertEqual(article.parent_id, self.shelf.uuid)
+
+	def test_deleting_box_with_contents_removes_the_subtree(self):
+		self.authenticate()
+		nested_box = Box.objects.create(name="Nested box", inventory=self.inventory, parent=self.box)
+		article = Article.objects.create(name="Box article", inventory=self.inventory, parent=nested_box)
+
+		response = self.client.delete(
+			f"/api/entries/{self.box.uuid}/?delete_contents=true",
+		)
+
+		self.assertEqual(response.status_code, 204)
+		self.assertFalse(InventoryEntry.objects.filter(pk=self.box.uuid).exists())
+		self.assertFalse(InventoryEntry.objects.filter(pk=nested_box.uuid).exists())
+		self.assertFalse(InventoryEntry.objects.filter(pk=article.uuid).exists())
+
 	def test_category_field_rejects_foreign_category(self):
 		self.authenticate()
 

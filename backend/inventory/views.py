@@ -11,7 +11,8 @@ from venv import logger
 
 from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.db.models import Count
+from django.db import transaction
+from django.db.models import Count, Prefetch
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
@@ -305,7 +306,21 @@ class InventoryEntryViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     queryset = InventoryEntry.objects.all() # We use a base queryset here, but the actual queryset is filtered in get_queryset() based on accessible inventories and query parameters.
     serializer_class = InventoryEntrySerializer
     select_related_fields = ("inventory", "parent", "category")
+    prefetch_related_fields = (
+        "field_values__field",
+        Prefetch("inventory__categoryfield_set", queryset=CategoryField.objects.all(), to_attr="_category_fields"),
+    )
     ordering = ("name",)
+
+    @transaction.atomic
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.type == "box":
+            delete_contents = request.query_params.get("delete_contents", "false").lower() in ("true", "1", "on")
+            if not delete_contents:
+                instance.children.update(parent_id=instance.parent_id)
+        self.perform_destroy(instance)
+        return Response(status=204)
 
 
 class ArticleCategoryViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
@@ -391,39 +406,43 @@ class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
 
 # region QR/ BARCODE VIEWS
 
-CODE_MODELS = ( # (model, entry_type, object_type) tuples for code lookup
-    (InventoryEntry, "article", "article"),
-    (InventoryEntry, "box", "box"),
-    (InventoryEntry, "shelf", "shelf"),
-    (InventoryEntry, "area", "area"),
-    (ArticleCategory, None, "category"),
-    (CategoryField, None, "field"),
-)
-
 class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     def post(self, request, *args, **kwargs):
         identifier = str(request.data.get("identifier", "")).strip()
         if not identifier:
             return Response({"error": "identifier is required."}, status=400)
+        
+        inventory_uuid = request.data.get("inventory") or request.data.get("inventory_uuid")
+        accessible_inventories = self.get_accessible_inventories()
 
-        for model, entry_type, object_type in CODE_MODELS:
-            queryset = model.objects.filter(
-                inventory__in=self.get_accessible_inventories(),
+        item = None
+
+        if inventory_uuid:
+            item = InventoryEntry.objects.filter(
+                inventory__in=accessible_inventories,
+                inventory__uuid=inventory_uuid,
                 identifier=identifier,
-            )
-            if entry_type:
-                queryset = queryset.filter(type=entry_type)
-            item = queryset.first()
-            if item is not None:
-                return Response({
-                    "uuid": str(item.uuid),
-                    "identifier": item.identifier,
-                    "name": getattr(item, "name", getattr(item, "label", str(item))),
-                    "type": object_type,
-                })
+            ).first()
+
+        if item is None:
+            item = InventoryEntry.objects.filter(
+                inventory__in=accessible_inventories,
+                identifier=identifier,
+            ).first()
+
+        if item is not None:
+            return Response({
+                "uuid": str(item.uuid),
+                "identifier": item.identifier,
+                "name": getattr(item, "name", str(item)),
+                "type": item.type,
+                "inventory": {
+                    "uuid": str(item.inventory.uuid),
+                    "name": item.inventory.name,
+                },
+            })
 
         return Response({"error": "No inventory item was found for this code."}, status=404)
-
 
 class CodePdfView(InventoryScopedAPIView):
     page_sizes: ClassVar[dict[str, tuple[str, int, int]]] = {
@@ -459,15 +478,12 @@ class CodePdfView(InventoryScopedAPIView):
                 invalid_uuids.append(str(raw_uuid))
                 continue
 
-            match = None
-            for model, entry_type, object_type in CODE_MODELS:
-                queryset = model.objects.filter(uuid=item_uuid, inventory__in=accessible)
-                if entry_type:
-                    queryset = queryset.filter(type=entry_type)
-                match = queryset.first()
-                if match is not None:
-                    selected_items.append((match, object_type))
-                    break
+            match = InventoryEntry.objects.filter(
+                uuid=item_uuid,
+                inventory__in=accessible,
+            ).first()
+            if match is not None:
+                selected_items.append((match, match.type))
             if match is None:
                 invalid_uuids.append(str(raw_uuid))
 

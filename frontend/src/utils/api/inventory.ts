@@ -334,8 +334,8 @@ export const inventoryApi = {
     fetchData<ThirdPartyProvider[]>(`/api/third-party-providers/?inventory=${encodeURIComponent(inventory)}`),
   lookupBarcodeProduct: (barcode: string, inventory: string, provider: string | null) =>
     postData<BarcodeProduct>("/api/barcodes/lookup/", { barcode, inventory, provider }),
-  lookupCode: (identifier: string) =>
-    postData<CodeLookupResult>("/api/codes/lookup/", { identifier }),
+  lookupCode: (identifier: string, inventory: string) =>
+    postData<CodeLookupResult>("/api/codes/lookup/", { identifier, inventory }),
   magicImport: (inventory: string, image: File, provider: string | null) => {
     const payload = new FormData()
     payload.append("inventory", inventory)
@@ -343,8 +343,8 @@ export const inventoryApi = {
     if (provider) payload.append("provider", provider)
     return postData<{ articles: MagicArticleDraft[] }>("/api/entries/magic-import/", payload)
   },
-  remove: (kind: EntityPath, uuid: string) =>
-    deleteData<void>(`${entryEndpoint(kind)}${uuid}/`),
+  remove: (kind: EntityPath, uuid: string, queryParams?: Record<string, unknown>) =>
+    deleteData<void>(`${entryEndpoint(kind)}${uuid}/`, queryParams),
   removeArticleAttachment: (id: number) =>
     deleteData<void>(`/api/article-attachments/?id=${id}`),
   removeMember: (inventory: string, userUuid: string) =>

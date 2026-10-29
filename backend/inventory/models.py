@@ -149,11 +149,17 @@ class InventoryEntry(models.Model):
 
     class Meta:
         ordering = ("name",)
-
+        constraints = (
+            models.UniqueConstraint(
+                fields=("identifier", "inventory"),
+                name="unique_inventory_entry_identifier",
+            ),
+        )
+    
     def save(self, *args, **kwargs):
         if not self.identifier:
             self.identifier = generate_random_code()
-        self.full_clean(exclude=None) # Run validations
+        self.full_clean() # Run full validation always before saving the model
         super().save(*args, **kwargs)
 
     def clean(self):
@@ -161,8 +167,6 @@ class InventoryEntry(models.Model):
         super().clean()
         if self.type not in INVENTORY_ENTRY_TYPE_CONFIG:
             raise ValidationError({"type": f"Invalid entry type: {self.type}"})
-        if self.category_id and self.category.inventory_id != self.inventory_id:
-            raise ValidationError({"category": "Category must belong to the same inventory."})
         if self.parent_id:
             if self.parent.inventory_id != self.inventory_id:
                 raise ValidationError({"parent": "Parent must belong to the same inventory."})
@@ -180,6 +184,8 @@ class InventoryEntry(models.Model):
                 node = node.parent
         elif not INVENTORY_ENTRY_TYPE_CONFIG[self.type]["allow_root"]:
             raise ValidationError({"parent": "This entry type requires a parent."})
+        if self.category_id and self.category.inventory_id != self.inventory_id:
+            raise ValidationError({"category": "Category must belong to the same inventory."})
 
     def __str__(self):
         return self.name

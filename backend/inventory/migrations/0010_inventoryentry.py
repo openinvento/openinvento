@@ -1,7 +1,6 @@
 import django.core.validators
 import django.db.models.deletion
 import inventory.models
-from inventory.models import INVENTORY_ENTRY_TYPE_CONFIG
 import uuid
 from django.db import migrations, models
 
@@ -10,8 +9,34 @@ def copy_inventory_objects(apps, schema_editor):
     database = schema_editor.connection.alias
     InventoryEntry = apps.get_model("inventory", "InventoryEntry")
     InventoryEntryType = apps.get_model("inventory", "InventoryEntryType")
+    type_config = {
+        "area": {
+            "name": "Area",
+            "allowed_parent_types": [],
+            "allowed_child_types": ["shelf", "box", "article"],
+            "allow_root": True,
+        },
+        "shelf": {
+            "name": "Shelf",
+            "allowed_parent_types": ["area"],
+            "allowed_child_types": ["box", "article"],
+            "allow_root": False,
+        },
+        "box": {
+            "name": "Box",
+            "allowed_parent_types": ["area", "shelf", "box"],
+            "allowed_child_types": ["box", "article"],
+            "allow_root": False,
+        },
+        "article": {
+            "name": "Article",
+            "allowed_parent_types": ["area", "shelf", "box", "article"],
+            "allowed_child_types": ["article"],
+            "allow_root": True,
+        },
+    }
     type_rows = {}
-    for key, config in INVENTORY_ENTRY_TYPE_CONFIG.items():
+    for key, config in type_config.items():
         type_rows[key], _ = InventoryEntryType.objects.using(database).get_or_create(
             key=key, defaults=config
         )

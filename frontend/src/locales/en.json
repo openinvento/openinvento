@@ -21,7 +21,16 @@
       "articleCount": "{{count}} articles",
       "articles": "Articles",
       "confirmDelete": "Delete {{name}}?",
+      "deleteBox": "Delete box",
+      "deleteBoxChoice": "Choose what to delete",
+      "deleteBoxDescription": "Choose whether the contents should remain in the box's parent or be deleted with the box.",
+      "deleteBoxKeepContents": "Delete only the box",
+      "deleteBoxKeepContentsDescription": "Move its contents to the box's parent.",
+      "deleteBoxTitle": "Delete {{name}}",
+      "deleteBoxWithContents": "Delete the box and its contents",
+      "deleteBoxWithContentsDescription": "Permanently delete all nested boxes and articles.",
       "deleteShelf": "Delete shelf",
+      "deleting": "Deleting...",
       "errors": {
         "delete": "Could not delete item.",
         "load": "Could not load this area.",
@@ -430,6 +439,7 @@
     "magicImport": "Magic article import",
     "magicImportPage": {
       "analyzing": "Analyzing...",
+      "chooseArticleImage": "Choose an image for this article",
       "chooseImage": "Choose image",
       "createArticles": "Create {{count}} articles",
       "createdMany": "{{saved}} articles created.",
@@ -438,7 +448,6 @@
       "createdOneWithFailures": "{{saved}} article created; {{failed}} could not be saved.",
       "description": "Take a photo and turn the items in it into editable articles.",
       "descriptionLabel": "Description",
-      "chooseArticleImage": "Choose an image for this article",
       "errors": {
         "analyze": "Could not analyze this photo.",
         "invalidImage": "Choose a JPEG or PNG image.",
@@ -462,6 +471,8 @@
     },
     "open": "Open quick actions"
   },
+  "save": "Save",
+  "saving": "Saving",
   "search": {
     "box": "Box",
     "empty": "No articles found.",
@@ -601,13 +612,13 @@
         "remove": "Remove provider",
         "title": "Third-party providers",
         "typeLabel": "Provider type",
-        "urlLabel": "Ollama server URL (optional)",
-        "urlPlaceholder": "http://localhost:11434",
         "types": {
           "barcode_lookup": "Barcode lookup",
           "llm": "LLM",
           "object_detection_llm": "Object detection LLM"
-        }
+        },
+        "urlLabel": "Ollama server URL (optional)",
+        "urlPlaceholder": "http://localhost:11434"
       },
       "removeMember": "Remove person",
       "removeMemberConfirm": "Remove {{name}} from this inventory?",
