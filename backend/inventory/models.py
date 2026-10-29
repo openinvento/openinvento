@@ -160,12 +160,7 @@ class InventoryEntry(models.Model):
         if not self.identifier:
             self.identifier = generate_random_code()
         update_fields = kwargs.get("update_fields")
-        if self._state.adding:
-            self.full_clean()
-        elif update_fields is not None:
-            changed_fields = set(update_fields)
-            if changed_fields & {"inventory", "type", "parent", "category", "image"}:
-                self.full_clean(exclude=[] if "image" in changed_fields else ["image"])
+        self.full_clean() # Run full validation always before saving the model
         super().save(*args, **kwargs)
 
     def clean(self):
