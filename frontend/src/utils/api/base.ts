@@ -209,11 +209,14 @@ export async function putData<T>(path: string, body?: unknown, options?: Request
   })
 }
 
-export async function deleteData<T>(path: string, body?: unknown, options?: RequestOptions) {
-  return request<T>("DELETE", path, {
-    ...options,
-    body,
-  })
+export async function deleteData<T>(path: string, queryParams?: Record<string, unknown>, options?: RequestOptions) {
+  const query = queryParams
+    ? new URLSearchParams(
+        Object.entries(queryParams).map(([key, value]) => [key, String(value)]),
+      ).toString()
+    : ""
+
+  return request<T>("DELETE", path + (query ? `?${query}` : ""), options)
 }
 
 export async function patchData<T>(path: string, body?: unknown, options?: RequestOptions) {

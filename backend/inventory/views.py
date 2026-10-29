@@ -316,7 +316,7 @@ class InventoryEntryViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.type == "box":
-            delete_contents = request.data.get("delete_contents", False) in (True, "true", "1", "on")
+            delete_contents = request.query_params.get("delete_contents", "false").lower() in ("true", "1", "on")
             if not delete_contents:
                 instance.children.update(parent_id=instance.parent_id)
         self.perform_destroy(instance)

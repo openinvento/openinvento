@@ -343,8 +343,8 @@ export const inventoryApi = {
     if (provider) payload.append("provider", provider)
     return postData<{ articles: MagicArticleDraft[] }>("/api/entries/magic-import/", payload)
   },
-  remove: (kind: EntityPath, uuid: string, payload?: Record<string, unknown>) =>
-    deleteData<void>(`${entryEndpoint(kind)}${uuid}/`, payload),
+  remove: (kind: EntityPath, uuid: string, queryParams?: Record<string, unknown>) =>
+    deleteData<void>(`${entryEndpoint(kind)}${uuid}/`, queryParams),
   removeArticleAttachment: (id: number) =>
     deleteData<void>(`/api/article-attachments/?id=${id}`),
   removeMember: (inventory: string, userUuid: string) =>
