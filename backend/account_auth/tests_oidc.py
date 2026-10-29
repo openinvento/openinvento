@@ -9,7 +9,7 @@ from urllib.parse import parse_qs, urlsplit
 import jwt
 import requests
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric import ec, rsa
 from django.contrib.auth import get_user
 from django.core.cache import cache
 from django.http import HttpRequest
@@ -747,6 +747,15 @@ class OIDCHardeningTests(OIDCTestCase):
 
 	def test_id_token_without_kid_and_single_key_is_accepted(self):
 		self.provider.id_token_signing['headers'] = {}
+
+		self.assertEqual(self.login()['Location'], '/app')
+
+	def test_id_token_without_kid_picks_the_only_key_of_matching_type(self):
+		# Conformance suite oidcc-client-test-kid-absent-single-jwks: RSA, EC and OKP keys without alg or kid.
+		self.provider.id_token_signing['headers'] = {}
+		rsa_key = {k: v for k, v in self.provider.jwks['keys'][0].items() if k not in ('kid', 'alg')}
+		ec_key = jwt.algorithms.ECAlgorithm.to_jwk(ec.generate_private_key(ec.SECP256R1()).public_key(), as_dict=True)
+		self.provider.jwks['keys'] = [ec_key, rsa_key, {'kty': 'OKP', 'crv': 'Ed25519', 'x': '11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo'}]
 
 		self.assertEqual(self.login()['Location'], '/app')
 

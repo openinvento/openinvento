@@ -48,6 +48,11 @@ ASYMMETRIC_SIGN_ALGOS = {"RS256", "RS384", "RS512", "ES256", "ES384", "ES512"}
 HMAC_SIGN_ALGOS = {"HS256", "HS384", "HS512"}
 HMAC_MIN_SECRET_LENGTH = 32
 LOOPBACK_HOSTS = {"localhost", "127.0.0.1", "::1"}
+# Key type (and EC curve) each supported algorithm needs (RFC 7518, sections 3.1 and 6).
+KEY_TYPE_FOR_ALGO = {
+    "RS256": ("RSA", None), "RS384": ("RSA", None), "RS512": ("RSA", None),
+    "ES256": ("EC", "P-256"), "ES384": ("EC", "P-384"), "ES512": ("EC", "P-521"),
+}
 
 # Maps the mozilla-django-oidc endpoint settings to the keys of the discovery document.
 ENDPOINT_SETTINGS = {
@@ -221,9 +226,14 @@ class OIDCBackend(OIDCAuthenticationBackend):
             timeout=self.get_settings("OIDC_TIMEOUT", None),
         )
         response.raise_for_status()
+        algo = header.get("alg")
+        kty, crv = KEY_TYPE_FOR_ALGO.get(algo, (None, None))
         keys = [
             key for key in response.json().get("keys", [])
-            if key.get("use", "sig") == "sig" and key.get("alg", header.get("alg")) == header.get("alg")
+            if key.get("use", "sig") == "sig"
+            and key.get("alg", algo) == algo
+            and key.get("kty") == kty
+            and (crv is None or key.get("crv") == crv)
         ]
         if len(keys) != 1:
             raise SuspiciousOperation("Token has no kid and the provider has more than one matching key.")
