@@ -93,7 +93,7 @@ class InstanceSettingsView(APIView):
     def get(self, request):
         return Response({
             **InstanceSettingsSerializer(InstanceSettings.get_solo()).data,
-            "allow_signup": settings.ENABLE_SIGNUP,
+            "allow_signup": settings.ENABLE_SIGNUP and not settings.DISABLE_LOCAL_LOGIN,
             "enabled_modules": InstanceSettings.get_solo().enabled_modules,
             "available_modules": [
                 {"name": module.name, "label": module.name.replace("_", " ").title()}
@@ -119,7 +119,7 @@ class InstanceSettingsView(APIView):
             serializer.save()
             return Response({
                 **serializer.data,
-                "allow_signup": settings.ENABLE_SIGNUP,
+                "allow_signup": settings.ENABLE_SIGNUP and not settings.DISABLE_LOCAL_LOGIN,
                 "enabled_modules": instance_settings.enabled_modules,
                 "available_modules": [
                     {"name": module.name, "label": module.name.replace("_", " ").title()}

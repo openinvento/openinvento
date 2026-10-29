@@ -208,6 +208,51 @@ else:
     )
 
 
+def _env_flag(name, default):
+    return os.getenv(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+
+
+# OpenID Connect login (mozilla-django-oidc, authorization code flow with PKCE).
+# Endpoints are discovered from OIDC_ISSUER unless they are set explicitly.
+OIDC_ENABLED = _env_flag("OIDC_ENABLED", False)
+OIDC_ISSUER = os.getenv("OIDC_ISSUER", "").strip()
+OIDC_RP_CLIENT_ID = os.getenv("OIDC_CLIENT_ID", "").strip()
+OIDC_RP_CLIENT_SECRET = os.getenv("OIDC_CLIENT_SECRET", "").strip()  # Empty for public clients (PKCE only)
+OIDC_RP_SCOPES = os.getenv("OIDC_SCOPES", "openid profile email").strip()
+OIDC_RP_SIGN_ALGO = os.getenv("OIDC_SIGN_ALGO", "RS256").strip()
+OIDC_OP_AUTHORIZATION_ENDPOINT = os.getenv("OIDC_AUTHORIZATION_ENDPOINT", "").strip()
+OIDC_OP_TOKEN_ENDPOINT = os.getenv("OIDC_TOKEN_ENDPOINT", "").strip()
+OIDC_OP_USER_ENDPOINT = os.getenv("OIDC_USERINFO_ENDPOINT", "").strip()
+OIDC_OP_JWKS_ENDPOINT = os.getenv("OIDC_JWKS_ENDPOINT", "").strip()
+OIDC_USERNAME_CLAIM = os.getenv("OIDC_USERNAME_CLAIM", "preferred_username").strip()
+OIDC_NAME_CLAIM = os.getenv("OIDC_NAME_CLAIM", "name").strip()
+OIDC_EMAIL_CLAIM = os.getenv("OIDC_EMAIL_CLAIM", "email").strip()
+OIDC_CREATE_USERS = _env_flag("OIDC_CREATE_USERS", True)
+# Off by default: linking by email lets whoever controls that address at the provider take over the account.
+OIDC_LINK_EXISTING_BY_EMAIL = _env_flag("OIDC_LINK_EXISTING_BY_EMAIL", False)
+OIDC_AUTO_REDIRECT = _env_flag("OIDC_AUTO_REDIRECT", False)
+OIDC_BUTTON_LABEL = os.getenv("OIDC_BUTTON_LABEL", "").strip()
+OIDC_TIMEOUT = int(os.getenv("OIDC_TIMEOUT", "10"))
+OIDC_USE_PKCE = True
+
+if OIDC_ENABLED and not (OIDC_ISSUER and OIDC_RP_CLIENT_ID):
+    logger.warning("OIDC_ENABLED is set, but OIDC_ISSUER or OIDC_CLIENT_ID is missing. OIDC login stays disabled.")
+
+# Disables password login and signup for everyone except LOCAL_LOGIN_USERS (break-glass accounts,
+# by default the initial administrator), so the instance stays reachable when the provider is down.
+DISABLE_LOCAL_LOGIN = _env_flag("DISABLE_LOCAL_LOGIN", False)
+_init_admin_username = os.getenv("INIT_ADMIN_USERNAME", "").strip()
+LOCAL_LOGIN_USERS = _csv_env("LOCAL_LOGIN_USERS", [_init_admin_username] if _init_admin_username else [])
+
+if DISABLE_LOCAL_LOGIN and not LOCAL_LOGIN_USERS:
+    logger.warning("DISABLE_LOCAL_LOGIN is set without LOCAL_LOGIN_USERS. No account can log in with a password.")
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "account_auth.oidc.OIDCBackend",
+]
+
+
 
 
 ROOT_URLCONF = 'openinvento.urls'

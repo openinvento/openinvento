@@ -28,6 +28,26 @@ class CustomUser(AbstractUser):
     is_superuser = models.BooleanField(default=False)
 
 
+class OIDCIdentity(models.Model):
+    """Links a user to an account at the OpenID provider.
+
+    OpenID Connect Core 1.0 (section 5.7) only guarantees that issuer + subject
+    identify an end user; the email address may change or be reassigned.
+    """
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="oidc_identities")
+    issuer = models.CharField(max_length=255)
+    subject = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = (
+            models.UniqueConstraint(fields=("issuer", "subject"), name="unique_oidc_identity"),
+        )
+
+    def __str__(self):
+        return f"{self.issuer} {self.subject} ({self.user})"
+
+
 class UserAPIKey(AbstractAPIKey):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="api_keys")
 

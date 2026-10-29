@@ -2,13 +2,22 @@ from django.contrib.auth import password_validation
 from rest_framework import serializers
 
 from .models import CustomUser, InstanceSettings, Notification
+from .oidc import changes_break_glass_username
 from .services import create_user_inventory
+
+BREAK_GLASS_RENAME_ERROR = 'This username is a break-glass login (LOCAL_LOGIN_USERS) and cannot be changed.'
 
 
 class UserSerializer(serializers.ModelSerializer):
+    # False for accounts created by single sign-on, which have no local password.
+    has_password = serializers.SerializerMethodField()
+
     class Meta:
         model = CustomUser
-        fields = ('uuid', 'username', 'email', 'name', 'is_superuser', 'require_reset')
+        fields = ('uuid', 'username', 'email', 'name', 'is_superuser', 'require_reset', 'has_password')
+
+    def get_has_password(self, obj):
+        return obj.has_usable_password()
 
 
 class NotificationSerializer(serializers.ModelSerializer):
@@ -54,6 +63,8 @@ class AdminUserSerializer(serializers.ModelSerializer):
             queryset = queryset.exclude(pk=self.instance.pk)
         if queryset.exists():
             raise serializers.ValidationError('A user with that username already exists.')
+        if self.instance and changes_break_glass_username(self.instance.username, value):
+            raise serializers.ValidationError(BREAK_GLASS_RENAME_ERROR)
         return value
 
     def create(self, validated_data):
@@ -126,10 +137,15 @@ class CredentialResetSerializer(serializers.Serializer):
         user = self.context['request'].user
         if CustomUser.objects.exclude(pk=user.pk).filter(username=value).exists():
             raise serializers.ValidationError('A user with that username already exists.')
+        if changes_break_glass_username(user.username, value):
+            raise serializers.ValidationError(BREAK_GLASS_RENAME_ERROR)
         return value
 
     def validate_password(self, value):
-        password_validation.validate_password(value, self.context['request'].user)
+        user = self.context['request'].user
+        if not user.has_usable_password():
+            raise serializers.ValidationError('Password login is not available for single sign-on accounts.')
+        password_validation.validate_password(value, user)
         return value
 
     def save(self, **kwargs):
