@@ -392,6 +392,28 @@ class OIDCCallbackTests(OIDCTestCase):
 
 		self.assertEqual(self.login()['Location'], '/app')
 
+	def test_parallel_first_login_reuses_the_identity_created_first(self):
+		# A second browser tab links the account between our identity lookup and our insert,
+		# so the lookup misses and the insert hits the unique constraint.
+		other_tab_user = CustomUser.objects.create_user(username='alice-other-tab')
+		OIDCIdentity.objects.create(user=other_tab_user, issuer=ISSUER, subject='user-1')
+		select_related = OIDCIdentity.objects.select_related
+		lookups = []
+
+		def lookup_before_other_tab_commits(*fields):
+			lookups.append(fields)
+			queryset = select_related(*fields)
+			return queryset.none() if len(lookups) == 1 else queryset
+
+		with patch.object(OIDCIdentity.objects, 'select_related', side_effect=lookup_before_other_tab_commits):
+			response = self.login()
+
+		self.assertEqual(response['Location'], '/app')
+		self.assertEqual(self.client.get('/api/me/').data['user']['username'], 'alice-other-tab')
+		# The account created by the losing request is rolled back.
+		self.assertFalse(CustomUser.objects.filter(username='alice').exists())
+		self.assertEqual(OIDCIdentity.objects.count(), 1)
+
 	def test_inactive_user_is_rejected(self):
 		user = CustomUser.objects.create_user(username='alice', is_active=False)
 		OIDCIdentity.objects.create(user=user, issuer=ISSUER, subject='user-1')

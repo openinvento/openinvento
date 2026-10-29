@@ -16,7 +16,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_not_required
 from django.core.cache import cache
 from django.core.exceptions import SuspiciousOperation
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -174,13 +174,22 @@ class OIDCBackend(OIDCAuthenticationBackend):
             if identity:
                 return self.update_user(identity.user, claims)
 
-            user = self.find_user_by_verified_email(claims)
-            if user is None:
-                if not settings.OIDC_CREATE_USERS:
-                    logger.info("OIDC login rejected: no account for subject %s and OIDC_CREATE_USERS is off.", subject)
-                    return None
-                user = self.create_user(claims)
-            OIDCIdentity.objects.create(user=user, issuer=issuer, subject=subject)
+            try:
+                with transaction.atomic():
+                    user = self.find_user_by_verified_email(claims)
+                    if user is None:
+                        if not settings.OIDC_CREATE_USERS:
+                            logger.info(
+                                "OIDC login rejected: no account for subject %s and OIDC_CREATE_USERS is off.", subject
+                            )
+                            return None
+                        user = self.create_user(claims)
+                    OIDCIdentity.objects.create(user=user, issuer=issuer, subject=subject)
+            except IntegrityError:
+                # A parallel first login of the same account (e.g. a second tab) linked it first;
+                # the account created here is rolled back.
+                identity = OIDCIdentity.objects.select_related("user").get(issuer=issuer, subject=subject)
+                user = identity.user
             return self.update_user(user, claims)
 
     def find_user_by_verified_email(self, claims):
