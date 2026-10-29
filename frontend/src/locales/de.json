@@ -159,6 +159,7 @@
       "invalidCredentials": "Ungültige E-Mail-Adresse, Benutzername oder Passwort.",
       "invalidField": "Ungültige Angabe für {{field}}.",
       "invalidRequest": "Bitte überprüfe deine Eingaben.",
+      "localLoginDisabled": "Die Anmeldung mit Passwort ist für diese Instanz deaktiviert. Bitte nutze Single Sign-On.",
       "nameRequired": "Der Name ist erforderlich.",
       "passwordCommon": "Dieses Passwort ist zu häufig verwendet.",
       "passwordMismatch": "Die Passwörter stimmen nicht überein.",
@@ -166,6 +167,7 @@
       "passwordRequired": "Das Passwort ist erforderlich.",
       "passwordSimilar": "Das Passwort ähnelt deinen persönlichen Angaben zu sehr.",
       "passwordTooShort": "Das Passwort ist zu kurz. Es muss mindestens 8 Zeichen enthalten.",
+      "usernameBreakGlass": "Dieses Konto ist ein Notfall-Zugang, deshalb kann sein Benutzername nicht geändert werden.",
       "usernameRequired": "Der Benutzername ist erforderlich.",
       "usernameTaken": "Dieser Benutzername ist bereits vergeben."
     },
@@ -183,7 +185,14 @@
       "title": "Zugangsdaten aktualisieren",
       "warning": "Aus Sicherheitsgründen musst du einen neuen Benutzernamen und ein neues Passwort festlegen."
     },
-    "signupDisabled": "Die öffentliche Kontoerstellung ist für diese Instanz derzeit deaktiviert."
+    "signupDisabled": "Die öffentliche Kontoerstellung ist für diese Instanz derzeit deaktiviert.",
+    "sso": {
+      "button": "Mit Single Sign-On anmelden",
+      "buttonWithProvider": "Mit {{provider}} anmelden",
+      "divider": "oder",
+      "error": "Die Anmeldung per Single Sign-On ist fehlgeschlagen. Bitte versuche es erneut oder wende dich an deine Administration.",
+      "redirecting": "Weiterleitung zum Single Sign-On ..."
+    }
   },
   "boxes": {
     "articleCount": "{{count}} Artikel",
@@ -494,6 +503,7 @@
     "accountName": "Anzeigename",
     "accountPassword": "Neues Passwort",
     "accountPasswordConfirm": "Neues Passwort bestätigen",
+    "accountPasswordManagedBySso": "Dein Konto meldet sich per Single Sign-On an und hat hier deshalb kein Passwort.",
     "accountSave": "Persönliches Konto speichern",
     "accountSaving": "Wird gespeichert...",
     "accountUsername": "Benutzername",

@@ -159,6 +159,7 @@
       "invalidCredentials": "Adresse e-mail, nom d’utilisateur ou mot de passe invalide.",
       "invalidField": "{{field}} invalide.",
       "invalidRequest": "Veuillez vérifier les informations saisies.",
+      "localLoginDisabled": "La connexion par mot de passe est désactivée sur cette instance. Utilisez l'authentification unique.",
       "nameRequired": "Le nom est obligatoire.",
       "passwordCommon": "Ce mot de passe est trop courant.",
       "passwordMismatch": "Les mots de passe ne correspondent pas.",
@@ -166,6 +167,7 @@
       "passwordRequired": "Le mot de passe est obligatoire.",
       "passwordSimilar": "Le mot de passe est trop similaire à vos informations personnelles.",
       "passwordTooShort": "Le mot de passe est trop court. Il doit contenir au moins 8 caractères.",
+      "usernameBreakGlass": "Ce compte est un accès de secours, son nom d'utilisateur ne peut donc pas être modifié.",
       "usernameRequired": "Le nom d’utilisateur est obligatoire.",
       "usernameTaken": "Ce nom d’utilisateur est déjà utilisé."
     },
@@ -183,7 +185,14 @@
       "title": "Mettre à jour vos identifiants",
       "warning": "Pour des raisons de sécurité, vous devez choisir un nouveau nom d’utilisateur et un nouveau mot de passe avant de continuer."
     },
-    "signupDisabled": "La création de comptes publics est actuellement désactivée pour cette instance."
+    "signupDisabled": "La création de comptes publics est actuellement désactivée pour cette instance.",
+    "sso": {
+      "button": "Se connecter avec l'authentification unique",
+      "buttonWithProvider": "Se connecter avec {{provider}}",
+      "divider": "ou",
+      "error": "L'authentification unique a échoué. Réessayez ou contactez votre administrateur.",
+      "redirecting": "Redirection vers l'authentification unique..."
+    }
   },
   "boxes": {
     "articleCount": "{{count}} articles",
@@ -494,6 +503,7 @@
     "accountName": "Nom d’affichage",
     "accountPassword": "Nouveau mot de passe",
     "accountPasswordConfirm": "Confirmer le nouveau mot de passe",
+    "accountPasswordManagedBySso": "Votre compte se connecte via l'authentification unique et n'a donc pas de mot de passe ici.",
     "accountSave": "Enregistrer le compte personnel",
     "accountSaving": "Enregistrement…",
     "accountUsername": "Nom d’utilisateur",

@@ -34,6 +34,10 @@ function translateFieldError(field: string, message: string, t: Translate) {
     if (normalizedMessage.includes("similar")) return t("auth.errors.passwordSimilar")
   }
 
+  if (field === "username" && normalizedMessage.includes("break-glass")) {
+    return t("auth.errors.usernameBreakGlass")
+  }
+
   if (normalizedMessage.includes("already exists") || normalizedMessage.includes("already taken")) {
     return t(`auth.errors.${field}Taken`)
   }
@@ -58,6 +62,9 @@ export function getAuthErrorMessage(error: unknown, t: Translate) {
       if (message) return translateFieldError(field, message, t)
     }
 
+    if (error.status === 403 && getFieldError(error.payload, "error")?.startsWith("Local login is disabled")) {
+      return t("auth.errors.localLoginDisabled")
+    }
     if (error.status === 401) return t("auth.errors.invalidCredentials")
     if (error.status === 400) return t("auth.errors.invalidRequest")
   }
