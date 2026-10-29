@@ -45,7 +45,7 @@ export function AccountSidebarManager({
     try {
       await logout()
       console.log("Redirecting to login page...")
-      navigate("/auth/login", { replace: true })
+      navigate("/auth/login?logged_out=1", { replace: true })
     } catch (error) {
       console.error("Error during logout:", error)
     }

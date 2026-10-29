@@ -29,8 +29,10 @@ export function LoginForm({
   const [searchParams] = useSearchParams()
   // ?error=sso is set by the backend after a failed single sign-on; ?local=1 shows the
   // password form for break-glass accounts even when local login or auto-redirect is on.
+  // ?logged_out=1 stops auto-redirect, which would log the user straight back in at the provider.
   const ssoFailed = searchParams.get("error") === "sso"
   const forceLocalLogin = searchParams.get("local") === "1"
+  const loggedOut = searchParams.get("logged_out") === "1"
   const [identifier, setIdentifier] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -44,13 +46,13 @@ export function LoginForm({
     getOIDCConfig()
       .then((config) => {
         setOidcConfig(config)
-        if (config.enabled && config.auto_redirect && !ssoFailed && !forceLocalLogin) {
+        if (config.enabled && config.auto_redirect && !ssoFailed && !forceLocalLogin && !loggedOut) {
           setRedirecting(true)
           startOIDCLogin()
         }
       })
       .catch(() => undefined)
-  }, [ssoFailed, forceLocalLogin])
+  }, [ssoFailed, forceLocalLogin, loggedOut])
 
   useEffect(() => {
     getInstanceSettings()
