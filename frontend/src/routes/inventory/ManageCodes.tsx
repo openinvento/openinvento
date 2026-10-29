@@ -5,7 +5,7 @@ import { LoaderCircle, Printer, ScanBarcode, ScanLine, X } from "lucide-react"
 import Scanner from "@/components/qr-bar-code/Scanner"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
-import { inventoryApi, type CodePdfOptions, type Shelf } from "@/utils/api/inventory"
+import { getSelectedInventory, inventoryApi, type CodePdfOptions, type Shelf } from "@/utils/api/inventory"
 import { useTranslation } from "react-i18next"
 import { Input } from "@/components/ui/input"
 
@@ -47,9 +47,25 @@ export default function ManageCodes() {
 	const [isLoading, setIsLoading] = useState(true)
 	const [isGenerating, setIsGenerating] = useState(false)
 	const [error, setError] = useState("")
+	const [selectedInventory, setSelectedInventory] = useState<string | null>(null)
+
+	useEffect(() => {
+		const fetchInventory = async () => {
+			try {
+			const inventories = inventoryApi.listInventories();
+			
+			const selected = getSelectedInventory(await inventories);
+			setSelectedInventory(selected?.uuid ?? null);
+			} catch (reason) {
+				setError(reason instanceof Error ? reason.message : t("manageCodes.errors.load"))
+			}
+		};
+
+		fetchInventory();
+	}, []);
 
 	async function handleCodeDetected(code: string) {
-		const result = await inventoryApi.lookupCode(code)
+		const result = await inventoryApi.lookupCode(code, selectedInventory ?? "")
 		switch (result.type) {
 			case "article":
 				navigate(`/app/articles/${result.uuid}`)

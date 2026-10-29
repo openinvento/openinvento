@@ -334,8 +334,8 @@ export const inventoryApi = {
     fetchData<ThirdPartyProvider[]>(`/api/third-party-providers/?inventory=${encodeURIComponent(inventory)}`),
   lookupBarcodeProduct: (barcode: string, inventory: string, provider: string | null) =>
     postData<BarcodeProduct>("/api/barcodes/lookup/", { barcode, inventory, provider }),
-  lookupCode: (identifier: string) =>
-    postData<CodeLookupResult>("/api/codes/lookup/", { identifier }),
+  lookupCode: (identifier: string, inventory: string) =>
+    postData<CodeLookupResult>("/api/codes/lookup/", { identifier, inventory }),
   magicImport: (inventory: string, image: File, provider: string | null) => {
     const payload = new FormData()
     payload.append("inventory", inventory)

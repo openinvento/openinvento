@@ -411,17 +411,35 @@ class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         identifier = str(request.data.get("identifier", "")).strip()
         if not identifier:
             return Response({"error": "identifier is required."}, status=400)
+        
+        inventory_uuid = request.data.get("inventory") or request.data.get("inventory_uuid")
+        accessible_inventories = self.get_accessible_inventories()
 
-        item = InventoryEntry.objects.filter(
-            inventory__in=self.get_accessible_inventories(),
-            identifier=identifier,
-        ).first()
+        item = None
+
+        if inventory_uuid:
+            item = InventoryEntry.objects.filter(
+                inventory__in=accessible_inventories,
+                inventory__uuid=inventory_uuid,
+                identifier=identifier,
+            ).first()
+
+        if item is None:
+            item = InventoryEntry.objects.filter(
+                inventory__in=accessible_inventories,
+                identifier=identifier,
+            ).first()
+
         if item is not None:
             return Response({
                 "uuid": str(item.uuid),
                 "identifier": item.identifier,
                 "name": getattr(item, "name", str(item)),
                 "type": item.type,
+                "inventory": {
+                    "uuid": str(item.inventory.uuid),
+                    "name": item.inventory.name,
+                },
             })
 
         return Response({"error": "No inventory item was found for this code."}, status=404)
