@@ -66,10 +66,6 @@ export default function ManageCodes() {
 			case "box":
 				navigate(`/app/boxes/${result.uuid}`)
 				break
-			case "category":
-			case "field":
-				navigate("/app/manage-categories-and-fields")
-				break
 		}
 	}
 
