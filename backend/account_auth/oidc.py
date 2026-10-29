@@ -258,8 +258,10 @@ class OIDCBackend(OIDCAuthenticationBackend):
         azp = payload.get("azp")
         if azp and azp != client_id:
             raise SuspiciousOperation("ID token azp does not match the client ID.")
-        if not payload.get("sub") or "exp" not in payload:
-            raise SuspiciousOperation("ID token is missing sub or exp.")
+        # Section 2: sub, exp and iat are REQUIRED; PyJWT only validates them when present.
+        missing = [claim for claim in ("sub", "exp", "iat") if not payload.get(claim)]
+        if missing:
+            raise SuspiciousOperation(f"ID token is missing required claims: {', '.join(missing)}.")
 
     def get_or_create_user(self, access_token, id_token, payload):
         self.validate_id_token_claims(payload)

@@ -795,6 +795,13 @@ class OIDCHardeningTests(OIDCTestCase):
 
 		self.assert_login_failed(self.login())
 
+	def test_id_token_without_iat_is_rejected(self):
+		# OIDC Core 1.0, section 2: iat is REQUIRED (found by the conformance suite, oidcc-client-test-missing-iat).
+		self.provider.id_token_claims['iat'] = None
+
+		self.assert_login_failed(self.login())
+		self.assertEqual(self.provider.userinfo_requests, 0)
+
 	def test_id_token_without_exp_is_rejected(self):
 		self.provider.id_token_claims['exp'] = None
 
