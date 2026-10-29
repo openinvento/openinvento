@@ -12,6 +12,7 @@ The library is extended with:
 import logging
 import re
 import time
+from urllib.parse import urlsplit
 
 import jwt
 import requests
@@ -46,6 +47,7 @@ ASYMMETRIC_SIGN_ALGOS = {"RS256", "RS384", "RS512", "ES256", "ES384", "ES512"}
 # HMAC-signed ID tokens use the client secret as key (OpenID Connect Core 1.0, section 10.1).
 HMAC_SIGN_ALGOS = {"HS256", "HS384", "HS512"}
 HMAC_MIN_SECRET_LENGTH = 32
+LOOPBACK_HOSTS = {"localhost", "127.0.0.1", "::1"}
 
 # Maps the mozilla-django-oidc endpoint settings to the keys of the discovery document.
 ENDPOINT_SETTINGS = {
@@ -110,6 +112,14 @@ def get_callback_url(request):
     return request.build_absolute_uri(path)
 
 
+def require_https(url, name):
+    """Provider URLs must use TLS (OpenID Connect Core 1.0, section 16.17), except on loopback or when allowed."""
+    parsed = urlsplit(url)
+    if parsed.scheme == "https" or parsed.hostname in LOOPBACK_HOSTS or settings.OIDC_ALLOW_INSECURE_HTTP:
+        return
+    raise OIDCConfigurationError(f"{name} must use https (or set OIDC_ALLOW_INSECURE_HTTP): {url}")
+
+
 def uses_discovery():
     return not all(getattr(settings, name, "") for name in ENDPOINT_SETTINGS)
 
@@ -136,6 +146,7 @@ def get_provider_metadata():
 
 def get_endpoints():
     """Return the provider endpoints, preferring explicitly configured ones over discovery."""
+    require_https(settings.OIDC_ISSUER, "OIDC_ISSUER")
     endpoints = {name: getattr(settings, name, "") for name in ENDPOINT_SETTINGS}
     if uses_discovery():
         metadata = get_provider_metadata()
@@ -149,6 +160,8 @@ def get_endpoints():
     missing = [name for name, value in endpoints.items() if not value]
     if missing:
         raise OIDCConfigurationError(f"Missing OIDC endpoints: {', '.join(missing)}")
+    for name, url in endpoints.items():
+        require_https(url, name)
     return endpoints
 
 
@@ -238,8 +251,12 @@ class OIDCBackend(OIDCAuthenticationBackend):
             audiences = [audiences]
         if client_id not in audiences:
             raise SuspiciousOperation("ID token audience does not contain the client ID.")
+        # Step 3: a token that also names other audiences could be replayed by them, so it is
+        # rejected even when azp names us (no other audience is trusted).
+        if set(audiences) != {client_id}:
+            raise SuspiciousOperation("ID token has untrusted additional audiences.")
         azp = payload.get("azp")
-        if (len(audiences) > 1 and not azp) or (azp and azp != client_id):
+        if azp and azp != client_id:
             raise SuspiciousOperation("ID token azp does not match the client ID.")
         if not payload.get("sub") or "exp" not in payload:
             raise SuspiciousOperation("ID token is missing sub or exp.")
@@ -316,6 +333,10 @@ class OIDCBackend(OIDCAuthenticationBackend):
             update_fields.append("name")
 
         email = CustomUser.objects.normalize_email(claims.get(settings.OIDC_EMAIL_CLAIM))
+        # Only an explicit "not verified" is refused: some providers (e.g. Microsoft Entra ID)
+        # never send email_verified. Linking accounts by email still requires it to be true.
+        if claims.get("email_verified") in (False, "false"):
+            email = None
         if email and email != user.email:
             if CustomUser.objects.filter(email__iexact=email).exclude(pk=user.pk).exists():
                 logger.warning("OIDC email address of user %s is already used by another account; not updated.", user.pk)

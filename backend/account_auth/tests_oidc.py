@@ -452,14 +452,20 @@ class OIDCCallbackTests(OIDCTestCase):
 
 		self.assert_login_failed(self.login())
 
-	def test_multiple_audiences_require_matching_azp(self):
-		self.provider.id_token_claims['aud'] = [CLIENT_ID, 'another-client']
+	def test_azp_of_another_client_is_rejected(self):
 		self.provider.id_token_claims['azp'] = 'another-client'
 
 		self.assert_login_failed(self.login())
 
-	def test_multiple_audiences_with_matching_azp_are_accepted(self):
+	def test_additional_audiences_are_rejected_even_with_matching_azp(self):
+		# OIDC Core 1.0, section 3.1.3.7, step 3: reject tokens with audiences the client does not trust.
 		self.provider.id_token_claims['aud'] = [CLIENT_ID, 'another-client']
+		self.provider.id_token_claims['azp'] = CLIENT_ID
+
+		self.assert_login_failed(self.login())
+
+	def test_audience_list_with_only_the_client_is_accepted(self):
+		self.provider.id_token_claims['aud'] = [CLIENT_ID]
 		self.provider.id_token_claims['azp'] = CLIENT_ID
 
 		self.assertEqual(self.login()['Location'], '/app')
@@ -923,6 +929,56 @@ class OIDCHardeningTests(OIDCTestCase):
 
 		self.assertEqual(self.login()['Location'], '/app')
 		self.assertEqual(self.provider.discovery_requests, 2)
+
+	# Transport security (RFC 9700, section 2.6; OpenID Connect Core 1.0, section 16.17)
+
+	def use_issuer(self, issuer):
+		self.provider.issuer = self.provider.discovery_issuer = issuer
+		return override_settings(OIDC_ISSUER=issuer)
+
+	def test_http_issuer_is_rejected(self):
+		with self.use_issuer('http://idp.example.test'):
+			response = self.client.get('/api/oidc/authenticate/')
+
+		self.assertEqual(response['Location'], FAILURE_URL)
+		self.assertEqual(self.provider.discovery_requests, 0)
+
+	def test_http_endpoint_from_discovery_is_rejected(self):
+		self.provider.metadata_extra = {'token_endpoint': 'http://idp.example.test/token'}
+
+		self.assertEqual(self.client.get('/api/oidc/authenticate/')['Location'], FAILURE_URL)
+
+	def test_http_loopback_issuer_is_allowed(self):
+		with self.use_issuer('http://localhost:1411'):
+			self.provider.id_token_claims['iss'] = 'http://localhost:1411'
+			response = self.login()
+
+		self.assertEqual(response['Location'], '/app')
+
+	@override_settings(OIDC_ALLOW_INSECURE_HTTP=True)
+	def test_http_issuer_can_be_allowed_explicitly(self):
+		with self.use_issuer('http://idp.example.test'):
+			self.provider.id_token_claims['iss'] = 'http://idp.example.test'
+			response = self.login()
+
+		self.assertEqual(response['Location'], '/app')
+
+	# Profile data
+
+	def test_email_marked_unverified_is_not_stored(self):
+		self.provider.set_user(sub='user-2', preferred_username='eve', email='victim@example.com', email_verified=False)
+
+		self.login()
+
+		self.assertIsNone(CustomUser.objects.get(username='eve').email)
+
+	def test_email_without_verification_claim_is_stored(self):
+		# Some providers (e.g. Microsoft Entra ID) never send email_verified.
+		self.provider.set_user(sub='user-2', preferred_username='eve', email='eve@example.com')
+
+		self.login()
+
+		self.assertEqual(CustomUser.objects.get(username='eve').email, 'eve@example.com')
 
 	def test_wrong_password_does_not_contact_the_provider(self):
 		CustomUser.objects.create_user(username='member', password='StrongPassword!123')
