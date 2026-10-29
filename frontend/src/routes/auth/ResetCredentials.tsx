@@ -1,11 +1,11 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useLocation } from "react-router"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { resetCredentials } from "@/utils/api/auth"
+import { getCurrentSession, resetCredentials } from "@/utils/api/auth"
 import { getAuthErrorMessage } from "@/utils/api/auth-errors"
 
 export default function ResetCredentialsPage() {
@@ -17,6 +17,16 @@ export default function ResetCredentialsPage() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+
+  // Prefill the current username, so keeping it is the default (break-glass accounts
+  // listed in LOCAL_LOGIN_USERS cannot be renamed while local login is disabled).
+  useEffect(() => {
+    getCurrentSession()
+      .then(({ user }) => {
+        if (user) setUsername((current) => current || user.username)
+      })
+      .catch(() => undefined)
+  }, [])
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
