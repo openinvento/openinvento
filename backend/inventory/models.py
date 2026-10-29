@@ -159,7 +159,6 @@ class InventoryEntry(models.Model):
     def save(self, *args, **kwargs):
         if not self.identifier:
             self.identifier = generate_random_code()
-        update_fields = kwargs.get("update_fields")
         self.full_clean() # Run full validation always before saving the model
         super().save(*args, **kwargs)
 
