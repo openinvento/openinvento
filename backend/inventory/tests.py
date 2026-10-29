@@ -238,9 +238,7 @@ class InventoryIsolationTests(TestCase):
 		article = Article.objects.create(name="Box article", inventory=self.inventory, parent=nested_box)
 
 		response = self.client.delete(
-			f"/api/entries/{self.box.uuid}/",
-			{"delete_contents": True},
-			format="json",
+			f"/api/entries/{self.box.uuid}/?delete_contents=true",
 		)
 
 		self.assertEqual(response.status_code, 204)
