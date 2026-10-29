@@ -3,10 +3,11 @@
 import { useEffect, type FormEvent, type ReactNode } from "react"
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import i18n from "@/i18n";
 
 type Props = { title: string; open: boolean; submitting?: boolean; submitLabel?: string; submittingLabel?: string; children: ReactNode; onClose: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void }
 
-export function InventoryModal({ title, open, submitting, submitLabel = "Save", submittingLabel = "Saving...", children, onClose, onSubmit }: Props) {
+export function InventoryModal({ title, open, submitting, submitLabel = i18n.t("save"), submittingLabel = i18n.t("saving"), children, onClose, onSubmit }: Props) {
   useEffect(() => {
     if (!open) return
     const close = (event: KeyboardEvent) => event.key === "Escape" && onClose()
