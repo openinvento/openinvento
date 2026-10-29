@@ -12,7 +12,7 @@ The library is extended with:
 import logging
 import re
 import time
-from urllib.parse import urlsplit
+from urllib.parse import quote_plus, urlsplit
 
 import jwt
 import requests
@@ -30,6 +30,7 @@ from mozilla_django_oidc.views import (
     OIDCAuthenticationCallbackView,
     OIDCAuthenticationRequestView,
 )
+from requests.auth import HTTPBasicAuth
 
 from .models import CustomUser, OIDCIdentity
 from .services import create_user_inventory
@@ -196,11 +197,26 @@ class OIDCBackend(OIDCAuthenticationBackend):
         return ModelBackend.get_user(self, user_id)
 
     def get_token(self, payload):
+        """Token request; replaces the base class to handle public clients and Basic auth correctly."""
         payload["redirect_uri"] = get_callback_url(self.request)
-        if not payload.get("client_secret"):
-            # Public clients authenticate with PKCE only.
-            payload.pop("client_secret", None)
-        token = super().get_token(payload)
+        secret = payload.pop("client_secret", "")
+        auth = None
+        # Public clients (no secret) authenticate with PKCE only.
+        if secret and settings.OIDC_TOKEN_USE_BASIC_AUTH:
+            # RFC 6749, section 2.3.1: form-urlencode client ID and secret before Basic encoding.
+            auth = HTTPBasicAuth(quote_plus(payload["client_id"]), quote_plus(secret))
+        elif secret:
+            payload["client_secret"] = secret
+        response = requests.post(
+            self.OIDC_OP_TOKEN_ENDPOINT,
+            data=payload,
+            auth=auth,
+            verify=self.get_settings("OIDC_VERIFY_SSL", True),
+            timeout=self.get_settings("OIDC_TIMEOUT", None),
+            proxies=self.get_settings("OIDC_PROXY", None),
+        )
+        self.raise_token_response_error(response)
+        token = response.json()
         # OpenID Connect Core 1.0, section 3.1.3.5, with RFC 6749, section 7.1: only Bearer is supported.
         if str(token.get("token_type", "")).lower() != "bearer":
             raise SuspiciousOperation("Token response has no Bearer token_type.")
@@ -240,15 +256,27 @@ class OIDCBackend(OIDCAuthenticationBackend):
         return jwt.PyJWK(keys[0])
 
     def get_userinfo(self, access_token, id_token, payload):
-        userinfo = super().get_userinfo(access_token, id_token, payload)
+        """UserInfo request; replaces the base class so a signed response can be told apart from JSON."""
+        response = requests.get(
+            self.OIDC_OP_USER_ENDPOINT,
+            headers={"Authorization": f"Bearer {access_token}"},
+            verify=self.get_settings("OIDC_VERIFY_SSL", True),
+            timeout=self.get_settings("OIDC_TIMEOUT", None),
+            proxies=self.get_settings("OIDC_PROXY", None),
+        )
+        response.raise_for_status()
+        if response.headers.get("content-type", "").lower().startswith("application/jwt"):
+            userinfo = self.verify_token(response.text)
+            # OpenID Connect Core 1.0, section 5.3.2: a signed response must contain iss and aud.
+            audiences = userinfo.get("aud")
+            if not isinstance(audiences, list):
+                audiences = [audiences]
+            if userinfo.get("iss") != settings.OIDC_ISSUER or settings.OIDC_RP_CLIENT_ID not in audiences:
+                raise SuspiciousOperation("Signed UserInfo response has a missing or unexpected iss or aud.")
+        else:
+            userinfo = response.json()
         if not isinstance(userinfo, dict):
             raise SuspiciousOperation("UserInfo response is not a JSON object.")
-        # Signed UserInfo responses carry iss and aud (OpenID Connect Core 1.0, section 5.3.2).
-        audiences = userinfo.get("aud", settings.OIDC_RP_CLIENT_ID)
-        if not isinstance(audiences, list):
-            audiences = [audiences]
-        if userinfo.get("iss", settings.OIDC_ISSUER) != settings.OIDC_ISSUER or settings.OIDC_RP_CLIENT_ID not in audiences:
-            raise SuspiciousOperation("Signed UserInfo response has an unexpected iss or aud.")
         return userinfo
 
     def validate_id_token_claims(self, payload):

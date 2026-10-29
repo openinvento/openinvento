@@ -709,6 +709,19 @@ class OIDCHardeningTests(OIDCTestCase):
 
 		self.assert_login_failed(self.login())
 
+	@override_settings(OIDC_TOKEN_USE_BASIC_AUTH=True, OIDC_RP_CLIENT_SECRET='')
+	def test_basic_auth_is_not_used_for_public_clients(self):
+		self.assertEqual(self.login()['Location'], '/app')
+		self.assertIsNone(self.provider.token_request_kwargs[-1].get('auth'))
+
+	@override_settings(OIDC_TOKEN_USE_BASIC_AUTH=True, OIDC_RP_CLIENT_SECRET='se:cret/ä')
+	def test_basic_auth_credentials_are_form_urlencoded(self):
+		# RFC 6749, section 2.3.1: client ID and secret are form-urlencoded before Basic encoding.
+		self.login()
+
+		auth = self.provider.token_request_kwargs[-1]['auth']
+		self.assertEqual((auth.username, auth.password), (CLIENT_ID, 'se%3Acret%2F%C3%A4'))
+
 	@override_settings(OIDC_TOKEN_USE_BASIC_AUTH=True)
 	def test_basic_auth_sends_secret_in_header(self):
 		self.login()
@@ -859,6 +872,14 @@ class OIDCHardeningTests(OIDCTestCase):
 		)
 
 		self.assertEqual(self.login()['Location'], '/app')
+
+	def test_signed_userinfo_without_iss_and_aud_is_rejected(self):
+		# OIDC Core 1.0, section 5.3.2: a signed UserInfo response must contain iss and aud.
+		self.provider.userinfo_jwt = jwt.encode(
+			{'sub': 'user-1'}, FakeProvider.private_key, algorithm='RS256', headers={'kid': 'test-key'},
+		)
+
+		self.assert_login_failed(self.login())
 
 	def test_signed_userinfo_with_wrong_audience_is_rejected(self):
 		self.provider.userinfo_jwt = jwt.encode(
