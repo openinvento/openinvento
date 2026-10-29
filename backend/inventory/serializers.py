@@ -58,7 +58,7 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
         model = InventoryEntry
         fields = ("uuid", "identifier", "inventory", "created_at", "updated_at", "name", "type", "parent",
                   "description", "quantity", "stock_tracking", "image", "icon", "category", "field_values", "field_values_input", "category_fields")
-        read_only_fields = ("uuid", "identifier", "created_at", "updated_at")
+        read_only_fields = ("uuid", "created_at", "updated_at")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
