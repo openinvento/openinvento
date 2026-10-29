@@ -1,13 +1,21 @@
+import base64
+import hashlib
+import hmac
+import json
 import time
 from unittest.mock import patch
 from urllib.parse import parse_qs, urlsplit
 
 import jwt
 import requests
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from django.contrib.auth import get_user
 from django.core.cache import cache
+from django.http import HttpRequest
 from django.test import TestCase, override_settings
 from mozilla_django_oidc.utils import generate_code_challenge
+from requests.auth import HTTPBasicAuth
 from rest_framework.test import APIClient
 
 from inventory.models import Inventory
@@ -38,12 +46,12 @@ OIDC_SETTINGS = {
 
 
 class FakeResponse:
-	def __init__(self, data=None, status_code=200, url=''):
+	def __init__(self, data=None, status_code=200, url='', content_type='application/json', text=None):
 		self._data = data
 		self.status_code = status_code
 		self.url = url
-		self.headers = {'content-type': 'application/json'}
-		self.text = str(data)
+		self.headers = {'content-type': content_type}
+		self.text = str(data) if text is None else text
 
 	def json(self):
 		return self._data
@@ -63,9 +71,15 @@ class FakeProvider:
 		self.discovery_issuer = issuer
 		self.discovery_requests = 0
 		self.token_requests = []
+		self.token_request_kwargs = []
 		self.token_status = 200
+		self.token_response = {}
 		self.id_token_claims = {}
+		self.id_token_signing = {'key': self.private_key, 'algorithm': 'RS256', 'headers': {'kid': 'test-key'}}
 		self.userinfo = {}
+		self.userinfo_jwt = None
+		self.userinfo_requests = 0
+		self.metadata_extra = {}
 		jwk = jwt.algorithms.RSAAlgorithm.to_jwk(self.private_key.public_key(), as_dict=True)
 		self.jwks = {'keys': [{**jwk, 'kid': 'test-key', 'alg': 'RS256', 'use': 'sig'}]}
 		self.nonce = None
@@ -78,6 +92,7 @@ class FakeProvider:
 			'token_endpoint': f'{self.issuer}/token',
 			'userinfo_endpoint': f'{self.issuer}/userinfo',
 			'jwks_uri': f'{self.issuer}/jwks',
+			**self.metadata_extra,
 		}
 
 	def set_user(self, sub='user-1', **claims):
@@ -94,7 +109,8 @@ class FakeProvider:
 			'nonce': self.nonce,
 			**self.id_token_claims,
 		}
-		return jwt.encode(claims, self.private_key, algorithm='RS256', headers={'kid': 'test-key'})
+		claims = {key: value for key, value in claims.items() if value is not None}
+		return jwt.encode(claims, **self.id_token_signing)
 
 	def get(self, url, **kwargs):
 		if url == f'{self.issuer}/.well-known/openid-configuration':
@@ -103,14 +119,19 @@ class FakeProvider:
 		if url == f'{self.issuer}/jwks':
 			return FakeResponse(self.jwks, url=url)
 		if url == f'{self.issuer}/userinfo':
+			self.userinfo_requests += 1
+			if self.userinfo_jwt is not None:
+				return FakeResponse(url=url, content_type='application/jwt', text=self.userinfo_jwt)
 			return FakeResponse(self.userinfo, url=url)
 		return FakeResponse({}, status_code=404, url=url)
 
 	def post(self, url, data=None, **kwargs):
 		self.token_requests.append(dict(data or {}))
+		self.token_request_kwargs.append(kwargs)
 		if url != f'{self.issuer}/token' or self.token_status != 200:
 			return FakeResponse({'error': 'invalid_grant'}, status_code=400, url=url)
-		return FakeResponse({'id_token': self.id_token(), 'access_token': 'access-token'}, url=url)
+		response = {'id_token': self.id_token(), 'access_token': 'access-token', 'token_type': 'Bearer', **self.token_response}
+		return FakeResponse({key: value for key, value in response.items() if value is not None}, url=url)
 
 
 @override_settings(**OIDC_SETTINGS)
@@ -615,4 +636,298 @@ class OIDCAccountTests(OIDCTestCase):
 
 		APIClient().post('/api/login/', {'identifier': 'member', 'password': 'StrongPassword!123'}, format='json')
 
+		self.assertEqual(self.provider.discovery_requests, 0)
+
+
+def b64url(data):
+	return base64.urlsafe_b64encode(data).rstrip(b'=').decode()
+
+
+def hs256_token(claims, key, kid='test-key'):
+	"""Build an HS256 token by hand; PyJWT refuses PEM keys as HMAC secrets."""
+	header = b64url(json.dumps({'alg': 'HS256', 'typ': 'JWT', 'kid': kid}).encode())
+	payload = b64url(json.dumps(claims).encode())
+	signature = hmac.new(key, f'{header}.{payload}'.encode(), hashlib.sha256).digest()
+	return f'{header}.{payload}.{b64url(signature)}'
+
+
+class OIDCHardeningTests(OIDCTestCase):
+	"""Requirements from OIDC Core 1.0, RFC 9700, RFC 9207 and RFC 8725 beyond the basic flow."""
+
+	def callback(self, params, **extra):
+		return self.client.get('/api/oidc/callback/', {'code': 'auth-code', 'state': params['state'], **extra})
+
+	def id_token_claims(self):
+		now = int(time.time())
+		return {'iss': ISSUER, 'aud': CLIENT_ID, 'iat': now, 'exp': now + 300, 'sub': 'user-1', 'nonce': self.provider.nonce}
+
+	# Sessions and accounts
+
+	def test_deactivated_oidc_user_loses_session(self):
+		self.login()
+		CustomUser.objects.filter(username='alice').update(is_active=False)
+		request = HttpRequest()
+		request.session = self.client.session
+
+		# Non-DRF views (LoginRequiredMiddleware) see the user through the backend's get_user.
+		self.assertFalse(get_user(request).is_authenticated)
+
+	def test_login_cycles_session_key(self):
+		_, params = self.start_login()
+		key_before = self.client.session.session_key
+
+		self.callback(params)
+
+		self.assertNotEqual(self.client.session.session_key, key_before)
+
+	# Token response (OIDC Core 3.1.3.5, RFC 6749 5.1)
+
+	def test_token_response_with_other_token_type_is_rejected(self):
+		self.provider.token_response = {'token_type': 'DPoP'}
+
+		self.assert_login_failed(self.login())
+		self.assertEqual(self.provider.userinfo_requests, 0)
+
+	def test_token_response_without_token_type_is_rejected(self):
+		self.provider.token_response = {'token_type': None}
+
+		self.assert_login_failed(self.login())
+
+	def test_token_type_is_case_insensitive(self):
+		self.provider.token_response = {'token_type': 'bearer'}
+
+		self.assertEqual(self.login()['Location'], '/app')
+
+	def test_token_response_without_id_token_fails_cleanly(self):
+		self.provider.token_response = {'id_token': None}
+
+		self.assert_login_failed(self.login())
+
+	@override_settings(OIDC_TOKEN_USE_BASIC_AUTH=True)
+	def test_basic_auth_sends_secret_in_header(self):
+		self.login()
+
+		self.assertNotIn('client_secret', self.provider.token_requests[-1])
+		auth = self.provider.token_request_kwargs[-1]['auth']
+		self.assertEqual((auth.username, auth.password), (CLIENT_ID, 'client-secret'))
+		self.assertIsInstance(auth, HTTPBasicAuth)
+
+	# ID token signature (RFC 8725 3.1, 3.2)
+
+	def test_id_token_alg_none_is_rejected(self):
+		self.provider.id_token_signing = {'key': None, 'algorithm': 'none'}
+
+		self.assert_login_failed(self.login())
+
+	def test_id_token_hs256_signed_with_public_key_is_rejected(self):
+		public_pem = FakeProvider.private_key.public_key().public_bytes(
+			serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo,
+		)
+		_, params = self.start_login()
+		self.provider.token_response = {'id_token': hs256_token(self.id_token_claims(), public_pem)}
+
+		self.assert_login_failed(self.callback(params))
+
+	def test_id_token_with_bad_signature_is_rejected(self):
+		other_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+		self.provider.id_token_signing = {'key': other_key, 'algorithm': 'RS256', 'headers': {'kid': 'test-key'}}
+
+		self.assert_login_failed(self.login())
+
+	def test_id_token_with_unknown_kid_is_rejected(self):
+		self.provider.id_token_signing['headers'] = {'kid': 'other-key'}
+
+		self.assert_login_failed(self.login())
+
+	def test_id_token_without_kid_and_single_key_is_accepted(self):
+		self.provider.id_token_signing['headers'] = {}
+
+		self.assertEqual(self.login()['Location'], '/app')
+
+	def test_id_token_without_kid_and_two_keys_is_rejected(self):
+		self.provider.id_token_signing['headers'] = {}
+		self.provider.jwks['keys'].append({**self.provider.jwks['keys'][0], 'kid': 'second-key'})
+
+		self.assert_login_failed(self.login())
+
+	def test_id_token_with_other_algorithm_than_configured_is_rejected(self):
+		# A JWKS key without "alg" matches any token header, so the algorithm check itself must reject it.
+		self.provider.jwks['keys'][0].pop('alg')
+		self.provider.id_token_signing['algorithm'] = 'RS384'
+
+		self.assert_login_failed(self.login())
+
+	@override_settings(OIDC_RP_SIGN_ALGO='none')
+	def test_unsupported_sign_algo_disables_oidc(self):
+		self.assertFalse(APIClient().get('/api/oidc/config/').data['enabled'])
+		self.assertEqual(self.client.get('/api/oidc/authenticate/').status_code, 404)
+
+	@override_settings(OIDC_RP_SIGN_ALGO='HS256', OIDC_RP_CLIENT_SECRET='short')
+	def test_hmac_algo_needs_a_long_client_secret(self):
+		self.assertFalse(APIClient().get('/api/oidc/config/').data['enabled'])
+
+	# ID token claims (OIDC Core 3.1.3.7)
+
+	def test_id_token_without_nonce_is_rejected(self):
+		self.provider.id_token_claims['nonce'] = None
+		_, params = self.start_login()
+		self.provider.nonce = None
+
+		self.assert_login_failed(self.callback(params))
+
+	def test_id_token_without_sub_is_rejected(self):
+		self.provider.id_token_claims['sub'] = None
+
+		self.assert_login_failed(self.login())
+
+	def test_id_token_without_exp_is_rejected(self):
+		self.provider.id_token_claims['exp'] = None
+
+		self.assert_login_failed(self.login())
+
+	def test_multiple_audiences_without_azp_are_rejected(self):
+		self.provider.id_token_claims['aud'] = [CLIENT_ID, 'another-client']
+
+		self.assert_login_failed(self.login())
+
+	def test_id_token_iat_slightly_in_future_is_accepted(self):
+		# The provider's clock may run a few seconds ahead.
+		self.provider.id_token_claims['iat'] = int(time.time()) + 5
+
+		self.assertEqual(self.login()['Location'], '/app')
+
+	def test_id_token_iat_far_in_future_is_rejected(self):
+		self.provider.id_token_claims['iat'] = int(time.time()) + 600
+
+		self.assert_login_failed(self.login())
+
+	# UserInfo (OIDC Core 5.3.2)
+
+	def test_userinfo_without_sub_is_rejected(self):
+		self.provider.userinfo.pop('sub')
+
+		self.assert_login_failed(self.login())
+
+	def test_userinfo_that_is_not_an_object_fails_cleanly(self):
+		self.provider.userinfo = []
+
+		self.assert_login_failed(self.login())
+
+	def test_signed_userinfo_is_accepted(self):
+		self.provider.userinfo_jwt = jwt.encode(
+			{'iss': ISSUER, 'aud': CLIENT_ID, 'sub': 'user-1', 'preferred_username': 'alice'},
+			FakeProvider.private_key, algorithm='RS256', headers={'kid': 'test-key'},
+		)
+
+		self.assertEqual(self.login()['Location'], '/app')
+
+	def test_signed_userinfo_with_audience_list_is_accepted(self):
+		self.provider.userinfo_jwt = jwt.encode(
+			{'iss': ISSUER, 'aud': [CLIENT_ID], 'sub': 'user-1'},
+			FakeProvider.private_key, algorithm='RS256', headers={'kid': 'test-key'},
+		)
+
+		self.assertEqual(self.login()['Location'], '/app')
+
+	def test_signed_userinfo_with_wrong_audience_is_rejected(self):
+		self.provider.userinfo_jwt = jwt.encode(
+			{'iss': ISSUER, 'aud': 'another-client', 'sub': 'user-1'},
+			FakeProvider.private_key, algorithm='RS256', headers={'kid': 'test-key'},
+		)
+
+		self.assert_login_failed(self.login())
+
+	# Authorization request and response (OIDC Core 3.1.2, RFC 9207, RFC 9700)
+
+	@override_settings(OIDC_RP_SCOPES='profile email')
+	def test_openid_scope_is_always_requested(self):
+		_, params = self.start_login()
+
+		self.assertEqual(params['scope'].split()[0], 'openid')
+
+	@override_settings(
+		OIDC_OP_AUTHORIZATION_ENDPOINT='https://login.example.test/auth?tenant=home',
+		OIDC_OP_TOKEN_ENDPOINT=f'{ISSUER}/token',
+		OIDC_OP_USER_ENDPOINT=f'{ISSUER}/userinfo',
+		OIDC_OP_JWKS_ENDPOINT=f'{ISSUER}/jwks',
+	)
+	def test_authorization_endpoint_query_is_preserved(self):
+		response, params = self.start_login()
+
+		self.assertEqual(response['Location'].count('?'), 1)
+		self.assertEqual(params['tenant'], 'home')
+		self.assertTrue(params['state'])
+
+	@override_settings(OIDC_RP_CLIENT_SECRET='')
+	def test_public_client_rejects_provider_without_s256(self):
+		self.provider.metadata_extra = {'code_challenge_methods_supported': ['plain']}
+
+		response = self.client.get('/api/oidc/authenticate/')
+
+		self.assertEqual(response['Location'], FAILURE_URL)
+
+	def test_iss_response_parameter_must_match(self):
+		_, params = self.start_login()
+
+		self.assert_login_failed(self.callback(params, iss='https://evil.example.test'))
+
+	def test_matching_iss_response_parameter_is_accepted(self):
+		_, params = self.start_login()
+
+		self.assertEqual(self.callback(params, iss=ISSUER)['Location'], '/app')
+
+	def test_iss_response_parameter_is_required_when_advertised(self):
+		self.provider.metadata_extra = {'authorization_response_iss_parameter_supported': True}
+
+		self.assert_login_failed(self.login())
+
+	def test_expired_state_is_rejected(self):
+		_, params = self.start_login()
+		session = self.client.session
+		session['oidc_states'][params['state']]['added_on'] -= 3600
+		session.save()
+
+		self.assert_login_failed(self.callback(params))
+
+	def test_error_without_valid_state_keeps_session(self):
+		self.login()
+
+		self.client.get('/api/oidc/callback/', {'error': 'access_denied', 'state': 'forged'})
+
+		self.assertTrue(self.client.get('/api/me/').data['authenticated'])
+
+	def test_next_url_variants_are_rejected(self):
+		for next_url in ('//evil.example.test/', '/\\evil.example.test', 'javascript:alert(1)', 'https:evil.example.test'):
+			with self.subTest(next_url=next_url):
+				self.client.post('/api/logout/')
+				response = self.login(f'/api/oidc/authenticate/?next={next_url}')
+				self.assertEqual(response['Location'], '/app')
+
+	# Configuration and discovery
+
+	@override_settings(APP_URL='')
+	def test_redirect_uri_falls_back_to_request_without_app_url(self):
+		_, params = self.start_login()
+
+		self.assertEqual(params['redirect_uri'], 'http://testserver/api/oidc/callback/')
+
+	def test_discovery_without_required_endpoint_fails(self):
+		self.provider.metadata_extra = {'jwks_uri': None}
+
+		self.assertEqual(self.client.get('/api/oidc/authenticate/')['Location'], FAILURE_URL)
+
+	def test_invalid_discovery_document_is_not_cached(self):
+		self.provider.discovery_issuer = 'https://evil.example.test'
+		self.client.get('/api/oidc/authenticate/')
+		self.provider.discovery_issuer = ISSUER
+
+		self.assertEqual(self.login()['Location'], '/app')
+		self.assertEqual(self.provider.discovery_requests, 2)
+
+	def test_wrong_password_does_not_contact_the_provider(self):
+		CustomUser.objects.create_user(username='member', password='StrongPassword!123')
+
+		response = APIClient().post('/api/login/', {'identifier': 'member', 'password': 'wrong'}, format='json')
+
+		self.assertEqual(response.status_code, 401)
 		self.assertEqual(self.provider.discovery_requests, 0)

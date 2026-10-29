@@ -233,6 +233,7 @@ OIDC_LINK_EXISTING_BY_EMAIL = _env_flag("OIDC_LINK_EXISTING_BY_EMAIL", False)
 OIDC_AUTO_REDIRECT = _env_flag("OIDC_AUTO_REDIRECT", False)
 OIDC_BUTTON_LABEL = os.getenv("OIDC_BUTTON_LABEL", "").strip()
 OIDC_TIMEOUT = int(os.getenv("OIDC_TIMEOUT", "10"))
+OIDC_TOKEN_USE_BASIC_AUTH = _env_flag("OIDC_TOKEN_USE_BASIC_AUTH", False)  # client_secret_basic instead of _post
 OIDC_USE_PKCE = True
 
 if OIDC_ENABLED and not (OIDC_ISSUER and OIDC_RP_CLIENT_ID):

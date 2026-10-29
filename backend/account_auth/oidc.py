@@ -4,15 +4,19 @@ The library is extended with:
 - provider discovery (OpenID Connect Discovery 1.0) unless endpoints are set explicitly,
 - issuer, audience and azp checks of the ID token (OpenID Connect Core 1.0, section 3.1.3.7),
 - user lookup by issuer + subject instead of the email address,
-- a redirect URI built from APP_URL, so it stays correct behind a TLS-terminating proxy.
+- a redirect URI built from APP_URL, so it stays correct behind a TLS-terminating proxy,
+- the hardening listed in the requirement catalog of the pull request: token_type, iss
+  response parameter (RFC 9207), state expiry, signing algorithm allow-list, clock skew.
 """
 
 import logging
 import re
+import time
 
 import jwt
 import requests
 from django.conf import settings
+from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.decorators import login_not_required
 from django.core.cache import cache
 from django.core.exceptions import SuspiciousOperation
@@ -34,6 +38,14 @@ logger = logging.getLogger(__name__)
 LOGIN_SUCCESS_URL = "/app"
 LOGIN_FAILURE_URL = "/auth/login?error=sso"
 DISCOVERY_CACHE_SECONDS = 60 * 60
+# Tolerated clock difference to the provider for iat/exp/nbf.
+CLOCK_SKEW_SECONDS = 60
+# Pending logins (state, nonce, PKCE verifier) expire, which keeps the window for a stolen code short.
+STATE_MAX_AGE_SECONDS = 10 * 60
+ASYMMETRIC_SIGN_ALGOS = {"RS256", "RS384", "RS512", "ES256", "ES384", "ES512"}
+# HMAC-signed ID tokens use the client secret as key (OpenID Connect Core 1.0, section 10.1).
+HMAC_SIGN_ALGOS = {"HS256", "HS384", "HS512"}
+HMAC_MIN_SECRET_LENGTH = 32
 
 # Maps the mozilla-django-oidc endpoint settings to the keys of the discovery document.
 ENDPOINT_SETTINGS = {
@@ -54,8 +66,23 @@ class OIDCConfigurationError(ValueError):
     pass
 
 
+def sign_algo_supported():
+    algo = settings.OIDC_RP_SIGN_ALGO
+    if algo in ASYMMETRIC_SIGN_ALGOS:
+        return True
+    return algo in HMAC_SIGN_ALGOS and len(settings.OIDC_RP_CLIENT_SECRET) >= HMAC_MIN_SECRET_LENGTH
+
+
 def oidc_enabled():
-    return bool(settings.OIDC_ENABLED and settings.OIDC_ISSUER and settings.OIDC_RP_CLIENT_ID)
+    return bool(
+        settings.OIDC_ENABLED and settings.OIDC_ISSUER and settings.OIDC_RP_CLIENT_ID and sign_algo_supported()
+    )
+
+
+def get_scopes():
+    """Return the configured scopes with "openid" first; without it the request is plain OAuth 2.0."""
+    scopes = [scope for scope in settings.OIDC_RP_SCOPES.split() if scope != "openid"]
+    return " ".join(["openid", *scopes])
 
 
 def local_login_allowed(username):
@@ -83,6 +110,10 @@ def get_callback_url(request):
     return request.build_absolute_uri(path)
 
 
+def uses_discovery():
+    return not all(getattr(settings, name, "") for name in ENDPOINT_SETTINGS)
+
+
 def get_provider_metadata():
     issuer = settings.OIDC_ISSUER
     cache_key = f"oidc-provider-metadata:{issuer}"
@@ -106,10 +137,15 @@ def get_provider_metadata():
 def get_endpoints():
     """Return the provider endpoints, preferring explicitly configured ones over discovery."""
     endpoints = {name: getattr(settings, name, "") for name in ENDPOINT_SETTINGS}
-    if not all(endpoints.values()):
+    if uses_discovery():
         metadata = get_provider_metadata()
         for name, key in ENDPOINT_SETTINGS.items():
-            endpoints[name] = endpoints[name] or metadata.get(key, "")
+            endpoints[name] = endpoints[name] or metadata.get(key) or ""
+        methods = metadata.get("code_challenge_methods_supported")
+        # Public clients rely on PKCE alone (RFC 9700, section 2.1.1); a provider that ignores it
+        # would let anyone redeem an intercepted code.
+        if not settings.OIDC_RP_CLIENT_SECRET and methods is not None and "S256" not in methods:
+            raise OIDCConfigurationError("The provider does not support PKCE S256, which public clients require.")
     missing = [name for name, value in endpoints.items() if not value]
     if missing:
         raise OIDCConfigurationError(f"Missing OIDC endpoints: {', '.join(missing)}")
@@ -137,12 +173,60 @@ class OIDCBackend(OIDCAuthenticationBackend):
         self.OIDC_RP_IDP_SIGN_KEY = None
         return super().authenticate(request, **kwargs)
 
+    def get_user(self, user_id):
+        # The base class returns inactive users too, which would keep their sessions valid.
+        return ModelBackend.get_user(self, user_id)
+
     def get_token(self, payload):
         payload["redirect_uri"] = get_callback_url(self.request)
         if not payload.get("client_secret"):
             # Public clients authenticate with PKCE only.
             payload.pop("client_secret", None)
-        return super().get_token(payload)
+        token = super().get_token(payload)
+        # OpenID Connect Core 1.0, section 3.1.3.5, with RFC 6749, section 7.1: only Bearer is supported.
+        if str(token.get("token_type", "")).lower() != "bearer":
+            raise SuspiciousOperation("Token response has no Bearer token_type.")
+        return token
+
+    def _verify_jws(self, payload, key):
+        """Like the base class, with clock skew leeway and the algorithm passed as a list (RFC 8725, 3.1)."""
+        algo = jwt.get_unverified_header(payload).get("alg")
+        if algo != self.OIDC_RP_SIGN_ALGO:
+            raise SuspiciousOperation(f"Token algorithm {algo!r} does not match OIDC_SIGN_ALGO.")
+        return jwt.decode(
+            payload, key, algorithms=[algo], leeway=CLOCK_SKEW_SECONDS, options={"verify_aud": False}
+        )
+
+    def retrieve_matching_jwk(self, token):
+        header = jwt.get_unverified_header(token)
+        if "kid" in header:
+            return super().retrieve_matching_jwk(token)
+        # Providers with a single signing key may omit kid; never guess between several keys.
+        response = requests.get(
+            self.OIDC_OP_JWKS_ENDPOINT,
+            verify=self.get_settings("OIDC_VERIFY_SSL", True),
+            timeout=self.get_settings("OIDC_TIMEOUT", None),
+        )
+        response.raise_for_status()
+        keys = [
+            key for key in response.json().get("keys", [])
+            if key.get("use", "sig") == "sig" and key.get("alg", header.get("alg")) == header.get("alg")
+        ]
+        if len(keys) != 1:
+            raise SuspiciousOperation("Token has no kid and the provider has more than one matching key.")
+        return jwt.PyJWK(keys[0])
+
+    def get_userinfo(self, access_token, id_token, payload):
+        userinfo = super().get_userinfo(access_token, id_token, payload)
+        if not isinstance(userinfo, dict):
+            raise SuspiciousOperation("UserInfo response is not a JSON object.")
+        # Signed UserInfo responses carry iss and aud (OpenID Connect Core 1.0, section 5.3.2).
+        audiences = userinfo.get("aud", settings.OIDC_RP_CLIENT_ID)
+        if not isinstance(audiences, list):
+            audiences = [audiences]
+        if userinfo.get("iss", settings.OIDC_ISSUER) != settings.OIDC_ISSUER or settings.OIDC_RP_CLIENT_ID not in audiences:
+            raise SuspiciousOperation("Signed UserInfo response has an unexpected iss or aud.")
+        return userinfo
 
     def validate_id_token_claims(self, payload):
         """Check the claims mozilla-django-oidc leaves unchecked (it only verifies signature, exp and nonce)."""
@@ -246,16 +330,27 @@ class OIDCBackend(OIDCAuthenticationBackend):
 
 @method_decorator(login_not_required, name="dispatch")
 class OIDCLoginView(OIDCAuthenticationRequestView):
+    @staticmethod
+    def get_settings(attr, *args):
+        if attr == "OIDC_RP_SCOPES":
+            return get_scopes()
+        return OIDCAuthenticationRequestView.get_settings(attr, *args)
+
     def get(self, request):
         if not oidc_enabled():
             raise Http404
         try:
-            self.OIDC_OP_AUTH_ENDPOINT = get_endpoints()["OIDC_OP_AUTHORIZATION_ENDPOINT"]
+            endpoint = get_endpoints()["OIDC_OP_AUTHORIZATION_ENDPOINT"]
         except LOGIN_ERRORS as exc:
             logger.warning("OIDC provider discovery failed: %s", exc)
             return HttpResponseRedirect(LOGIN_FAILURE_URL)
+        # The base class appends "?<query>"; keep a query string the endpoint already has.
+        self.OIDC_OP_AUTH_ENDPOINT, _, endpoint_query = endpoint.partition("?")
         self.OIDC_RP_CLIENT_ID = settings.OIDC_RP_CLIENT_ID
-        return super().get(request)
+        response = super().get(request)
+        if endpoint_query:
+            response["Location"] = response["Location"].replace("?", f"?{endpoint_query}&", 1)
+        return response
 
     def get_extra_params(self, request):
         # Applied after the base class sets redirect_uri from the request.
@@ -277,7 +372,32 @@ class OIDCCallbackView(OIDCAuthenticationCallbackView):
         if not oidc_enabled():
             raise Http404
         try:
+            if not self.has_valid_state(request):
+                # Also keeps a forged "?error=..." link from logging the user out.
+                return self.login_failure()
+            self.check_iss_parameter(request)
             return super().get(request)
         except LOGIN_ERRORS as exc:
             logger.warning("OIDC login failed: %s", exc)
             return self.login_failure()
+
+    def has_valid_state(self, request):
+        states = request.session.get("oidc_states")
+        if not isinstance(states, dict):
+            return False
+        oldest = time.time() - STATE_MAX_AGE_SECONDS
+        expired = [state for state, entry in states.items() if entry.get("added_on", 0) < oldest]
+        for state in expired:
+            del states[state]
+        if expired:
+            request.session.modified = True
+        return request.GET.get("state") in states
+
+    def check_iss_parameter(self, request):
+        """RFC 9207: the iss response parameter must name our issuer, and is required if advertised."""
+        iss = request.GET.get("iss")
+        if iss is not None and iss != settings.OIDC_ISSUER:
+            raise SuspiciousOperation("Authorization response iss does not match OIDC_ISSUER.")
+        advertised = uses_discovery() and get_provider_metadata().get("authorization_response_iss_parameter_supported")
+        if iss is None and "code" in request.GET and advertised:
+            raise SuspiciousOperation("Authorization response is missing the iss parameter.")
