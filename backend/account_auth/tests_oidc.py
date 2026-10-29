@@ -768,6 +768,15 @@ class OIDCHardeningTests(OIDCTestCase):
 		self.assertFalse(APIClient().get('/api/oidc/config/').data['enabled'])
 		self.assertEqual(self.client.get('/api/oidc/authenticate/').status_code, 404)
 
+	@override_settings(OIDC_RP_SIGN_ALGO='PS256')
+	def test_unsupported_sign_algo_is_logged_at_startup(self):
+		from django.apps import apps
+
+		with self.assertLogs('account_auth.oidc', level='ERROR') as logs:
+			apps.get_app_config('account_auth').ready()
+
+		self.assertIn('OIDC_SIGN_ALGO', logs.output[0])
+
 	@override_settings(OIDC_RP_SIGN_ALGO='HS256', OIDC_RP_CLIENT_SECRET='short')
 	def test_hmac_algo_needs_a_long_client_secret(self):
 		self.assertFalse(APIClient().get('/api/oidc/config/').data['enabled'])
