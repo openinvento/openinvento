@@ -21,7 +21,7 @@ services:
       #OIDC_BUTTON_LABEL: ${OIDC_BUTTON_LABEL} # Provider name on the login button (e.g. Pocket ID)
       #OIDC_AUTO_REDIRECT: ${OIDC_AUTO_REDIRECT:-false} # Skip the login page and go straight to the provider (/auth/login?local=1 still shows it)
       #DISABLE_LOCAL_LOGIN: ${DISABLE_LOCAL_LOGIN:-false} # Disable password login and signup for everyone except LOCAL_LOGIN_USERS
-      #LOCAL_LOGIN_USERS: ${LOCAL_LOGIN_USERS} # Comma-separated break-glass usernames that keep password login (default: INIT_ADMIN_USERNAME)
+      #LOCAL_LOGIN_USERS: ${LOCAL_LOGIN_USERS} # Comma-separated break-glass usernames that keep password login (default: INIT_ADMIN_USERNAME); they sign in at /auth/login?local=1
     volumes:
       - openinvento-data:/data
 
