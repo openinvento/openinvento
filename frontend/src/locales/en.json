@@ -159,6 +159,7 @@
       "invalidCredentials": "Invalid email, username, or password.",
       "invalidField": "Invalid {{field}}.",
       "invalidRequest": "Please check the entered details.",
+      "localLoginDisabled": "Password login is disabled for this instance. Please use single sign-on.",
       "nameRequired": "Name is required.",
       "passwordCommon": "This password is too common.",
       "passwordMismatch": "Passwords do not match.",
@@ -166,6 +167,7 @@
       "passwordRequired": "Password is required.",
       "passwordSimilar": "Password is too similar to your personal information.",
       "passwordTooShort": "Password is too short. It must contain at least 8 characters.",
+      "usernameBreakGlass": "This account is a break-glass login, so its username cannot be changed.",
       "usernameRequired": "Username is required.",
       "usernameTaken": "This username is already taken."
     },
@@ -183,7 +185,14 @@
       "title": "Update your credentials",
       "warning": "For security, you must choose a new username and password before continuing."
     },
-    "signupDisabled": "Public account signup is currently disabled for this instance."
+    "signupDisabled": "Public account signup is currently disabled for this instance.",
+    "sso": {
+      "button": "Sign in with single sign-on",
+      "buttonWithProvider": "Sign in with {{provider}}",
+      "divider": "or",
+      "error": "Single sign-on failed. Please try again or contact your administrator.",
+      "redirecting": "Redirecting to single sign-on..."
+    }
   },
   "boxes": {
     "articleCount": "{{count}} articles",
@@ -496,6 +505,7 @@
     "accountName": "Display name",
     "accountPassword": "New password",
     "accountPasswordConfirm": "Confirm new password",
+    "accountPasswordManagedBySso": "Your account signs in with single sign-on, so it has no password here.",
     "accountSave": "Save personal account",
     "accountSaving": "Saving...",
     "accountUsername": "Username",

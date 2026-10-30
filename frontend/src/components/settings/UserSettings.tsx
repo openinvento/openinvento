@@ -27,6 +27,7 @@ export default function UserSettings() {
   const [name, setName] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [hasPassword, setHasPassword] = useState(true)
   const [accountError, setAccountError] = useState<string | null>(null)
   const [accountSaving, setAccountSaving] = useState(false)
   const [apiKeys, setApiKeys] = useState<APIKey[]>([])
@@ -50,6 +51,7 @@ export default function UserSettings() {
         if (session.user) {
           setUsername(session.user.username)
           setName(session.user.name || session.user.username)
+          setHasPassword(session.user.has_password)
         }
       })
       .catch(() => setAccountError(t("settings.accountLoadError")))
@@ -132,7 +134,7 @@ export default function UserSettings() {
     try {
       await logout()
       console.log("Redirecting to login page...")
-      navigate("/auth/login", { replace: true })
+      navigate("/auth/login?logged_out=1", { replace: true })
     } catch (error) {
       console.error("Error during logout:", error)
     }
@@ -217,33 +219,42 @@ export default function UserSettings() {
             />
           </Field>
 
-          <Field>
-            <FieldLabel htmlFor="account-password">
-              {t("settings.accountPassword")}
-            </FieldLabel>
-            <Input
-              id="account-password"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              minLength={8}
-              autoComplete="new-password"
-            />
-          </Field>
+          {hasPassword ? (
+            <>
+              <Field>
+                <FieldLabel htmlFor="account-password">
+                  {t("settings.accountPassword")}
+                </FieldLabel>
+                <Input
+                  id="account-password"
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  minLength={8}
+                  autoComplete="new-password"
+                />
+              </Field>
 
-          <Field>
-            <FieldLabel htmlFor="account-password-confirm">
-              {t("settings.accountPasswordConfirm")}
-            </FieldLabel>
-            <Input
-              id="account-password-confirm"
-              type="password"
-              value={confirmPassword}
-              onChange={(event) => setConfirmPassword(event.target.value)}
-              minLength={8}
-              autoComplete="new-password"
-            />
-          </Field>
+              <Field>
+                <FieldLabel htmlFor="account-password-confirm">
+                  {t("settings.accountPasswordConfirm")}
+                </FieldLabel>
+                <Input
+                  id="account-password-confirm"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  minLength={8}
+                  autoComplete="new-password"
+                />
+              </Field>
+
+            </>
+          ) : (
+            <FieldDescription className="sm:col-span-2">
+              {t("settings.accountPasswordManagedBySso")}
+            </FieldDescription>
+          )}
 
           <FieldError className="sm:col-span-2">{accountError}</FieldError>
 

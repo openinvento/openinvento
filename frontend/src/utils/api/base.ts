@@ -45,6 +45,10 @@ function buildUrl(path: string) {
   return `${baseUrl}${normalizedPath}`
 }
 
+export function getApiUrl(path: string) {
+  return buildUrl(path)
+}
+
 export function getMediaUrl(path: string | null | undefined) {
   if (!path) return null
   return buildUrl(path)

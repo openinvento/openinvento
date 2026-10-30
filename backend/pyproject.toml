@@ -20,6 +20,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "pydantic>=2.0.0",
     "cryptography>=50.0.2",
+    "mozilla-django-oidc==5.0.2",
 ]
 
 [tool.setuptools]

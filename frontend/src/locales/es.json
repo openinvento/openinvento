@@ -159,6 +159,7 @@
       "invalidCredentials": "Correo electrónico, nombre de usuario o contraseña no válidos.",
       "invalidField": "{{field}} no válido.",
       "invalidRequest": "Comprueba los datos introducidos.",
+      "localLoginDisabled": "El inicio de sesión con contraseña está desactivado en esta instancia. Usa el inicio de sesión único.",
       "nameRequired": "El nombre es obligatorio.",
       "passwordCommon": "Esta contraseña es demasiado común.",
       "passwordMismatch": "Las contraseñas no coinciden.",
@@ -166,6 +167,7 @@
       "passwordRequired": "La contraseña es obligatoria.",
       "passwordSimilar": "La contraseña es demasiado similar a tu información personal.",
       "passwordTooShort": "La contraseña es demasiado corta. Debe contener al menos 8 caracteres.",
+      "usernameBreakGlass": "Esta cuenta es un acceso de emergencia, por lo que su nombre de usuario no se puede cambiar.",
       "usernameRequired": "El nombre de usuario es obligatorio.",
       "usernameTaken": "Este nombre de usuario ya está en uso."
     },
@@ -183,7 +185,14 @@
       "title": "Actualizar tus credenciales",
       "warning": "Por seguridad, debes elegir un nuevo nombre de usuario y una nueva contraseña antes de continuar."
     },
-    "signupDisabled": "El registro público de cuentas está desactivado en esta instancia."
+    "signupDisabled": "El registro público de cuentas está desactivado en esta instancia.",
+    "sso": {
+      "button": "Iniciar sesión con inicio de sesión único",
+      "buttonWithProvider": "Iniciar sesión con {{provider}}",
+      "divider": "o",
+      "error": "El inicio de sesión único ha fallado. Inténtalo de nuevo o contacta con tu administrador.",
+      "redirecting": "Redirigiendo al inicio de sesión único..."
+    }
   },
   "boxes": {
     "articleCount": "{{count}} artículos",
@@ -494,6 +503,7 @@
     "accountName": "Nombre visible",
     "accountPassword": "Nueva contraseña",
     "accountPasswordConfirm": "Confirmar nueva contraseña",
+    "accountPasswordManagedBySso": "Tu cuenta inicia sesión con inicio de sesión único, por lo que aquí no tiene contraseña.",
     "accountSave": "Guardar cuenta personal",
     "accountSaving": "Guardando...",
     "accountUsername": "Nombre de usuario",
