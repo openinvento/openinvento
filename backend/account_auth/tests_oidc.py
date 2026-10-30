@@ -52,6 +52,7 @@ class FakeResponse:
 		self.url = url
 		self.headers = {'content-type': content_type}
 		self.text = str(data) if text is None else text
+		self.history = []
 
 	def json(self):
 		return self._data
@@ -80,7 +81,9 @@ class FakeProvider:
 		self.userinfo_jwt = None
 		self.userinfo_requests = 0
 		self.metadata_extra = {}
-		jwk = jwt.algorithms.RSAAlgorithm.to_jwk(self.private_key.public_key(), as_dict=True)
+		# Requested URL -> URL the response appears to come from after a redirect.
+		self.redirects = {}
+		jwk =jwt.algorithms.RSAAlgorithm.to_jwk(self.private_key.public_key(), as_dict=True)
 		self.jwks = {'keys': [{**jwk, 'kid': 'test-key', 'alg': 'RS256', 'use': 'sig'}]}
 		self.nonce = None
 
@@ -113,6 +116,13 @@ class FakeProvider:
 		return jwt.encode(claims, **self.id_token_signing)
 
 	def get(self, url, **kwargs):
+		response = self.answer_get(url)
+		if url in self.redirects:
+			response.history = [FakeResponse(status_code=302, url=url)]
+			response.url = self.redirects[url]
+		return response
+
+	def answer_get(self, url):
 		if url == f'{self.issuer}/.well-known/openid-configuration':
 			self.discovery_requests += 1
 			return FakeResponse(self.metadata, url=url)
@@ -1019,6 +1029,35 @@ class OIDCHardeningTests(OIDCTestCase):
 			response = self.login()
 
 		self.assertEqual(response['Location'], '/app')
+
+	def redirect_to_http(self, path):
+		self.provider.redirects[f'{ISSUER}{path}'] = f'http://idp.example.test{path}'
+
+	def test_discovery_redirect_to_http_is_rejected(self):
+		self.redirect_to_http('/.well-known/openid-configuration')
+
+		self.assertEqual(self.client.get('/api/oidc/authenticate/')['Location'], FAILURE_URL)
+
+	def test_discovery_redirect_within_https_is_allowed(self):
+		url = f'{ISSUER}/.well-known/openid-configuration'
+		self.provider.redirects[url] = f'{ISSUER}/realms/main/.well-known/openid-configuration'
+
+		self.assertEqual(self.login()['Location'], '/app')
+
+	def test_jwks_redirect_to_http_is_rejected(self):
+		self.redirect_to_http('/jwks')
+
+		self.assert_login_failed(self.login())
+
+	def test_userinfo_redirect_to_http_is_rejected(self):
+		self.redirect_to_http('/userinfo')
+
+		self.assert_login_failed(self.login())
+
+	def test_token_request_does_not_follow_redirects(self):
+		self.login()
+
+		self.assertIs(self.provider.token_request_kwargs[-1]['allow_redirects'], False)
 
 	# Profile data
 

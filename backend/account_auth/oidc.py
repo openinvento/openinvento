@@ -126,6 +126,25 @@ def require_https(url, name):
     raise OIDCConfigurationError(f"{name} must use https (or set OIDC_ALLOW_INSECURE_HTTP): {url}")
 
 
+def provider_get(url, name, **kwargs):
+    """GET from the provider, following redirects only as long as every hop keeps https.
+
+    requests follows redirects to http as well; an attacker on that leg could swap the
+    discovery document, the JWKS or the UserInfo claims.
+    """
+    response = requests.get(
+        url,
+        verify=getattr(settings, "OIDC_VERIFY_SSL", True),
+        timeout=settings.OIDC_TIMEOUT,
+        proxies=getattr(settings, "OIDC_PROXY", None),
+        **kwargs,
+    )
+    for hop in [*response.history, response]:
+        require_https(hop.url, name)
+    response.raise_for_status()
+    return response
+
+
 def uses_discovery():
     return not all(getattr(settings, name, "") for name in ENDPOINT_SETTINGS)
 
@@ -135,12 +154,7 @@ def get_provider_metadata():
     cache_key = f"oidc-provider-metadata:{issuer}"
     metadata = cache.get(cache_key)
     if metadata is None:
-        response = requests.get(
-            f"{issuer.rstrip('/')}/.well-known/openid-configuration",
-            timeout=settings.OIDC_TIMEOUT,
-        )
-        response.raise_for_status()
-        metadata = response.json()
+        metadata = provider_get(f"{issuer.rstrip('/')}/.well-known/openid-configuration", "OIDC discovery").json()
         # OpenID Connect Discovery 1.0, section 4.3: the issuer must match exactly.
         if metadata.get("issuer") != issuer:
             raise OIDCConfigurationError(
@@ -214,6 +228,8 @@ class OIDCBackend(OIDCAuthenticationBackend):
             verify=self.get_settings("OIDC_VERIFY_SSL", True),
             timeout=self.get_settings("OIDC_TIMEOUT", None),
             proxies=self.get_settings("OIDC_PROXY", None),
+            # A 307/308 would resend the code, the PKCE verifier and the client secret, possibly over http.
+            allow_redirects=False,
         )
         self.raise_token_response_error(response)
         token = response.json()
@@ -232,20 +248,20 @@ class OIDCBackend(OIDCAuthenticationBackend):
         )
 
     def retrieve_matching_jwk(self, token):
+        """Replaces the base class so the JWKS is fetched with provider_get and tokens without kid work."""
         header = jwt.get_unverified_header(token)
-        if "kid" in header:
-            return super().retrieve_matching_jwk(token)
-        # Providers with a single signing key may omit kid; never guess between several keys.
-        response = requests.get(
-            self.OIDC_OP_JWKS_ENDPOINT,
-            verify=self.get_settings("OIDC_VERIFY_SSL", True),
-            timeout=self.get_settings("OIDC_TIMEOUT", None),
-        )
-        response.raise_for_status()
         algo = header.get("alg")
+        jwks = provider_get(self.OIDC_OP_JWKS_ENDPOINT, "OIDC_OP_JWKS_ENDPOINT").json().get("keys", [])
+        if "kid" in header:
+            # Same selection as the base class: matching kid, and matching alg where the key names one.
+            keys = [key for key in jwks if key.get("kid") == header["kid"] and key.get("alg", algo) == algo]
+            if not keys:
+                raise SuspiciousOperation("Could not find a valid JWKS.")
+            return jwt.PyJWK(keys[-1])
+        # Providers with a single signing key may omit kid; never guess between several keys.
         kty, crv = KEY_TYPE_FOR_ALGO.get(algo, (None, None))
         keys = [
-            key for key in response.json().get("keys", [])
+            key for key in jwks
             if key.get("use", "sig") == "sig"
             and key.get("alg", algo) == algo
             and key.get("kty") == kty
@@ -257,14 +273,11 @@ class OIDCBackend(OIDCAuthenticationBackend):
 
     def get_userinfo(self, access_token, id_token, payload):
         """UserInfo request; replaces the base class so a signed response can be told apart from JSON."""
-        response = requests.get(
+        response = provider_get(
             self.OIDC_OP_USER_ENDPOINT,
+            "OIDC_OP_USER_ENDPOINT",
             headers={"Authorization": f"Bearer {access_token}"},
-            verify=self.get_settings("OIDC_VERIFY_SSL", True),
-            timeout=self.get_settings("OIDC_TIMEOUT", None),
-            proxies=self.get_settings("OIDC_PROXY", None),
         )
-        response.raise_for_status()
         if response.headers.get("content-type", "").lower().startswith("application/jwt"):
             userinfo = self.verify_token(response.text)
             # OpenID Connect Core 1.0, section 5.3.2: a signed response must contain iss and aud.
