@@ -1,8 +1,28 @@
 import { useEffect, useRef, useState } from "react"
-import { BarcodeDetector } from "barcode-detector"
+import { BarcodeDetector, prepareZXingModule } from "barcode-detector/ponyfill"
 import { Camera, LoaderCircle, RotateCcw, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+
+interface PrepareZXingOptions {
+	overrides?: {
+		locateFile?: (path: string, prefix: string) => string;
+	};
+}
+
+const BASE_PATH = import.meta.env?.BASE_URL || "/"; 
+
+prepareZXingModule({
+	overrides: {
+		locateFile: (path: string, prefix: string): string => {
+			if (path.endsWith(".wasm")) {
+				const fullUrl = new URL(path, window.location.origin + BASE_PATH).href;
+				return fullUrl;
+			}
+			return prefix + path;
+		},
+	},
+} as PrepareZXingOptions);
 
 type ScannerProps = {
 	onClose: () => void
