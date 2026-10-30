@@ -12,7 +12,7 @@ The library is extended with:
 import logging
 import re
 import time
-from urllib.parse import quote_plus, urlsplit
+from urllib.parse import quote_plus, urljoin, urlsplit
 
 import jwt
 import requests
@@ -130,17 +130,23 @@ def provider_get(url, name, **kwargs):
     """GET from the provider, following redirects only as long as every hop keeps https.
 
     requests follows redirects to http as well; an attacker on that leg could swap the
-    discovery document, the JWKS or the UserInfo claims.
+    discovery document, the JWKS or the UserInfo claims. requests runs response hooks on
+    every redirect before it sends the next request, so the hook rejects an http target
+    before anything goes out to it. Redirect limit and Authorization stripping stay with requests.
     """
+
+    def check_redirect_target(response, *args, **kwargs):
+        if response.is_redirect:
+            require_https(urljoin(response.url, response.headers["location"]), name)
+
     response = requests.get(
         url,
         verify=getattr(settings, "OIDC_VERIFY_SSL", True),
         timeout=settings.OIDC_TIMEOUT,
         proxies=getattr(settings, "OIDC_PROXY", None),
+        hooks={"response": check_redirect_target},
         **kwargs,
     )
-    for hop in [*response.history, response]:
-        require_https(hop.url, name)
     response.raise_for_status()
     return response
 

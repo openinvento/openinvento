@@ -13,7 +13,7 @@ from cryptography.hazmat.primitives.asymmetric import ec, rsa
 from django.contrib.auth import get_user
 from django.core.cache import cache
 from django.http import HttpRequest
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from mozilla_django_oidc.utils import generate_code_challenge
 from requests.auth import HTTPBasicAuth
 from rest_framework.test import APIClient
@@ -21,6 +21,7 @@ from rest_framework.test import APIClient
 from inventory.models import Inventory
 
 from .models import CustomUser, OIDCIdentity
+from .oidc import OIDCConfigurationError, provider_get
 
 ISSUER = 'https://idp.example.test'
 CLIENT_ID = 'openinvento'
@@ -54,6 +55,10 @@ class FakeResponse:
 		self.text = str(data) if text is None else text
 		self.history = []
 
+	@property
+	def is_redirect(self):
+		return 'location' in self.headers
+
 	def json(self):
 		return self._data
 
@@ -81,8 +86,10 @@ class FakeProvider:
 		self.userinfo_jwt = None
 		self.userinfo_requests = 0
 		self.metadata_extra = {}
-		# Requested URL -> URL the response appears to come from after a redirect.
+		# Requested URL -> URL the provider redirects it to.
 		self.redirects = {}
+		# Every URL a GET went out to, redirect hops included.
+		self.requested_urls = []
 		jwk =jwt.algorithms.RSAAlgorithm.to_jwk(self.private_key.public_key(), as_dict=True)
 		self.jwks = {'keys': [{**jwk, 'kid': 'test-key', 'alg': 'RS256', 'use': 'sig'}]}
 		self.nonce = None
@@ -115,11 +122,24 @@ class FakeProvider:
 		claims = {key: value for key, value in claims.items() if value is not None}
 		return jwt.encode(claims, **self.id_token_signing)
 
-	def get(self, url, **kwargs):
+	def get(self, url, hooks=None, **kwargs):
+		# Like requests: run the response hook on each redirect before following it.
+		hook = (hooks or {}).get('response')
+		history = []
+		target = url
+		while target in self.redirects:
+			self.requested_urls.append(target)
+			hop = FakeResponse(status_code=302, url=target)
+			hop.headers['location'] = self.redirects[target]
+			if hook:
+				hook(hop)
+			history.append(hop)
+			target = self.redirects[target]
+		self.requested_urls.append(target)
+		# The redirect target serves what the original URL would have served.
 		response = self.answer_get(url)
-		if url in self.redirects:
-			response.history = [FakeResponse(status_code=302, url=url)]
-			response.url = self.redirects[url]
+		response.history = history
+		response.url = target
 		return response
 
 	def answer_get(self, url):
@@ -1031,28 +1051,41 @@ class OIDCHardeningTests(OIDCTestCase):
 		self.assertEqual(response['Location'], '/app')
 
 	def redirect_to_http(self, path):
-		self.provider.redirects[f'{ISSUER}{path}'] = f'http://idp.example.test{path}'
+		target = f'http://idp.example.test{path}'
+		self.provider.redirects[f'{ISSUER}{path}'] = target
+		return target
 
 	def test_discovery_redirect_to_http_is_rejected(self):
-		self.redirect_to_http('/.well-known/openid-configuration')
+		target = self.redirect_to_http('/.well-known/openid-configuration')
 
 		self.assertEqual(self.client.get('/api/oidc/authenticate/')['Location'], FAILURE_URL)
+		self.assertNotIn(target, self.provider.requested_urls)
 
 	def test_discovery_redirect_within_https_is_allowed(self):
 		url = f'{ISSUER}/.well-known/openid-configuration'
-		self.provider.redirects[url] = f'{ISSUER}/realms/main/.well-known/openid-configuration'
+		target = f'{ISSUER}/realms/main/.well-known/openid-configuration'
+		self.provider.redirects[url] = target
 
 		self.assertEqual(self.login()['Location'], '/app')
+		self.assertIn(target, self.provider.requested_urls)
 
 	def test_jwks_redirect_to_http_is_rejected(self):
-		self.redirect_to_http('/jwks')
+		target = self.redirect_to_http('/jwks')
 
 		self.assert_login_failed(self.login())
+		self.assertNotIn(target, self.provider.requested_urls)
 
 	def test_userinfo_redirect_to_http_is_rejected(self):
-		self.redirect_to_http('/userinfo')
+		target = self.redirect_to_http('/userinfo')
 
 		self.assert_login_failed(self.login())
+		self.assertNotIn(target, self.provider.requested_urls)
+
+	def test_relative_redirect_is_resolved_against_the_current_url(self):
+		url = f'{ISSUER}/.well-known/openid-configuration'
+		self.provider.redirects[url] = '/realms/main/.well-known/openid-configuration'
+
+		self.assertEqual(self.login()['Location'], '/app')
 
 	def test_token_request_does_not_follow_redirects(self):
 		self.login()
@@ -1083,3 +1116,47 @@ class OIDCHardeningTests(OIDCTestCase):
 
 		self.assertEqual(response.status_code, 401)
 		self.assertEqual(self.provider.discovery_requests, 0)
+
+
+@override_settings(**OIDC_SETTINGS)
+class ProviderGetTransportTests(SimpleTestCase):
+	"""Runs the real redirect handling of requests; only the transport adapter is replaced."""
+
+	def serve(self, responses):
+		sent = []
+
+		def send(adapter, request, **kwargs):
+			sent.append(request.url)
+			status, headers = responses[request.url]
+			response = requests.Response()
+			response.status_code = status
+			response.headers.update(headers)
+			response.url = request.url
+			response.request = request
+			response._content = b'{}'
+			return response
+
+		patcher = patch('requests.adapters.HTTPAdapter.send', autospec=True, side_effect=send)
+		patcher.start()
+		self.addCleanup(patcher.stop)
+		return sent
+
+	def test_http_redirect_target_is_never_requested(self):
+		sent = self.serve({
+			f'{ISSUER}/jwks': (302, {'Location': 'http://idp.example.test/jwks'}),
+			'http://idp.example.test/jwks': (200, {}),
+		})
+
+		with self.assertRaises(OIDCConfigurationError):
+			provider_get(f'{ISSUER}/jwks', 'OIDC_OP_JWKS_ENDPOINT')
+		self.assertEqual(sent, [f'{ISSUER}/jwks'])
+
+	def test_https_redirect_is_followed(self):
+		sent = self.serve({
+			f'{ISSUER}/jwks': (302, {'Location': '/realms/main/jwks'}),
+			f'{ISSUER}/realms/main/jwks': (200, {}),
+		})
+
+		provider_get(f'{ISSUER}/jwks', 'OIDC_OP_JWKS_ENDPOINT')
+
+		self.assertEqual(sent, [f'{ISSUER}/jwks', f'{ISSUER}/realms/main/jwks'])
