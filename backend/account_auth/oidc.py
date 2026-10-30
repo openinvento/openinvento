@@ -329,7 +329,12 @@ class OIDCBackend(OIDCAuthenticationBackend):
             except IntegrityError:
                 # A parallel first login of the same account (e.g. a second tab) linked it first;
                 # the account created here is rolled back.
-                identity = OIDCIdentity.objects.select_related("user").get(issuer=issuer, subject=subject)
+                identity = OIDCIdentity.objects.select_related("user").filter(issuer=issuer, subject=subject).first()
+                if identity is None:
+                    # Another constraint failed, e.g. a parallel first login of a different account
+                    # took the same username; this attempt fails and the user can retry.
+                    logger.warning("OIDC login failed: account for subject %s could not be created.", subject)
+                    return None
                 user = identity.user
             return self.update_user(user, claims)
 

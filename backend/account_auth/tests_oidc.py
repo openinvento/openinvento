@@ -435,6 +435,17 @@ class OIDCCallbackTests(OIDCTestCase):
 		self.assertFalse(CustomUser.objects.filter(username='alice').exists())
 		self.assertEqual(OIDCIdentity.objects.count(), 1)
 
+	def test_parallel_first_login_with_the_same_username_fails_cleanly(self):
+		# Another account takes the username between get_username() and the insert,
+		# so the insert hits the username constraint and no identity exists for this subject.
+		CustomUser.objects.create_user(username='alice')
+
+		with patch('account_auth.oidc.OIDCBackend.get_username', return_value='alice'):
+			self.assert_login_failed(self.login())
+
+		self.assertFalse(OIDCIdentity.objects.exists())
+		self.assertEqual(CustomUser.objects.count(), 1)
+
 	def test_inactive_user_is_rejected(self):
 		user = CustomUser.objects.create_user(username='alice', is_active=False)
 		OIDCIdentity.objects.create(user=user, issuer=ISSUER, subject='user-1')
