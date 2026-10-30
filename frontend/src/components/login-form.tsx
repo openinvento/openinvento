@@ -79,7 +79,9 @@ export function LoginForm({
   }
 
   const ssoEnabled = Boolean(oidcConfig?.enabled)
-  const showPasswordForm = !oidcConfig || oidcConfig.local_login_enabled || forceLocalLogin
+  // Without single sign-on the password form is the only way in, e.g. for break-glass accounts.
+  const showPasswordForm =
+    !oidcConfig || !oidcConfig.enabled || oidcConfig.local_login_enabled || forceLocalLogin
   const ssoButtonLabel = oidcConfig?.button_label
     ? t("auth.sso.buttonWithProvider", { provider: oidcConfig.button_label })
     : t("auth.sso.button")
