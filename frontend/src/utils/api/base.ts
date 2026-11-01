@@ -180,6 +180,13 @@ export async function fetchData<T>(path: string, options?: RequestOptions) {
   return request<T>("GET", path, options)
 }
 
+// Filename from a Content-Disposition header, e.g. one with the date of a backup.
+function getContentDispositionFilename(header: string | null) {
+  const match = header?.match(/filename="([^"]+)"/)
+  return match?.[1] ?? null
+}
+
+// The server's filename wins over the fallback filename.
 export async function downloadFile(path: string, filename: string) {
   const response = await fetch(buildUrl(path), { credentials: "include" })
   if (!response.ok) {
@@ -192,7 +199,7 @@ export async function downloadFile(path: string, filename: string) {
   const objectUrl = URL.createObjectURL(await response.blob())
   const link = document.createElement("a")
   link.href = objectUrl
-  link.download = filename
+  link.download = getContentDispositionFilename(response.headers.get("content-disposition")) ?? filename
   document.body.appendChild(link)
   link.click()
   link.remove()

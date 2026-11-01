@@ -164,6 +164,22 @@ class InstanceBackupTests(TransactionTestCase):
 		self.assertEqual(archive.namelist(), ["db.sqlite3"])
 		self.assertEqual(self.read_database(archive), ("ok", ["configured"]))
 
+	def test_filename_has_date_and_time(self):
+		now = datetime(2026, 11, 1, 15, 30, 12, tzinfo=datetime_timezone.utc)
+
+		with (
+			override_settings(DATA_DIR=self.data_dir),
+			timezone.override("UTC"),
+			patch("django.utils.timezone.now", return_value=now),
+		):
+			response = self.client.get("/api/instance-settings/backup/")
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(
+			response["Content-Disposition"],
+			'attachment; filename="openinvento-instance-backup-2026-11-01-153012.zip"',
+		)
+
 	def test_only_instance_admins_can_download_it(self):
 		member = CustomUser.objects.create_user(username="member", password="StrongPassword!123")
 		self.client.force_login(member)
