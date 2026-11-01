@@ -2,12 +2,14 @@
 
 import logging
 import os
+import sqlite3
 import tempfile
 import zipfile
 from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_not_required
+from django.db import connection
 from django.http import FileResponse, Http404, JsonResponse
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -70,6 +72,31 @@ class VersionCheckView(APIView):
         })
 
 
+# Name of the database copy in the backup archive, as in a default data directory.
+BACKUP_DATABASE_NAME = "db.sqlite3"
+# Files SQLite keeps next to the database while it is in use.
+SQLITE_SIDECAR_SUFFIXES = ("", "-journal", "-wal", "-shm")
+
+
+def copy_database(target_path):
+    """Write a consistent copy of the database to target_path.
+
+    Copying the database file while a request writes to it can produce a corrupt copy
+    (https://www.sqlite.org/howtocorrupt.html, section 1.2). SQLite's online backup API copies
+    the last committed state instead, without stopping the application. It reads through its own
+    connection: Django's connection may have a transaction open, and a backup from a connection
+    with an uncommitted write waits forever.
+    """
+    name = str(connection.settings_dict["NAME"])
+    source = sqlite3.connect(name, uri=name.startswith("file:"))
+    target = sqlite3.connect(target_path)
+    try:
+        source.backup(target)
+    finally:
+        target.close()
+        source.close()
+
+
 # Attention: This endpoint return the whole data directory
 class InstanceBackupView(APIView):
     """Download a ZIP archive of the complete instance data directory."""
@@ -77,13 +104,19 @@ class InstanceBackupView(APIView):
 
     def get(self, request):
         data_dir = os.path.realpath(settings.DATA_DIR)
+        # The live database file is replaced by the consistent copy below.
+        database_path = os.path.realpath(connection.settings_dict["NAME"])
+        skipped_paths = {database_path + suffix for suffix in SQLITE_SIDECAR_SUFFIXES}
         archive_file = tempfile.TemporaryFile()
-        with zipfile.ZipFile(archive_file, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        with tempfile.TemporaryDirectory() as temp_dir, zipfile.ZipFile(archive_file, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            database_copy = os.path.join(temp_dir, BACKUP_DATABASE_NAME)
+            copy_database(database_copy)
+            archive.write(database_copy, BACKUP_DATABASE_NAME)
             for root, directories, filenames in os.walk(data_dir, followlinks=False):
                 directories[:] = [name for name in directories if not os.path.islink(os.path.join(root, name))]
                 for filename in filenames:
                     source_path = os.path.join(root, filename)
-                    if os.path.islink(source_path):
+                    if os.path.islink(source_path) or source_path in skipped_paths:
                         continue
                     archive.write(source_path, os.path.relpath(source_path, data_dir))
 
