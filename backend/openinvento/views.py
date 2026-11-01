@@ -104,9 +104,12 @@ class InstanceBackupView(APIView):
 
     def get(self, request):
         data_dir = os.path.realpath(settings.DATA_DIR)
-        # The live database file is replaced by the consistent copy below.
+        # The live database file is replaced by the consistent copy below. A db.sqlite3 in the data
+        # directory that is not the configured database (e.g. left over after setting DATABASE_PATH)
+        # is left out too, so it can never be restored in place of the real one.
         database_path = os.path.realpath(connection.settings_dict["NAME"])
-        skipped_paths = {database_path + suffix for suffix in SQLITE_SIDECAR_SUFFIXES}
+        default_path = os.path.join(data_dir, BACKUP_DATABASE_NAME)
+        skipped_paths = {path + suffix for path in (database_path, default_path) for suffix in SQLITE_SIDECAR_SUFFIXES}
         archive_file = tempfile.TemporaryFile()
         with tempfile.TemporaryDirectory() as temp_dir, zipfile.ZipFile(archive_file, "w", compression=zipfile.ZIP_DEFLATED) as archive:
             database_copy = os.path.join(temp_dir, BACKUP_DATABASE_NAME)

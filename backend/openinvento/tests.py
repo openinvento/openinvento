@@ -132,6 +132,35 @@ class InstanceBackupTests(TransactionTestCase):
 
 		self.assertEqual(self.read_database(archive), ("ok", ["committed"]))
 
+	def create_database(self, path, username):
+		database = sqlite3.connect(path)
+		database.execute("CREATE TABLE account_auth_customuser (username TEXT)")
+		database.execute("INSERT INTO account_auth_customuser VALUES (?)", (username,))
+		database.commit()
+		database.close()
+
+	def test_contains_a_database_outside_the_data_directory(self):
+		database_dir = Path(tempfile.mkdtemp())
+		self.addCleanup(shutil.rmtree, database_dir)
+		self.create_database(database_dir / "openinvento.sqlite3", "configured")
+		with patch.dict(connection.settings_dict, {"NAME": str(database_dir / "openinvento.sqlite3")}):
+			archive = self.download()
+
+		self.assertEqual(archive.namelist(), ["db.sqlite3"])
+		self.assertEqual(self.read_database(archive), ("ok", ["configured"]))
+
+	def test_leftover_database_in_the_data_directory_is_left_out(self):
+		database_dir = Path(tempfile.mkdtemp())
+		self.addCleanup(shutil.rmtree, database_dir)
+		self.create_database(database_dir / "openinvento.sqlite3", "configured")
+		self.create_database(self.data_dir / "db.sqlite3", "leftover")
+		(self.data_dir / "db.sqlite3-journal").write_bytes(b"journal")
+		with patch.dict(connection.settings_dict, {"NAME": str(database_dir / "openinvento.sqlite3")}):
+			archive = self.download()
+
+		self.assertEqual(archive.namelist(), ["db.sqlite3"])
+		self.assertEqual(self.read_database(archive), ("ok", ["configured"]))
+
 	def test_only_instance_admins_can_download_it(self):
 		member = CustomUser.objects.create_user(username="member", password="StrongPassword!123")
 		self.client.force_login(member)
