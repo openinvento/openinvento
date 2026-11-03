@@ -232,7 +232,7 @@ class InventoryManageView(InventoryAccessMixin, APIView):
         inventory.delete()
         return Response(status=204)
 
-class ExportInventoryView(InventoryAccessMixin, APIView):
+class ExportInventoryView(StandardOrAPIKeyAuthMixin, InventoryAccessMixin, APIView):
     permission_classes = (IsAuthenticated, IsInventoryMember)
 
     def get(self, request, inventory_uuid):
@@ -444,7 +444,7 @@ class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
 
         return Response({"error": "No inventory item was found for this code."}, status=404)
 
-class CodePdfView(InventoryScopedAPIView):
+class CodePdfView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     page_sizes: ClassVar[dict[str, tuple[str, int, int]]] = {
         "a4": ("A4", 210, 297),
         "a5": ("A5", 148, 210),
