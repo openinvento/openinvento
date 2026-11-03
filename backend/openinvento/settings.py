@@ -412,8 +412,15 @@ USE_I18N = True
 USE_TZ = True
 
 USE_X_FORWARDED_HOST = True
-# for https:
-#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# When every configured origin is https, TLS ends at a reverse proxy in front of the bundled nginx,
+# which forwards the original scheme. Trust it for request.is_secure() and send cookies only over https.
+# With a single http origin left, secure cookies would break logins there, so everything stays off.
+_app_origins = ([APP_URL] if APP_URL else []) + APP_URLS
+_https_only = bool(_app_origins) and all(url.startswith("https://") for url in _app_origins)
+SESSION_COOKIE_SECURE = _https_only
+CSRF_COOKIE_SECURE = _https_only
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https") if _https_only else None
 
 
 # Static files (CSS, JavaScript, Images)
