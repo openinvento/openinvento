@@ -1,6 +1,6 @@
 from datetime import datetime, time, timedelta, timezone as datetime_timezone
 
-from django.test import SimpleTestCase
+from django.test import Client, SimpleTestCase, TestCase
 from django.utils import timezone
 
 from .daily_scheduler import DailyScheduler
@@ -40,3 +40,11 @@ class DailySchedulerTests(SimpleTestCase):
 			scheduler._seconds_until_next_job(now),
 			int(timedelta(days=1, hours=1).total_seconds()),
 		)
+
+
+class HealthViewTests(TestCase):
+	def test_answers_without_login(self):
+		response = Client().get("/api/health")
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response.json(), {"status": "healthy"})

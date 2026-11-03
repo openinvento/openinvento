@@ -7,6 +7,7 @@ import zipfile
 from pathlib import Path
 
 from django.conf import settings
+from django.contrib.auth.decorators import login_not_required
 from django.http import FileResponse, Http404, JsonResponse
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -24,6 +25,9 @@ from .version_fetching import VersionFetcher
 
 #TODO: Add option to serve user uploads through Nginx or a connected S3 storage bucket
 
+# Monitoring and container healthchecks call this without a session; LoginRequiredMiddleware would
+# otherwise redirect them to the login page, whose 200 hides whether Django itself answers.
+@login_not_required
 def health_view(request):
     """Return HTTP 200 for health checks."""
     return JsonResponse({'status': 'healthy'}, status=200)
