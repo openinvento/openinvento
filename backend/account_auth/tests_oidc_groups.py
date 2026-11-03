@@ -2,6 +2,7 @@ import os
 import uuid
 from unittest.mock import patch
 
+from django.core.exceptions import ImproperlyConfigured
 from django.test import SimpleTestCase, override_settings
 from rest_framework.test import APIClient
 
@@ -40,27 +41,26 @@ class GroupInventoriesSettingTests(SimpleTestCase):
 		self.assertEqual(mapping['family'], str(inventory))
 		self.assertIn('a,b=c:d', mapping)
 
-	def test_invalid_json_is_ignored(self):
-		with self.assertLogs('openinvento.settings', 'WARNING'):
-			self.assertEqual(self.parse('{"family": '), {})
+	def test_empty_value_is_empty(self):
+		self.assertEqual(self.parse('  '), {})
 
-	def test_non_object_is_ignored(self):
-		with self.assertLogs('openinvento.settings', 'WARNING'):
-			self.assertEqual(self.parse('["family"]'), {})
+	def test_invalid_json_stops_the_start(self):
+		with self.assertRaisesMessage(ImproperlyConfigured, 'not valid JSON'):
+			self.parse('{"family": ')
 
-	def test_entry_without_uuid_is_ignored(self):
+	def test_non_object_stops_the_start(self):
+		with self.assertRaisesMessage(ImproperlyConfigured, 'must be a JSON object'):
+			self.parse('["family"]')
+
+	def test_entry_without_uuid_stops_the_start(self):
+		for value in ('"not-a-uuid"', '42', 'null'):
+			with self.subTest(value=value), self.assertRaisesMessage(ImproperlyConfigured, "for group 'typo'"):
+				self.parse(f'{{"family": "{uuid.uuid4()}", "typo": {value}}}')
+
+	def test_inventory_mapped_twice_stops_the_start(self):
 		inventory = str(uuid.uuid4())
-		with self.assertLogs('openinvento.settings', 'WARNING'):
-			mapping = self.parse(f'{{"family": "{inventory}", "typo": "not-a-uuid", "number": 42}}')
-
-		self.assertEqual(mapping, {'family': inventory})
-
-	def test_inventory_mapped_twice_keeps_first_group(self):
-		inventory = str(uuid.uuid4())
-		with self.assertLogs('openinvento.settings', 'WARNING'):
-			mapping = self.parse(f'{{"family": "{inventory}", "relatives": "{inventory}"}}')
-
-		self.assertEqual(mapping, {'family': inventory})
+		with self.assertRaisesMessage(ImproperlyConfigured, 'more than one group'):
+			self.parse(f'{{"family": "{inventory}", "relatives": "{inventory.upper()}"}}')
 
 
 @override_settings(**GROUP_SYNC_SETTINGS)

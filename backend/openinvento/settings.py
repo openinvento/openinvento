@@ -7,6 +7,7 @@ from datetime import timedelta
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
 
 from .custom_logger import LOGGING, configure_early_logging
@@ -267,8 +268,9 @@ OIDC_ADMIN_GROUP = os.getenv("OIDC_ADMIN_GROUP", "").strip()
 def _group_inventories_env(name):
     """Parse the explicit group mapping, a JSON object {"<group>": "<inventory uuid>"}.
 
-    JSON because group names may contain commas, "=" or ":". Invalid entries are dropped with a
-    warning, so a typo never binds an unexpected inventory.
+    JSON because group names may contain commas, "=" or ":". Any invalid entry stops the start:
+    dropping it would release the inventory it protects, and a typo must never bind an
+    unexpected inventory.
     """
     raw_value = os.getenv(name, "").strip()
     if not raw_value:
@@ -276,22 +278,18 @@ def _group_inventories_env(name):
     try:
         value = json.loads(raw_value)
     except json.JSONDecodeError as exc:
-        logger.warning("%s is not valid JSON and is ignored: %s", name, exc)
-        return {}
+        raise ImproperlyConfigured(f"{name} is not valid JSON: {exc}") from exc
     if not isinstance(value, dict):
-        logger.warning("%s must be a JSON object of group names to inventory UUIDs and is ignored.", name)
-        return {}
+        raise ImproperlyConfigured(f"{name} must be a JSON object of group names to inventory UUIDs.")
     mapping, inventories = {}, set()
     for group, inventory in value.items():
         try:
             inventory = str(uuid.UUID(str(inventory)))
-        except ValueError:
-            logger.warning("%s: %r is not an inventory UUID; the entry for group %r is ignored.", name, inventory, group)
-            continue
+        except ValueError as exc:
+            raise ImproperlyConfigured(f"{name}: {inventory!r} for group {group!r} is not an inventory UUID.") from exc
         # Two groups for one inventory would rebind it on every login.
         if inventory in inventories:
-            logger.warning("%s maps inventory %s more than once; the entry for group %r is ignored.", name, inventory, group)
-            continue
+            raise ImproperlyConfigured(f"{name} maps inventory {inventory} to more than one group ({group!r}).")
         inventories.add(inventory)
         mapping[group] = inventory
     return mapping
