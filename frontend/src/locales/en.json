@@ -609,7 +609,7 @@
       "invitesDisabled": "Adding people is disabled for this instance.",
       "loadError": "Could not load inventory settings.",
       "loading": "Loading inventory settings...",
-      "managedBySso": "Members of this inventory are managed by single sign-on. They change when someone joins or leaves the group at the identity provider and logs in again.",
+      "managedBySso": "Members of this inventory are managed by single sign-on. They change when someone joins or leaves the group at the identity provider and logs in again. Members who do not log in through single sign-on can be removed here.",
       "members": "Shared with",
       "name": "Name",
       "noMembers": "No members found.",

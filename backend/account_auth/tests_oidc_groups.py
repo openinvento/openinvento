@@ -431,6 +431,33 @@ class ManagedInventoryAPITests(GroupSyncTestCase):
 		self.assertEqual(response.status_code, 403)
 		self.assertTrue(Inventory.objects.filter(pk=self.inventory.pk, users=self.alice()).exists())
 
+	def test_members_list_marks_sso_members_as_not_removable(self):
+		self.inventory.users.add(self.other)
+
+		members = {member['username']: member['removable'] for member in self.client.get(self.members_url()).data['members']}
+
+		self.assertEqual(members, {'alice': False, 'other': True})
+
+	def test_member_without_sso_can_be_removed(self):
+		self.inventory.users.add(self.other)
+
+		response = self.client.delete(self.members_url(self.other))
+
+		self.assertEqual(response.status_code, 204)
+		self.assertEqual(list(self.inventory.users.all()), [self.alice()])
+
+	def test_last_member_without_sso_leaving_keeps_the_inventory(self):
+		self.login_with_groups([])
+		self.inventory.users.add(self.other)
+		client = APIClient()
+		client.force_authenticate(self.other)
+
+		response = client.delete(self.members_url(self.other))
+
+		self.assertEqual(response.status_code, 204)
+		self.assertTrue(Inventory.objects.filter(pk=self.inventory.pk).exists())
+		self.assertFalse(self.inventory.users.exists())
+
 	def test_regular_member_cannot_delete_it(self):
 		response = self.client.delete(f'/api/inventories/{self.inventory.uuid}/')
 

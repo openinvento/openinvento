@@ -130,6 +130,8 @@ export type InventoryUser = {
   name: string
   is_superuser: boolean
   require_reset: boolean
+  // Only in member lists: false for members the single sign-on group sync manages.
+  removable?: boolean
 }
 
 export type InventoryMembership = {

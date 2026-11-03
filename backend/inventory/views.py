@@ -180,6 +180,12 @@ class InventoryMembersView(InventoryAccessMixin, APIView):
     def get(self, request, inventory_uuid):
         inventory = self.get_inventory(request, inventory_uuid)
         members = inventory.users.order_by("name", "username")
+        # In a managed inventory the sync owns the members that log in through single sign-on.
+        sso_members = (
+            set(members.filter(oidc_identities__isnull=False).values_list("pk", flat=True))
+            if inventory.oidc_managed
+            else set()
+        )
         available_users = (
             CustomUser.objects.exclude(inventories=inventory).order_by("name", "username")
             if settings.ALLOW_INVENTORY_USER_INVITES
@@ -187,7 +193,10 @@ class InventoryMembersView(InventoryAccessMixin, APIView):
         )
         return Response({
             "inventory": InventorySerializer(inventory).data,
-            "members": UserSerializer(members, many=True).data,
+            "members": [
+                {**UserSerializer(member).data, "removable": member.pk not in sso_members}
+                for member in members
+            ],
             "available_users": UserSerializer(available_users, many=True).data,
             "can_invite": settings.ALLOW_INVENTORY_USER_INVITES and not inventory.oidc_managed,
         })
@@ -204,13 +213,16 @@ class InventoryMembersView(InventoryAccessMixin, APIView):
 
     def delete(self, request, inventory_uuid, user_uuid):
         inventory = self.get_inventory(request, inventory_uuid)
-        # Also covers leaving: the next login would add the member again.
-        if inventory.oidc_managed:
-            return Response({"error": MANAGED_MEMBERS_ERROR}, status=403)
         user = get_object_or_404(CustomUser, uuid=user_uuid)
+        # The sync only handles accounts that log in through single sign-on, so members without an
+        # OIDC identity (e.g. added before the group was mapped) can still be removed here.
+        # Also covers leaving: the next login would add an OIDC member again.
+        if inventory.oidc_managed and user.oidc_identities.exists():
+            return Response({"error": MANAGED_MEMBERS_ERROR}, status=403)
         inventory.users.remove(user)
 
-        if not inventory.users.exists():
+        # A managed inventory keeps its data without members, like after the sync removed the last one.
+        if not inventory.oidc_managed and not inventory.users.exists():
             inventory.delete()
             return Response({"message": "Inventory deleted as it has no remaining members."}, status=204)
         return Response(status=204)

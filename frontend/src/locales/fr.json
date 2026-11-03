@@ -607,7 +607,7 @@
       "invitesDisabled": "L’ajout de personnes est désactivé pour cette instance.",
       "loadError": "Impossible de charger les paramètres de l’inventaire.",
       "loading": "Chargement des paramètres de l’inventaire…",
-      "managedBySso": "Les membres de cet inventaire sont gérés par l’authentification unique. Ils changent lorsqu’une personne rejoint ou quitte le groupe chez le fournisseur d’identité et se reconnecte.",
+      "managedBySso": "Les membres de cet inventaire sont gérés par l’authentification unique. Ils changent lorsqu’une personne rejoint ou quitte le groupe chez le fournisseur d’identité et se reconnecte. Les membres qui ne se connectent pas par l’authentification unique peuvent être retirés ici.",
       "members": "Partagé avec",
       "name": "Nom",
       "noMembers": "Aucun membre trouvé.",

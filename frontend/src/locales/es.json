@@ -607,7 +607,7 @@
       "invitesDisabled": "La opción de añadir personas está desactivada en esta instancia.",
       "loadError": "No se pudo cargar la configuración del inventario.",
       "loading": "Cargando la configuración del inventario...",
-      "managedBySso": "Los miembros de este inventario se gestionan mediante inicio de sesión único. Cambian cuando alguien se une al grupo o lo abandona en el proveedor de identidad y vuelve a iniciar sesión.",
+      "managedBySso": "Los miembros de este inventario se gestionan mediante inicio de sesión único. Cambian cuando alguien se une al grupo o lo abandona en el proveedor de identidad y vuelve a iniciar sesión. Los miembros que no inician sesión mediante inicio de sesión único se pueden quitar aquí.",
       "members": "Compartido con",
       "name": "Nombre",
       "noMembers": "No se encontraron miembros.",

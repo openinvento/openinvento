@@ -607,7 +607,7 @@
       "invitesDisabled": "Das Hinzufügen von Personen ist für diese Instanz deaktiviert.",
       "loadError": "Inventareinstellungen konnten nicht geladen werden.",
       "loading": "Inventareinstellungen werden geladen...",
-      "managedBySso": "Die Mitglieder dieses Inventars werden per Single Sign-on verwaltet. Sie ändern sich, wenn jemand beim Identitätsanbieter der Gruppe beitritt oder sie verlässt und sich erneut anmeldet.",
+      "managedBySso": "Die Mitglieder dieses Inventars werden per Single Sign-on verwaltet. Sie ändern sich, wenn jemand beim Identitätsanbieter der Gruppe beitritt oder sie verlässt und sich erneut anmeldet. Mitglieder, die sich nicht per Single Sign-on anmelden, lassen sich hier entfernen.",
       "members": "Geteilt mit",
       "name": "Name",
       "noMembers": "Keine Mitglieder gefunden.",

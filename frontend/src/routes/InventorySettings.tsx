@@ -273,17 +273,17 @@ export default function InventorySettingsPage() {
 
             <div className="overflow-hidden rounded-xl border">
               <table className="w-full text-left text-sm">
-                <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">{t("settings.admin.name")}</th><th className="hidden px-4 py-3 font-medium sm:table-cell">{t("settings.admin.username")}</th>{!membership.inventory.oidc_managed && <th className="px-4 py-3 text-right font-medium">{t("settings.admin.actions")}</th>}</tr></thead>
+                <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">{t("settings.admin.name")}</th><th className="hidden px-4 py-3 font-medium sm:table-cell">{t("settings.admin.username")}</th><th className="px-4 py-3 text-right font-medium">{t("settings.admin.actions")}</th></tr></thead>
                 <tbody className="divide-y">{membership.members.length === 0 ? 
                   <tr>
-                    <td colSpan={membership.inventory.oidc_managed ? 2 : 3} className="px-4 py-8 text-center text-muted-foreground">{t("settings.inventory.noMembers")}</td>
+                    <td colSpan={3} className="px-4 py-8 text-center text-muted-foreground">{t("settings.inventory.noMembers")}</td>
                   </tr> : membership.members.map((user) => <tr key={user.uuid} className="hover:bg-muted/20">
                   <td className="px-4 py-3 font-medium">{user.name || user.username}</td>
                   <td className="hidden px-4 py-3 text-muted-foreground sm:table-cell">{user.username}</td>
-                  {!membership.inventory.oidc_managed && <td className="px-4 py-3 text-right">
-                    <Button type="button" variant="ghost" size="icon-sm" onClick={() => void removeMember(user.uuid, user.name || user.username)} disabled={saving} aria-label={t("settings.inventory.removeMember")}>
-                    <UserMinus /></Button>
-                  </td>}
+                  <td className="px-4 py-3 text-right">
+                    {user.removable !== false && <Button type="button" variant="ghost" size="icon-sm" onClick={() => void removeMember(user.uuid, user.name || user.username)} disabled={saving} aria-label={t("settings.inventory.removeMember")}>
+                    <UserMinus /></Button>}
+                  </td>
                   </tr>)}
                 </tbody>
               </table>
