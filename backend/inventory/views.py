@@ -13,7 +13,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.db.models import Count, Prefetch
-from django.http import FileResponse
+from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
@@ -248,7 +248,14 @@ class InventoryManageView(InventoryAccessMixin, APIView):
         return Response(serializer.data)
 
     def delete(self, request, inventory_uuid):
-        inventory = self.get_inventory(request, inventory_uuid)
+        if request.user.is_superuser:
+            # Instance admins also reach managed inventories they are no member of, e.g. one left
+            # without members after everybody left its group.
+            inventory = get_object_or_404(Inventory, uuid=inventory_uuid)
+            if not inventory.oidc_managed and not inventory.users.filter(pk=request.user.pk).exists():
+                raise Http404
+        else:
+            inventory = self.get_inventory(request, inventory_uuid)
         # Members have no roles, so any group member could delete a managed inventory for the whole group.
         if inventory.oidc_managed and not request.user.is_superuser:
             return Response({"error": "Only instance administrators can delete an inventory managed by single sign-on."}, status=403)

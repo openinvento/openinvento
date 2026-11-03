@@ -472,6 +472,26 @@ class ManagedInventoryAPITests(GroupSyncTestCase):
 		self.assertEqual(response.status_code, 204)
 		self.assertFalse(Inventory.objects.filter(pk=self.inventory.pk).exists())
 
+	def test_instance_admin_can_delete_it_without_being_a_member(self):
+		# After leaving the group the inventory has no members left.
+		self.login_with_groups([])
+		CustomUser.objects.filter(username='alice').update(is_superuser=True, is_staff=True)
+
+		response = self.client.delete(f'/api/inventories/{self.inventory.uuid}/')
+
+		self.assertEqual(response.status_code, 204)
+		self.assertFalse(Inventory.objects.filter(pk=self.inventory.pk).exists())
+
+	def test_instance_admin_cannot_reach_other_inventories(self):
+		other = Inventory.objects.create(name='Private')
+		other.users.add(self.other)
+		CustomUser.objects.filter(username='alice').update(is_superuser=True, is_staff=True)
+
+		response = self.client.delete(f'/api/inventories/{other.uuid}/')
+
+		self.assertEqual(response.status_code, 404)
+		self.assertTrue(Inventory.objects.filter(pk=other.pk).exists())
+
 	def test_member_can_still_rename_it(self):
 		response = self.client.patch(f'/api/inventories/{self.inventory.uuid}/', {'name': 'Garage'}, format='json')
 
