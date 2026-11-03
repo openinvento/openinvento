@@ -67,7 +67,8 @@ export default function InventorySettingsPage() {
       if (!inventoryUuid) return
       const loadedMembership = await inventoryApi.getMembership(inventoryUuid)
       setProviders(await inventoryApi.listThirdPartyProviders(inventoryUuid))
-      setIsAdmin(Boolean((await getCurrentSession()).user?.is_superuser))
+      // Only the admin-only controls need the session; the rest of the page loads without it.
+      setIsAdmin(Boolean((await getCurrentSession().catch(() => null))?.user?.is_superuser))
       setInventoryName(loadedMembership.inventory.name)
       setMembership(loadedMembership)
     } catch (reason) {
