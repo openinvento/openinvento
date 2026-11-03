@@ -174,6 +174,18 @@ class InventorySyncTests(GroupSyncTestCase):
 
 		self.assertEqual(self.inventory_names(self.alice()), ["alice's Inventory"])
 
+	def test_mapping_to_an_unknown_inventory_keeps_the_bound_inventory(self):
+		self.login_with_groups(['openinvento-workshop'])
+
+		# A typo in the UUID must not remove anybody from the inventory the group is bound to.
+		with override_settings(OIDC_GROUP_INVENTORIES={'openinvento-workshop': str(uuid.uuid4())}):
+			with self.assertLogs('account_auth.oidc_groups', 'WARNING'):
+				self.login_with_groups(['openinvento-workshop'])
+
+			workshop = Inventory.objects.get(oidc_group='openinvento-workshop')
+			self.assertTrue(workshop.oidc_managed)
+			self.assertEqual(self.inventory_names(self.alice()), ['workshop'])
+
 	def test_mapping_takes_over_a_prefix_binding(self):
 		self.login_with_groups(['openinvento-workshop'])
 		old = Inventory.objects.get(oidc_group='openinvento-workshop')

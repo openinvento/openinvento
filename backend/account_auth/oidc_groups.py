@@ -89,13 +89,21 @@ def sync_inventory_memberships(user, groups):
     Removal goes through users.remove() directly, never through the members API, which deletes an
     inventory once its last member leaves: a managed inventory without members keeps its data.
     """
-    targets = [inventory for group in sorted(groups) if (inventory := bind_inventory(group))]
+    targets, unresolved = [], set()
+    for group in sorted(groups):
+        inventory = bind_inventory(group)
+        if inventory:
+            targets.append(inventory)
+        elif group in settings.OIDC_GROUP_INVENTORIES:
+            # The mapping names an inventory that does not exist (yet). The inventory still bound
+            # to the group keeps its members until the mapping is fixed, so a typo removes nobody.
+            unresolved.add(group)
     user.inventories.add(*targets)
     target_ids = {inventory.pk for inventory in targets}
     stale = [
         inventory
         for inventory in user.inventories.filter(oidc_group__isnull=False)
-        if inventory.oidc_managed and inventory.pk not in target_ids
+        if inventory.oidc_managed and inventory.pk not in target_ids and inventory.oidc_group not in unresolved
     ]
     user.inventories.remove(*stale)
 
