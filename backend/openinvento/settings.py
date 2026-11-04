@@ -1,16 +1,14 @@
 
-import json
 import logging
 import os
-import uuid
 from datetime import timedelta
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
 
 from .custom_logger import LOGGING, configure_early_logging
+from .settings_utils import group_inventories_env
 
 configure_early_logging()
 
@@ -265,37 +263,7 @@ OIDC_ALLOWED_GROUPS = _csv_env("OIDC_ALLOWED_GROUPS", [])
 OIDC_ADMIN_GROUP = os.getenv("OIDC_ADMIN_GROUP", "").strip()
 
 
-def _group_inventories_env(name):
-    """Parse the explicit group mapping, a JSON object {"<group>": "<inventory uuid>"}.
-
-    JSON because group names may contain commas, "=" or ":". Any invalid entry stops the start:
-    dropping it would release the inventory it protects, and a typo must never bind an
-    unexpected inventory.
-    """
-    raw_value = os.getenv(name, "").strip()
-    if not raw_value:
-        return {}
-    try:
-        value = json.loads(raw_value)
-    except json.JSONDecodeError as exc:
-        raise ImproperlyConfigured(f"{name} is not valid JSON: {exc}") from exc
-    if not isinstance(value, dict):
-        raise ImproperlyConfigured(f"{name} must be a JSON object of group names to inventory UUIDs.")
-    mapping, inventories = {}, set()
-    for group, inventory in value.items():
-        try:
-            inventory = str(uuid.UUID(str(inventory)))
-        except ValueError as exc:
-            raise ImproperlyConfigured(f"{name}: {inventory!r} for group {group!r} is not an inventory UUID.") from exc
-        # Two groups for one inventory would rebind it on every login.
-        if inventory in inventories:
-            raise ImproperlyConfigured(f"{name} maps inventory {inventory} to more than one group ({group!r}).")
-        inventories.add(inventory)
-        mapping[group] = inventory
-    return mapping
-
-
-OIDC_GROUP_INVENTORIES = _group_inventories_env("OIDC_GROUP_INVENTORIES")
+OIDC_GROUP_INVENTORIES = group_inventories_env("OIDC_GROUP_INVENTORIES")
 
 if OIDC_ENABLED and not (OIDC_ISSUER and OIDC_RP_CLIENT_ID):
     logger.warning("OIDC_ENABLED is set, but OIDC_ISSUER or OIDC_CLIENT_ID is missing. OIDC login stays disabled.")

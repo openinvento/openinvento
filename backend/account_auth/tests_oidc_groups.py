@@ -7,7 +7,7 @@ from django.test import SimpleTestCase, override_settings
 from rest_framework.test import APIClient
 
 from inventory.models import Inventory, InventoryEntry, is_prefix_group
-from openinvento.settings import _group_inventories_env
+from openinvento.settings_utils import group_inventories_env
 
 from .models import CustomUser
 from .oidc_groups import get_groups
@@ -28,11 +28,11 @@ NO_GROUP_SETTINGS = {**GROUP_SYNC_SETTINGS, 'OIDC_GROUP_SYNC': False, 'OIDC_INVE
 class GroupInventoriesSettingTests(SimpleTestCase):
 	def parse(self, value):
 		with patch.dict(os.environ, {'OIDC_GROUP_INVENTORIES': value}):
-			return _group_inventories_env('OIDC_GROUP_INVENTORIES')
+			return group_inventories_env('OIDC_GROUP_INVENTORIES')
 
 	def test_unset_is_empty(self):
 		with patch.dict(os.environ, {}, clear=True):
-			self.assertEqual(_group_inventories_env('OIDC_GROUP_INVENTORIES'), {})
+			self.assertEqual(group_inventories_env('OIDC_GROUP_INVENTORIES'), {})
 
 	def test_maps_groups_to_normalized_uuids(self):
 		inventory = uuid.uuid4()
