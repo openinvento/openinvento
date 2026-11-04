@@ -4,7 +4,9 @@ import os
 import runpy
 import shutil
 import sqlite3
+import sys
 import tempfile
+import types
 import zipfile
 from datetime import datetime, time, timedelta, timezone as datetime_timezone
 from pathlib import Path
@@ -238,3 +240,11 @@ class HttpsSettingsTests(SimpleTestCase):
 			load_settings(APP_URL="https://inventory.example.test", APP_URLS="http://inventory.lan:8080")
 
 		self.assertFalse(any("both http and https" in call.args[0] for call in warning.call_args_list))
+
+
+class CorsSettingsTests(SimpleTestCase):
+	def test_cross_origin_downloads_can_read_the_filename(self):
+		with patch.dict(sys.modules, {"corsheaders": types.ModuleType("corsheaders")}):
+			settings = runpy.run_module("openinvento.settings")
+
+		self.assertIn("Content-Disposition", settings["CORS_EXPOSE_HEADERS"])
