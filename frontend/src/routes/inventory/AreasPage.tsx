@@ -6,12 +6,13 @@ import { AreaCard } from "@/components/inventory/entity-cards"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
-import { getSelectedInventory, inventoryApi, type Area, type Inventory } from "@/utils/api/inventory"
+import { inventoryApi, type Area } from "@/utils/api/inventory"
+import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 
 export default function AreasPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [inventory, setInventory] = useState<Inventory | null>(null)
+  const { selectedInventory: inventory } = useSelectedInventory()
   const [areas, setAreas] = useState<Area[]>([])
   const [modal, setModal] = useState<{ area?: Area } | null>(null)
   const [error, setError] = useState("")
@@ -20,8 +21,7 @@ export default function AreasPage() {
   async function load() {
     setError("")
     try {
-      const [inventories, nextAreas] = await Promise.all([inventoryApi.listInventories(), inventoryApi.listAreas()])
-      setInventory(getSelectedInventory(inventories))
+      const nextAreas = await inventoryApi.listAreas()
       setAreas(nextAreas)
     } catch (reason) { setError(reason instanceof Error ? reason.message : t("areas.errors.load")) }
   }
