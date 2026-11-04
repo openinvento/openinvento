@@ -1,4 +1,7 @@
 import io
+import logging
+import os
+import runpy
 import shutil
 import sqlite3
 import tempfile
@@ -169,3 +172,53 @@ class InstanceBackupTests(TransactionTestCase):
 			response = self.client.get("/api/instance-settings/backup/")
 
 		self.assertEqual(response.status_code, 403)
+
+
+def load_settings(**env):
+	"""Execute settings.py with only the given APP_URL/APP_URLS values in the environment."""
+	base = {key: value for key, value in os.environ.items() if key not in {"APP_URL", "APP_URLS"}}
+	with patch.dict(os.environ, {**base, **env}, clear=True):
+		return runpy.run_module("openinvento.settings")
+
+
+class HttpsSettingsTests(SimpleTestCase):
+	def assert_https_settings(self, settings, enabled):
+		self.assertIs(settings["SESSION_COOKIE_SECURE"], enabled)
+		self.assertIs(settings["CSRF_COOKIE_SECURE"], enabled)
+		self.assertEqual(
+			settings["SECURE_PROXY_SSL_HEADER"],
+			("HTTP_X_FORWARDED_PROTO", "https") if enabled else None,
+		)
+
+	def test_https_app_url_enables_secure_cookies_and_the_proxy_header(self):
+		self.assert_https_settings(load_settings(APP_URL="https://inventory.example.test"), True)
+
+	def test_https_app_urls_enable_them_too(self):
+		settings = load_settings(APP_URLS="https://inventory.example.test,https://alt.example.test:8443")
+
+		self.assert_https_settings(settings, True)
+
+	def test_one_http_origin_keeps_them_off(self):
+		# Secure cookies would never be sent back over the http origin, so login there would break.
+		settings = load_settings(APP_URL="https://inventory.example.test", APP_URLS="http://inventory.lan:8080")
+
+		self.assert_https_settings(settings, False)
+
+	def test_http_or_bare_host_keeps_them_off(self):
+		self.assert_https_settings(load_settings(APP_URL="http://inventory.example.test"), False)
+		self.assert_https_settings(load_settings(APP_URL="inventory.example.test"), False)
+
+	def test_no_app_url_keeps_them_off(self):
+		self.assert_https_settings(load_settings(), False)
+
+	def test_one_host_over_http_and_https_logs_a_warning(self):
+		with self.assertLogs("openinvento.settings", "WARNING") as logs:
+			load_settings(APP_URL="https://inventory.example.test", APP_URLS="http://inventory.example.test:8080")
+
+		self.assertIn("inventory.example.test over both http and https", "\n".join(logs.output))
+
+	def test_http_on_another_host_logs_no_warning(self):
+		with patch.object(logging.getLogger("openinvento.settings"), "warning") as warning:
+			load_settings(APP_URL="https://inventory.example.test", APP_URLS="http://inventory.lan:8080")
+
+		self.assertFalse(any("both http and https" in call.args[0] for call in warning.call_args_list))
