@@ -21,7 +21,7 @@ def group_inventories_env(name):
     if not raw_value:
         return {}
     try:
-        value = json.loads(raw_value)
+        value = json.loads(raw_value, object_pairs_hook=lambda pairs: _reject_repeated_keys(name, pairs))
     except json.JSONDecodeError as exc:
         raise ImproperlyConfigured(f"{name} is not valid JSON: {exc}") from exc
     if not isinstance(value, dict):
@@ -38,3 +38,12 @@ def group_inventories_env(name):
         inventories.add(inventory)
         mapping[group] = inventory
     return mapping
+
+
+def _reject_repeated_keys(name, pairs):
+    # json.loads keeps only the last value of a repeated key, which would drop an entry silently.
+    keys = [key for key, _ in pairs]
+    repeated = sorted({key for key in keys if keys.count(key) > 1})
+    if repeated:
+        raise ImproperlyConfigured(f"{name} lists group {repeated[0]!r} more than once.")
+    return dict(pairs)

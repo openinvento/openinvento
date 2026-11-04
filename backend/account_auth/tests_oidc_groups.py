@@ -62,6 +62,9 @@ class GroupInventoriesSettingTests(SimpleTestCase):
 		with self.assertRaisesMessage(ImproperlyConfigured, 'more than one group'):
 			self.parse(f'{{"family": "{inventory}", "relatives": "{inventory.upper()}"}}')
 
+	def test_group_listed_twice_stops_the_start(self):
+		with self.assertRaisesMessage(ImproperlyConfigured, "lists group 'family' more than once"):
+			self.parse(f'{{"family": "{uuid.uuid4()}", "family": "{uuid.uuid4()}"}}')
 
 @override_settings(**GROUP_SYNC_SETTINGS)
 class GroupsClaimTests(SimpleTestCase):
