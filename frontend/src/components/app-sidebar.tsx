@@ -18,7 +18,7 @@ import { SearchIcon, HomeIcon, DoorClosedIcon, Settings2Icon, MessageCircleQuest
 import { FAVORITES_CHANGED_EVENT, getFavorites, removeFavorite, type Favorite } from "@/utils/favorites"
 import i18n from "@/i18n"
 import { getSidebarData, type SidebarData } from "@/utils/api/general"
-import { inventoryApi, type Area } from "@/utils/api/inventory"
+import { inventoryApi, setAvailableInventories, type Area } from "@/utils/api/inventory"
 import { getEnabledModules, MODULES_CHANGED_EVENT } from "@/utils/api/modules"
 
 // This is sample data.
@@ -193,7 +193,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [])
 
   React.useEffect(() => {
-    void getSidebarData().then(setSidebar).catch(() => setSidebar(null))
+    void getSidebarData().then((nextSidebar) => {
+      setSidebar(nextSidebar)
+      // Update available inventories in the global state
+      setAvailableInventories(nextSidebar.inventories)
+    }).catch(() => setSidebar(null))
   }, [])
 
   React.useEffect(() => {
