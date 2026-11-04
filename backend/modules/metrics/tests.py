@@ -108,6 +108,12 @@ class MetricsEndpointTests(TestCase):
 
         self.assertIn('openinvento_build_info{version="v1.5.0 \\"beta\\"\\\\x"} 1', samples)
 
+    def test_info_metric_escapes_a_newline_in_the_version_label(self):
+        with patch.dict(os.environ, {"APP_VERSION": "v1.5.0\nbeta"}):
+            samples = self.samples(self.scrape(self.admin))
+
+        self.assertIn('openinvento_build_info{version="v1.5.0\\nbeta"} 1', samples)
+
     def test_requires_an_api_key(self):
         self.assertEqual(self.scrape().status_code, 401)
 
