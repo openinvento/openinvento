@@ -90,7 +90,9 @@ def sync_inventory_memberships(user, groups):
     inventory once its last member leaves: a managed inventory without members keeps its data.
     """
     targets, unresolved = [], set()
-    for group in sorted(groups):
+    # Mapped groups first: a mapping can take over an inventory that a prefix group is bound to,
+    # and the prefix group then gets its new inventory in the same login.
+    for group in sorted(groups, key=lambda group: (group not in settings.OIDC_GROUP_INVENTORIES, group)):
         inventory = bind_inventory(group)
         if inventory:
             targets.append(inventory)

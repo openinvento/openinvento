@@ -205,6 +205,20 @@ class InventorySyncTests(GroupSyncTestCase):
 			# The old inventory became a normal one and keeps its members.
 			self.assertEqual(self.inventory_names(self.alice()), ['Workshop (new)', 'workshop'])
 
+	def test_prefix_group_gets_a_new_inventory_when_a_mapping_takes_over_its_own(self):
+		self.login_with_groups(['openinvento-workshop'])
+		workshop = Inventory.objects.get(oidc_group='openinvento-workshop')
+
+		# 'zoo' sorts after the prefix group, but the mapping must be bound first.
+		with override_settings(OIDC_GROUP_INVENTORIES={'zoo': str(workshop.uuid)}):
+			self.login_with_groups(['openinvento-workshop', 'zoo'])
+
+			workshop.refresh_from_db()
+			self.assertEqual(workshop.oidc_group, 'zoo')
+			new = Inventory.objects.get(oidc_group='openinvento-workshop')
+			self.assertNotEqual(new.pk, workshop.pk)
+			self.assertEqual(set(self.alice().inventories.all()), {workshop, new})
+
 	def test_mapping_wins_over_the_prefix_for_new_groups(self):
 		family = Inventory.objects.create(name='Family')
 		with override_settings(OIDC_GROUP_INVENTORIES={'openinvento-family': str(family.uuid)}):
