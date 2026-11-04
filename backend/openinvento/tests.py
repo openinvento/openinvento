@@ -1,7 +1,18 @@
+import io
+import shutil
+import sqlite3
+import tempfile
+import zipfile
 from datetime import datetime, time, timedelta, timezone as datetime_timezone
+from pathlib import Path
+from unittest.mock import patch
 
-from django.test import Client, SimpleTestCase, TestCase
+from django.db import connection
+from django.test import Client, SimpleTestCase, TestCase, TransactionTestCase, override_settings
 from django.utils import timezone
+from rest_framework.test import APIClient
+
+from account_auth.models import CustomUser
 
 from .daily_scheduler import DailyScheduler
 
@@ -48,3 +59,113 @@ class HealthViewTests(TestCase):
 
 		self.assertEqual(response.status_code, 200)
 		self.assertEqual(response.json(), {"status": "healthy"})
+
+
+class InstanceBackupTests(TransactionTestCase):
+	def setUp(self):
+		self.data_dir = Path(tempfile.mkdtemp())
+		self.addCleanup(shutil.rmtree, self.data_dir)
+		self.admin = CustomUser.objects.create_superuser(username="admin", password="StrongPassword!123")
+		self.client = APIClient()
+		self.client.force_login(self.admin)
+
+	def download(self):
+		with override_settings(DATA_DIR=self.data_dir):
+			response = self.client.get("/api/instance-settings/backup/")
+		self.assertEqual(response.status_code, 200)
+		return zipfile.ZipFile(io.BytesIO(b"".join(response.streaming_content)))
+
+	def read_database(self, archive):
+		with tempfile.TemporaryDirectory() as temp_dir:
+			path = Path(temp_dir) / "db.sqlite3"
+			path.write_bytes(archive.read("db.sqlite3"))
+			database = sqlite3.connect(path)
+			try:
+				integrity = database.execute("PRAGMA integrity_check").fetchone()[0]
+				usernames = [row[0] for row in database.execute("SELECT username FROM account_auth_customuser")]
+			finally:
+				database.close()
+		return integrity, usernames
+
+	def test_contains_a_consistent_copy_of_the_database(self):
+		integrity, usernames = self.read_database(self.download())
+
+		self.assertEqual(integrity, "ok")
+		self.assertIn("admin", usernames)
+
+	def test_contains_the_other_files_of_the_data_directory(self):
+		(self.data_dir / "media").mkdir()
+		(self.data_dir / "media" / "photo.jpg").write_bytes(b"jpeg")
+		(self.data_dir / "outside.txt").symlink_to(__file__)
+
+		names = self.download().namelist()
+
+		self.assertIn("media/photo.jpg", names)
+		self.assertNotIn("outside.txt", names)
+
+	def test_live_database_files_are_replaced_by_the_copy(self):
+		# A database in the data directory, as in a default installation, with a leftover sidecar file.
+		live_database = self.data_dir / "db.sqlite3"
+		database = sqlite3.connect(live_database)
+		database.execute("CREATE TABLE account_auth_customuser (username TEXT)")
+		database.execute("INSERT INTO account_auth_customuser VALUES ('live')")
+		database.commit()
+		database.close()
+		(self.data_dir / "db.sqlite3-wal").write_bytes(b"wal")
+		with patch.dict(connection.settings_dict, {"NAME": str(live_database)}):
+			archive = self.download()
+
+		self.assertEqual(archive.namelist().count("db.sqlite3"), 1)
+		self.assertNotIn("db.sqlite3-wal", archive.namelist())
+		self.assertEqual(self.read_database(archive), ("ok", ["live"]))
+
+	def test_copy_has_the_committed_state_while_another_connection_writes(self):
+		live_database = self.data_dir / "db.sqlite3"
+		writer = sqlite3.connect(live_database)
+		self.addCleanup(writer.close)
+		writer.execute("CREATE TABLE account_auth_customuser (username TEXT)")
+		writer.execute("INSERT INTO account_auth_customuser VALUES ('committed')")
+		writer.commit()
+		writer.execute("INSERT INTO account_auth_customuser VALUES ('uncommitted')")
+		with patch.dict(connection.settings_dict, {"NAME": str(live_database)}):
+			archive = self.download()
+
+		self.assertEqual(self.read_database(archive), ("ok", ["committed"]))
+
+	def create_database(self, path, username):
+		database = sqlite3.connect(path)
+		database.execute("CREATE TABLE account_auth_customuser (username TEXT)")
+		database.execute("INSERT INTO account_auth_customuser VALUES (?)", (username,))
+		database.commit()
+		database.close()
+
+	def test_contains_a_database_outside_the_data_directory(self):
+		database_dir = Path(tempfile.mkdtemp())
+		self.addCleanup(shutil.rmtree, database_dir)
+		self.create_database(database_dir / "openinvento.sqlite3", "configured")
+		with patch.dict(connection.settings_dict, {"NAME": str(database_dir / "openinvento.sqlite3")}):
+			archive = self.download()
+
+		self.assertEqual(archive.namelist(), ["db.sqlite3"])
+		self.assertEqual(self.read_database(archive), ("ok", ["configured"]))
+
+	def test_leftover_database_in_the_data_directory_is_left_out(self):
+		database_dir = Path(tempfile.mkdtemp())
+		self.addCleanup(shutil.rmtree, database_dir)
+		self.create_database(database_dir / "openinvento.sqlite3", "configured")
+		self.create_database(self.data_dir / "db.sqlite3", "leftover")
+		(self.data_dir / "db.sqlite3-journal").write_bytes(b"journal")
+		with patch.dict(connection.settings_dict, {"NAME": str(database_dir / "openinvento.sqlite3")}):
+			archive = self.download()
+
+		self.assertEqual(archive.namelist(), ["db.sqlite3"])
+		self.assertEqual(self.read_database(archive), ("ok", ["configured"]))
+
+	def test_only_instance_admins_can_download_it(self):
+		member = CustomUser.objects.create_user(username="member", password="StrongPassword!123")
+		self.client.force_login(member)
+
+		with override_settings(DATA_DIR=self.data_dir):
+			response = self.client.get("/api/instance-settings/backup/")
+
+		self.assertEqual(response.status_code, 403)
