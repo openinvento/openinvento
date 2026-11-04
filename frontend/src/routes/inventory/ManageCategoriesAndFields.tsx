@@ -7,12 +7,11 @@ import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
 import {
-  getSelectedInventory,
   inventoryApi,
   type ArticleCategory,
   type CategoryField,
-  type Inventory,
 } from "@/utils/api/inventory"
+import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -30,7 +29,7 @@ const fieldTypeOptions = ["text", "number", "boolean", "date", "barcode", "selec
 
 export default function ManageCategoriesAndFieldsPage() {
   const { t } = useTranslation()
-  const [inventory, setInventory] = useState<Inventory | null>(null)
+  const { selectedInventory: inventory } = useSelectedInventory()
   const [categories, setCategories] = useState<ArticleCategory[]>([])
   const [fields, setFields] = useState<CategoryField[]>([])
   const [categoryModal, setCategoryModal] = useState<CategoryModal>(null)
@@ -41,12 +40,10 @@ export default function ManageCategoriesAndFieldsPage() {
   async function load() {
     setError("")
     try {
-      const [inventories, nextCategories, nextFields] = await Promise.all([
-        inventoryApi.listInventories(),
+      const [nextCategories, nextFields] = await Promise.all([
         inventoryApi.listCategories(),
         inventoryApi.listCategoryFields(),
       ])
-      setInventory(getSelectedInventory(inventories))
       setCategories(nextCategories)
       setFields(nextFields)
     } catch (reason) {
