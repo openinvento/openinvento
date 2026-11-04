@@ -98,11 +98,7 @@ class Inventory(models.Model):
 
     @property
     def oidc_managed(self):
-        """Whether members come from the OpenID provider only.
-
-        The binding counts only while the settings still name the group, so removing a group from
-        OIDC_GROUP_INVENTORIES or turning OIDC_GROUP_SYNC off makes the inventory a normal one again.
-        """
+        """ Whether members come from the OpenID provider only. """
         return bool(
             settings.OIDC_GROUP_SYNC
             and self.oidc_group
