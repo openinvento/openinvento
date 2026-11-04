@@ -78,15 +78,32 @@ def generate_random_code(length=10):
     characters = string.ascii_letters + string.digits
     return ''.join(secrets.choice(characters) for _ in range(length))
 
+def is_prefix_group(group):
+    """Whether a group gets its own inventory through OIDC_INVENTORY_GROUP_PREFIX."""
+    prefix = settings.OIDC_INVENTORY_GROUP_PREFIX
+    return bool(prefix) and len(group) > len(prefix) and group.startswith(prefix)
+
+
 class Inventory(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     name = models.CharField(max_length=100)
     # The identifier is only used for inventory-internal identification for users - not system relevant. Users can change it any time by themselves
     identifier = models.CharField(unique=True, max_length=30, blank=True)
+    # Group at the OpenID provider this inventory is bound to (account_auth/oidc_groups.py).
+    oidc_group = models.CharField(max_length=255, unique=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name_plural = "Inventories"
+
+    @property
+    def oidc_managed(self):
+        """ Whether members come from the OpenID provider only. """
+        return bool(
+            settings.OIDC_GROUP_SYNC
+            and self.oidc_group
+            and (self.oidc_group in settings.OIDC_GROUP_INVENTORIES or is_prefix_group(self.oidc_group))
+        )
 
     def save(self, *args, **kwargs):
         if not self.identifier:

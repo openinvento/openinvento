@@ -8,6 +8,7 @@ from urllib.parse import urlsplit
 from django.core.management.utils import get_random_secret_key
 
 from .custom_logger import LOGGING, configure_early_logging
+from .settings_utils import group_inventories_env
 
 configure_early_logging()
 
@@ -247,6 +248,22 @@ OIDC_CA_BUNDLE = os.getenv("OIDC_CA_BUNDLE", "").strip()
 # the client secret and log in as any user; prefer OIDC_CA_BUNDLE.
 OIDC_SKIP_SSL_VERIFICATION = _env_flag("OIDC_SKIP_SSL_VERIFICATION", False)
 OIDC_USE_PKCE = True
+
+# Group claim handling on OIDC login (account_auth/oidc_groups.py). The claim name is configurable
+# because providers differ: Keycloak may send group paths, Microsoft Entra ID sends group object IDs.
+OIDC_GROUPS_CLAIM = os.getenv("OIDC_GROUPS_CLAIM", "groups").strip()
+# Syncs inventory membership from the groups claim. OIDC_ALLOWED_GROUPS and OIDC_ADMIN_GROUP
+# work without it, so an instance can restrict login or grant admin access without managed inventories.
+OIDC_GROUP_SYNC = _env_flag("OIDC_GROUP_SYNC", False)
+# Every group starting with this prefix gets its own managed inventory, created on first use.
+OIDC_INVENTORY_GROUP_PREFIX = os.getenv("OIDC_INVENTORY_GROUP_PREFIX", "").strip()
+# Only members of one of these groups may log in via OIDC (comma-separated; empty allows everyone).
+OIDC_ALLOWED_GROUPS = _csv_env("OIDC_ALLOWED_GROUPS", [])
+# Members of this group get instance admin access on every login, non-members lose it.
+OIDC_ADMIN_GROUP = os.getenv("OIDC_ADMIN_GROUP", "").strip()
+
+
+OIDC_GROUP_INVENTORIES = group_inventories_env("OIDC_GROUP_INVENTORIES")
 
 if OIDC_ENABLED and not (OIDC_ISSUER and OIDC_RP_CLIENT_ID):
     logger.warning("OIDC_ENABLED is set, but OIDC_ISSUER or OIDC_CLIENT_ID is missing. OIDC login stays disabled.")

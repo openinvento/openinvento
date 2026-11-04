@@ -23,6 +23,13 @@ services:
       #OIDC_REDIRECT_URI: ${OIDC_REDIRECT_URI} # Full redirect URI registered at your provider, if it is not ${APP_URL}/api/oidc/callback/
       #OIDC_CA_BUNDLE: /certs/ca.pem # CA certificate (PEM) for a provider with a private or self-signed certificate; mount it below
       #OIDC_SKIP_SSL_VERIFICATION: ${OIDC_SKIP_SSL_VERIFICATION:-false} # Insecure: no certificate check for the provider, anyone on the network path can log in as any user; prefer OIDC_CA_BUNDLE
+      # Groups from the provider (optional, applied on every SSO login). Some providers only send groups with an extra scope, e.g. OIDC_SCOPES: "openid profile email groups" for Pocket ID.
+      #OIDC_GROUPS_CLAIM: ${OIDC_GROUPS_CLAIM:-groups} # Claim that lists the user's groups
+      #OIDC_GROUP_SYNC: ${OIDC_GROUP_SYNC:-false} # Set to true to sync inventory members from the groups below; members of these inventories are then managed by the provider only
+      #OIDC_INVENTORY_GROUP_PREFIX: ${OIDC_INVENTORY_GROUP_PREFIX} # Every group with this prefix gets its own inventory (e.g. openinvento- turns openinvento-workshop into "workshop")
+      #OIDC_GROUP_INVENTORIES: ${OIDC_GROUP_INVENTORIES} # JSON mapping of groups to existing inventories, e.g. {"family": "<inventory ID from the inventory settings>"}
+      #OIDC_ALLOWED_GROUPS: ${OIDC_ALLOWED_GROUPS} # Comma-separated; only members of one of these groups can log in via SSO (works without OIDC_GROUP_SYNC)
+      #OIDC_ADMIN_GROUP: ${OIDC_ADMIN_GROUP} # Members become instance administrators, non-members lose admin access (works without OIDC_GROUP_SYNC)
       #DISABLE_LOCAL_LOGIN: ${DISABLE_LOCAL_LOGIN:-false} # Disable password login and signup for everyone except LOCAL_LOGIN_USERS
       #LOCAL_LOGIN_USERS: ${LOCAL_LOGIN_USERS} # Comma-separated break-glass usernames that keep password login (default: INIT_ADMIN_USERNAME); they sign in at /auth/login?local=1
     volumes:

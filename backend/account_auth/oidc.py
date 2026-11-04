@@ -4,6 +4,7 @@ The library is extended with:
 - provider discovery (OpenID Connect Discovery 1.0) unless endpoints are set explicitly,
 - issuer, audience and azp checks of the ID token (OpenID Connect Core 1.0, section 3.1.3.7),
 - user lookup by issuer + subject instead of the email address,
+- allowed groups, admin group and inventory sync from the groups claim (oidc_groups.py),
 - a redirect URI built from OIDC_REDIRECT_URI or APP_URL, so it stays correct behind a TLS-terminating proxy,
 - a custom CA bundle for providers with a private certificate,
 - the hardening listed in the requirement catalog of the pull request: token_type, iss
@@ -35,6 +36,7 @@ from mozilla_django_oidc.views import (
 from requests.auth import HTTPBasicAuth
 
 from .models import CustomUser, OIDCIdentity
+from .oidc_groups import apply_group_claims, get_groups, login_allowed
 from .services import create_user_inventory
 
 logger = logging.getLogger(__name__)
@@ -373,35 +375,49 @@ class OIDCBackend(OIDCAuthenticationBackend):
         if userinfo.get("sub") != payload["sub"]:
             raise SuspiciousOperation("UserInfo subject does not match the ID token.")
         claims = {**payload, **userinfo}
-        issuer, subject = settings.OIDC_ISSUER, payload["sub"]
+        subject = payload["sub"]
+        groups = get_groups(claims)
+        if not login_allowed(groups):
+            logger.info("OIDC login rejected: subject %s is in none of OIDC_ALLOWED_GROUPS.", subject)
+            return None
 
         with transaction.atomic():
-            identity = OIDCIdentity.objects.select_related("user").filter(issuer=issuer, subject=subject).first()
-            if identity:
-                return self.update_user(identity.user, claims)
+            user = self.get_or_link_user(claims, subject)
+            if user is None:
+                return None
+            self.update_user(user, claims)
+            apply_group_claims(user, groups)
+            return user
 
-            try:
-                with transaction.atomic():
-                    user = self.find_user_by_verified_email(claims)
-                    if user is None:
-                        if not settings.OIDC_CREATE_USERS:
-                            logger.info(
-                                "OIDC login rejected: no account for subject %s and OIDC_CREATE_USERS is off.", subject
-                            )
-                            return None
-                        user = self.create_user(claims)
-                    OIDCIdentity.objects.create(user=user, issuer=issuer, subject=subject)
-            except IntegrityError:
-                # A parallel first login of the same account (e.g. a second tab) linked it first;
-                # the account created here is rolled back.
-                identity = OIDCIdentity.objects.select_related("user").filter(issuer=issuer, subject=subject).first()
-                if identity is None:
-                    # Another constraint failed, e.g. a parallel first login of a different account
-                    # took the same username; this attempt fails and the user can retry.
-                    logger.warning("OIDC login failed: account for subject %s could not be created.", subject)
-                    return None
-                user = identity.user
-            return self.update_user(user, claims)
+    def get_or_link_user(self, claims, subject):
+        """Return the account linked to issuer + subject, linking or creating one on the first login."""
+        issuer = settings.OIDC_ISSUER
+        identity = OIDCIdentity.objects.select_related("user").filter(issuer=issuer, subject=subject).first()
+        if identity:
+            return identity.user
+
+        try:
+            with transaction.atomic():
+                user = self.find_user_by_verified_email(claims)
+                if user is None:
+                    if not settings.OIDC_CREATE_USERS:
+                        logger.info(
+                            "OIDC login rejected: no account for subject %s and OIDC_CREATE_USERS is off.", subject
+                        )
+                        return None
+                    user = self.create_user(claims)
+                OIDCIdentity.objects.create(user=user, issuer=issuer, subject=subject)
+        except IntegrityError:
+            # A parallel first login of the same account (e.g. a second tab) linked it first;
+            # the account created here is rolled back.
+            identity = OIDCIdentity.objects.select_related("user").filter(issuer=issuer, subject=subject).first()
+            if identity is None:
+                # Another constraint failed, e.g. a parallel first login of a different account
+                # took the same username; this attempt fails and the user can retry.
+                logger.warning("OIDC login failed: account for subject %s could not be created.", subject)
+                return None
+            return identity.user
+        return user
 
     def find_user_by_verified_email(self, claims):
         if not settings.OIDC_LINK_EXISTING_BY_EMAIL:
@@ -431,7 +447,9 @@ class OIDCBackend(OIDCAuthenticationBackend):
         # Accounts from the provider have no local password (break-glass accounts stay local).
         user.set_unusable_password()
         user.save()
-        create_user_inventory(user)
+        # With group sync, apply_group_claims creates it only if the user ends up in no inventory.
+        if not settings.OIDC_GROUP_SYNC:
+            create_user_inventory(user)
         return user
 
     def update_user(self, user, claims):

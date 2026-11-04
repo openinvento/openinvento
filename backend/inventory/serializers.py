@@ -28,9 +28,12 @@ def _trusted_media_url(request, media_path):
 
 
 class InventorySerializer(serializers.ModelSerializer):
+    # Members come from the OpenID provider; the members page shows a hint instead of invite/remove.
+    oidc_managed = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = Inventory
-        fields = ("uuid", "name", "identifier", "updated_at")
+        fields = ("uuid", "name", "identifier", "updated_at", "oidc_managed")
         read_only_fields = ("uuid", "identifier", "updated_at")
 
 

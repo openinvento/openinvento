@@ -13,7 +13,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.db.models import Count, Prefetch
-from django.http import FileResponse
+from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
@@ -170,6 +170,9 @@ class InventoryScopedAPIView(APIView):
 # endregion Base classes
 
 # region Inventory Settings/ Management Views
+MANAGED_MEMBERS_ERROR = "Members of this inventory are managed by single sign-on."
+
+
 class InventoryMembersView(InventoryAccessMixin, APIView):
     """ API view for managing members of a specific inventory."""
     permission_classes = (IsAuthenticated, IsInventoryMember)
@@ -177,6 +180,12 @@ class InventoryMembersView(InventoryAccessMixin, APIView):
     def get(self, request, inventory_uuid):
         inventory = self.get_inventory(request, inventory_uuid)
         members = inventory.users.order_by("name", "username")
+        # In a managed inventory the sync owns the members that log in through single sign-on.
+        sso_members = (
+            set(members.filter(oidc_identities__isnull=False).values_list("pk", flat=True))
+            if inventory.oidc_managed
+            else set()
+        )
         available_users = (
             CustomUser.objects.exclude(inventories=inventory).order_by("name", "username")
             if settings.ALLOW_INVENTORY_USER_INVITES
@@ -184,15 +193,20 @@ class InventoryMembersView(InventoryAccessMixin, APIView):
         )
         return Response({
             "inventory": InventorySerializer(inventory).data,
-            "members": UserSerializer(members, many=True).data,
+            "members": [
+                {**UserSerializer(member).data, "removable": member.pk not in sso_members}
+                for member in members
+            ],
             "available_users": UserSerializer(available_users, many=True).data,
-            "can_invite": settings.ALLOW_INVENTORY_USER_INVITES,
+            "can_invite": settings.ALLOW_INVENTORY_USER_INVITES and not inventory.oidc_managed,
         })
 
     def post(self, request, inventory_uuid):
         if not settings.ALLOW_INVENTORY_USER_INVITES:
             return Response({"error": "Inventory user invites are disabled."}, status=403)
         inventory = self.get_inventory(request, inventory_uuid)
+        if inventory.oidc_managed:
+            return Response({"error": MANAGED_MEMBERS_ERROR}, status=403)
         user = get_object_or_404(CustomUser, uuid=request.data.get("user_uuid"))
         inventory.users.add(user)
         return Response(UserSerializer(user).data, status=201)
@@ -200,9 +214,15 @@ class InventoryMembersView(InventoryAccessMixin, APIView):
     def delete(self, request, inventory_uuid, user_uuid):
         inventory = self.get_inventory(request, inventory_uuid)
         user = get_object_or_404(CustomUser, uuid=user_uuid)
+        # The sync only handles accounts that log in through single sign-on, so members without an
+        # OIDC identity (e.g. added before the group was mapped) can still be removed here.
+        # Also covers leaving: the next login would add an OIDC member again.
+        if inventory.oidc_managed and user.oidc_identities.exists():
+            return Response({"error": MANAGED_MEMBERS_ERROR}, status=403)
         inventory.users.remove(user)
 
-        if not inventory.users.exists():
+        # A managed inventory keeps its data without members, like after the sync removed the last one.
+        if not inventory.oidc_managed and not inventory.users.exists():
             inventory.delete()
             return Response({"message": "Inventory deleted as it has no remaining members."}, status=204)
         return Response(status=204)
@@ -228,7 +248,17 @@ class InventoryManageView(InventoryAccessMixin, APIView):
         return Response(serializer.data)
 
     def delete(self, request, inventory_uuid):
-        inventory = self.get_inventory(request, inventory_uuid)
+        if request.user.is_superuser:
+            # Instance admins also reach managed inventories they are no member of, e.g. one left
+            # without members after everybody left its group.
+            inventory = get_object_or_404(Inventory, uuid=inventory_uuid)
+            if not inventory.oidc_managed and not inventory.users.filter(pk=request.user.pk).exists():
+                raise Http404
+        else:
+            inventory = self.get_inventory(request, inventory_uuid)
+        # Members have no roles, so any group member could delete a managed inventory for the whole group.
+        if inventory.oidc_managed and not request.user.is_superuser:
+            return Response({"error": "Only instance administrators can delete an inventory managed by single sign-on."}, status=403)
         inventory.delete()
         return Response(status=204)
 
