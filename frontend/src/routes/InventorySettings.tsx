@@ -67,10 +67,12 @@ export default function InventorySettingsPage() {
       if (!inventoryUuid) return
       const loadedMembership = await inventoryApi.getMembership(inventoryUuid)
       setProviders(await inventoryApi.listThirdPartyProviders(inventoryUuid))
-      // Only the admin-only controls need the session; the rest of the page loads without it.
-      setIsAdmin(Boolean((await getCurrentSession().catch(() => null))?.user?.is_superuser))
       setInventoryName(loadedMembership.inventory.name)
       setMembership(loadedMembership)
+      // Only the admin-only controls need the session, so a slow or failed request does not block the page.
+      void getCurrentSession()
+        .catch(() => null)
+        .then((session) => setIsAdmin(Boolean(session?.user?.is_superuser)))
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : t("settings.inventory.loadError"))
     } finally {
