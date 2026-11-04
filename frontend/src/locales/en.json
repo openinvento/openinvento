@@ -605,7 +605,6 @@
       "exporting": "Preparing CSV...",
       "general": "General",
       "inventoryId": "Inventory ID",
-      "inventoryIdDescription": "Maps a single sign-on group to this inventory in OIDC_GROUP_INVENTORIES.",
       "invitesDisabled": "Adding people is disabled for this instance.",
       "loadError": "Could not load inventory settings.",
       "loading": "Loading inventory settings...",

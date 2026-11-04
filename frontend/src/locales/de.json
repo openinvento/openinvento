@@ -603,7 +603,6 @@
       "exporting": "CSV wird erstellt...",
       "general": "Allgemein",
       "inventoryId": "Inventar-ID",
-      "inventoryIdDescription": "Ordnet in OIDC_GROUP_INVENTORIES eine Single-Sign-on-Gruppe diesem Inventar zu.",
       "invitesDisabled": "Das Hinzufügen von Personen ist für diese Instanz deaktiviert.",
       "loadError": "Inventareinstellungen konnten nicht geladen werden.",
       "loading": "Inventareinstellungen werden geladen...",

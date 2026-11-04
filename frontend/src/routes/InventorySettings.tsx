@@ -192,17 +192,20 @@ export default function InventorySettingsPage() {
           <section>
             <section className="mb-5">
               <h2 className="text-xl mb-2 font-semibold">{t("settings.inventory.general")}</h2>
-              <label htmlFor="inventoryName" className="text-sm text-muted-foreground">{t("settings.inventory.name")}</label>
-              <br />
-              <Input value={inventoryName} onChange={(event) => { setInventoryName(event.target.value); setNameChanged(true) }} className="w-64" />
-              {isAdmin && <div className="mt-4">
-                <label htmlFor="inventoryId" className="text-sm text-muted-foreground">{t("settings.inventory.inventoryId")}</label>
-                <div className="flex max-w-md gap-2">
-                  <Input id="inventoryId" value={membership.inventory.uuid} readOnly className="font-mono text-xs" />
-                  <Button type="button" variant="outline" size="icon" aria-label={t("settings.inventory.copyInventoryId")} onClick={() => void navigator.clipboard?.writeText(membership.inventory.uuid)}><Copy /></Button>
+              <div className="flex flex-col gap-4 lg:flex-row lg:gap-8">
+                <div>
+                  <label htmlFor="inventoryName" className="text-sm text-muted-foreground">{t("settings.inventory.name")}</label>
+                  <br />
+                  <Input value={inventoryName} onChange={(event) => { setInventoryName(event.target.value); setNameChanged(true) }} className="w-64" />
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">{t("settings.inventory.inventoryIdDescription")}</p>
-              </div>}
+                {isAdmin && <div className="w-full max-w-md">
+                  <label htmlFor="inventoryId" className="text-sm text-muted-foreground">{t("settings.inventory.inventoryId")}</label>
+                  <div className="flex gap-2">
+                    <Input id="inventoryId" value={membership.inventory.uuid} readOnly className="font-mono text-xs" />
+                    <Button type="button" variant="outline" size="icon" aria-label={t("settings.inventory.copyInventoryId")} onClick={() => void navigator.clipboard?.writeText(membership.inventory.uuid)}><Copy /></Button>
+                  </div>
+                </div>}
+              </div>
             </section>
 
             <section className="mb-8 flex items-center justify-between gap-4 my-8 mb-12 py-5">

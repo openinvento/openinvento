@@ -603,7 +603,6 @@
       "exporting": "Preparando CSV...",
       "general": "General",
       "inventoryId": "ID del inventario",
-      "inventoryIdDescription": "Asigna un grupo de inicio de sesión único a este inventario en OIDC_GROUP_INVENTORIES.",
       "invitesDisabled": "La opción de añadir personas está desactivada en esta instancia.",
       "loadError": "No se pudo cargar la configuración del inventario.",
       "loading": "Cargando la configuración del inventario...",

@@ -603,7 +603,6 @@
       "exporting": "Préparation des fichiers CSV…",
       "general": "Général",
       "inventoryId": "ID de l’inventaire",
-      "inventoryIdDescription": "Associe un groupe d’authentification unique à cet inventaire dans OIDC_GROUP_INVENTORIES.",
       "invitesDisabled": "L’ajout de personnes est désactivé pour cette instance.",
       "loadError": "Impossible de charger les paramètres de l’inventaire.",
       "loading": "Chargement des paramètres de l’inventaire…",
