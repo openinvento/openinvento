@@ -255,8 +255,53 @@ class APIKeyManagementTests(TestCase):
 		key_management_response = self.client.get('/api/api-keys/')
 		self.assertEqual(key_management_response.status_code, 403)
 
-		code_pdf_response = self.client.post('/api/codes/pdf/', {}, format='json')
-		self.assertEqual(code_pdf_response.status_code, 403)
+		members_response = self.client.get(f'/api/inventories/{self.inventory.uuid}/members/')
+		self.assertEqual(members_response.status_code, 403)
+
+	def test_api_key_can_export_own_inventory(self):
+		_, secret = self.create_key()
+		self.authenticate_with_key(secret)
+
+		response = self.client.get(f'/api/inventories/{self.inventory.uuid}/export/')
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response['Content-Type'], 'application/zip')
+
+	def test_api_key_cannot_export_other_inventory(self):
+		_, secret = self.create_key()
+		self.authenticate_with_key(secret)
+
+		response = self.client.get(f'/api/inventories/{self.other_inventory.uuid}/export/')
+
+		self.assertEqual(response.status_code, 404)
+
+	def test_api_key_can_generate_code_pdf_for_own_entries(self):
+		_, secret = self.create_key()
+		self.authenticate_with_key(secret)
+
+		response = self.client.post('/api/codes/pdf/', {'uuids': [str(self.area.uuid)]}, format='json')
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response['Content-Type'], 'application/pdf')
+
+	def test_api_key_cannot_generate_code_pdf_for_other_entries(self):
+		_, secret = self.create_key()
+		self.authenticate_with_key(secret)
+		other_area = InventoryEntry.objects.get(inventory=self.other_inventory)
+
+		response = self.client.post('/api/codes/pdf/', {'uuids': [str(other_area.uuid)]}, format='json')
+
+		self.assertEqual(response.status_code, 400)
+		self.assertEqual(response.data['uuids'], [str(other_area.uuid)])
+
+	def test_revoked_api_key_cannot_export_or_generate_code_pdf(self):
+		revoked_key, secret = self.create_key(name='revoked')
+		revoked_key.revoked = True
+		revoked_key.save()
+		self.authenticate_with_key(secret)
+
+		self.assertEqual(self.client.get(f'/api/inventories/{self.inventory.uuid}/export/').status_code, 401)
+		self.assertEqual(self.client.post('/api/codes/pdf/', {'uuids': [str(self.area.uuid)]}, format='json').status_code, 401)
 
 	def test_invalid_revoked_and_expired_api_keys_are_rejected(self):
 		self.authenticate_with_key('invalid.key')
