@@ -1,4 +1,5 @@
 import io
+import logging
 import os
 import runpy
 import shutil
@@ -209,3 +210,15 @@ class HttpsSettingsTests(SimpleTestCase):
 
 	def test_no_app_url_keeps_them_off(self):
 		self.assert_https_settings(load_settings(), False)
+
+	def test_one_host_over_http_and_https_logs_a_warning(self):
+		with self.assertLogs("openinvento.settings", "WARNING") as logs:
+			load_settings(APP_URL="https://inventory.example.test", APP_URLS="http://inventory.example.test:8080")
+
+		self.assertIn("inventory.example.test over both http and https", "\n".join(logs.output))
+
+	def test_http_on_another_host_logs_no_warning(self):
+		with patch.object(logging.getLogger("openinvento.settings"), "warning") as warning:
+			load_settings(APP_URL="https://inventory.example.test", APP_URLS="http://inventory.lan:8080")
+
+		self.assertFalse(any("both http and https" in call.args[0] for call in warning.call_args_list))

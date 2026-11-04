@@ -421,6 +421,21 @@ _https_only = bool(_app_origins) and all(url.startswith("https://") for url in _
 SESSION_COOKIE_SECURE = _https_only
 CSRF_COOKIE_SECURE = _https_only
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https") if _https_only else None
+# Cookies are scoped by host, not by scheme or port: a host reachable over http and https would
+# send the session cookie of an https login over http as well.
+_schemes_by_host = {}
+for _url in _app_origins:
+    _origin = urlsplit(_url)
+    if _origin.hostname:
+        _schemes_by_host.setdefault(_origin.hostname, set()).add(_origin.scheme)
+for _host, _schemes in sorted(_schemes_by_host.items()):
+    if {"http", "https"} <= _schemes:
+        logger.warning(
+            "APP_URL/APP_URLS list %s over both http and https. Session cookies are not marked secure, "
+            "so a browser sends the cookie of an https login over http to this host as well. "
+            "Use a different host name for http access.",
+            _host,
+        )
 
 
 # Static files (CSS, JavaScript, Images)
