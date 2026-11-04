@@ -6,14 +6,15 @@ import Scanner from "@/components/qr-bar-code/Scanner"
 import ThirdPartyProviderSelector from "@/components/inventory/ThirdPartyProviderSelector"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
-import { getSelectedInventory, inventoryApi, type BarcodeProduct, type Inventory, type ThirdPartyProvider } from "@/utils/api/inventory"
+import { inventoryApi, type BarcodeProduct, type ThirdPartyProvider } from "@/utils/api/inventory"
+import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 
 type ScannedArticle = BarcodeProduct & { id: string; added: boolean }
 
 export default function BarcodeArticleImportPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [inventory, setInventory] = useState<Inventory | null>(null)
+  const { selectedInventory: inventory } = useSelectedInventory()
   const [providers, setProviders] = useState<ThirdPartyProvider[]>([])
   const [providerId, setProviderId] = useState("")
   const [articles, setArticles] = useState<ScannedArticle[]>([])
@@ -24,17 +25,14 @@ export default function BarcodeArticleImportPage() {
   const handleScannerClose = useCallback(() => navigate(-1), [navigate])
 
   useEffect(() => {
-    void inventoryApi.listInventories().then(async (items) => {
-      const selected = getSelectedInventory(items)
-      setInventory(selected)
-      if (selected) {
-        const availableProviders = (await inventoryApi.listThirdPartyProviders(selected.uuid)).filter((provider) => provider.type === "barcode_lookup")
+    void (async () => {
+      if (inventory) {
+        const availableProviders = (await inventoryApi.listThirdPartyProviders(inventory.uuid)).filter((provider) => provider.type === "barcode_lookup")
         setProviders(availableProviders)
         if (availableProviders.length === 1) setProviderId(availableProviders[0].uuid)
       }
-    })
-      .catch((reason) => setError(reason instanceof Error ? reason.message : "Could not load inventory."))
-  }, [])
+    })().catch((reason) => setError(reason instanceof Error ? reason.message : "Could not load inventory."))
+  }, [inventory])
 
   const handleCodeDetected = useCallback(async (barcode: string) => {
     if (!inventory) throw new Error("Select an inventory before scanning.")
