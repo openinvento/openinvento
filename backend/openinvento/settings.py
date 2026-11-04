@@ -202,6 +202,8 @@ if HAS_CORSHEADERS:
         "CORS_ALLOWED_ORIGINS",
         [],
     )
+    # Downloads read the server's filename from this header, e.g. the date of an instance backup.
+    CORS_EXPOSE_HEADERS = ["Content-Disposition"]
 
 if APP_URL or APP_URLS:
     CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(([APP_URL] if APP_URL else []) + APP_URLS))
