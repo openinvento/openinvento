@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { getCurrentSession, resetCredentials } from "@/utils/api/auth"
+import { getCurrentSession, getReturnPath, resetCredentials } from "@/utils/api/auth"
 import { getAuthErrorMessage } from "@/utils/api/auth-errors"
 
 export default function ResetCredentialsPage() {
@@ -39,13 +39,7 @@ export default function ResetCredentialsPage() {
     setError(null)
     try {
       await resetCredentials(username.trim(), password)
-      const returnTo = (location.state as {
-        from?: { pathname?: string; search?: string; hash?: string }
-      } | null)?.from
-      const destination = returnTo?.pathname
-        ? `${returnTo.pathname}${returnTo.search ?? ""}${returnTo.hash ?? ""}`
-        : "/app"
-      window.location.replace(destination)
+      window.location.replace(getReturnPath(location.state) ?? "/app")
     } catch (submissionError) {
       setError(getAuthErrorMessage(submissionError, t))
     } finally {

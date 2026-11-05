@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Navigate, Outlet, useLocation } from "react-router"
 
-import { getCurrentSession } from "@/utils/api/auth"
+import { getCurrentSession, getReturnPath } from "@/utils/api/auth"
 
 type SessionGuardMode = "protected" | "guest"
 
@@ -50,7 +50,9 @@ export function SessionGuard({ mode, redirectUnauthenticated = false }: SessionG
   const navigationState = location.state as { credentialsReset?: boolean } | null
 
   if (mode === "guest" && authenticated) {
-    return <Navigate to="/app" replace />
+    // Also reached right after signing in: this guard instance is reused across routes, so the first
+    // protected route still sees the old session and sends the user back here, with the page in state.
+    return <Navigate to={getReturnPath(location.state) ?? "/app"} replace />
   }
 
   if (mode === "guest" && redirectUnauthenticated && !authenticated) {

@@ -421,6 +421,11 @@ class OIDCCallbackTests(OIDCTestCase):
 
 		self.assertEqual(response['Location'], '/app/settings')
 
+	def test_next_url_keeps_an_encoded_slash(self):
+		response = self.login('/api/oidc/authenticate/?next=/i/abcde/a%252Fb')
+
+		self.assertEqual(response['Location'], '/i/abcde/a%2Fb')
+
 	def test_ignores_external_next_url(self):
 		response = self.login('/api/oidc/authenticate/?next=https://evil.example.test/')
 

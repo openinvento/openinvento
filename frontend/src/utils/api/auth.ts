@@ -28,9 +28,11 @@ export async function getLoginConfig() {
 }
 
 // A full page navigation, since the provider redirects back to the backend callback.
-export function startOIDCLogin() {
+// The backend validates next and falls back to /app if it is not a local path.
+export function startOIDCLogin(next?: string | null) {
   resetNotificationsCache()
-  window.location.assign(getApiUrl("/api/oidc/authenticate/"))
+  const query = next ? `?next=${encodeURIComponent(next)}` : ""
+  window.location.assign(getApiUrl(`/api/oidc/authenticate/${query}`))
 }
 
 export async function login(identifier: string, password: string) {
@@ -85,4 +87,12 @@ export async function updatePersonalAccount(
     name,
     ...(password ? { password } : {}),
   })
+}
+
+// The page SessionGuard sent the user away from, to return to it after signing in.
+export function getReturnPath(state: unknown) {
+  const from = (state as { from?: { pathname?: string; search?: string; hash?: string } } | null)?.from
+  // Only paths within this app: "//host" and "/\host" would leave it.
+  if (!from?.pathname || !/^\/(?![/\\])/.test(from.pathname)) return null
+  return `${from.pathname}${from.search ?? ""}${from.hash ?? ""}`
 }
