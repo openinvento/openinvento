@@ -303,6 +303,31 @@ class APIKeyManagementTests(TestCase):
 		self.assertEqual(self.client.get(f'/api/inventories/{self.inventory.uuid}/export/').status_code, 401)
 		self.assertEqual(self.client.post('/api/codes/pdf/', {'uuids': [str(self.area.uuid)]}, format='json').status_code, 401)
 
+	def test_inactive_user_api_key_cannot_access_api_key_enabled_views(self):
+		_, secret = self.create_key()
+		self.user.is_active = False
+		self.user.save(update_fields=('is_active',))
+		self.authenticate_with_key(secret)
+
+		self.assertEqual(self.client.get('/api/entries/?type=area').status_code, 401)
+		self.assertEqual(self.client.get(f'/api/inventories/{self.inventory.uuid}/export/').status_code, 401)
+		self.assertEqual(self.client.post('/api/codes/pdf/', {'uuids': [str(self.area.uuid)]}, format='json').status_code, 401)
+
+	def test_api_key_works_again_after_user_reactivation(self):
+		_, secret = self.create_key()
+		self.user.is_active = False
+		self.user.save(update_fields=('is_active',))
+		self.authenticate_with_key(secret)
+
+		self.assertEqual(self.client.get('/api/entries/?type=area').status_code, 401)
+
+		self.user.is_active = True
+		self.user.save(update_fields=('is_active',))
+
+		response = self.client.get('/api/entries/?type=area')
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual([area['uuid'] for area in response.data], [str(self.area.uuid)])
+
 	def test_invalid_revoked_and_expired_api_keys_are_rejected(self):
 		self.authenticate_with_key('invalid.key')
 		invalid_response = self.client.get('/api/entries/?type=area')

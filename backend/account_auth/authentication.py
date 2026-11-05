@@ -26,6 +26,8 @@ class UserAPIKeyAuthentication(BaseAuthentication):
             raise exceptions.AuthenticationFailed("Invalid, revoked, or expired API key.")
         if key.has_expired:
             raise exceptions.AuthenticationFailed("Invalid, revoked, or expired API key.")
+        if not key.user.is_active:
+            raise exceptions.AuthenticationFailed("User inactive or deleted.")
 
         return (key.user, key)
 
