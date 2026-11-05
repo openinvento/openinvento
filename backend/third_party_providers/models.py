@@ -32,7 +32,8 @@ class ThirdPartyProvider(models.Model):
     @property
     def api_key(self):
         from .secrets import decrypt_secret
-        return decrypt_secret(self.encrypted_api_key)
+        # Providers such as Ollama need no key, so there may be nothing to decrypt.
+        return decrypt_secret(self.encrypted_api_key) if self.encrypted_api_key else ""
 
     @api_key.setter
     def api_key(self, value):
