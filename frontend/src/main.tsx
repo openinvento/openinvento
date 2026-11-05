@@ -28,6 +28,7 @@ import ResetCredentialsPage from './routes/auth/ResetCredentials.tsx'
 import LoansPage from '../modules/loans/LoansPage.tsx'
 import { getEnabledModules, MODULES_CHANGED_EVENT } from './utils/api/modules'
 import BarcodeArticleImportPage from './routes/inventory/BarcodeArticleImport.tsx'
+import ScanCode from './routes/ScanCode.tsx'
 
 function EnabledModuleRoute({ name, children }: { name: string; children: ReactNode }) {
   const [enabled, setEnabled] = useState<boolean | null>(null)
@@ -177,6 +178,12 @@ const router = createBrowserRouter([
         ],
       },
     ],
+  },
+  {
+    /* URL in QR codes; printed on labels, so it has to stay stable. */
+    path: "/i/:inventory/:identifier",
+    element: <SessionGuard mode="protected" />,
+    children: [{ index: true, element: <ScanCode /> }],
   },
   {
     path: "/auth/reset",
