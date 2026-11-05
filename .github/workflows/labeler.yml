@@ -1,0 +1,49 @@
+name: "Pull Request Labeler"
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  label-files:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Label according to changed files
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+  label-keywords:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Label according to PR title keywords
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const title = pr.title.toLowerCase();
+            const labelsToAdd = [];
+
+            if (title.includes('fix') || title.includes('bug')) {
+              labelsToAdd.push('bug');
+            }
+            if (title.includes('feature') || title.includes('feat')) {
+              labelsToAdd.push('enhancement');
+            }
+            if (title.includes('chore') || title.includes('refactor')) {
+              labelsToAdd.push('chore');
+            }
+
+            if (labelsToAdd.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: labelsToAdd
+              });
+            }
