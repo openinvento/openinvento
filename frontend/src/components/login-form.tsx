@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useNavigate, useSearchParams } from "react-router"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
 import { GalleryVerticalEndIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input"
 import { cn } from "cn"
 import { useTranslation } from "react-i18next"
 
-import { getLoginConfig, login, startOIDCLogin, type LoginConfig } from "@/utils/api/auth"
+import { getLoginConfig, getReturnPath, login, startOIDCLogin, type LoginConfig } from "@/utils/api/auth"
 import { getAuthErrorMessage } from "@/utils/api/auth-errors"
 
 export function LoginForm({
@@ -24,6 +24,8 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const returnPath = getReturnPath(location.state)
   const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   // ?error=sso is set by the backend after a failed single sign-on; ?local=1 shows the
@@ -50,7 +52,7 @@ export function LoginForm({
         setLoginConfig(config)
         if (config.oidc.enabled && config.oidc.auto_redirect && !ssoFailed && !forceLocalLogin && !loggedOut) {
           setRedirecting(true)
-          startOIDCLogin()
+          startOIDCLogin(returnPath)
         }
       })
       .catch(() => {
@@ -59,7 +61,7 @@ export function LoginForm({
     return () => {
       active = false
     }
-  }, [ssoFailed, forceLocalLogin, loggedOut, configAttempt])
+  }, [ssoFailed, forceLocalLogin, loggedOut, configAttempt, returnPath])
 
   function retryLoginConfig() {
     setConfigFailed(false)
@@ -73,7 +75,7 @@ export function LoginForm({
 
     try {
       await login(identifier.trim(), password)
-      navigate("/app", { replace: true })
+      navigate(returnPath ?? "/app", { replace: true })
     } catch (submissionError) {
       setError(getAuthErrorMessage(submissionError, t))
     } finally {
@@ -137,7 +139,7 @@ export function LoginForm({
 
           {ssoEnabled && (
             <Field>
-              <Button type="button" variant={showPasswordForm ? "outline" : "default"} onClick={startOIDCLogin}>
+              <Button type="button" variant={showPasswordForm ? "outline" : "default"} onClick={() => startOIDCLogin(returnPath)}>
                 {ssoButtonLabel}
               </Button>
             </Field>
