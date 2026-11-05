@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next"
 import BaseScreen from "@/layouts/BaseScreen"
 import ThirdPartyProviderSelector from "@/components/inventory/ThirdPartyProviderSelector"
 import { Button } from "@/components/ui/button"
-import { getSelectedInventory, inventoryApi, type Inventory, type ThirdPartyProvider } from "@/utils/api/inventory"
+import { inventoryApi, type ThirdPartyProvider } from "@/utils/api/inventory"
+import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 import { useNavigate } from "react-router"
 import { type Draft, ArticleDraftCard } from "@/components/inventory/ArticleDraftIcon"
 
@@ -12,10 +13,10 @@ import { type Draft, ArticleDraftCard } from "@/components/inventory/ArticleDraf
 export default function MagicArticleImportPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { selectedInventory: inventory } = useSelectedInventory()
 
   const cameraInput = useRef<HTMLInputElement>(null)
   const fileInput = useRef<HTMLInputElement>(null)
-  const [inventory, setInventory] = useState<Inventory | null>(null)
   const [providers, setProviders] = useState<ThirdPartyProvider[]>([])
   const [providerId, setProviderId] = useState("")
   const [image, setImage] = useState<File | null>(null)
@@ -30,16 +31,14 @@ export default function MagicArticleImportPage() {
   const boxId = new URLSearchParams(window.location.search).get("box") || undefined
 
   useEffect(() => {
-    void inventoryApi.listInventories().then(async (items) => {
-      const selected = getSelectedInventory(items)
-      setInventory(selected)
-      if (selected) {
-        const availableProviders = (await inventoryApi.listThirdPartyProviders(selected.uuid)).filter((provider) => provider.type === "object_detection_llm")
+    void (async () => {
+      if (inventory) {
+        const availableProviders = (await inventoryApi.listThirdPartyProviders(inventory.uuid)).filter((provider) => provider.type === "object_detection_llm")
         setProviders(availableProviders)
         if (availableProviders.length === 1) setProviderId(availableProviders[0].uuid)
       }
-    }).catch((reason) => setError(reason instanceof Error ? reason.message : t("quickActions.magicImportPage.errors.loadInventories")))
-  }, [])
+    })().catch((reason) => setError(reason instanceof Error ? reason.message : t("quickActions.magicImportPage.errors.loadInventories")))
+  }, [inventory, t])
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
 
   function chooseImage(event: ChangeEvent<HTMLInputElement>) {

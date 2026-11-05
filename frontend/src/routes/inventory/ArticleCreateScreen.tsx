@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { getSelectedInventory, inventoryApi, type ArticleCategory, type CategoryField, type Box, type Inventory, type Shelf } from "@/utils/api/inventory"
+import { inventoryApi, type ArticleCategory, type CategoryField, type Box, type Shelf } from "@/utils/api/inventory"
+import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 import { compressArticleImage } from "@/utils/article-image"
 
@@ -18,7 +19,7 @@ export default function ArticleCreateScreen() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const [inventory, setInventory] = useState<Inventory | null>(null)
+  const { selectedInventory: inventory } = useSelectedInventory()
   const [areaName, setAreaName] = useState("")
   const [shelves, setShelves] = useState<Shelf[]>([])
   const [boxes, setBoxes] = useState<Box[]>([])
@@ -38,15 +39,13 @@ export default function ArticleCreateScreen() {
     void (async () => {
       if (!areaId) return
       try {
-        const [inventories, areas, fetchedShelves, fetchedBoxes, fetchedCategories, fetchedFields] = await Promise.all([
-          inventoryApi.listInventories(),
+        const [areas, fetchedShelves, fetchedBoxes, fetchedCategories, fetchedFields] = await Promise.all([
           inventoryApi.listAreas(),
           inventoryApi.listShelves({ within: areaId }),
           inventoryApi.listBoxes({ within: areaId }),
           inventoryApi.listCategories(),
           inventoryApi.listCategoryFields(),
         ])
-        setInventory(getSelectedInventory(inventories))
         setAreaName(areas.find((area) => area.uuid === areaId)?.name ?? "")
         setShelves(fetchedShelves)
         setBoxes(fetchedBoxes)

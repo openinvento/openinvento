@@ -161,6 +161,15 @@ type EntryQuery = {
 }
 
 const SELECTED_INVENTORY_KEY = "selectedInventoryUuid" // key for localStorage to store the selected inventory UUID
+const INVENTORIES_CHANGED_EVENT = "openinvento:inventories-changed"
+
+let availableInventories: Inventory[] = []
+let inventoryState = {
+  inventories: availableInventories,
+  selectedInventory: null as Inventory | null,
+  selectedInventoryUuid: null as string | null,
+}
+
 const entryPath = "/api/entries/"
 const entryTypeForPath: Record<string, EntryRecord["type"]> = {
   areas: "area",
@@ -172,7 +181,7 @@ const entryTypeForPath: Record<string, EntryRecord["type"]> = {
 
 // functions
 
-export function getSelectedInventory(inventories: Inventory[]) {
+export function getSelectedInventory(inventories: Inventory[] = availableInventories) {
   const storedUuid = localStorage.getItem(SELECTED_INVENTORY_KEY)
   const selected = inventories.find((inventory) => inventory.uuid === storedUuid)
   const fallback = selected ?? inventories[0] ?? null
@@ -182,16 +191,56 @@ export function getSelectedInventory(inventories: Inventory[]) {
   return fallback
 }
 
+export function setAvailableInventories(inventories: Inventory[]) {
+  availableInventories = inventories
+  updateInventoryState()
+  window.dispatchEvent(new Event(INVENTORIES_CHANGED_EVENT))
+}
+
+export function getAvailableInventories() {
+  return availableInventories
+}
+
+export function subscribeToInventoryChanges(listener: () => void) {
+  const sync = () => {
+    updateInventoryState()
+    listener()
+  }
+  window.addEventListener(INVENTORIES_CHANGED_EVENT, sync)
+  window.addEventListener("storage", sync)
+  return () => {
+    window.removeEventListener(INVENTORIES_CHANGED_EVENT, sync)
+    window.removeEventListener("storage", sync)
+  }
+}
+
 export function setSelectedInventory(uuid: string) {
   localStorage.setItem(SELECTED_INVENTORY_KEY, uuid)
+  updateInventoryState()
+  window.dispatchEvent(new Event(INVENTORIES_CHANGED_EVENT))
 }
 
 export function getSelectedInventoryUuid() {
   return localStorage.getItem(SELECTED_INVENTORY_KEY)
 }
 
+export function getInventoryState() {
+  return inventoryState
+}
+
+function updateInventoryState() {
+  const selectedInventory = getSelectedInventory()
+  inventoryState = {
+    inventories: availableInventories,
+    selectedInventory,
+    selectedInventoryUuid: selectedInventory?.uuid ?? null,
+  }
+}
+
 export function clearSelectedInventory() {
   localStorage.removeItem(SELECTED_INVENTORY_KEY)
+  updateInventoryState()
+  window.dispatchEvent(new Event(INVENTORIES_CHANGED_EVENT))
 }
 
 function scopedPath(path: string) {

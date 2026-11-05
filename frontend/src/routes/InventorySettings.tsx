@@ -17,18 +17,18 @@ import {
 } from "@/components/ui/combobox"
 import {
   clearSelectedInventory,
-  getSelectedInventory,
-  getSelectedInventoryUuid,
   inventoryApi,
   type InventoryMembership,
   type ThirdPartyProviderConfiguration,
 } from "@/utils/api/inventory"
 import { Input } from "@/components/ui/input"
 import { getCurrentSession } from "@/utils/api/auth"
+import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 
 export default function InventorySettingsPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { selectedInventoryUuid } = useSelectedInventory()
   const [membership, setMembership] = useState<InventoryMembership | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [inventoryName, setInventoryName] = useState("")
@@ -54,16 +54,11 @@ export default function InventorySettingsPage() {
   async function load() {
     setLoading(true)
     setError("")
-    const inventories = await inventoryApi.listInventories()
-
     try {
       const availableConfigurations = await inventoryApi.listThirdPartyProviderConfigurations()
       setConfigurations(availableConfigurations)
       setProviderModel(availableConfigurations[0]?.default_model ?? "")
-      let inventoryUuid = getSelectedInventoryUuid()
-      if (!inventoryUuid) {
-        inventoryUuid = getSelectedInventory(inventories)?.uuid ?? null
-      }
+      const inventoryUuid = selectedInventoryUuid
       if (!inventoryUuid) return
       const loadedMembership = await inventoryApi.getMembership(inventoryUuid)
       setProviders(await inventoryApi.listThirdPartyProviders(inventoryUuid))
@@ -111,7 +106,7 @@ export default function InventorySettingsPage() {
 
   useEffect(() => {
     void load()
-  }, [])
+  }, [selectedInventoryUuid])
 
   useEffect(() => {
     if (!nameChanged || !membership) return

@@ -1,7 +1,5 @@
 "use client"
 
-import * as React from "react"
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +18,8 @@ import { ChevronDownIcon, LogOutIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { logout } from "@/utils/api/auth"
 import { useNavigate } from "react-router"
-import { getSelectedInventory, setSelectedInventory, type Inventory } from "@/utils/api/inventory"
+import { setSelectedInventory, type Inventory } from "@/utils/api/inventory"
+import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 
 export function AccountSidebarManager({
   userName,
@@ -29,13 +28,9 @@ export function AccountSidebarManager({
   userName: string
   inventories: Inventory[]
 }) {
-  const [activeInventory, setActiveInventory] = React.useState<Inventory | null>(null)
+  const { selectedInventory: activeInventory } = useSelectedInventory()
   const {t} = useTranslation()
   const navigate = useNavigate()
-
-  React.useEffect(() => {
-    setActiveInventory(getSelectedInventory(inventories))
-  }, [inventories])
 
   if (!activeInventory) {
     return null
@@ -82,7 +77,6 @@ export function AccountSidebarManager({
                   key={inventory.uuid}
                   onClick={() => {
                     setSelectedInventory(inventory.uuid)
-                    setActiveInventory(inventory)
                     navigate(0)
                   }}
                   className="gap-2 p-2"

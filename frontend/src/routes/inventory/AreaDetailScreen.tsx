@@ -10,14 +10,13 @@ import { InventoryViewToggle, useInventoryViewMode } from "@/components/inventor
 import { InventoryDraggable, InventoryDropTarget } from "@/components/inventory/inventory-dnd"
 import { FloatingCreateButton } from "@/components/inventory/FloatingCreateButton"
 import {
-  getSelectedInventory,
   inventoryApi,
   type Area,
   type Article,
   type Box,
-  type Inventory,
   type Shelf,
 } from "@/utils/api/inventory"
+import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 
 type CreateKind = "box" | "shelf"
 
@@ -34,9 +33,9 @@ export default function AreaDetailScreen() {
   const { areaId } = useParams()
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { selectedInventory: inventory } = useSelectedInventory()
   const { viewMode, setViewMode } = useInventoryViewMode()
 
-  const [inventory, setInventory] = useState<Inventory | null>(null)
   const [area, setArea] = useState<Area | null>(null)
   const [allAreas, setAllAreas] = useState<Area[]>([])
   const [editAreaId, setEditAreaId] = useState("")
@@ -54,12 +53,10 @@ export default function AreaDetailScreen() {
     if (!areaId) return
     setError("")
     try {
-      const [inventories, allAreas, scopedEntries] = await Promise.all([
-        inventoryApi.listInventories(),
+      const [allAreas, scopedEntries] = await Promise.all([
         inventoryApi.listAreas(),
         inventoryApi.listEntries({ within: areaId }),
       ])
-      setInventory(getSelectedInventory(inventories))
       setArea(allAreas.find((item) => item.uuid === areaId) ?? null)
       setAllAreas(allAreas)
       const scopedShelves = scopedEntries.filter((item) => item.type === "shelf") as Shelf[]

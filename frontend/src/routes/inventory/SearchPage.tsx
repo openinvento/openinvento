@@ -5,16 +5,17 @@ import { useTranslation } from "react-i18next"
 import { useNavigate, useSearchParams } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { getSelectedInventory, inventoryApi, type Inventory, type SearchResult } from "@/utils/api/inventory"
+import { inventoryApi, type SearchResult } from "@/utils/api/inventory"
+import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 import { ArticleCard, BoxCard } from "@/components/inventory/entity-cards"
 
 export default function SearchPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const { inventories, selectedInventoryUuid: selectedInventoryId } = useSelectedInventory()
   const initialQuery = searchParams.get("q")?.trim() ?? ""
-  const [inventories, setInventories] = useState<Inventory[]>([])
-  const [inventoryId, setInventoryId] = useState("")
+  const [inventoryId, setInventoryId] = useState(selectedInventoryId ?? "")
   const [query, setQuery] = useState(initialQuery)
   const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(true)
@@ -22,27 +23,20 @@ export default function SearchPage() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    async function loadInventories() {
-      try {
-        const nextInventories = await inventoryApi.listInventories()
-        const nextInventoryId = getSelectedInventory(nextInventories)?.uuid ?? ""
-        setInventories(nextInventories)
-        setInventoryId(nextInventoryId)
-
-        if (initialQuery && nextInventoryId) {
-          setSearching(true)
-          setResults(await inventoryApi.searchInventory(initialQuery, nextInventoryId))
-        }
-      } catch (reason) {
-        setError(reason instanceof Error ? reason.message : t("search.errors.load"))
-      } finally {
-        setLoading(false)
-        setSearching(false)
-      }
+    setInventoryId(selectedInventoryId ?? "")
+    if (initialQuery && selectedInventoryId) {
+      setSearching(true)
+      void inventoryApi.searchInventory(initialQuery, selectedInventoryId)
+        .then(setResults)
+        .catch((reason) => setError(reason instanceof Error ? reason.message : t("search.errors.load")))
+        .finally(() => {
+          setLoading(false)
+          setSearching(false)
+        })
+    } else {
+      setLoading(false)
     }
-
-    void loadInventories()
-  }, [initialQuery, t])
+  }, [initialQuery, selectedInventoryId, t])
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
