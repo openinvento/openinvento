@@ -35,6 +35,7 @@ export default function ManageCodes() {
 		code_type: "qr",
 		size: "a4",
 		layout: "vertical",
+		error_correction: "M",
 	})
 
 	const [isScannerOpen, setIsScannerOpen] = useState(false)
@@ -262,6 +263,15 @@ export default function ManageCodes() {
 									<option value="vertical">Vertical</option><option value="horizontal">Horizontal</option>
 								</select>
 							</label>
+							{options.code_type === "qr" && (
+								<label className="grid gap-1.5 text-sm font-medium">
+									{t("manageCodes.errorCorrection")}
+									<select className="h-9 rounded-lg border bg-background px-2" value={options.error_correction} onChange={(event) => setOptions({ ...options, error_correction: event.target.value as CodePdfOptions["error_correction"] })}>
+										<option value="M">{t("manageCodes.errorCorrections.M")}</option>
+										<option value="L">{t("manageCodes.errorCorrections.L")}</option>
+									</select>
+								</label>
+							)}
 							<div className="grid gap-2 pt-2">
 								<Button variant="outline" onClick={() => void openCodes(true)} disabled={isGenerating || selectedIds.size === 0}>
 									<Printer /> {t("manageCodes.print")}

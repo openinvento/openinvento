@@ -368,6 +368,12 @@
   },
   "manageCodes": {
     "clearSelection": "Auswahl aufheben",
+    "errorCorrection": "Fehlerkorrektur",
+    "errorCorrections": {
+      "L": "Niedrig (kleinerer Code, weniger robust)",
+      "M": "Mittel (empfohlen)"
+    },
+    "identifierPrintedHint": "Gedruckte Etiketten behalten die alte Kennung und öffnen diesen Eintrag erst nach einem Neudruck wieder.",
     "codeType": "Codetyp",
     "codeTypes": {
       "barcode": "Barcode",
@@ -530,6 +536,7 @@
       "downloadBackup": "Backup herunterladen",
       "editUser": "Benutzer bearbeiten",
       "email": "E-Mail",
+      "enableQrCodeUrls": "URLs in QR-Codes aktivieren",
       "enableEmailLogin": "Anmeldung per E-Mail aktivieren",
       "loadUsersError": "Benutzer konnten nicht geladen werden.",
       "loadingUsers": "Benutzer werden geladen...",
@@ -564,6 +571,8 @@
       }
     },
     "adminTab": "Administratoreinstellungen",
+    "qrCodeUrls": "URLs in QR-Codes",
+    "qrCodeUrlsDescription": "QR-Codes enthalten einen Link zum Eintrag, sodass jede Kamera-App ihn öffnen kann. Ohne APP_URL enthalten sie nur die Kennung. Barcodes enthalten immer die Kennung.",
     "allowEmailLogin": "Anmeldung mit E-Mail-Adresse erlauben",
     "allowEmailLoginDescription": "Wenn aktiviert, können sich Benutzer zusätzlich mit ihrer E-Mail-Adresse anmelden.",
     "apiKeys": {

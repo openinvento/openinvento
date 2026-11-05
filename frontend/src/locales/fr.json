@@ -368,6 +368,12 @@
   },
   "manageCodes": {
     "clearSelection": "Effacer la sélection",
+    "errorCorrection": "Correction d’erreurs",
+    "errorCorrections": {
+      "L": "Faible (code plus petit, moins tolérant aux dommages)",
+      "M": "Moyenne (recommandée)"
+    },
+    "identifierPrintedHint": "Les étiquettes imprimées conservent l’ancien identifiant et n’ouvrent plus cette entrée tant qu’elles ne sont pas réimprimées.",
     "codeType": "Type de code",
     "codeTypes": {
       "barcode": "Code-barres",
@@ -530,6 +536,7 @@
       "downloadBackup": "Télécharger la sauvegarde",
       "editUser": "Modifier l’utilisateur",
       "email": "E-mail",
+      "enableQrCodeUrls": "Activer les URL dans les codes QR",
       "enableEmailLogin": "Activer la connexion par e-mail",
       "loadUsersError": "Impossible de charger les utilisateurs.",
       "loadingUsers": "Chargement des utilisateurs…",
@@ -564,6 +571,8 @@
       }
     },
     "adminTab": "Paramètres d’administration (instance)",
+    "qrCodeUrls": "URL dans les codes QR",
+    "qrCodeUrlsDescription": "Les codes QR contiennent un lien vers l’entrée, que toute application d’appareil photo peut ouvrir. Sans APP_URL, ils ne contiennent que l’identifiant. Les codes-barres contiennent toujours l’identifiant.",
     "allowEmailLogin": "Autoriser la connexion par adresse e-mail",
     "allowEmailLoginDescription": "Lorsqu’elle est activée, les utilisateurs peuvent se connecter avec leur adresse e-mail en plus de leur nom d’utilisateur.",
     "apiKeys": {

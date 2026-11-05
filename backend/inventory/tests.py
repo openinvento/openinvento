@@ -7,10 +7,13 @@ from django.test import Client, TestCase, override_settings
 from django.test.client import MULTIPART_CONTENT, encode_multipart
 from rest_framework.test import APIClient
 from django.utils import timezone
+from reportlab.graphics.barcode import createBarcodeDrawing
+from reportlab.graphics.barcode.qr import QrCodeWidget
 
-from account_auth.models import CustomUser, Notification, UserAPIKey
+from account_auth.models import CustomUser, InstanceSettings, Notification, UserAPIKey
 from inventory.jobs.date_field_sync import sync_date_field_notifications
 
+from .code_utils import qr_code_value
 from .models import CODE_CHARACTERS, ArticleAttachment, ArticleCategory, ArticleFieldValue, CategoryField, Inventory, InventoryEntry
 
 
@@ -539,3 +542,52 @@ class CodeLookupTests(TestCase):
 
 		self.assertIn(response.status_code, (302, 401, 403))
 		self.assertNotIn("uuid", getattr(response, "data", None) or {})
+
+
+@override_settings(APP_URL="https://inventory.example")
+class QrCodeUrlTests(TestCase):
+	def setUp(self):
+		self.user = CustomUser.objects.create_user(username="qr", password="password")
+		self.inventory = Inventory.objects.create(name="Home", identifier="AbC23")
+		self.user.inventories.add(self.inventory)
+		self.entry = InventoryEntry.objects.create(inventory=self.inventory, type="area", name="Area", identifier="box1")
+		self.client = APIClient()
+		self.client.force_authenticate(self.user)
+
+	def pdf(self, **options):
+		return self.client.post("/api/codes/pdf/", {"uuids": [str(self.entry.uuid)], **options}, format="json")
+
+	def test_value_is_the_scan_url(self):
+		self.assertEqual(qr_code_value(self.entry, True), "https://inventory.example/i/AbC23/box1")
+
+	def test_value_percent_encodes_the_identifier(self):
+		self.entry.identifier = "a/b ü"
+		self.assertEqual(qr_code_value(self.entry, True), "https://inventory.example/i/AbC23/a%2Fb%20%C3%BC")
+
+	def test_value_is_the_identifier_when_urls_are_off(self):
+		self.assertEqual(qr_code_value(self.entry, False), "box1")
+
+	@override_settings(APP_URL="")
+	def test_value_is_the_identifier_without_app_url(self):
+		self.assertEqual(qr_code_value(self.entry, True), "box1")
+
+	def test_urls_are_on_by_default(self):
+		self.assertTrue(InstanceSettings.get_solo().qr_code_urls)
+
+	def test_pdf_uses_the_instance_setting_and_error_correction_m(self):
+		with patch("inventory.code_utils.QrCodeWidget", wraps=QrCodeWidget) as widget:
+			self.assertEqual(self.pdf().status_code, 200)
+		widget.assert_called_once_with("https://inventory.example/i/AbC23/box1", barLevel="M")
+
+		InstanceSettings.objects.update_or_create(pk=1, defaults={"qr_code_urls": False})
+		with patch("inventory.code_utils.QrCodeWidget", wraps=QrCodeWidget) as widget:
+			self.assertEqual(self.pdf(error_correction="L").status_code, 200)
+		widget.assert_called_once_with("box1", barLevel="L")
+
+	def test_pdf_rejects_other_error_correction_levels(self):
+		self.assertEqual(self.pdf(error_correction="H").status_code, 400)
+
+	def test_barcode_keeps_the_identifier(self):
+		with patch("inventory.code_utils.createBarcodeDrawing", wraps=createBarcodeDrawing) as drawing:
+			self.assertEqual(self.pdf(code_type="barcode").status_code, 200)
+		self.assertEqual(drawing.call_args.kwargs["value"], "box1")

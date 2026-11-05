@@ -5,6 +5,7 @@ import { refreshEnabledModules } from "./modules"
 export type InstanceSettings = {
   allow_email_login: boolean
   allow_signup: boolean
+  qr_code_urls: boolean
   enabled_modules: string[]
   available_modules: { name: string; label: string }[]
 }

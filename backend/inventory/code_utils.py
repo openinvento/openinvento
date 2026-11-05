@@ -1,5 +1,7 @@
 from io import BytesIO
+from urllib.parse import quote
 
+from django.conf import settings
 from reportlab.graphics import renderPDF
 from reportlab.graphics.barcode import createBarcodeDrawing
 from reportlab.graphics.barcode.qr import QrCodeWidget
@@ -9,7 +11,25 @@ from reportlab.lib.pagesizes import A4, A5, LETTER
 from reportlab.pdfgen import canvas
 
 
-def generate_codes_pdf(selected_items, code_type: str, size: str, layout: str) -> BytesIO:
+def scan_url(item) -> str:
+    """The URL of an entry for a QR code: {APP_URL}/i/{inventory identifier}/{identifier}."""
+    inventory_identifier = quote(item.inventory.identifier, safe="")
+    return f"{settings.APP_URL}/i/{inventory_identifier}/{quote(item.identifier, safe='')}"
+
+
+def qr_code_value(item, use_urls: bool) -> str:
+    """Without APP_URL there is no address to point at, so the QR code holds the identifier alone."""
+    return scan_url(item) if use_urls and settings.APP_URL else item.identifier
+
+
+def generate_codes_pdf(
+    selected_items,
+    code_type: str,
+    size: str,
+    layout: str,
+    error_correction: str = "M",
+    use_urls: bool = False,
+) -> BytesIO:
     page_sizes = {"a4": A4, "a5": A5, "letter": LETTER}
     page_width, page_height = page_sizes[size]
     columns, rows = (2, 4) if layout == "horizontal" else (4, 2)
@@ -37,7 +57,7 @@ def generate_codes_pdf(selected_items, code_type: str, size: str, layout: str) -
         pdf.drawCentredString(origin_x + cell_width / 2, origin_y + 10, f"{object_type}: {item.identifier}")
 
         if code_type == "qr":
-            code = QrCodeWidget(item.identifier)
+            code = QrCodeWidget(qr_code_value(item, use_urls), barLevel=error_correction)
             bounds = code.getBounds()
             code_width = bounds[2] - bounds[0]
             code_height = bounds[3] - bounds[1]

@@ -40,6 +40,7 @@ const emptyForm: UserForm = {
 export default function AdminSettings() {
   const { t } = useTranslation()
   const [allowEmailLogin, setAllowEmailLogin] = useState(false)
+  const [qrCodeUrls, setQrCodeUrls] = useState(true)
   const [enabledModules, setEnabledModules] = useState<string[]>([])
   const [availableModules, setAvailableModules] = useState<{ name: string; label: string }[]>([])
   const [settingsError, setSettingsError] = useState<string | null>(null)
@@ -60,6 +61,7 @@ export default function AdminSettings() {
     Promise.all([getInstanceSettings(), getUsers()])
       .then(([settings, loadedUsers]) => {
         setAllowEmailLogin(settings.allow_email_login)
+        setQrCodeUrls(settings.qr_code_urls)
         setEnabledModules(settings.enabled_modules)
         setAvailableModules(settings.available_modules)
         setUsers(loadedUsers)
@@ -80,6 +82,20 @@ export default function AdminSettings() {
       await updateInstanceSettings({ allow_email_login: value })
     } catch {
       setAllowEmailLogin(!value)
+      setSettingsError(t("settings.instanceSettingsSaveError"))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleQrCodeUrlsChange(value: boolean) {
+    setQrCodeUrls(value)
+    setSaving(true)
+    setSettingsError(null)
+    try {
+      await updateInstanceSettings({ qr_code_urls: value })
+    } catch {
+      setQrCodeUrls(!value)
       setSettingsError(t("settings.instanceSettingsSaveError"))
     } finally {
       setSaving(false)
@@ -224,6 +240,19 @@ export default function AdminSettings() {
             {t("settings.admin.enableEmailLogin")}
           </FieldLabel>
           <FieldError>{settingsError}</FieldError>
+        </Field>
+      </section>
+
+      <section className="border-b pb-7">
+        <div className="mb-4">
+          <h2 className="font-semibold">{t("settings.qrCodeUrls")}</h2>
+          <p className="text-sm text-muted-foreground">{t("settings.qrCodeUrlsDescription")}</p>
+        </div>
+        <Field>
+          <FieldLabel htmlFor="qr-code-urls" className="flex-row items-center text-sm font-normal">
+            <Switch id="qr-code-urls" checked={qrCodeUrls} disabled={saving} onCheckedChange={(checked: boolean) => void handleQrCodeUrlsChange(checked)} />
+            {t("settings.admin.enableQrCodeUrls")}
+          </FieldLabel>
         </Field>
       </section>
 

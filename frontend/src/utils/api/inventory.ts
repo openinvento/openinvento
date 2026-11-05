@@ -114,6 +114,7 @@ export type CodePdfOptions = {
   code_type: "qr" | "barcode"
   size: "a4" | "a5" | "letter"
   layout: "horizontal" | "vertical"
+  error_correction: "M" | "L"
 }
 
 export type CodeLookupResult = {

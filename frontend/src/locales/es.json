@@ -368,6 +368,12 @@
   },
   "manageCodes": {
     "clearSelection": "Borrar selección",
+    "errorCorrection": "Corrección de errores",
+    "errorCorrections": {
+      "L": "Baja (código más pequeño, menos tolerante a daños)",
+      "M": "Media (recomendada)"
+    },
+    "identifierPrintedHint": "Las etiquetas impresas conservan el identificador anterior y no abrirán esta entrada hasta que las vuelvas a imprimir.",
     "codeType": "Tipo de código",
     "codeTypes": {
       "barcode": "Código de barras",
@@ -530,6 +536,7 @@
       "downloadBackup": "Descargar copia de seguridad",
       "editUser": "Editar usuario",
       "email": "Correo electrónico",
+      "enableQrCodeUrls": "Activar URL en los códigos QR",
       "enableEmailLogin": "Habilitar el inicio de sesión con correo electrónico",
       "loadUsersError": "No se pudo cargar usuarios.",
       "loadingUsers": "Cargando usuarios...",
@@ -564,6 +571,8 @@
       }
     },
     "adminTab": "Configuración de administración (instancia)",
+    "qrCodeUrls": "URL en los códigos QR",
+    "qrCodeUrlsDescription": "Los códigos QR contienen un enlace a la entrada, de modo que cualquier aplicación de cámara puede abrirla. Sin APP_URL solo contienen el identificador. Los códigos de barras siempre contienen el identificador.",
     "allowEmailLogin": "Permitir el inicio de sesión con correo electrónico",
     "allowEmailLoginDescription": "Cuando está activado, los usuarios pueden iniciar sesión con su dirección de correo electrónico además de con su nombre de usuario.",
     "apiKeys": {
