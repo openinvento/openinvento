@@ -1,5 +1,6 @@
 import base64
 import tempfile
+from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
@@ -10,7 +11,7 @@ from django.utils import timezone
 from account_auth.models import CustomUser, Notification
 from inventory.jobs.date_field_sync import sync_date_field_notifications
 
-from .models import ArticleAttachment, ArticleCategory, ArticleFieldValue, CategoryField, Inventory, InventoryEntry
+from .models import CODE_CHARACTERS, ArticleAttachment, ArticleCategory, ArticleFieldValue, CategoryField, Inventory, InventoryEntry
 
 
 class TypedEntryFacade:
@@ -368,3 +369,43 @@ class DateFieldNotificationTests(TestCase):
 		sync_date_field_notifications(self.user)
 
 		self.assertFalse(Notification.objects.filter(user=self.user, kind="date_reminder").exists())
+
+
+class GeneratedIdentifierTests(TestCase):
+	def test_new_inventory_gets_a_short_identifier_without_ambiguous_characters(self):
+		identifier = Inventory.objects.create(name="Home").identifier
+
+		self.assertEqual(len(identifier), 5)
+		self.assertTrue(set(identifier) <= set(CODE_CHARACTERS))
+
+	def test_new_entry_keeps_ten_characters_from_the_same_alphabet(self):
+		inventory = Inventory.objects.create(name="Home")
+
+		identifier = InventoryEntry.objects.create(name="Attic", type="area", inventory=inventory).identifier
+
+		self.assertEqual(len(identifier), 10)
+		self.assertTrue(set(identifier) <= set(CODE_CHARACTERS))
+
+	def test_alphabet_leaves_out_characters_that_are_easy_to_confuse(self):
+		self.assertFalse(set("0O1lI") & set(CODE_CHARACTERS))
+		self.assertEqual(len(CODE_CHARACTERS), 57)
+
+	def test_inventory_picks_another_identifier_on_a_collision(self):
+		Inventory.objects.create(name="First", identifier="abcde")
+
+		# Without the default categories, which draw codes as well.
+		with (
+			patch("inventory.category_defaults.ensure_default_categories"),
+			patch("inventory.models.generate_random_code", side_effect=["abcde", "fghjk"]),
+		):
+			inventory = Inventory.objects.create(name="Second")
+
+		self.assertEqual(inventory.identifier, "fghjk")
+
+	def test_existing_identifier_stays_when_the_inventory_is_saved(self):
+		inventory = Inventory.objects.create(name="Old", identifier="X7k9P2mQ1a")
+		inventory.name = "Renamed"
+		inventory.save()
+
+		inventory.refresh_from_db()
+		self.assertEqual(inventory.identifier, "X7k9P2mQ1a")

@@ -1,6 +1,5 @@
 import os
 import secrets
-import string
 import uuid
 
 from django.conf import settings
@@ -74,9 +73,13 @@ def article_attachment_upload_path(instance, filename):
     safe_name = slugify(os.path.splitext(os.path.basename(filename))[0])[:80] or "attachment"
     return os.path.join("article-attachments", str(instance.entry.uuid), f"{uuid.uuid4()}-{safe_name}{file_ext}")
 
+# Without characters that are easy to confuse on a label: 0/O and 1/l/I.
+CODE_CHARACTERS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+# Part of every QR code URL, so short enough to keep the code small. About 600 million combinations.
+INVENTORY_IDENTIFIER_LENGTH = 5
+
 def generate_random_code(length=10):
-    characters = string.ascii_letters + string.digits
-    return ''.join(secrets.choice(characters) for _ in range(length))
+    return ''.join(secrets.choice(CODE_CHARACTERS) for _ in range(length))
 
 def is_prefix_group(group):
     """Whether a group gets its own inventory through OIDC_INVENTORY_GROUP_PREFIX."""
@@ -87,7 +90,7 @@ def is_prefix_group(group):
 class Inventory(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     name = models.CharField(max_length=100)
-    # The identifier is only used for inventory-internal identification for users - not system relevant. Users can change it any time by themselves
+    # Generated once and not editable; QR code URLs contain it.
     identifier = models.CharField(unique=True, max_length=30, blank=True)
     # Group at the OpenID provider this inventory is bound to (account_auth/oidc_groups.py).
     oidc_group = models.CharField(max_length=255, unique=True, null=True, blank=True)
@@ -106,8 +109,10 @@ class Inventory(models.Model):
         )
 
     def save(self, *args, **kwargs):
-        if not self.identifier:
-            self.identifier = generate_random_code()
+        while not self.identifier:
+            code = generate_random_code(INVENTORY_IDENTIFIER_LENGTH)
+            if not Inventory.objects.filter(identifier=code).exists():
+                self.identifier = code
         super().save(*args, **kwargs)
         from .category_defaults import ensure_default_categories
         ensure_default_categories(self)
