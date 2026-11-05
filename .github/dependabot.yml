@@ -10,9 +10,13 @@ updates:
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 4
+    labels:
+      - "skip-changelog"
 
   - package-ecosystem: "pip"
     directory: "/backend"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    labels:
+      - "skip-changelog"
