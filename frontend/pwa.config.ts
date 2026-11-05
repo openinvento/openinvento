@@ -4,6 +4,9 @@ export const pwaConfig: Partial<VitePWAOptions> = {
   registerType: 'autoUpdate',
   workbox: {
     globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+    // Without this the service worker answers navigations to the backend, such as the OIDC
+    // callback, with index.html, and the request never reaches the server.
+    navigateFallbackDenylist: [/^\/api\//, /^\/media\//],
   },
   manifest: {
     name: 'OpenInvento',
