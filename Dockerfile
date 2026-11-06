@@ -4,7 +4,8 @@ WORKDIR /app/frontend
 
 RUN corepack enable
 
-COPY frontend/package.json frontend/pnpm-lock.yaml ./
+# pnpm-workspace.yaml holds the overrides the frozen lockfile is checked against.
+COPY frontend/package.json frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 COPY frontend/ ./
