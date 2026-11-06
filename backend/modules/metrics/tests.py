@@ -114,11 +114,11 @@ class MetricsEndpointTests(TestCase):
 
         self.assertIn('openinvento_build_info{version="v1.5.0\\nbeta"} 1', samples)
 
-    def test_requires_an_api_key(self):
+    def test_session_auth(self):
         self.assertEqual(self.scrape().status_code, 401)
 
         self.client.force_login(self.admin)
-        self.assertEqual(self.client.get("/api/metrics/").status_code, 401)
+        self.assertEqual(self.client.get("/api/metrics/").status_code, 200)
 
     def test_revoked_key_is_rejected(self):
         api_key, secret = UserAPIKey.objects.create_key(name="prometheus", user=self.admin)

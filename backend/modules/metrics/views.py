@@ -6,7 +6,9 @@ from rest_framework.negotiation import BaseContentNegotiation
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from account_auth.authentication import UserAPIKeyAuthentication
+from account_auth.authentication import (
+    StandardOrAPIKeyAuthMixin,
+)
 from account_auth.models import CustomUser
 from inventory.models import Inventory, InventoryEntry, InventoryEntryType
 from openinvento.instance_notifications import get_current_version
@@ -83,9 +85,8 @@ class IgnoreAcceptHeader(BaseContentNegotiation):
         return renderers[0], renderers[0].media_type
 
 
-class MetricsView(APIView):
+class MetricsView(StandardOrAPIKeyAuthMixin, APIView):
     # API keys only, so a scraper always needs a token; a browser session is not enough.
-    authentication_classes = (UserAPIKeyAuthentication,)
     permission_classes = (IsAuthenticated,)
     content_negotiation_class = IgnoreAcceptHeader
 
