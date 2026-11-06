@@ -86,7 +86,7 @@ class IgnoreAcceptHeader(BaseContentNegotiation):
 
 
 class MetricsView(StandardOrAPIKeyAuthMixin, APIView):
-    # API keys only, so a scraper always needs a token; a browser session is not enough.
+    # Scrapers have no session, so they use an API key; signed-in users can open it in the browser.
     permission_classes = (IsAuthenticated,)
     content_negotiation_class = IgnoreAcceptHeader
 
