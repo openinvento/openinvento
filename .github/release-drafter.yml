@@ -6,6 +6,9 @@ categories:
     when:
       labels:
         - 'feature'
+  - title: 'Enhancements'
+    when:
+      labels:
         - 'enhancement'
   - title: 'Bug Fixes'
     when:
