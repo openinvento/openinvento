@@ -209,8 +209,8 @@ importers:
         specifier: ^0.7.1
         version: 0.7.1
       cn:
-        specifier: ^0.2.4
-        version: 0.2.4
+        specifier: ^0.5.2
+        version: 0.5.2
       i18next:
         specifier: ^26.4.2
         version: 26.4.2(typescript@6.0.3)
@@ -1968,6 +1968,11 @@ packages:
   cn@0.2.4:
     resolution: {integrity: sha512-SzQvoh5FwizWtQg9+JueKdjWhlfCZMdu5DqNHm9q1wUlRVmKb9WXlepR9bTTbPwzEOyX1ujJ6lcCppmn3bNUCg==}
     engines: {node: '>=20'}
+    hasBin: true
+
+  cn@0.5.2:
+    resolution: {integrity: sha512-wm10E6iuJ37rALOw3D+3cfaXXZSLNMh2uxpQn3dNICqfJM59yXqgbA9/9Iiz155j5kYNLdK6WreNdW3NQtx3OQ==}
+    engines: {node: '>=22'}
     hasBin: true
 
   code-block-writer@13.0.3:
@@ -6105,6 +6110,8 @@ snapshots:
   cmd-shim@8.0.0: {}
 
   cn@0.2.4: {}
+
+  cn@0.5.2: {}
 
   code-block-writer@13.0.3: {}
 
