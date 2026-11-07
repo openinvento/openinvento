@@ -5,7 +5,8 @@ import { LoaderCircle, Printer, ScanBarcode, ScanLine, X } from "lucide-react"
 import Scanner from "@/components/qr-bar-code/Scanner"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
-import { inventoryApi, type CodePdfOptions, type Shelf } from "@/utils/api/inventory"
+import { inventoryApi, type CodePdfOptions } from "@/utils/api/inventory"
+import { lookupScannedCode, openInventoryOfEntry } from "@/utils/scan-code"
 import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 import { useTranslation } from "react-i18next"
 import { Input } from "@/components/ui/input"
@@ -50,25 +51,14 @@ export default function ManageCodes() {
 	const [error, setError] = useState("")
 	const { selectedInventoryUuid: selectedInventory } = useSelectedInventory()
 
+	// Camera and external scanner both end up here, with a bare identifier or a scan URL.
 	async function handleCodeDetected(code: string) {
-		const result = await inventoryApi.lookupCode(code, selectedInventory ?? "")
-		switch (result.type) {
-			case "article":
-				navigate(`/app/articles/${result.uuid}`)
-				break
-			case "area":
-				navigate(`/app/areas/${result.uuid}`)
-				break
-			case "shelf": {
-				const shelf = await inventoryApi.getEntry<Shelf>(result.uuid)
-				if (!shelf) throw new Error(t("manageCodes.externalScanner.errors.lookup"))
-				navigate(`/app/areas/${shelf.area}`)
-				break
-			}
-			case "box":
-				navigate(`/app/boxes/${result.uuid}`)
-				break
-		}
+		const result = await lookupScannedCode(code.trim(), selectedInventory)
+		const target = await openInventoryOfEntry(result)
+		if (!target) throw new Error(t("manageCodes.externalScanner.errors.lookup"))
+		// The mounted layout only loads the selected inventory on load, like the inventory switcher.
+		if (target.inventoryChanged) window.location.assign(target.path)
+		else navigate(target.path)
 	}
 
 	/* External barcode scanners */
