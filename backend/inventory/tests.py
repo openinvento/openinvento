@@ -503,3 +503,12 @@ class EntriesWithoutParentTests(TestCase):
 		)
 
 		self.assertEqual(response.status_code, 400)
+
+	def test_root_filter_lists_only_entries_without_a_parent(self):
+		root = InventoryEntry.objects.create(inventory=self.inventory, type="article", name="Keys")
+		InventoryEntry.objects.create(inventory=self.other, type="article", name="Foreign")
+
+		response = self.client.get("/api/entries/", {"type": "article", "root": "true", "include_ancestors": "true"})
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual([entry["uuid"] for entry in response.data], [str(root.uuid)])
