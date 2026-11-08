@@ -22,7 +22,8 @@ export function parseScanUrl(value: string) {
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") return null
 
-  const match = url.pathname.match(/^\/i\/([^/]+)\/([^/]+)$/)
+  // /I/ as well: all-uppercase URLs make for smaller QR codes. Identifiers stay case-sensitive.
+  const match = url.pathname.match(/^\/[iI]\/([^/]+)\/([^/]+)$/)
   if (!match) return null
   try {
     return { inventoryIdentifier: decodeURIComponent(match[1]), identifier: decodeURIComponent(match[2]) }
