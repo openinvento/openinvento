@@ -378,17 +378,53 @@ class GeneratedIdentifierTests(TestCase):
 		self.assertEqual(len(identifier), 5)
 		self.assertTrue(set(identifier) <= set(CODE_CHARACTERS))
 
-	def test_new_entry_keeps_ten_characters_from_the_same_alphabet(self):
+	def test_new_entry_gets_a_short_identifier_from_the_same_alphabet(self):
 		inventory = Inventory.objects.create(name="Home")
 
 		identifier = InventoryEntry.objects.create(name="Attic", type="area", inventory=inventory).identifier
 
+		self.assertEqual(len(identifier), 7)
+		self.assertTrue(set(identifier) <= set(CODE_CHARACTERS))
+
+	def test_new_category_keeps_ten_characters_from_the_same_alphabet(self):
+		inventory = Inventory.objects.create(name="Home")
+
+		identifier = ArticleCategory.objects.create(name="Tools", inventory=inventory).identifier
+
 		self.assertEqual(len(identifier), 10)
 		self.assertTrue(set(identifier) <= set(CODE_CHARACTERS))
 
-	def test_alphabet_leaves_out_characters_that_are_easy_to_confuse(self):
-		self.assertFalse(set("0O1lI") & set(CODE_CHARACTERS))
-		self.assertEqual(len(CODE_CHARACTERS), 57)
+	def test_alphabet_is_crockford_base32(self):
+		self.assertEqual(CODE_CHARACTERS, "0123456789ABCDEFGHJKMNPQRSTVWXYZ")
+		self.assertFalse(set("ILOU") & set(CODE_CHARACTERS))
+
+	def test_entry_picks_another_identifier_on_a_collision(self):
+		inventory = Inventory.objects.create(name="Home")
+		InventoryEntry.objects.create(name="First", type="area", inventory=inventory, identifier="ABCDEFG")
+
+		with patch("inventory.models.generate_random_code", side_effect=["ABCDEFG", "HJKMNPQ"]):
+			entry = InventoryEntry.objects.create(name="Second", type="area", inventory=inventory)
+
+		self.assertEqual(entry.identifier, "HJKMNPQ")
+
+	def test_entry_can_use_an_identifier_taken_in_another_inventory(self):
+		other = Inventory.objects.create(name="Other")
+		InventoryEntry.objects.create(name="First", type="area", inventory=other, identifier="ABCDEFG")
+		inventory = Inventory.objects.create(name="Home")
+
+		with patch("inventory.models.generate_random_code", return_value="ABCDEFG"):
+			entry = InventoryEntry.objects.create(name="Second", type="area", inventory=inventory)
+
+		self.assertEqual(entry.identifier, "ABCDEFG")
+
+	def test_existing_identifier_stays_when_the_entry_is_saved(self):
+		inventory = Inventory.objects.create(name="Home")
+		entry = InventoryEntry.objects.create(name="Old", type="area", inventory=inventory, identifier="X7k9P2mQ1a")
+		entry.name = "Renamed"
+		entry.save()
+
+		entry.refresh_from_db()
+		self.assertEqual(entry.identifier, "X7k9P2mQ1a")
 
 	def test_inventory_picks_another_identifier_on_a_collision(self):
 		Inventory.objects.create(name="First", identifier="abcde")
@@ -396,11 +432,11 @@ class GeneratedIdentifierTests(TestCase):
 		# Without the default categories, which draw codes as well.
 		with (
 			patch("inventory.category_defaults.ensure_default_categories"),
-			patch("inventory.models.generate_random_code", side_effect=["abcde", "fghjk"]),
+			patch("inventory.models.generate_random_code", side_effect=["abcde", "FGHJK"]),
 		):
 			inventory = Inventory.objects.create(name="Second")
 
-		self.assertEqual(inventory.identifier, "fghjk")
+		self.assertEqual(inventory.identifier, "FGHJK")
 
 	def test_existing_identifier_stays_when_the_inventory_is_saved(self):
 		inventory = Inventory.objects.create(name="Old", identifier="X7k9P2mQ1a")

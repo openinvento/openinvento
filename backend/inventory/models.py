@@ -73,10 +73,12 @@ def article_attachment_upload_path(instance, filename):
     safe_name = slugify(os.path.splitext(os.path.basename(filename))[0])[:80] or "attachment"
     return os.path.join("article-attachments", str(instance.entry.uuid), f"{uuid.uuid4()}-{safe_name}{file_ext}")
 
-# Without characters that are easy to confuse on a label: 0/O and 1/l/I.
-CODE_CHARACTERS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-# Part of every QR code URL, so short enough to keep the code small. About 600 million combinations.
-INVENTORY_IDENTIFIER_LENGTH = 5
+# Crockford Base32: without I, L, O and U, so 0 and 1 can't be mistaken for letters on a label.
+# Uppercase only, because QR codes store that in alphanumeric mode, which takes 5.5 instead of 8 bits per character.
+CODE_CHARACTERS = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+# Both are part of every QR code URL, so short enough to keep the code small.
+INVENTORY_IDENTIFIER_LENGTH = 5  # About 33 million combinations.
+ENTRY_IDENTIFIER_LENGTH = 7  # About 34 billion combinations per inventory.
 
 def generate_random_code(length=10):
     return ''.join(secrets.choice(CODE_CHARACTERS) for _ in range(length))
@@ -179,8 +181,10 @@ class InventoryEntry(models.Model):
         )
     
     def save(self, *args, **kwargs):
-        if not self.identifier:
-            self.identifier = generate_random_code()
+        while not self.identifier:
+            code = generate_random_code(ENTRY_IDENTIFIER_LENGTH)
+            if not InventoryEntry.objects.filter(inventory_id=self.inventory_id, identifier=code).exists():
+                self.identifier = code
         self.full_clean() # Run full validation always before saving the model
         super().save(*args, **kwargs)
 
