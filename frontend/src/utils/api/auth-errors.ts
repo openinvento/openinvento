@@ -65,6 +65,7 @@ export function getAuthErrorMessage(error: unknown, t: Translate) {
     if (error.status === 403 && getFieldError(error.payload, "error")?.startsWith("Local login is disabled")) {
       return t("auth.errors.localLoginDisabled")
     }
+    if (error.status === 429) return error.message
     if (error.status === 401) return t("auth.errors.invalidCredentials")
     if (error.status === 400) return t("auth.errors.invalidRequest")
   }

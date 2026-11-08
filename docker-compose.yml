@@ -13,6 +13,10 @@ services:
       CREATE_INIT_ADMIN: ${CREATE_INIT_ADMIN:-true} # Set to false to disable initial administrator creation
       ENABLE_SIGNUP: ${ENABLE_SIGNUP:-false} # Set to true to enable public account signup
       SECRET_KEY: ${SECRET_KEY} # Set this to a random string for security purposes - You can generate one with `openssl rand -hex 32`
+      # Comma-separated CIDRs of the reverse proxy networks directly in front of this container.
+      # Also set DRF_NUM_PROXIES to the number of trusted proxy hops seen by Django.
+      TRUSTED_PROXY_IPS: ${TRUSTED_PROXY_IPS:-127.0.0.1}
+      DRF_NUM_PROXIES: ${DRF_NUM_PROXIES:-1}
       # Single sign-on via OpenID Connect (optional). Needs APP_URL (with APP_URLS only, the first entry counts); register ${APP_URL}/api/oidc/callback/ as redirect URI at your provider. SSO logins started on another APP_URLS host move to this host first, so users stay logged in there.
       #OIDC_ENABLED: ${OIDC_ENABLED:-false} # Set to true to show the single sign-on button on the login page
       #OIDC_ISSUER: ${OIDC_ISSUER} # Issuer URL of your provider (e.g. https://id.example.com) - endpoints are discovered from it

@@ -164,7 +164,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_ratelimit.middleware.RatelimitMiddleware',
 ]
 
 # APP_URL and APP_URLS accept full http(s) URLs or bare host[:port] values.
@@ -319,7 +318,21 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-     'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES
+    'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES,
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        # Keep normal browser use well below the limit while preventing anonymous API floods.
+        'anon': os.getenv('DRF_ANON_RATE', '60/minute'),
+        'user': os.getenv('DRF_USER_RATE', '600/minute'),
+        # Login, signup, credential reset, and OIDC callbacks can trigger expensive work.
+        'auth': os.getenv('DRF_AUTH_RATE', '10/minute'),
+    },
+    # Set this to the number of trusted proxy hops after nginx normalizes the client IP.
+    'NUM_PROXIES': int(os.getenv('DRF_NUM_PROXIES', '0')),
 }
 
 # Register custom model for API keys, so the default model is not created
@@ -345,10 +358,6 @@ ACCOUNT_EMAIL_UNKNOWN_ACCOUNTS = False
 REST_AUTH = {
     'REGISTER_SERIALIZER': 'auth.serializers.CustomRegisterSerializer',
 }
-
-#django ratelimit config
-RATELIMIT_VIEW = 'account_auth.views.ratelimited_error'
-
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 

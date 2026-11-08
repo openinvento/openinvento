@@ -99,5 +99,6 @@ jobs:
 
           docker run --rm \
             -v "$PWD/docker/nginx.conf:/etc/nginx/nginx.conf:ro" \
+            -v "$PWD/docker/trusted-proxies.conf:/etc/nginx/trusted-proxies.conf:ro" \
             nginx:stable \
             nginx -t

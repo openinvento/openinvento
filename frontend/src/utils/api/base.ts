@@ -92,6 +92,18 @@ function getPayloadMessage(payload: unknown) {
       : null
 }
 
+function getRateLimitMessage(response: Response) {
+  if (response.status !== 429) {
+    return null
+  }
+
+  const retryAfter = response.headers.get("retry-after")
+  const seconds = retryAfter ? Number.parseInt(retryAfter, 10) : NaN
+  return Number.isFinite(seconds) && seconds > 0
+    ? `Too many requests. Try again in ${seconds} seconds.`
+    : "Too many requests. Please try again later."
+}
+
 function getCsrfOriginErrorMessage(payload: unknown) {
   const detail = getPayloadMessage(payload)
 
@@ -158,9 +170,12 @@ async function request<T>(
 
   if (!response.ok) {
     const csrfOriginErrorMessage = getCsrfOriginErrorMessage(payload)
+    const rateLimitMessage = getRateLimitMessage(response)
     const message = csrfOriginErrorMessage
       ?? (isCsrfRejection(response.status, payload)
         ? CSRF_ERROR_MESSAGE
+        : rateLimitMessage
+          ? rateLimitMessage
         : getPayloadMessage(payload)
           ?? (typeof payload === "string" && payload
             ? payload
@@ -192,7 +207,9 @@ export async function downloadFile(path: string, filename: string) {
   if (!response.ok) {
     const contentType = response.headers.get("content-type") ?? ""
     const payload = contentType.includes("application/json") ? await response.json() : await response.text()
-    const message = getPayloadMessage(payload) ?? (typeof payload === "string" && payload ? payload : `Request failed with status ${response.status}`)
+    const message = getRateLimitMessage(response)
+      ?? getPayloadMessage(payload)
+      ?? (typeof payload === "string" && payload ? payload : `Request failed with status ${response.status}`)
     throw new ApiError(message, payload, response.status)
   }
 

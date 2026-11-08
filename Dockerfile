@@ -37,6 +37,7 @@ COPY backend/ .
 COPY --from=frontend-build /app/frontend/dist /usr/share/nginx/html
 
 COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY docker/trusted-proxies.conf /etc/nginx/trusted-proxies.conf
 
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
