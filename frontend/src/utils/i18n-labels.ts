@@ -10,6 +10,5 @@ export function getCategoryLabel(name: string) {
 }
 
 export function getFieldLabel(field: Pick<CategoryField, "key" | "label">) {
-    console.log("getFieldLabel called with field:", field); // Debugging line
   return translateOrFallback(`inventory.fields.${field.key}`, field.label)
 }

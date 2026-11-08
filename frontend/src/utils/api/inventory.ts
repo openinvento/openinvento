@@ -104,9 +104,9 @@ export type CategoryField = EntityBase & {
 export type ArticleCategory = EntityBase & { fields: CategoryField[]; category_fields?: CategoryField[] }
 
 export type DashboardData = {
-  counts: { areas: number; articles: number; categories: number }
-  category_counts: Array<{ name: string; count: number }>
-  last_added: Array<{ uuid: string; name: string; type: string; created_at: string }>
+  counts: { areas: number; articles: number; categories: number; added_last_7_days: number }
+  category_counts: Array<{ name: string | null; count: number }>
+  last_added: Array<{ uuid: string; name: string; type: "area" | "shelf" | "box" | "article"; parent: string | null; created_at: string }>
 }
 
 export type CodePdfOptions = {

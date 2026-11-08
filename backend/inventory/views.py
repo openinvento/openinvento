@@ -3,6 +3,7 @@ import json
 import os
 import tempfile
 import uuid
+from datetime import timedelta
 from typing import ClassVar
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
@@ -15,6 +16,7 @@ from django.db import transaction
 from django.db.models import Count, Prefetch
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -286,53 +288,38 @@ class DashboardView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         inventory_uuid = request.query_params.get("inventory")
         if inventory_uuid:
             inventories = inventories.filter(uuid=inventory_uuid)
-        scoped_models = (
-            ("area", "area"),
-            ("shelf", "shelf"),
-            ("box", "box"),
-            ("article", "article"),
-            (ArticleCategory, "category", "name"),
-            (CategoryField, "field", "label"),
-        )
 
-        counts = {
-            "areas": InventoryEntry.objects.filter(inventory__in=inventories, type="area").count(),
-            "articles": InventoryEntry.objects.filter(inventory__in=inventories, type="article").count(),
-            "categories": ArticleCategory.objects.filter(inventory__in=inventories).count(),
-        }
+        entries = InventoryEntry.objects.filter(inventory__in=inventories)
+        articles = entries.filter(type="article")
         category_counts = (
-            InventoryEntry.objects.filter(inventory__in=inventories, type="article")
-            .values("category__name")
+            articles.values("category__name")
             .annotate(count=Count("uuid"))
             .order_by("-count", "category__name")
         )
+        last_added = entries.order_by("-created_at").values("uuid", "name", "type", "parent_id", "created_at")[:4]
 
-        last_added = []
-        for item in scoped_models:
-            if len(item) == 2:
-                entry_type, object_type = item
-                model, name_field = InventoryEntry, "name"
-                queryset = model.objects.filter(inventory__in=inventories, type=entry_type)
-            else:
-                model, object_type, name_field = item
-                queryset = model.objects.filter(inventory__in=inventories)
-            fields = {"uuid", name_field, "created_at"}
-            for item in queryset.values(*fields).order_by("-created_at")[:10]:
-                last_added.append({
-                    "uuid": str(item["uuid"]),
-                    "name": item[name_field],
-                    "type": object_type,
-                    "created_at": item["created_at"],
-                })
-
-        last_added.sort(key=lambda item: item["created_at"], reverse=True)
         return Response({
-            "counts": counts,
+            "counts": {
+                "areas": entries.filter(type="area").count(),
+                "articles": articles.count(),
+                "categories": ArticleCategory.objects.filter(inventory__in=inventories).count(),
+                "added_last_7_days": entries.filter(created_at__gte=timezone.now() - timedelta(days=7)).count(),
+            },
+            # Name is null for articles without a category; the frontend translates that.
             "category_counts": [
-                {"name": item["category__name"] or "No category", "count": item["count"]}
+                {"name": item["category__name"], "count": item["count"]}
                 for item in category_counts
             ],
-            "last_added": last_added[:4],
+            "last_added": [
+                {
+                    "uuid": str(item["uuid"]),
+                    "name": item["name"],
+                    "type": item["type"],
+                    "parent": str(item["parent_id"]) if item["parent_id"] else None,
+                    "created_at": item["created_at"],
+                }
+                for item in last_added
+            ],
         })
 
 

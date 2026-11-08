@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router"
 import BaseScreen from "@/layouts/BaseScreen"
 import { Button } from "@/components/ui/button"
 import { inventoryApi, type DashboardData } from "@/utils/api/inventory"
+import { getCategoryLabel } from "@/utils/i18n-labels"
 import {
   Activity,
   ArrowRight,
@@ -15,18 +16,36 @@ import {
   Tags,
 } from "lucide-react"
 
+function greetingKey(hour: number) {
+  if (hour >= 5 && hour < 12) return "dashboard.greetingMorning"
+  if (hour >= 12 && hour < 18) return "dashboard.greetingAfternoon"
+  return "dashboard.greetingEvening"
+}
+
+// Shelves have no page of their own, they are shown on the page of their area.
+function entryPath(item: DashboardData["last_added"][number]) {
+  switch (item.type) {
+    case "area": return `/app/areas/${item.uuid}`
+    case "shelf": return item.parent ? `/app/areas/${item.parent}` : null
+    case "box": return `/app/boxes/${item.uuid}`
+    case "article": return `/app/articles/${item.uuid}`
+  }
+}
+
 export default function Dashboard() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [data, setData] = useState<DashboardData | null>(null)
   const [query, setQuery] = useState("")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [loadedAt, setLoadedAt] = useState<Date | null>(null)
 
   useEffect(() => {
     async function load() {
       try {
         setData(await inventoryApi.getDashboard())
+        setLoadedAt(new Date())
       } catch (reason) {
         setError(reason instanceof Error ? reason.message : t("dashboard.errors.load"))
       } finally {
@@ -47,7 +66,7 @@ export default function Dashboard() {
   return (
     <BaseScreen
       title={t("dashboard.title")}
-      description={t("dashboard.greeting")}
+      description={t(greetingKey(new Date().getHours()))}
     >
       <form onSubmit={search} className="mt-6 flex max-w-full items-center gap-2 rounded-xl border bg-background p-1.5 shadow-sm">
         <Search className="ml-2 size-4 shrink-0 text-muted-foreground" />
@@ -70,13 +89,17 @@ export default function Dashboard() {
           <h2 id="dashboard-overview" className="text-base font-semibold">
             {t("dashboard.overview")}
           </h2>
-          <span className="text-xs text-muted-foreground">{t("dashboard.updatedNow")}</span>
+          {loadedAt && (
+            <span className="text-xs text-muted-foreground">
+              {t("dashboard.updatedAt", { time: loadedAt.toLocaleTimeString(i18n.language, { hour: "2-digit", minute: "2-digit" }) })}
+            </span>
+          )}
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <InfoCard icon={Boxes} value={loading ? "-" : String(data?.counts.areas ?? 0)} label={t("dashboard.areas")} />
-          <InfoCard icon={Package} value={loading ? "-" : String(data?.counts.articles ?? 0)} label={t("dashboard.articles")} />
-          <InfoCard icon={Tags} value={loading ? "-" : String(data?.counts.categories ?? 0)} label={t("dashboard.categories")} />
-          <InfoCard icon={Activity} value={loading ? "-" : String(data?.last_added.length ?? 0)} label={t("dashboard.recentUpdates")} />
+          <InfoCard icon={Boxes} value={data ? String(data.counts.areas) : "-"} label={t("dashboard.areas")} />
+          <InfoCard icon={Package} value={data ? String(data.counts.articles) : "-"} label={t("dashboard.articles")} />
+          <InfoCard icon={Tags} value={data ? String(data.counts.categories) : "-"} label={t("dashboard.categories")} />
+          <InfoCard icon={Activity} value={data ? String(data.counts.added_last_7_days) : "-"} label={t("dashboard.addedLast7Days")} />
         </div>
       </section>
 
@@ -109,7 +132,7 @@ export default function Dashboard() {
           action={t("dashboard.viewAll")}
           navigateAction={() => navigate("/app/areas")}
         >
-          <LastAdded items={data?.last_added ?? []} loading={loading} t={t} />
+          <LastAdded items={data?.last_added ?? []} loading={loading} failed={!loading && !data} language={i18n.language} t={t} />
         </DashboardPanel>
 
         <DashboardPanel
@@ -118,7 +141,7 @@ export default function Dashboard() {
           action={t("dashboard.viewCategories")}
           navigateAction={() => navigate("/app/manage-categories-and-fields")}
         >
-          <CategoryList categories={data?.category_counts ?? []} loading={loading} t={t} />
+          <CategoryList categories={data?.category_counts ?? []} loading={loading} failed={!loading && !data} t={t} />
         </DashboardPanel>
       </div>
     </BaseScreen>
@@ -197,8 +220,9 @@ const DashboardPanel = ({
   )
 }
 
-function LastAdded({ items, loading, t }: { items: DashboardData["last_added"]; loading: boolean; t: (key: string) => string }) {
+function LastAdded({ items, loading, failed, language, t }: { items: DashboardData["last_added"]; loading: boolean; failed: boolean; language: string; t: (key: string) => string }) {
   if (loading) return <p className="py-12 text-center text-sm text-muted-foreground">{t("dashboard.loading")}</p>
+  if (failed) return <p className="py-12 text-center text-sm text-muted-foreground">{t("dashboard.errors.load")}</p>
   if (items.length === 0) {
     return (
       <div className="flex min-h-36 flex-col items-center justify-center text-center">
@@ -210,30 +234,34 @@ function LastAdded({ items, loading, t }: { items: DashboardData["last_added"]; 
 
   return (
     <div className="mt-4 divide-y">
-      {items.map((item) => (
+      {items.map((item) => {
+        const path = entryPath(item)
+        return (
         <div key={`${item.type}-${item.uuid}`} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">
-              {item.type === "article" ? <Link to={`/app/articles/${item.uuid}`} className="hover:underline">{item.name}</Link> : item.name}
+              {path ? <Link to={path} className="hover:underline">{item.name}</Link> : item.name}
             </p>
             <p className="text-xs text-muted-foreground">{t(`dashboard.types.${item.type}`)}</p>
           </div>
           <time className="shrink-0 text-xs text-muted-foreground" dateTime={item.created_at}>
-            {new Date(item.created_at).toLocaleDateString()}
+            {new Date(item.created_at).toLocaleDateString(language)}
           </time>
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
 
-function CategoryList({ categories, loading, t }: { categories: DashboardData["category_counts"]; loading: boolean; t: (key: string) => string }) {
+function CategoryList({ categories, loading, failed, t }: { categories: DashboardData["category_counts"]; loading: boolean; failed: boolean; t: (key: string) => string }) {
   if (loading) return <p className="py-12 text-center text-sm text-muted-foreground">{t("dashboard.loading")}</p>
+  if (failed) return <p className="py-12 text-center text-sm text-muted-foreground">{t("dashboard.errors.load")}</p>
   if (categories.length === 0) {
     return (
       <div className="flex min-h-36 flex-col items-center justify-center text-center">
-        <p className="text-sm font-medium">{t("dashboard.noCategoryTitle")}</p>
-        <p className="mt-1 max-w-xs text-xs text-muted-foreground">{t("dashboard.noCategoryDescription")}</p>
+        <p className="text-sm font-medium">{t("dashboard.noArticlesTitle")}</p>
+        <p className="mt-1 max-w-xs text-xs text-muted-foreground">{t("dashboard.noArticlesDescription")}</p>
       </div>
     )
   }
@@ -242,9 +270,9 @@ function CategoryList({ categories, loading, t }: { categories: DashboardData["c
   return (
     <div className="mt-5 space-y-4">
       {categories.slice(0, 5).map((category) => (
-        <div key={category.name}>
+        <div key={category.name ?? ""}>
           <div className="mb-1.5 flex justify-between gap-3 text-xs">
-            <span className="truncate">{category.name}</span>
+            <span className="truncate">{category.name === null ? t("articles.page.noCategory") : getCategoryLabel(category.name)}</span>
             <span className="shrink-0 text-muted-foreground">{category.count}</span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-muted">

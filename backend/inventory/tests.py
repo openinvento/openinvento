@@ -3,6 +3,8 @@ import tempfile
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from datetime import timedelta
+
 from django.test import Client, TestCase, override_settings
 from django.test.client import MULTIPART_CONTENT, encode_multipart
 from rest_framework.test import APIClient
@@ -512,3 +514,71 @@ class EntriesWithoutParentTests(TestCase):
 
 		self.assertEqual(response.status_code, 200)
 		self.assertEqual([entry["uuid"] for entry in response.data], [str(root.uuid)])
+
+
+class DashboardTests(TestCase):
+	def setUp(self):
+		self.user = CustomUser.objects.create_user(username="owner", password="StrongPassword!123")
+		self.inventory = Inventory.objects.create(name="Home")
+		self.inventory.users.add(self.user)
+		self.client = APIClient()
+		self.client.force_login(self.user)
+
+	def dashboard(self):
+		return self.client.get("/api/dashboard/", {"inventory": str(self.inventory.uuid)}).data
+
+	def entry(self, name, entry_type="area", **kwargs):
+		return InventoryEntry.objects.create(inventory=self.inventory, type=entry_type, name=name, **kwargs)
+
+	def test_last_added_only_holds_entries(self):
+		# The inventory's default categories and fields exist already, but aren't listed.
+		self.assertEqual(self.dashboard()["last_added"], [])
+
+		area = self.entry("Study")
+		shelf = self.entry("Cabinet", "shelf", parent=area)
+
+		last_added = self.dashboard()["last_added"]
+		self.assertEqual({item["name"] for item in last_added}, {"Study", "Cabinet"})
+		parents = {item["name"]: item["parent"] for item in last_added}
+		self.assertIsNone(parents["Study"])
+		self.assertEqual(parents[shelf.name], str(area.uuid))
+
+	def test_last_added_shows_the_four_newest(self):
+		entries = [self.entry(f"Area {number}") for number in range(5)]
+		for age, entry in enumerate(reversed(entries)):
+			InventoryEntry.objects.filter(pk=entry.pk).update(created_at=timezone.now() - timedelta(minutes=age))
+
+		names = [item["name"] for item in self.dashboard()["last_added"]]
+
+		self.assertEqual(names, ["Area 4", "Area 3", "Area 2", "Area 1"])
+
+	def test_added_last_7_days_is_not_capped_and_ignores_older_entries(self):
+		for number in range(6):
+			self.entry(f"New {number}")
+		old = self.entry("Old")
+		InventoryEntry.objects.filter(pk=old.pk).update(created_at=timezone.now() - timedelta(days=8))
+
+		self.assertEqual(self.dashboard()["counts"]["added_last_7_days"], 6)
+
+	def test_category_counts_use_null_for_articles_without_a_category(self):
+		category = ArticleCategory.objects.create(inventory=self.inventory, name="Tools")
+		self.entry("Hammer", "article", category=category)
+		self.entry("Saw", "article", category=category)
+		self.entry("Laptop", "article")
+
+		self.assertEqual(
+			self.dashboard()["category_counts"],
+			[{"name": "Tools", "count": 2}, {"name": None, "count": 1}],
+		)
+
+	def test_other_inventories_are_not_counted(self):
+		other = Inventory.objects.create(name="Other")
+		other.users.add(self.user)
+		InventoryEntry.objects.create(inventory=other, type="area", name="Elsewhere")
+		self.entry("Study")
+
+		data = self.dashboard()
+
+		self.assertEqual(data["counts"]["areas"], 1)
+		self.assertEqual(data["counts"]["added_last_7_days"], 1)
+		self.assertEqual([item["name"] for item in data["last_added"]], ["Study"])
