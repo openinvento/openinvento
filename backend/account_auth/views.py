@@ -8,10 +8,11 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
-from inventory.serializers import InventorySerializer
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from inventory.serializers import InventorySerializer
 
 from .models import CustomUser, InstanceSettings, Notification, UserAPIKey
 from .oidc import local_login_allowed, oidc_enabled
@@ -26,6 +27,7 @@ from .serializers import (
 
 class SignupView(APIView):
     permission_classes = (permissions.AllowAny,)
+    throttle_scope = "auth"
 
     def post(self, request):
         if not settings.ENABLE_SIGNUP or settings.DISABLE_LOCAL_LOGIN:
@@ -52,6 +54,7 @@ class SignupView(APIView):
 
 class LoginView(APIView):
     permission_classes = (permissions.AllowAny,)
+    throttle_scope = "auth"
 
     def post(self, request):
         identifier = request.data.get('identifier') or request.data.get('username') or request.data.get('email')
@@ -113,6 +116,8 @@ class LoginConfigView(APIView):
 
 
 class CredentialResetView(APIView):
+    throttle_scope = "auth"
+
     def post(self, request):
         serializer = CredentialResetSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():

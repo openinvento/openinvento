@@ -34,6 +34,8 @@ from mozilla_django_oidc.views import (
     OIDCAuthenticationRequestView,
 )
 from requests.auth import HTTPBasicAuth
+from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView
 
 from .models import CustomUser, OIDCIdentity
 from .oidc_groups import apply_group_claims, get_groups, login_allowed
@@ -553,3 +555,21 @@ class OIDCCallbackView(OIDCAuthenticationCallbackView):
         advertised = uses_discovery() and get_provider_metadata().get("authorization_response_iss_parameter_supported")
         if iss is None and "code" in request.GET and advertised:
             raise SuspiciousOperation("Authorization response is missing the iss parameter.")
+
+
+@method_decorator(login_not_required, name="dispatch")
+class OIDCLoginAPIView(APIView):
+    permission_classes = (AllowAny,)
+    throttle_scope = "auth"
+
+    def get(self, request, *args, **kwargs):
+        return OIDCLoginView.as_view()(request._request, *args, **kwargs)
+
+
+@method_decorator(login_not_required, name="dispatch")
+class OIDCCallbackAPIView(APIView):
+    permission_classes = (AllowAny,)
+    throttle_scope = "auth"
+
+    def get(self, request, *args, **kwargs):
+        return OIDCCallbackView.as_view()(request._request, *args, **kwargs)
