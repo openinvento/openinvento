@@ -485,6 +485,12 @@
   },
   "save": "Save",
   "saving": "Saving",
+  "scanCode": {
+    "backToDashboard": "Go to dashboard",
+    "loading": "Opening code...",
+    "notFoundDescription": "This code does not exist, or you do not have access to its inventory.",
+    "notFoundTitle": "Code not found"
+  },
   "search": {
     "box": "Box",
     "empty": "No articles found.",

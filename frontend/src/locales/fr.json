@@ -483,6 +483,12 @@
     },
     "open": "Ouvrir les actions rapides"
   },
+  "scanCode": {
+    "backToDashboard": "Aller au tableau de bord",
+    "loading": "Ouverture du code...",
+    "notFoundDescription": "Ce code n’existe pas, ou vous n’avez pas accès à son inventaire.",
+    "notFoundTitle": "Code introuvable"
+  },
   "search": {
     "box": "Boîte",
     "empty": "Aucun article trouvé.",

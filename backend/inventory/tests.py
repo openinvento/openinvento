@@ -8,7 +8,7 @@ from django.test.client import MULTIPART_CONTENT, encode_multipart
 from rest_framework.test import APIClient
 from django.utils import timezone
 
-from account_auth.models import CustomUser, Notification
+from account_auth.models import CustomUser, Notification, UserAPIKey
 from inventory.jobs.date_field_sync import sync_date_field_notifications
 
 from .models import CODE_CHARACTERS, ArticleAttachment, ArticleCategory, ArticleFieldValue, CategoryField, Inventory, InventoryEntry
@@ -512,3 +512,97 @@ class EntriesWithoutParentTests(TestCase):
 
 		self.assertEqual(response.status_code, 200)
 		self.assertEqual([entry["uuid"] for entry in response.data], [str(root.uuid)])
+
+
+class CodeLookupTests(TestCase):
+	def setUp(self):
+		self.user = CustomUser.objects.create_user(username="scanner", password="StrongPassword!123")
+		self.home = self.user.inventories.first() or Inventory.objects.create(name="Home")
+		self.home.users.add(self.user)
+		self.office = Inventory.objects.create(name="Office")
+		self.office.users.add(self.user)
+		self.foreign = Inventory.objects.create(name="Foreign")
+		self.home_entry = InventoryEntry.objects.create(inventory=self.home, type="area", name="Home area", identifier="SAME")
+		self.office_entry = InventoryEntry.objects.create(inventory=self.office, type="area", name="Office area", identifier="SAME")
+		self.foreign_entry = InventoryEntry.objects.create(inventory=self.foreign, type="area", name="Foreign area", identifier="FOREIGN")
+		self.client = APIClient()
+		self.client.force_login(self.user)
+
+	def lookup(self, **data):
+		return self.client.post("/api/codes/lookup/", data, format="json")
+
+	def test_inventory_identifier_selects_the_inventory(self):
+		for inventory, entry in ((self.home, self.home_entry), (self.office, self.office_entry)):
+			with self.subTest(inventory=inventory.name):
+				response = self.lookup(identifier="SAME", inventory_identifier=inventory.identifier)
+
+				self.assertEqual(response.status_code, 200)
+				self.assertEqual(response.data["uuid"], str(entry.uuid))
+				self.assertEqual(response.data["inventory"]["uuid"], str(inventory.uuid))
+
+	def test_inventory_identifier_does_not_fall_back_to_other_inventories(self):
+		InventoryEntry.objects.create(inventory=self.home, type="area", name="Only at home", identifier="ONLY-HOME")
+
+		response = self.lookup(identifier="ONLY-HOME", inventory_identifier=self.office.identifier)
+
+		self.assertEqual(response.status_code, 404)
+
+	def test_inventory_identifier_takes_precedence_over_inventory(self):
+		response = self.lookup(identifier="SAME", inventory_identifier=self.office.identifier, inventory=str(self.home.uuid))
+
+		self.assertEqual(response.data["uuid"], str(self.office_entry.uuid))
+
+	def test_foreign_and_unknown_inventories_get_the_same_answer(self):
+		foreign = self.lookup(identifier="FOREIGN", inventory_identifier=self.foreign.identifier)
+		unknown = self.lookup(identifier="FOREIGN", inventory_identifier="nope")
+		unknown_entry = self.lookup(identifier="nope", inventory_identifier=self.home.identifier)
+
+		self.assertEqual(foreign.status_code, 404)
+		self.assertEqual(foreign.data, unknown.data)
+		self.assertEqual(foreign.data, unknown_entry.data)
+
+	def test_identifier_with_a_slash_is_found(self):
+		entry = InventoryEntry.objects.create(inventory=self.home, type="area", name="Slash", identifier="A/1")
+
+		response = self.lookup(identifier="A/1", inventory_identifier=self.home.identifier)
+
+		self.assertEqual(response.data["uuid"], str(entry.uuid))
+
+	def test_bare_identifier_prefers_the_given_inventory_and_falls_back(self):
+		preferred = self.lookup(identifier="SAME", inventory=str(self.office.uuid))
+		self.assertEqual(preferred.data["uuid"], str(self.office_entry.uuid))
+
+		InventoryEntry.objects.create(inventory=self.home, type="area", name="Only at home", identifier="ONLY-HOME")
+		fallback = self.lookup(identifier="ONLY-HOME", inventory=str(self.office.uuid))
+		self.assertEqual(fallback.data["inventory"]["uuid"], str(self.home.uuid))
+
+	def test_bare_identifier_never_finds_foreign_entries(self):
+		self.assertEqual(self.lookup(identifier="FOREIGN").status_code, 404)
+		self.assertEqual(self.lookup(identifier="FOREIGN", inventory=str(self.foreign.uuid)).status_code, 404)
+
+	def test_identifier_is_required(self):
+		self.assertEqual(self.lookup(inventory_identifier=self.home.identifier).status_code, 400)
+
+	def test_api_key_can_use_inventory_identifier(self):
+		_, key = UserAPIKey.objects.create_key(name="scanner", user=self.user)
+		client = APIClient()
+
+		response = client.post(
+			"/api/codes/lookup/",
+			{"identifier": "SAME", "inventory_identifier": self.office.identifier},
+			format="json",
+			HTTP_AUTHORIZATION=f"Api-Key {key}",
+		)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response.data["uuid"], str(self.office_entry.uuid))
+
+	def test_anonymous_requests_are_rejected(self):
+		response = APIClient().post(
+			"/api/codes/lookup/",
+			{"identifier": "SAME", "inventory_identifier": self.home.identifier},
+			format="json",
+		)
+
+		self.assertIn(response.status_code, (302, 401, 403))
+		self.assertNotIn("uuid", getattr(response, "data", None) or {})

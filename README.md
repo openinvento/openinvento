@@ -12,7 +12,7 @@
 [![Python](https://img.shields.io/badge/python-%3E%3D3.11-blue)](https://www.python.org/) 
 [![Stars](https://img.shields.io/github/stars/openinvento/openinvento?style=social)](https://github.com/openinvento/openinvento/stargazers)
 ![GHCR Total downloads](https://ghcr-badge.elias.eu.org/shield/openinvento/openinvento/openinvento)
-
+[![As seen on Open Source Alternatives](https://www.opensourcealternatives.to/badge-osa.svg)](https://www.opensourcealternatives.to)
 
 
 OpenInvento - Selfhosted Inventory Manager
