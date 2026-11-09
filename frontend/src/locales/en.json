@@ -427,9 +427,7 @@
       "errors": {
         "lookup": "Unable to find the scanned item."
       },
-      "listening": "Receiving barcode...",
-      "lookingUp": "Finding the inventory item...",
-      "ready": "Ready for input from external barcode scanner. Scan a code now.",
+      "ready": "Scan with a barcode scanner in keyboard mode, or type a code and press Enter.",
       "title": "External barcode scanner"
     },
     "inventoryItems": "Inventory Items",

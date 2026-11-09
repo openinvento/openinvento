@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
-import { LoaderCircle, Printer, ScanBarcode, ScanLine, X } from "lucide-react"
+import { Printer, ScanBarcode, ScanLine, X } from "lucide-react"
 
 import Scanner from "@/components/qr-bar-code/Scanner"
+import { BarcodeInputForm } from "@/components/qr-bar-code/BarcodeInputForm"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
 import { inventoryApi, type CodeLookupMatch, type CodePdfOptions } from "@/utils/api/inventory"
@@ -41,13 +42,8 @@ export default function ManageCodes() {
 	const [matchChoices, setMatchChoices] = useState<CodeLookupMatch[] | null>(null)
 	const [matchError, setMatchError] = useState("")
 
+	// A barcode scanner in keyboard (HID) mode types into the field of this dialog, like a person would.
 	const [useExternalBarcodeScanner, setUseExternalBarcodeScanner] = useState(false)
-	const [externalScanError, setExternalScanError] = useState("")
-	const [isLookingUpExternalCode, setIsLookingUpExternalCode] = useState(false)
-	const [isListeningForExternalCode, setIsListeningForExternalCode] = useState(false)
-	const externalCodeBuffer = useRef("")
-
-	const externalCodeTimer = useRef<number | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const [isGenerating, setIsGenerating] = useState(false)
 	const [error, setError] = useState("")
@@ -71,59 +67,6 @@ export default function ManageCodes() {
 		if (target.inventoryChanged) window.location.assign(target.path)
 		else navigate(target.path)
 	}
-
-	/* External barcode scanners */
-	useEffect(() => {
-		if (!useExternalBarcodeScanner) return
-
-		const finishInput = async () => {
-			if (externalCodeTimer.current !== null) {
-				window.clearTimeout(externalCodeTimer.current)
-				externalCodeTimer.current = null
-			}
-			const identifier = externalCodeBuffer.current.trim()
-			externalCodeBuffer.current = ""
-			setIsListeningForExternalCode(false)
-			if (!identifier || isLookingUpExternalCode) return
-
-			setIsLookingUpExternalCode(true)
-			setExternalScanError("")
-			try {
-				await handleCodeDetected(identifier)
-			} catch (reason) {
-				setExternalScanError(reason instanceof Error ? reason.message : t("manageCodes.externalScanner.errors.lookup"))
-			} finally {
-				setIsLookingUpExternalCode(false)
-			}
-		}
-
-		const onKeyDown = (event: KeyboardEvent) => {
-			if (event.key === "Escape") {
-				setUseExternalBarcodeScanner(false)
-				return
-			}
-			if (event.key === "Enter") {
-				event.preventDefault()
-				void finishInput()
-				return
-			}
-			if (event.key.length !== 1 || event.ctrlKey || event.altKey || event.metaKey) return
-
-			externalCodeBuffer.current += event.key
-			if (externalCodeTimer.current !== null) window.clearTimeout(externalCodeTimer.current)
-			setIsListeningForExternalCode(true)
-			externalCodeTimer.current = window.setTimeout(() => void finishInput(), 300)
-		}
-
-		window.addEventListener("keydown", onKeyDown) // register event listener
-		return () => {
-			window.removeEventListener("keydown", onKeyDown)
-			if (externalCodeTimer.current !== null) window.clearTimeout(externalCodeTimer.current)
-			externalCodeTimer.current = null
-			externalCodeBuffer.current = ""
-			setIsListeningForExternalCode(false)
-		}
-	}, [useExternalBarcodeScanner, isLookingUpExternalCode, t])
 
 	useEffect(() => {
 		void (async () => {
@@ -286,7 +229,13 @@ export default function ManageCodes() {
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="presentation" onMouseDown={(event) => {
 					if (event.target === event.currentTarget) setUseExternalBarcodeScanner(false)
 				}}>
-					<section role="dialog" aria-modal="true" aria-labelledby="external-scanner-title" className="w-full max-w-md rounded-xl border bg-card p-6 shadow-lg">
+					<section
+						role="dialog"
+						aria-modal="true"
+						aria-labelledby="external-scanner-title"
+						className="w-full max-w-md rounded-xl border bg-card p-6 shadow-lg"
+						onKeyDown={(event) => { if (event.key === "Escape") setUseExternalBarcodeScanner(false) }}
+					>
 						<div className="flex items-start justify-between gap-4">
 							<div>
 								<h2 id="external-scanner-title" className="text-lg font-semibold">{t("manageCodes.externalScanner.title")}</h2>
@@ -296,8 +245,9 @@ export default function ManageCodes() {
 								<X />
 							</Button>
 						</div>
-						{(isListeningForExternalCode || isLookingUpExternalCode) && <p className="mt-4 flex items-center gap-2 text-sm"><LoaderCircle className="size-4 animate-spin" />{isLookingUpExternalCode ? t("manageCodes.externalScanner.lookingUp") : t("manageCodes.externalScanner.listening")}</p>}
-						{externalScanError && <p className="mt-4 text-sm text-destructive">{externalScanError}</p>}
+						<div className="mt-4">
+							<BarcodeInputForm onSubmit={handleCodeDetected} />
+						</div>
 					</section>
 				</div>
 			)}

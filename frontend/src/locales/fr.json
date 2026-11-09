@@ -427,9 +427,7 @@
       "errors": {
         "lookup": "Impossible de trouver l’élément correspondant au code scanné."
       },
-      "listening": "Lecture du code-barres…",
-      "lookingUp": "Recherche de l’élément dans l’inventaire…",
-      "ready": "Prêt à recevoir les données d’un lecteur de codes-barres externe. Scannez un code maintenant.",
+      "ready": "Scannez avec un lecteur de codes-barres en mode clavier, ou saisissez un code et appuyez sur Entrée.",
       "title": "Scanner de codes-barres externe"
     },
     "inventoryItems": "Éléments de l’inventaire",

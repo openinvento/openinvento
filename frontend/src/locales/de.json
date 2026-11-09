@@ -427,9 +427,7 @@
       "errors": {
         "lookup": "Das gescannte Element konnte nicht gefunden werden."
       },
-      "listening": "Barcode wird empfangen...",
-      "lookingUp": "Inventarelement wird gesucht...",
-      "ready": "Bereit für Eingaben vom externen Barcodescanner. Jetzt einen Code scannen.",
+      "ready": "Mit einem Barcode-Scanner im Tastaturmodus scannen oder einen Code eingeben und Enter drücken.",
       "title": "Externer Barcodescanner"
     },
     "inventoryItems": "Inventarelemente",

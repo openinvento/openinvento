@@ -427,9 +427,7 @@
       "errors": {
         "lookup": "No se pudo encontrar el elemento escaneado."
       },
-      "listening": "Recibiendo código de barras...",
-      "lookingUp": "Buscando el elemento del inventario...",
-      "ready": "Listo para recibir datos de un escáner externo de códigos de barras. Escanea un código ahora.",
+      "ready": "Escanea con un lector de códigos en modo teclado o escribe un código y pulsa Intro.",
       "title": "Escáner externo de códigos de barras"
     },
     "inventoryItems": "Elementos del inventario",
