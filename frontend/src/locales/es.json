@@ -113,6 +113,7 @@
       "errors": {
         "delete": "No se pudo eliminar el artículo.",
         "load": "No se pudo cargar el artículo.",
+        "noInventory": "Selecciona un inventario antes de guardar el artículo.",
         "save": "No se pudo guardar el artículo.",
         "unsavedChanges": "Tienes cambios sin guardar. Guárdalos antes de salir de esta página."
       },

@@ -113,6 +113,7 @@
       "errors": {
         "delete": "Impossible de supprimer l’article.",
         "load": "Impossible de charger l’article.",
+        "noInventory": "Sélectionnez un inventaire avant d’enregistrer l’article.",
         "save": "Impossible d’enregistrer l’article.",
         "unsavedChanges": "Vous avez des modifications non enregistrées. Enregistrez-les avant de quitter cette page."
       },
