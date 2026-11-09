@@ -442,13 +442,9 @@ class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     POST body:
     - identifier: the identifier of the entry. Required.
     - inventory_identifier: for a scan URL (/i/<inventory_identifier>/<identifier>), which names
-      its inventory. Only this inventory is searched, so a label never opens an entry with the
-      same identifier elsewhere. An unknown inventory and one the user is not a member of get
-      the same 404, which does not reveal whether it exists. Takes precedence over inventory.
-    - inventory or inventory_uuid: for a bare identifier, which does not name its inventory.
-      This inventory is searched first, then all others the user can access.
-
-    The response names the inventory of the entry, which can differ from the one asked for first.
+      its inventory. Only this inventory is searched. An unknown inventory and one the user is not a member 
+      of get the same 404, which does not reveal whether it exists.
+    - inventory or inventory_uuid: for a bare identifier, which does not name its inventory. This inventory is searched first, then all others the user can access.
     """
 
     def post(self, request, *args, **kwargs):
