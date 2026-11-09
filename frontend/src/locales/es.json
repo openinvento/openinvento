@@ -489,6 +489,12 @@
     },
     "open": "Abrir acciones rápidas"
   },
+  "scanCode": {
+    "backToDashboard": "Ir al panel",
+    "loading": "Abriendo el código...",
+    "notFoundDescription": "Este código no existe o no tienes acceso a su inventario.",
+    "notFoundTitle": "Código no encontrado"
+  },
   "search": {
     "box": "Caja",
     "empty": "No se encontraron artículos.",

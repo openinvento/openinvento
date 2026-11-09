@@ -489,6 +489,12 @@
     },
     "open": "Schnellaktionen öffnen"
   },
+  "scanCode": {
+    "backToDashboard": "Zum Dashboard",
+    "loading": "Code wird geöffnet...",
+    "notFoundDescription": "Diesen Code gibt es nicht, oder du hast keinen Zugriff auf sein Inventar.",
+    "notFoundTitle": "Code nicht gefunden"
+  },
   "search": {
     "box": "Kiste",
     "empty": "Keine Artikel gefunden.",

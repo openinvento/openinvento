@@ -428,28 +428,32 @@ class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
 # region QR/ BARCODE VIEWS
 
 class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
+    """Find an entry by its identifier. Entry identifiers are only unique within one inventory.
+
+    POST body:
+    - identifier: the identifier of the entry. Required.
+    - inventory_identifier: for a scan URL (/i/<inventory_identifier>/<identifier>), which names
+      its inventory. Only this inventory is searched. An unknown inventory and one the user is not a member 
+      of get the same 404, which does not reveal whether it exists.
+    - inventory or inventory_uuid: for a bare identifier, which does not name its inventory. This inventory is searched first, then all others the user can access.
+    """
+
     def post(self, request, *args, **kwargs):
         identifier = str(request.data.get("identifier", "")).strip()
         if not identifier:
             return Response({"error": "identifier is required."}, status=400)
-        
-        inventory_uuid = request.data.get("inventory") or request.data.get("inventory_uuid")
+
         accessible_inventories = self.get_accessible_inventories()
+        inventory_identifier = str(request.data.get("inventory_identifier", "")).strip()
 
-        item = None
-
-        if inventory_uuid:
+        if inventory_identifier:
             item = InventoryEntry.objects.filter(
                 inventory__in=accessible_inventories,
-                inventory__uuid=inventory_uuid,
+                inventory__identifier=inventory_identifier,
                 identifier=identifier,
             ).first()
-
-        if item is None:
-            item = InventoryEntry.objects.filter(
-                inventory__in=accessible_inventories,
-                identifier=identifier,
-            ).first()
+        else:
+            item = self.find_by_bare_identifier(request, identifier, accessible_inventories)
 
         if item is not None:
             return Response({
@@ -464,6 +468,16 @@ class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
             })
 
         return Response({"error": "No inventory item was found for this code."}, status=404)
+
+    @staticmethod
+    def find_by_bare_identifier(request, identifier, accessible_inventories):
+        entries = InventoryEntry.objects.filter(inventory__in=accessible_inventories, identifier=identifier)
+        inventory_uuid = request.data.get("inventory") or request.data.get("inventory_uuid")
+        if inventory_uuid:
+            item = entries.filter(inventory__uuid=inventory_uuid).first()
+            if item is not None:
+                return item
+        return entries.first()
 
 class CodePdfView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     page_sizes: ClassVar[dict[str, tuple[str, int, int]]] = {

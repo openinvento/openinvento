@@ -121,6 +121,7 @@ export type CodeLookupResult = {
   identifier: string
   name: string
   type: "article" | "area" | "shelf" | "box" | "category" | "field"
+  inventory: { uuid: string; name: string }
 }
 
 export type InventoryUser = {
@@ -390,6 +391,9 @@ export const inventoryApi = {
     postData<BarcodeProduct>("/api/barcodes/lookup/", { barcode, inventory, provider }),
   lookupCode: (identifier: string, inventory: string) =>
     postData<CodeLookupResult>("/api/codes/lookup/", { identifier, inventory }),
+  // For a scan URL, which names its inventory: searches only this one, unlike lookupCode.
+  lookupCodeInInventory: (identifier: string, inventoryIdentifier: string) =>
+    postData<CodeLookupResult>("/api/codes/lookup/", { identifier, inventory_identifier: inventoryIdentifier }),
   magicImport: (inventory: string, image: File, provider: string | null) => {
     const payload = new FormData()
     payload.append("inventory", inventory)
