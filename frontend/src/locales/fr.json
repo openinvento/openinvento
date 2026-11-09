@@ -89,6 +89,25 @@
     "title": "Zones"
   },
   "articleBarcodeImport": {
+    "alreadyStored": "Déjà dans cet inventaire :",
+    "category": "Catégorie",
+    "categoryHint": "S’applique à chaque article ajouté pendant cette session de scan.",
+    "enterName": "Saisissez un nom pour l’ajouter quand même.",
+    "name": "Nom de l’article",
+    "namePlaceholder": "Nom de l’article",
+    "noCategory": "Aucune catégorie",
+    "noName": "Le catalogue n’a pas de nom pour ce produit.",
+    "notFound": "Aucun produit trouvé pour ce code-barres.",
+    "options": {
+      "title": "Options",
+      "sharedCategory": "Une catégorie pour tous",
+      "sharedCategoryHint": "Désactivé : choisissez une catégorie pour chaque article scanné.",
+      "addWithoutCatalog": "Ajouter des produits inconnus",
+      "addWithoutCatalogHint": "Les produits sans entrée de catalogue ou sans nom peuvent être ajoutés avec un nom saisi. Désactivé : ils affichent seulement une erreur.",
+      "checkExisting": "Afficher les articles existants",
+      "checkExistingHint": "Indique quels articles de cet inventaire ont déjà le code-barres scanné.",
+      "storedInBrowser": "Ces options sont enregistrées dans ce navigateur."
+    },
     "description": "Scannez le code-barres d'un produit pour le rechercher et ajoutez-le ici",
     "scannedArticles": "Articles scannés"
   },

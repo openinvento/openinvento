@@ -89,6 +89,25 @@
     "title": "áreas"
   },
   "articleBarcodeImport": {
+    "alreadyStored": "Ya está en este inventario:",
+    "category": "Categoría",
+    "categoryHint": "Se aplica a cada artículo que añadas en esta sesión de escaneo.",
+    "enterName": "Introduce un nombre para añadirlo de todos modos.",
+    "name": "Nombre del artículo",
+    "namePlaceholder": "Nombre del artículo",
+    "noCategory": "Sin categoría",
+    "noName": "El catálogo no tiene nombre para este producto.",
+    "notFound": "No se encontró ningún producto para este código de barras.",
+    "options": {
+      "title": "Opciones",
+      "sharedCategory": "Una categoría para todos",
+      "sharedCategoryHint": "Desactivado: elige una categoría para cada artículo escaneado.",
+      "addWithoutCatalog": "Añadir productos desconocidos",
+      "addWithoutCatalogHint": "Los productos sin entrada en el catálogo o sin nombre se pueden añadir con un nombre que escribas. Desactivado: solo muestran un error.",
+      "checkExisting": "Mostrar artículos existentes",
+      "checkExistingHint": "Muestra qué artículos de este inventario ya tienen el código de barras escaneado.",
+      "storedInBrowser": "Estas opciones se guardan en este navegador."
+    },
     "description": "Escanee el código de barras de un producto para buscarlo y agregarlo aquí",
     "scannedArticles": "Artículos escaneados"
   },

@@ -89,6 +89,25 @@
     "title": "Bereiche"
   },
   "articleBarcodeImport": {
+    "alreadyStored": "Schon in diesem Inventar:",
+    "category": "Kategorie",
+    "categoryHint": "Gilt für jeden Artikel, den du in dieser Scan-Runde hinzufügst.",
+    "enterName": "Gib einen Namen ein, um ihn trotzdem hinzuzufügen.",
+    "name": "Artikelname",
+    "namePlaceholder": "Name des Artikels",
+    "noCategory": "Keine Kategorie",
+    "noName": "Der Katalog kennt keinen Namen für dieses Produkt.",
+    "notFound": "Für diesen Barcode wurde kein Produkt gefunden.",
+    "options": {
+      "title": "Optionen",
+      "sharedCategory": "Eine Kategorie für alle",
+      "sharedCategoryHint": "Aus: Für jeden gescannten Artikel eine eigene Kategorie wählen.",
+      "addWithoutCatalog": "Unbekannte Produkte hinzufügen",
+      "addWithoutCatalogHint": "Produkte ohne Katalogeintrag oder Namen lassen sich mit einem eingegebenen Namen hinzufügen. Aus: Sie zeigen nur einen Fehler.",
+      "checkExisting": "Vorhandene Artikel anzeigen",
+      "checkExistingHint": "Zeigt, welche Artikel dieses Inventars den gescannten Barcode schon haben.",
+      "storedInBrowser": "Diese Optionen werden in diesem Browser gespeichert."
+    },
     "description": "Scanne ein Produkt-Barcode, um es hier hinzuzufügen",
     "scannedArticles": "Gescannte Artikel"
   },
