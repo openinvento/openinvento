@@ -30,7 +30,8 @@ export default function ArticleCreateScreen() {
   const [fields, setFields] = useState<CategoryField[]>([])
   const [selectedCategory, setSelectedCategory] = useState("")
   const [selectedShelf, setSelectedShelf] = useState("")
-  const [selectedBox, setSelectedBox] = useState(() => searchParams.get("box") ?? "")
+  // A preselected box only comes with its area in the route, so the form never holds a box without an area.
+  const [selectedBox, setSelectedBox] = useState(() => (areaId ? searchParams.get("box") ?? "" : ""))
   const [selectedIcon, setSelectedIcon] = useState("Package")
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -87,7 +88,10 @@ export default function ArticleCreateScreen() {
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!inventory) return
+    if (!inventory) {
+      setError(t("articles.page.errors.noInventory"))
+      return
+    }
     const form = new FormData(event.currentTarget)
     const name = form.get("name")?.toString().trim()
     if (!name) return
@@ -193,6 +197,9 @@ export default function ArticleCreateScreen() {
                   setSelectedArea(value ?? "")
                   setSelectedShelf("")
                   setSelectedBox("")
+                  // Drop the previous area's options so none of them can be picked while the new ones load.
+                  setShelves([])
+                  setBoxes([])
                 }}
               >
                 <SelectTrigger className="w-full">
