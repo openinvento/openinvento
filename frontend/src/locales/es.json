@@ -95,6 +95,21 @@
   "articles": {
     "page": {
       "areas": "áreas",
+      "barcodes": {
+        "title": "Códigos de barras",
+        "description": "EAN, UPC, ISBN o PZN del envase del producto.",
+        "add": "Añadir código de barras",
+        "remove": "Quitar código de barras",
+        "kind": "Tipo de código de barras",
+        "value": "Código de barras",
+        "kinds": {
+          "auto": "Detectar tipo",
+          "ean": "EAN / UPC",
+          "isbn": "ISBN",
+          "pzn": "PZN",
+          "other": "Otro"
+        }
+      },
       "attachments": {
         "add": "Añadir archivo",
         "addImages": "Agregar imagen",

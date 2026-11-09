@@ -54,7 +54,12 @@ export type InventoryEntry = EntityBase & {
   category?: string | null
   field_values?: ArticleFieldValue[]
   category_fields?: CategoryField[]
+  barcodes?: Barcode[]
 }
+
+export type BarcodeKind = "ean" | "isbn" | "pzn" | "other"
+// Product barcodes of an entry. Saving sends the whole list as barcodes_input; an empty kind is detected by the backend.
+export type Barcode = { kind: BarcodeKind; value: string }
 
 export type Area = InventoryEntry & { type: "area" }
 export type Shelf = InventoryEntry & { type: "shelf"; area: string }
