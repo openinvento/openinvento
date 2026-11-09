@@ -3,6 +3,7 @@ import { Check, LoaderCircle, Plus, PlusIcon, Settings2, Trash2 } from "lucide-r
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router"
 import Scanner from "@/components/qr-bar-code/Scanner"
+import { BarcodeInputForm } from "@/components/qr-bar-code/BarcodeInputForm"
 import ThirdPartyProviderSelector from "@/components/inventory/ThirdPartyProviderSelector"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -157,6 +158,11 @@ export default function BarcodeArticleImportPage() {
               <p className="text-xs text-muted-foreground">{t("articleBarcodeImport.options.storedInBrowser")}</p>
             </div>
           </details>
+        </section>
+        <section className="w-full rounded-xl border bg-card p-4 shadow-sm">
+          <h2 className="mb-1 text-sm font-medium">{t("articleBarcodeImport.manualTitle")}</h2>
+          <p className="mb-3 text-sm text-muted-foreground">{t("articleBarcodeImport.manualHint")}</p>
+          <BarcodeInputForm onSubmit={handleCodeDetected} />
         </section>
         <Scanner onCodeDetected={handleCodeDetected} onClose={handleScannerClose} />
         <section className="min-h-40 flex-1 rounded-xl border bg-card p-4 shadow-sm">

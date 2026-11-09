@@ -89,6 +89,8 @@
     "title": "Areas"
   },
   "articleBarcodeImport": {
+    "manualTitle": "Barcode scanner or keyboard",
+    "manualHint": "A barcode scanner in keyboard mode types into this field; you can also type a code and press Enter.",
     "alreadyStored": "Already in this inventory:",
     "category": "Category",
     "categoryHint": "Applies to every article you add in this scan session.",
@@ -110,6 +112,12 @@
     },
     "description": "Scan a product barcode to look it up and add it here",
     "scannedArticles": "Scanned Articles"
+  },
+  "barcodeInput": {
+    "error": "Could not look up this code.",
+    "label": "Barcode",
+    "placeholder": "Scan or type a barcode",
+    "submit": "Look up"
   },
   "articles": {
     "page": {

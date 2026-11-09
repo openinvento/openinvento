@@ -89,6 +89,8 @@
     "title": "áreas"
   },
   "articleBarcodeImport": {
+    "manualTitle": "Lector de códigos o teclado",
+    "manualHint": "Un lector de códigos en modo teclado escribe en este campo; también puedes escribir un código y pulsar Intro.",
     "alreadyStored": "Ya está en este inventario:",
     "category": "Categoría",
     "categoryHint": "Se aplica a cada artículo que añadas en esta sesión de escaneo.",
@@ -110,6 +112,12 @@
     },
     "description": "Escanee el código de barras de un producto para buscarlo y agregarlo aquí",
     "scannedArticles": "Artículos escaneados"
+  },
+  "barcodeInput": {
+    "error": "No se pudo buscar este código.",
+    "label": "Código de barras",
+    "placeholder": "Escanea o escribe un código de barras",
+    "submit": "Buscar"
   },
   "articles": {
     "page": {

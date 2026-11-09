@@ -89,6 +89,8 @@
     "title": "Zones"
   },
   "articleBarcodeImport": {
+    "manualTitle": "Lecteur de codes-barres ou clavier",
+    "manualHint": "Un lecteur de codes-barres en mode clavier saisit dans ce champ ; vous pouvez aussi saisir un code et appuyer sur Entrée.",
     "alreadyStored": "Déjà dans cet inventaire :",
     "category": "Catégorie",
     "categoryHint": "S’applique à chaque article ajouté pendant cette session de scan.",
@@ -110,6 +112,12 @@
     },
     "description": "Scannez le code-barres d'un produit pour le rechercher et ajoutez-le ici",
     "scannedArticles": "Articles scannés"
+  },
+  "barcodeInput": {
+    "error": "Impossible de rechercher ce code.",
+    "label": "Code-barres",
+    "placeholder": "Scannez ou saisissez un code-barres",
+    "submit": "Rechercher"
   },
   "articles": {
     "page": {

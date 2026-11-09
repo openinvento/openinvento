@@ -89,6 +89,8 @@
     "title": "Bereiche"
   },
   "articleBarcodeImport": {
+    "manualTitle": "Barcode-Scanner oder Tastatur",
+    "manualHint": "Ein Barcode-Scanner im Tastaturmodus tippt in dieses Feld; du kannst auch einen Code eingeben und Enter drücken.",
     "alreadyStored": "Schon in diesem Inventar:",
     "category": "Kategorie",
     "categoryHint": "Gilt für jeden Artikel, den du in dieser Scan-Runde hinzufügst.",
@@ -110,6 +112,12 @@
     },
     "description": "Scanne ein Produkt-Barcode, um es hier hinzuzufügen",
     "scannedArticles": "Gescannte Artikel"
+  },
+  "barcodeInput": {
+    "error": "Dieser Code konnte nicht nachgeschlagen werden.",
+    "label": "Barcode",
+    "placeholder": "Barcode scannen oder eingeben",
+    "submit": "Suchen"
   },
   "articles": {
     "page": {
