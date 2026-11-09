@@ -97,7 +97,7 @@
       "areas": "áreas",
       "barcodes": {
         "title": "Códigos de barras",
-        "description": "EAN, UPC, ISBN o PZN del envase del producto.",
+        "description": "EAN, UPC, ISBN o PZN del envase del producto. Al escanear cualquiera de ellos se encuentra este artículo.",
         "add": "Añadir código de barras",
         "remove": "Quitar código de barras",
         "kind": "Tipo de código de barras",
@@ -407,6 +407,11 @@
     "inventoryItems": "Elementos del inventario",
     "layout": "Diseño",
     "loading": "Cargando inventario elementos...",
+    "matches": {
+      "close": "Cerrar",
+      "description": "El mismo producto puede estar guardado en varios lugares. Elige el que buscas.",
+      "title": "{{count}} elementos tienen este código de barras"
+    },
     "noItems": "No se encontraron elementos en el inventario.",
     "options": "Opciones de código",
     "paperSize": "Tamaño de papel",

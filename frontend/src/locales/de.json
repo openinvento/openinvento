@@ -97,7 +97,7 @@
       "areas": "Bereiche",
       "barcodes": {
         "title": "Barcodes",
-        "description": "EAN, UPC, ISBN oder PZN von der Verpackung.",
+        "description": "EAN, UPC, ISBN oder PZN von der Verpackung. Beim Scannen findet jeder davon diesen Artikel.",
         "add": "Barcode hinzufügen",
         "remove": "Barcode entfernen",
         "kind": "Barcode-Art",
@@ -407,6 +407,11 @@
     "inventoryItems": "Inventarelemente",
     "layout": "Anordnung",
     "loading": "Inventarelemente werden geladen...",
+    "matches": {
+      "close": "Schließen",
+      "description": "Dasselbe Produkt kann an mehreren Orten liegen. Wähle den gemeinten Eintrag.",
+      "title": "{{count}} Einträge haben diesen Barcode"
+    },
     "noItems": "Keine Inventarelemente gefunden.",
     "options": "Codeoptionen",
     "paperSize": "Papierformat",

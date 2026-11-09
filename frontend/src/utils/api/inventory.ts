@@ -121,13 +121,17 @@ export type CodePdfOptions = {
   layout: "horizontal" | "vertical"
 }
 
-export type CodeLookupResult = {
+export type CodeLookupMatch = {
   uuid: string
   identifier: string
   name: string
   type: "article" | "area" | "shelf" | "box" | "category" | "field"
   inventory: { uuid: string; name: string }
+  matched_by: "identifier" | "barcode"
 }
+
+// An identifier matches one entry, a barcode can match several. No match is a 404.
+export type CodeLookupResult = { matches: CodeLookupMatch[] }
 
 export type InventoryUser = {
   uuid: string
