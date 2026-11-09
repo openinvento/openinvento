@@ -1,3 +1,4 @@
+import re
 from io import BytesIO
 from urllib.parse import quote
 
@@ -11,10 +12,26 @@ from reportlab.lib.pagesizes import A4, A5, LETTER
 from reportlab.pdfgen import canvas
 
 
+# Characters a QR code stores in alphanumeric mode (5.5 bits each instead of 8). It has no lowercase.
+UPPERCASE_IDENTIFIER = re.compile(r"[0-9A-Z]+")
+UPPERCASE_ORIGIN = re.compile(r"HTTPS?://[0-9A-Z.:-]+")
+
+
 def scan_url(item) -> str:
-    """The URL of an entry for a QR code: {APP_URL}/i/{inventory identifier}/{identifier}."""
-    inventory_identifier = quote(item.inventory.identifier, safe="")
-    return f"{settings.APP_URL}/i/{inventory_identifier}/{quote(item.identifier, safe='')}"
+    """The URL of an entry for a QR code: {APP_URL}/i/{inventory identifier}/{identifier}.
+
+    All uppercase when the whole URL allows it, which makes the QR code smaller.
+    """
+    inventory_identifier = item.inventory.identifier
+    identifier = item.identifier
+    origin = settings.APP_URL.upper()
+    if (
+        UPPERCASE_IDENTIFIER.fullmatch(inventory_identifier)
+        and UPPERCASE_IDENTIFIER.fullmatch(identifier)
+        and UPPERCASE_ORIGIN.fullmatch(origin)
+    ):
+        return f"{origin}/I/{inventory_identifier}/{identifier}"
+    return f"{settings.APP_URL}/i/{quote(inventory_identifier, safe='')}/{quote(identifier, safe='')}"
 
 
 def qr_code_value(item, use_urls: bool) -> str:

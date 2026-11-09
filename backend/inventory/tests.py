@@ -564,6 +564,40 @@ class QrCodeUrlTests(TestCase):
 		self.entry.identifier = "a/b ü"
 		self.assertEqual(qr_code_value(self.entry, True), "https://inventory.example/i/AbC23/a%2Fb%20%C3%BC")
 
+	def test_generated_identifiers_give_an_uppercase_url(self):
+		inventory = Inventory.objects.create(name="Office")
+		entry = InventoryEntry.objects.create(inventory=inventory, type="area", name="Area")
+
+		self.assertEqual(
+			qr_code_value(entry, True),
+			f"HTTPS://INVENTORY.EXAMPLE/I/{inventory.identifier}/{entry.identifier}",
+		)
+
+	@override_settings(APP_URL="https://inv.example.de")
+	def test_uppercase_url_uses_alphanumeric_mode(self):
+		self.inventory.identifier = "7GQ2M"
+		self.entry.identifier = "7GQ2MX4"
+		code = QrCodeWidget(qr_code_value(self.entry, True), barLevel="M")
+		code.qr.make()
+
+		self.assertEqual([type(data).__name__ for data in code.qr.dataList], ["QRAlphaNum"])
+		self.assertEqual(code.qr.version, 2)
+
+	def test_lowercase_in_an_identifier_keeps_the_url_lowercase(self):
+		for inventory_identifier, identifier in (("AbC23", "7GQ2MX4"), ("7GQ2M", "box1"), ("7GQ2M", "A-1")):
+			with self.subTest(inventory=inventory_identifier, identifier=identifier):
+				self.inventory.identifier = inventory_identifier
+				self.entry.identifier = identifier
+				self.assertTrue(qr_code_value(self.entry, True).startswith("https://inventory.example/i/"))
+
+	def test_port_is_kept_in_the_uppercase_url(self):
+		self.inventory.identifier = "7GQ2M"
+		self.entry.identifier = "7GQ2MX4"
+		with override_settings(APP_URL="http://inventory.example:8000"):
+			self.assertEqual(qr_code_value(self.entry, True), "HTTP://INVENTORY.EXAMPLE:8000/I/7GQ2M/7GQ2MX4")
+		with override_settings(APP_URL="http://[::1]:8000"):
+			self.assertEqual(qr_code_value(self.entry, True), "http://[::1]:8000/i/7GQ2M/7GQ2MX4")
+
 	def test_value_is_the_identifier_when_urls_are_off(self):
 		self.assertEqual(qr_code_value(self.entry, False), "box1")
 
