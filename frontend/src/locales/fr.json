@@ -572,7 +572,7 @@
     },
     "adminTab": "Paramètres d’administration (instance)",
     "qrCodeUrls": "URL dans les codes QR",
-    "qrCodeUrlsDescription": "Les codes QR contiennent un lien vers l’entrée, que toute application d’appareil photo peut ouvrir. Sans APP_URL, ils ne contiennent que l’identifiant. Les codes-barres contiennent toujours l’identifiant.",
+    "qrCodeUrlsDescription": "Les codes QR contiennent un lien vers l’entrée, que toute application d’appareil photo peut ouvrir. Ils utilisent SCAN_BASE_URL si elle est définie, sinon APP_URL. Sans aucune des deux, ils ne contiennent que l’identifiant. Les codes-barres contiennent toujours l’identifiant.",
     "allowEmailLogin": "Autoriser la connexion par adresse e-mail",
     "allowEmailLoginDescription": "Lorsqu’elle est activée, les utilisateurs peuvent se connecter avec leur adresse e-mail en plus de leur nom d’utilisateur.",
     "apiKeys": {

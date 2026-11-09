@@ -572,7 +572,7 @@
     },
     "adminTab": "Administratoreinstellungen",
     "qrCodeUrls": "URLs in QR-Codes",
-    "qrCodeUrlsDescription": "QR-Codes enthalten einen Link zum Eintrag, sodass jede Kamera-App ihn öffnen kann. Ohne APP_URL enthalten sie nur die Kennung. Barcodes enthalten immer die Kennung.",
+    "qrCodeUrlsDescription": "QR-Codes enthalten einen Link zum Eintrag, sodass jede Kamera-App ihn öffnen kann. Sie nutzen SCAN_BASE_URL, falls gesetzt, sonst APP_URL. Ohne beides enthalten sie nur die Kennung. Barcodes enthalten immer die Kennung.",
     "allowEmailLogin": "Anmeldung mit E-Mail-Adresse erlauben",
     "allowEmailLoginDescription": "Wenn aktiviert, können sich Benutzer zusätzlich mit ihrer E-Mail-Adresse anmelden.",
     "apiKeys": {

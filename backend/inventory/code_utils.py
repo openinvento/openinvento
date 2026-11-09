@@ -17,26 +17,32 @@ UPPERCASE_IDENTIFIER = re.compile(r"[0-9A-Z]+")
 UPPERCASE_ORIGIN = re.compile(r"HTTPS?://[0-9A-Z.:-]+")
 
 
+def scan_base_url() -> str:
+    """SCAN_BASE_URL if set, otherwise APP_URL."""
+    return settings.SCAN_BASE_URL or settings.APP_URL
+
+
 def scan_url(item) -> str:
-    """The URL of an entry for a QR code: {APP_URL}/i/{inventory identifier}/{identifier}.
+    """The URL of an entry for a QR code: {base URL}/i/{inventory identifier}/{identifier}.
 
     All uppercase when the whole URL allows it, which makes the QR code smaller.
     """
     inventory_identifier = item.inventory.identifier
     identifier = item.identifier
-    origin = settings.APP_URL.upper()
+    base_url = scan_base_url()
+    origin = base_url.upper()
     if (
         UPPERCASE_IDENTIFIER.fullmatch(inventory_identifier)
         and UPPERCASE_IDENTIFIER.fullmatch(identifier)
         and UPPERCASE_ORIGIN.fullmatch(origin)
     ):
         return f"{origin}/I/{inventory_identifier}/{identifier}"
-    return f"{settings.APP_URL}/i/{quote(inventory_identifier, safe='')}/{quote(identifier, safe='')}"
+    return f"{base_url}/i/{quote(inventory_identifier, safe='')}/{quote(identifier, safe='')}"
 
 
 def qr_code_value(item, use_urls: bool) -> str:
-    """Without APP_URL there is no address to point at, so the QR code holds the identifier alone."""
-    return scan_url(item) if use_urls and settings.APP_URL else item.identifier
+    """Without a base URL there is no address to point at, so the QR code holds the identifier alone."""
+    return scan_url(item) if use_urls and scan_base_url() else item.identifier
 
 
 def generate_codes_pdf(
