@@ -465,11 +465,7 @@ class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         inventory_identifier = str(request.data.get("inventory_identifier", "")).strip()
 
         if inventory_identifier:
-            item = InventoryEntry.objects.filter(
-                inventory__in=accessible_inventories,
-                inventory__identifier=inventory_identifier,
-                identifier=code,
-            ).select_related("inventory").first()
+            item = self.find_by_scan_url(code, inventory_identifier, accessible_inventories)
             matches = [(item, "identifier")] if item else []
         else:
             preferred_inventory = self.preferred_inventory(request)
@@ -492,14 +488,40 @@ class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         except ValueError:
             return None
 
+    # Identifiers are case-sensitive, so an exact match always wins. Without one, a case-insensitive match
+    # is used if it's the only one, so labels printed before `manage.py uppercase_identifiers` keep working.
+
     @staticmethod
-    def find_by_bare_identifier(code, accessible_inventories, preferred_inventory):
-        entries = InventoryEntry.objects.filter(inventory__in=accessible_inventories, identifier=code).select_related("inventory")
+    def only_match(queryset):
+        matches = list(queryset[:2])
+        return matches[0] if len(matches) == 1 else None
+
+    @classmethod
+    def find_by_scan_url(cls, code, inventory_identifier, accessible_inventories):
+        entries = InventoryEntry.objects.filter(inventory__in=accessible_inventories).select_related("inventory")
+        item = entries.filter(inventory__identifier=inventory_identifier, identifier=code).first()
+        if item is not None:
+            return item
+        inventory = cls.only_match(accessible_inventories.filter(identifier__iexact=inventory_identifier))
+        return cls.only_match(entries.filter(inventory=inventory, identifier__iexact=code)) if inventory else None
+
+    @classmethod
+    def find_by_bare_identifier(cls, code, accessible_inventories, preferred_inventory):
+        entries = InventoryEntry.objects.filter(inventory__in=accessible_inventories).select_related("inventory")
+        exact = entries.filter(identifier=code)
+        loose = entries.filter(identifier__iexact=code)
         if preferred_inventory:
-            item = entries.filter(inventory__uuid=preferred_inventory).first()
+            item = exact.filter(inventory__uuid=preferred_inventory).first()
             if item is not None:
                 return item
-        return entries.first()
+        item = exact.first()
+        if item is not None:
+            return item
+        if preferred_inventory:
+            item = cls.only_match(loose.filter(inventory__uuid=preferred_inventory))
+            if item is not None:
+                return item
+        return cls.only_match(loose)
 
     @classmethod
     def find_by_barcode(cls, code, accessible_inventories, preferred_inventory):
