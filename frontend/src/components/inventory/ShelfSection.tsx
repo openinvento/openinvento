@@ -61,46 +61,43 @@ export function ShelfSection({
     >
       <InventoryDropTarget target={{ kind: "shelf", id: shelf.uuid }}>
         <div className="rounded-2xl border bg-muted/15">
-          <button
-            className="flex w-full items-center gap-3 p-4 text-left"
-            onClick={onToggle}
-          >
-            <ChevronDown
-              className={`size-4 transition ${isOpen ? "" : "-rotate-90"}`}
-            />
-            <span className="font-semibold">{shelf.name}</span>
-            <span className="text-sm text-muted-foreground">
-              {t("areas.detail.itemCount", {
-                count: sectionBoxes.length + sectionArticles.length,
-              })}
-            </span>
-            <span className="ml-auto flex items-center gap-1">
-              <Button
-                title={t("areas.detail.renameShelf")}
-                aria-label={t("areas.detail.renameShelf")}
-                variant="ghost"
-                size="icon-xs"
-                onClick={(event) => {
-                  event.stopPropagation()
-                  onEditShelf()
-                }}
-              >
-                <Pencil />
-              </Button>
-              <Button
-                title={t("areas.detail.deleteShelf")}
-                aria-label={t("areas.detail.deleteShelf")}
-                variant="ghost"
-                size="icon-xs"
-                onClick={(event) => {
-                  event.stopPropagation()
-                  onDeleteShelf()
-                }}
-              >
-                <Trash2 />
-              </Button>
-            </span>
-          </button>
+          {/* The actions sit next to the toggle, not inside it: a button can't contain other buttons. */}
+          <div className="flex items-center gap-1 pr-4">
+            <button
+              type="button"
+              className="flex min-w-0 flex-1 items-center gap-3 p-4 text-left"
+              aria-expanded={isOpen}
+              onClick={onToggle}
+            >
+              <ChevronDown
+                className={`size-4 shrink-0 transition ${isOpen ? "" : "-rotate-90"}`}
+              />
+              <span className="font-semibold">{shelf.name}</span>
+              <span className="text-sm text-muted-foreground">
+                {t("areas.detail.itemCount", {
+                  count: sectionBoxes.length + sectionArticles.length,
+                })}
+              </span>
+            </button>
+            <Button
+              title={t("areas.detail.renameShelf")}
+              aria-label={t("areas.detail.renameShelf")}
+              variant="ghost"
+              size="icon-xs"
+              onClick={onEditShelf}
+            >
+              <Pencil />
+            </Button>
+            <Button
+              title={t("areas.detail.deleteShelf")}
+              aria-label={t("areas.detail.deleteShelf")}
+              variant="ghost"
+              size="icon-xs"
+              onClick={onDeleteShelf}
+            >
+              <Trash2 />
+            </Button>
+          </div>
 
           {isOpen && (
             <div className="border-t p-4">
