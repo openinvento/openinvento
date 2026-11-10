@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import BaseScreen from "@/layouts/BaseScreen"
 import { readBarcodeImportOptions, writeBarcodeImportOptions, type BarcodeImportOptions } from "@/utils/barcode-import-options"
+import { ApiError } from "@/utils/api/base"
 import { inventoryApi, type ArticleCategory, type BarcodeProduct, type CodeLookupMatch, type ThirdPartyProvider } from "@/utils/api/inventory"
 import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 import { getCategoryLabel } from "@/utils/i18n-labels"
@@ -21,6 +22,7 @@ type ScannedArticle = BarcodeProduct & {
   lookupError: string
   // Entries of this inventory that already carry the barcode. Adding stays possible: the same product can be in several places.
   existing: CodeLookupMatch[]
+  existingCheckFailed: boolean
   // Used when the category isn't shared by the whole scan session.
   categoryId: string
 }
@@ -45,18 +47,17 @@ export default function BarcodeArticleImportPage() {
   const handleScannerClose = useCallback(() => navigate(-1), [navigate])
 
   useEffect(() => {
-    void (async () => {
-      if (inventory) {
-        const [availableProviders, availableCategories] = await Promise.all([
-          inventoryApi.listThirdPartyProviders(inventory.uuid),
-          inventoryApi.listCategories(),
-        ])
+    if (!inventory) return
+    const showError = (reason: unknown) => setError(reason instanceof Error ? reason.message : "Could not load inventory.")
+    // Loaded separately, so a failure of one doesn't hide the other.
+    inventoryApi.listThirdPartyProviders(inventory.uuid)
+      .then((availableProviders) => {
         const barcodeProviders = availableProviders.filter((provider) => provider.type === "barcode_lookup")
         setProviders(barcodeProviders)
         if (barcodeProviders.length === 1) setProviderId(barcodeProviders[0].uuid)
-        setCategories(availableCategories)
-      }
-    })().catch((reason) => setError(reason instanceof Error ? reason.message : "Could not load inventory."))
+      })
+      .catch(showError)
+    inventoryApi.listCategories().then(setCategories).catch(showError)
   }, [inventory])
 
   const changeOption = (key: keyof BarcodeImportOptions, value: boolean) => {
@@ -83,13 +84,17 @@ export default function BarcodeArticleImportPage() {
         }),
       options.checkExisting
         ? inventoryApi.lookupCode(barcode, inventory.uuid)
-          .then(({ matches }) => matches.filter((match) => match.matched_by === "barcode" && match.inventory.uuid === inventory.uuid))
-          .catch(() => [] as CodeLookupMatch[]) // 404: not in any inventory yet
-        : Promise.resolve([] as CodeLookupMatch[]),
+          .then(({ matches }) => ({
+            existing: matches.filter((match) => match.matched_by === "barcode" && match.inventory.uuid === inventory.uuid),
+            existingCheckFailed: false,
+          }))
+          // 404 means the barcode isn't stored anywhere yet; anything else means the check didn't happen.
+          .catch((reason: unknown) => ({ existing: [] as CodeLookupMatch[], existingCheckFailed: !(reason instanceof ApiError && reason.status === 404) }))
+        : Promise.resolve({ existing: [] as CodeLookupMatch[], existingCheckFailed: false }),
     ])
     setArticles((current) => current.some((item) => item.barcode === barcode)
       ? current
-      : [...current, { ...lookup.product, lookupError: lookup.lookupError, existing, categoryId: "", id: crypto.randomUUID(), added: false }])
+      : [...current, { ...lookup.product, lookupError: lookup.lookupError, ...existing, categoryId: "", id: crypto.randomUUID(), added: false }])
   }, [inventory, providerId, options.addWithoutCatalog, options.checkExisting, t])
 
   const updateArticle = (id: string, change: Partial<ScannedArticle>) =>
@@ -191,6 +196,7 @@ export default function BarcodeArticleImportPage() {
                   />
                 )}
                 {article.lookupError && <p className="text-xs text-muted-foreground">{article.lookupError} {t("articleBarcodeImport.enterName")}</p>}
+                {article.existingCheckFailed && <p className="text-xs text-muted-foreground">{t("articleBarcodeImport.existingCheckFailed")}</p>}
                 {article.existing.length > 0 && (
                   <p className="text-xs text-amber-700 dark:text-amber-400">
                     {t("articleBarcodeImport.alreadyStored")}{" "}

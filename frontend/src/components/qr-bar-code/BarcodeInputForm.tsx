@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent } from "react"
+import { useEffect, useRef, useState, type FormEvent } from "react"
 import { LoaderCircle, Search } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
@@ -11,36 +11,61 @@ type BarcodeInputFormProps = {
 
 /**
  * Takes a code typed by hand or sent by a barcode scanner in keyboard (HID) mode, which types the
- * digits followed by Enter. The field keeps the focus after each lookup, so the next scan lands here too.
- * After an error the code stays selected, so the next scan replaces it instead of being appended.
+ * digits followed by Enter. The field is cleared as soon as a code is submitted and keeps the focus,
+ * so the next scan can follow right away. Codes scanned while a lookup is still running are queued
+ * and looked up in order, so none of them is lost or merged with the previous one.
  */
 export function BarcodeInputForm({ onSubmit, autoFocus = true }: BarcodeInputFormProps) {
   const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
+  const queue = useRef<string[]>([])
+  const draining = useRef(false)
+  const mounted = useRef(true)
+  const latestOnSubmit = useRef(onSubmit)
   const [value, setValue] = useState("")
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    latestOnSubmit.current = onSubmit
+  }, [onSubmit])
+
+  useEffect(() => {
+    mounted.current = true
+    return () => { mounted.current = false }
+  }, [])
+
+  async function drain() {
+    if (draining.current) return
+    draining.current = true
+    setBusy(true)
+    // Stop when the page is left, e.g. after a lookup opened an entry.
+    while (queue.current.length > 0 && mounted.current) {
+      const code = queue.current.shift() as string
+      try {
+        await latestOnSubmit.current(code)
+      } catch (reason) {
+        if (mounted.current) setError(`${code}: ${reason instanceof Error ? reason.message : t("barcodeInput.error")}`)
+      }
+    }
+    queue.current = []
+    draining.current = false
+    if (mounted.current) setBusy(false)
+  }
+
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const code = value.trim()
-    if (!code || busy) return
-    setBusy(true)
+    if (!code) return
+    setValue("")
     setError("")
-    try {
-      await onSubmit(code)
-      setValue("")
-      inputRef.current?.focus()
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("barcodeInput.error"))
-      inputRef.current?.select()
-    } finally {
-      setBusy(false)
-    }
+    queue.current.push(code)
+    inputRef.current?.focus()
+    void drain()
   }
 
   return (
-    <form className="grid gap-2" onSubmit={(event) => void submit(event)}>
+    <form className="grid gap-2" onSubmit={submit}>
       <div className="flex gap-2">
         <Input
           ref={inputRef}
@@ -53,7 +78,7 @@ export function BarcodeInputForm({ onSubmit, autoFocus = true }: BarcodeInputFor
           value={value}
           onChange={(event) => setValue(event.target.value)}
         />
-        <Button type="submit" className="h-9" disabled={busy || !value.trim()}>
+        <Button type="submit" className="h-9" disabled={!value.trim()}>
           {busy ? <LoaderCircle className="animate-spin" /> : <Search />} {t("barcodeInput.submit")}
         </Button>
       </div>

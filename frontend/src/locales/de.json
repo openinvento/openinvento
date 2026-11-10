@@ -89,6 +89,7 @@
     "title": "Bereiche"
   },
   "articleBarcodeImport": {
+    "existingCheckFailed": "Konnte nicht prüfen, ob dieser Barcode schon gespeichert ist.",
     "manualTitle": "Barcode-Scanner oder Tastatur",
     "manualHint": "Ein Barcode-Scanner im Tastaturmodus tippt in dieses Feld; du kannst auch einen Code eingeben und Enter drücken.",
     "alreadyStored": "Schon in diesem Inventar:",

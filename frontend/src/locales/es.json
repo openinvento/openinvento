@@ -89,6 +89,7 @@
     "title": "áreas"
   },
   "articleBarcodeImport": {
+    "existingCheckFailed": "No se pudo comprobar si este código de barras ya está guardado.",
     "manualTitle": "Lector de códigos o teclado",
     "manualHint": "Un lector de códigos en modo teclado escribe en este campo; también puedes escribir un código y pulsar Intro.",
     "alreadyStored": "Ya está en este inventario:",

@@ -89,6 +89,7 @@
     "title": "Areas"
   },
   "articleBarcodeImport": {
+    "existingCheckFailed": "Could not check whether this barcode is already stored.",
     "manualTitle": "Barcode scanner or keyboard",
     "manualHint": "A barcode scanner in keyboard mode types into this field; you can also type a code and press Enter.",
     "alreadyStored": "Already in this inventory:",

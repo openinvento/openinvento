@@ -89,6 +89,7 @@
     "title": "Zones"
   },
   "articleBarcodeImport": {
+    "existingCheckFailed": "Impossible de vérifier si ce code-barres est déjà enregistré.",
     "manualTitle": "Lecteur de codes-barres ou clavier",
     "manualHint": "Un lecteur de codes-barres en mode clavier saisit dans ce champ ; vous pouvez aussi saisir un code et appuyer sur Entrée.",
     "alreadyStored": "Déjà dans cet inventaire :",
