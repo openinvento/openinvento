@@ -470,8 +470,8 @@ class CodeLookupTests(TestCase):
 				response = self.lookup(identifier="SAME", inventory_identifier=inventory.identifier)
 
 				self.assertEqual(response.status_code, 200)
-				self.assertEqual(response.data["uuid"], str(entry.uuid))
-				self.assertEqual(response.data["inventory"]["uuid"], str(inventory.uuid))
+				self.assertEqual(response.data["matches"][0]["uuid"], str(entry.uuid))
+				self.assertEqual(response.data["matches"][0]["inventory"]["uuid"], str(inventory.uuid))
 
 	def test_inventory_identifier_does_not_fall_back_to_other_inventories(self):
 		InventoryEntry.objects.create(inventory=self.home, type="area", name="Only at home", identifier="ONLY-HOME")
@@ -483,7 +483,7 @@ class CodeLookupTests(TestCase):
 	def test_inventory_identifier_takes_precedence_over_inventory(self):
 		response = self.lookup(identifier="SAME", inventory_identifier=self.office.identifier, inventory=str(self.home.uuid))
 
-		self.assertEqual(response.data["uuid"], str(self.office_entry.uuid))
+		self.assertEqual(response.data["matches"][0]["uuid"], str(self.office_entry.uuid))
 
 	def test_foreign_and_unknown_inventories_get_the_same_answer(self):
 		foreign = self.lookup(identifier="FOREIGN", inventory_identifier=self.foreign.identifier)
@@ -499,15 +499,15 @@ class CodeLookupTests(TestCase):
 
 		response = self.lookup(identifier="A/1", inventory_identifier=self.home.identifier)
 
-		self.assertEqual(response.data["uuid"], str(entry.uuid))
+		self.assertEqual(response.data["matches"][0]["uuid"], str(entry.uuid))
 
 	def test_bare_identifier_prefers_the_given_inventory_and_falls_back(self):
 		preferred = self.lookup(identifier="SAME", inventory=str(self.office.uuid))
-		self.assertEqual(preferred.data["uuid"], str(self.office_entry.uuid))
+		self.assertEqual(preferred.data["matches"][0]["uuid"], str(self.office_entry.uuid))
 
 		InventoryEntry.objects.create(inventory=self.home, type="area", name="Only at home", identifier="ONLY-HOME")
 		fallback = self.lookup(identifier="ONLY-HOME", inventory=str(self.office.uuid))
-		self.assertEqual(fallback.data["inventory"]["uuid"], str(self.home.uuid))
+		self.assertEqual(fallback.data["matches"][0]["inventory"]["uuid"], str(self.home.uuid))
 
 	def test_bare_identifier_never_finds_foreign_entries(self):
 		self.assertEqual(self.lookup(identifier="FOREIGN").status_code, 404)
@@ -528,7 +528,7 @@ class CodeLookupTests(TestCase):
 		)
 
 		self.assertEqual(response.status_code, 200)
-		self.assertEqual(response.data["uuid"], str(self.office_entry.uuid))
+		self.assertEqual(response.data["matches"][0]["uuid"], str(self.office_entry.uuid))
 
 	def test_anonymous_requests_are_rejected(self):
 		response = APIClient().post(
@@ -538,4 +538,4 @@ class CodeLookupTests(TestCase):
 		)
 
 		self.assertIn(response.status_code, (302, 401, 403))
-		self.assertNotIn("uuid", getattr(response, "data", None) or {})
+		self.assertNotIn("matches", getattr(response, "data", None) or {})

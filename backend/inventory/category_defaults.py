@@ -10,13 +10,12 @@ DEFAULT_FIELDS = (
     },
 )
 
+# Product barcodes (EAN, ISBN, PZN) have their own table instead of category fields; see barcodes.py.
 DEFAULT_CATEGORIES = {
     "food": (
-        {"key": "barcode", "label": "barcode", "field_type": "barcode"},
         {"key": "expiration_date", "label": "expiration_date", "field_type": "date"},
     ),
     "books": (
-        {"key": "isbn", "label": "isbn", "field_type": "barcode"},
         {"key": "author", "label": "author", "field_type": "text"},
         {"key": "pages", "label": "pages", "field_type": "number"},
         {"key": "read_status", "label": "read_status", "field_type": "boolean"},
@@ -33,7 +32,6 @@ DEFAULT_CATEGORIES = {
         {"key": "quantity", "label": "quantity", "field_type": "number"},
     ),
     "medicine": (
-        {"key": "pzn_barcode", "label": "pzn_barcode", "field_type": "barcode"},
         {"key": "expiry", "label": "expiry", "field_type": "date"},
         {"key": "prescription_required", "label": "prescription_required", "field_type": "boolean"},
     ),

@@ -7,6 +7,8 @@ import { Switch } from "@/components/ui/switch"
 import { removeFavorite } from "@/utils/favorites"
 import { ArticleIconPicker, getArticleIcon } from "@/components/inventory/article-icon-picker"
 import { ImageUploadField } from "@/components/inventory/image-upload-field"
+import { BarcodeListField } from "@/components/inventory/barcode-list-field"
+import { barcodesPayload, toBarcodeDrafts, type BarcodeDraft } from "@/utils/barcodes"
 import { FullscreenImagePreview } from "@/components/inventory/fullscreen-image-preview"
 import { ArticleImageGallery } from "@/components/inventory/article-image-gallery"
 import { inventoryApi, type Area, type Article, type ArticleAttachment, type ArticleCategory, type CategoryField, type Box, type Shelf } from "@/utils/api/inventory"
@@ -40,6 +42,7 @@ export default function ArticlePage() {
   const [image, setImage] = useState<File | null>(null)
   const [imageChanged, setImageChanged] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [barcodes, setBarcodes] = useState<BarcodeDraft[]>([])
   const [attachments, setAttachments] = useState<ArticleAttachment[]>([])
   const [attachmentBusy, setAttachmentBusy] = useState(false)
   const attachmentInputId = useId()
@@ -92,7 +95,8 @@ export default function ArticlePage() {
       setSelectedCategory(fetchedArticle?.category ?? null)
       setSelectedShelf(fetchedArticle?.shelf ?? null)
       setSelectedBox(fetchedArticle?.box ?? null)
-      setAreas(fetchedAreas); 
+      setBarcodes(toBarcodeDrafts(fetchedArticle?.barcodes))
+      setAreas(fetchedAreas);
       setShelves(nextShelves); 
       setBoxes(nextBoxes)
       setCategories(fetchedCategories)
@@ -149,6 +153,7 @@ export default function ArticlePage() {
       payload.append("box", value("box") || "")
       payload.append("category", value("category") || "")
       payload.append("field_values", JSON.stringify(fieldValues))
+      payload.append("barcodes_input", barcodesPayload(barcodes))
       payload.append("icon", selectedIcon || "")
       if (image) payload.append("image", image)
       else if (imageChanged) payload.append("image", "")
@@ -157,6 +162,7 @@ export default function ArticlePage() {
 
       setUnsavedChanges(false)
       setArticle(next);
+      setBarcodes(toBarcodeDrafts(next.barcodes))
       window.dispatchEvent(new Event("openinvento:inventory-moved"))
 
       // Redirect to the area page if the article was saved successfully
@@ -443,6 +449,11 @@ export default function ArticlePage() {
             <Field label={t("articles.page.fields.description")}>
               <textarea name="description" rows={5} defaultValue={article.description ?? ""} />
             </Field>
+
+            <BarcodeListField
+              value={barcodes}
+              onChange={(next) => { setBarcodes(next); setUnsavedChanges(true) }}
+            />
 
             {otherFields.length > 0 && (
               <div className="grid gap-5 sm:grid-cols-2">

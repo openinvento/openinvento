@@ -5,7 +5,7 @@ import { LoaderCircle, Printer, ScanBarcode, ScanLine, X } from "lucide-react"
 import Scanner from "@/components/qr-bar-code/Scanner"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
-import { inventoryApi, type CodePdfOptions } from "@/utils/api/inventory"
+import { inventoryApi, type CodeLookupMatch, type CodePdfOptions } from "@/utils/api/inventory"
 import { lookupScannedCode, openInventoryOfEntry } from "@/utils/scan-code"
 import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 import { useTranslation } from "react-i18next"
@@ -38,6 +38,8 @@ export default function ManageCodes() {
 	})
 
 	const [isScannerOpen, setIsScannerOpen] = useState(false)
+	const [matchChoices, setMatchChoices] = useState<CodeLookupMatch[] | null>(null)
+	const [matchError, setMatchError] = useState("")
 
 	const [useExternalBarcodeScanner, setUseExternalBarcodeScanner] = useState(false)
 	const [externalScanError, setExternalScanError] = useState("")
@@ -51,10 +53,19 @@ export default function ManageCodes() {
 	const [error, setError] = useState("")
 	const { selectedInventoryUuid: selectedInventory } = useSelectedInventory()
 
-	// Camera and external scanner both end up here, with a bare identifier or a scan URL.
+	// Camera and external scanner both end up here, with a bare identifier, a scan URL or a product barcode.
 	async function handleCodeDetected(code: string) {
-		const result = await lookupScannedCode(code.trim(), selectedInventory)
-		const target = await openInventoryOfEntry(result)
+		const { matches } = await lookupScannedCode(code.trim(), selectedInventory)
+		if (matches.length === 1) return openMatch(matches[0])
+		// The same product can be stored in several places, so opening the first match could pick the wrong one.
+		setIsScannerOpen(false)
+		setUseExternalBarcodeScanner(false)
+		setMatchError("")
+		setMatchChoices(matches)
+	}
+
+	async function openMatch(match: CodeLookupMatch) {
+		const target = await openInventoryOfEntry(match)
 		if (!target) throw new Error(t("manageCodes.externalScanner.errors.lookup"))
 		// The mounted layout only loads the selected inventory on load, like the inventory switcher.
 		if (target.inventoryChanged) window.location.assign(target.path)
@@ -287,6 +298,43 @@ export default function ManageCodes() {
 						</div>
 						{(isListeningForExternalCode || isLookingUpExternalCode) && <p className="mt-4 flex items-center gap-2 text-sm"><LoaderCircle className="size-4 animate-spin" />{isLookingUpExternalCode ? t("manageCodes.externalScanner.lookingUp") : t("manageCodes.externalScanner.listening")}</p>}
 						{externalScanError && <p className="mt-4 text-sm text-destructive">{externalScanError}</p>}
+					</section>
+				</div>
+			)}
+			{matchChoices && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="presentation" onMouseDown={(event) => {
+					if (event.target === event.currentTarget) setMatchChoices(null)
+				}}>
+					<section role="dialog" aria-modal="true" aria-labelledby="scan-matches-title" className="flex max-h-[80vh] w-full max-w-md flex-col rounded-xl border bg-card p-6 shadow-lg">
+						<div className="flex items-start justify-between gap-4">
+							<div>
+								<h2 id="scan-matches-title" className="text-lg font-semibold">{t("manageCodes.matches.title", { count: matchChoices.length })}</h2>
+								<p className="mt-2 text-sm text-muted-foreground">{t("manageCodes.matches.description")}</p>
+							</div>
+							<Button aria-label={t("manageCodes.matches.close")} size="icon" variant="ghost" onClick={() => setMatchChoices(null)}>
+								<X />
+							</Button>
+						</div>
+						<ul className="mt-4 divide-y overflow-y-auto rounded-lg border">
+							{matchChoices.map((match) => (
+								<li key={match.uuid}>
+									<button
+										type="button"
+										className="flex w-full flex-col items-start gap-0.5 p-3 text-left transition-colors hover:bg-muted/50"
+										onClick={() => {
+											setMatchError("")
+											openMatch(match).catch((reason) => setMatchError(reason instanceof Error ? reason.message : t("manageCodes.externalScanner.errors.lookup")))
+										}}
+									>
+										<span className="font-medium">{match.name}</span>
+										<span className="text-xs text-muted-foreground">
+											{t(`manageCodes.types.${match.type}`, { defaultValue: match.type })} · {match.inventory.name}
+										</span>
+									</button>
+								</li>
+							))}
+						</ul>
+						{matchError && <p className="mt-4 text-sm text-destructive">{matchError}</p>}
 					</section>
 				</div>
 			)}

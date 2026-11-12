@@ -89,7 +89,16 @@ function getPayloadMessage(payload: unknown) {
     ? record.error
     : typeof record.detail === "string"
       ? record.detail
-      : null
+      : getFieldErrorMessage(record)
+}
+
+// DRF validation errors map field names to lists of messages, e.g. {"barcodes_input": ["..."]}.
+function getFieldErrorMessage(record: Record<string, unknown>) {
+  for (const value of Object.values(record)) {
+    const message = Array.isArray(value) ? value[0] : value
+    if (typeof message === "string" && message) return message
+  }
+  return null
 }
 
 function getRateLimitMessage(response: Response) {

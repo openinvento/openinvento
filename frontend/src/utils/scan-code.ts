@@ -2,11 +2,12 @@ import {
   getSelectedInventoryUuid,
   inventoryApi,
   setSelectedInventory,
-  type CodeLookupResult,
+  type CodeLookupMatch,
   type Shelf,
 } from "@/utils/api/inventory"
 
 // A label can contain a bare identifier or a scan URL: {APP_URL}/i/{inventory identifier}/{identifier}.
+// A product's own barcode (EAN, ISBN, PZN) is looked up like a bare identifier and can match several entries.
 
 /**
  * Reads the inventory and entry from a scan URL, or returns null for anything else, which is then
@@ -45,7 +46,7 @@ export function lookupScannedCode(code: string, selectedInventory: string | null
  * load entries of the selected inventory, so it has to be selected first.
  * inventoryChanged tells the caller that an already mounted layout still shows the old inventory.
  */
-export async function openInventoryOfEntry(result: CodeLookupResult) {
+export async function openInventoryOfEntry(result: CodeLookupMatch) {
   const inventoryChanged = getSelectedInventoryUuid() !== result.inventory.uuid
   if (inventoryChanged) setSelectedInventory(result.inventory.uuid)
 
@@ -53,7 +54,7 @@ export async function openInventoryOfEntry(result: CodeLookupResult) {
   return path ? { path, inventoryChanged } : null
 }
 
-async function getEntryPath(result: CodeLookupResult) {
+async function getEntryPath(result: CodeLookupMatch) {
   switch (result.type) {
     case "article":
       return `/app/articles/${result.uuid}`
