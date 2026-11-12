@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='instancesettings',
-            name='qr_code_urls',
+            name='qr_codes_include_url',
             field=models.BooleanField(default=True),
         ),
     ]
