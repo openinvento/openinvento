@@ -23,11 +23,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from account_auth.authentication import StandardOrAPIKeyAuthMixin
-from account_auth.models import CustomUser
+from account_auth.models import CustomUser, InstanceSettings
 from account_auth.serializers import UserSerializer
 from ai_features.object_detection.main import LUCIDE_ARTICLE_ICONS
 
-from .code_utils import generate_codes_pdf
+from .code_utils import generate_codes_pdf, scan_base_url
 from .export_utils import generate_inventory_csv_export
 from .models import (
     ArticleAttachment,
@@ -488,6 +488,19 @@ class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
                 return item
         return entries.first()
 
+class QrCodeSettingsView(StandardOrAPIKeyAuthMixin, APIView):
+    """Whether printed QR codes hold a URL, and which origin it points at.
+
+    The code page shows it before printing: labels stop working if that address changes.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        base_url = scan_base_url()
+        include_url = InstanceSettings.get_solo().qr_codes_include_url and bool(base_url)
+        return Response({"include_url": include_url, "base_url": base_url if include_url else ""})
+
+
 class CodePdfView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     page_sizes: ClassVar[dict[str, tuple[str, int, int]]] = {
         "a4": ("A4", 210, 297),
@@ -496,12 +509,14 @@ class CodePdfView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     }
     code_types = ("qr", "barcode")
     layouts = ("horizontal", "vertical")
+    error_corrections = ("M", "L")
 
     def post(self, request, *args, **kwargs):
         item_uuids = request.data.get("uuids")
         code_type = request.data.get("code_type", "qr")
         page_size_name = str(request.data.get("size", "a4")).lower()
         layout = request.data.get("layout", "vertical")
+        error_correction = request.data.get("error_correction", "M")
 
         if not isinstance(item_uuids, list) or not item_uuids:
             return Response({"error": "uuids must be a non-empty list."}, status=400)
@@ -511,6 +526,8 @@ class CodePdfView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
             return Response({"error": "size must be a4, a5, or letter."}, status=400)
         if layout not in self.layouts:
             return Response({"error": "layout must be horizontal or vertical."}, status=400)
+        if error_correction not in self.error_corrections:
+            return Response({"error": "error_correction must be M or L."}, status=400)
 
         accessible = self.get_accessible_inventories()
         selected_items = []
@@ -534,7 +551,14 @@ class CodePdfView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         if invalid_uuids:
             return Response({"error": "Some selected items are invalid or inaccessible.", "uuids": invalid_uuids}, status=400)
 
-        pdf_buffer = generate_codes_pdf(selected_items, code_type, page_size_name, layout)
+        pdf_buffer = generate_codes_pdf(
+            selected_items,
+            code_type,
+            page_size_name,
+            layout,
+            error_correction=error_correction,
+            use_urls=InstanceSettings.get_solo().qr_codes_include_url,
+        )
         response = FileResponse(pdf_buffer, content_type="application/pdf")
         response["Content-Disposition"] = 'attachment; filename="openinvento-codes.pdf"'
         return response

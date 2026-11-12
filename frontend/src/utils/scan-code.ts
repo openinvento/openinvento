@@ -6,7 +6,7 @@ import {
   type Shelf,
 } from "@/utils/api/inventory"
 
-// A label can contain a bare identifier or a scan URL: {APP_URL}/i/{inventory identifier}/{identifier}.
+// A label can contain a bare identifier or a scan URL: {SCAN_BASE_URL or APP_URL}/i/{inventory identifier}/{identifier}.
 
 /**
  * Reads the inventory and entry from a scan URL, or returns null for anything else, which is then
