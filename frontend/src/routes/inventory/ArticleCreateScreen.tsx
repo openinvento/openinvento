@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next"
 import BaseScreen from "@/layouts/BaseScreen"
 import { ArticleIconPicker } from "@/components/inventory/article-icon-picker"
 import { ImageUploadField } from "@/components/inventory/image-upload-field"
+import { BarcodeListField } from "@/components/inventory/barcode-list-field"
+import { barcodesPayload, type BarcodeDraft } from "@/utils/barcodes"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -32,6 +34,7 @@ export default function ArticleCreateScreen() {
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [stockTracking, setStockTracking] = useState(false)
+  const [barcodes, setBarcodes] = useState<BarcodeDraft[]>([])
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
 
@@ -101,6 +104,7 @@ export default function ArticleCreateScreen() {
       payload.append("description", form.get("description")?.toString() || "")
       payload.append("icon", selectedIcon)
       payload.append("field_values", JSON.stringify(fieldValues))
+      payload.append("barcodes_input", barcodesPayload(barcodes))
       if (image) payload.append("image", image)
 
       const article = await inventoryApi.create<{ area: string }>("articles", payload)
@@ -200,6 +204,7 @@ export default function ArticleCreateScreen() {
         </section>
         <section className="grid gap-5 rounded-xl border p-5 lg:col-span-2">
           <Field label={t("areas.detail.fields.description")}><textarea name="description" rows={5} className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50" /></Field>
+          <BarcodeListField value={barcodes} onChange={setBarcodes} />
           {otherFields.length > 0 && <div className="grid gap-5 sm:grid-cols-2">{otherFields.map((field) => <CustomField key={field.uuid} field={field} label={getFieldLabel(field)} selectLabel={t("articles.page.fields.selectValue")} />)}</div>}
           {stockTracking && stockFields.length > 0 && <div className="grid gap-5 border-t pt-5 sm:grid-cols-2">{stockFields.map((field) => <CustomField key={field.uuid} field={field} label={getFieldLabel(field)} selectLabel={t("articles.page.fields.selectValue")} />)}</div>}
         </section>
