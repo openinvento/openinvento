@@ -114,7 +114,11 @@ export type CodePdfOptions = {
   code_type: "qr" | "barcode"
   size: "a4" | "a5" | "letter"
   layout: "horizontal" | "vertical"
+  error_correction: "M" | "L"
 }
+
+// Whether printed QR codes hold a URL, and the origin it points at (empty without a URL).
+export type QrCodeSettings = { include_url: boolean; base_url: string }
 
 export type CodeLookupResult = {
   uuid: string
@@ -361,6 +365,7 @@ export const inventoryApi = {
     downloadFile(`/api/inventories/${inventory}/export/`, `inventory-${inventory}-csv-export.zip`),
   generateCodesPdf: (options: CodePdfOptions) =>
     postData<Blob>("/api/codes/pdf/", options),
+  getQrCodeSettings: () => fetchData<QrCodeSettings>("/api/codes/qr-settings/"),
   getDashboard: () => fetchData<DashboardData>(scopedPath("/api/dashboard/")),
   getEntry: <T>(uuid: string) => getEntry<T>(uuid),
   getMembership: (inventory: string) =>

@@ -15,6 +15,7 @@ from .views import (
     InventoryMembersView,
     InventoryViewSet,
     MagicArticleImportView,
+    QrCodeSettingsView,
     SearchView,
 )
 
@@ -36,4 +37,5 @@ urlpatterns = [
     path("codes/lookup/", CodeLookupView.as_view(), name="code-lookup"),
     path("barcodes/lookup/", BarcodeProductLookupView.as_view(), name="barcode-product-lookup"),
     path("codes/pdf/", CodePdfView.as_view(), name="code-pdf"),
+    path("codes/qr-settings/", QrCodeSettingsView.as_view(), name="code-qr-settings"),
 ] + router.urls

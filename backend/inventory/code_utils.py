@@ -1,5 +1,8 @@
+import re
 from io import BytesIO
+from urllib.parse import quote
 
+from django.conf import settings
 from reportlab.graphics import renderPDF
 from reportlab.graphics.barcode import createBarcodeDrawing
 from reportlab.graphics.barcode.qr import QrCodeWidget
@@ -9,7 +12,52 @@ from reportlab.lib.pagesizes import A4, A5, LETTER
 from reportlab.pdfgen import canvas
 
 
-def generate_codes_pdf(selected_items, code_type: str, size: str, layout: str) -> BytesIO:
+# Characters a QR code stores in alphanumeric mode (5.5 bits each instead of 8). It has no lowercase.
+UPPERCASE_IDENTIFIER = re.compile(r"[0-9A-Z]+")
+UPPERCASE_ORIGIN = re.compile(r"HTTPS?://[0-9A-Z.:-]+")
+
+
+# A URL path segment of "." or ".." is removed when the URL is resolved, so such an identifier can't be in a link.
+DOT_SEGMENTS = (".", "..")
+
+
+def scan_base_url() -> str:
+    """The origin that scan URLs in QR codes point at."""
+    return settings.APP_URL
+
+
+def scan_url(item) -> str:
+    """The URL of an entry for a QR code: {base URL}/i/{inventory identifier}/{identifier}.
+
+    All uppercase when the whole URL allows it, which makes the QR code smaller.
+    """
+    inventory_identifier = item.inventory.identifier
+    identifier = item.identifier
+    base_url = scan_base_url()
+    origin = base_url.upper()
+    if (
+        UPPERCASE_IDENTIFIER.fullmatch(inventory_identifier)
+        and UPPERCASE_IDENTIFIER.fullmatch(identifier)
+        and UPPERCASE_ORIGIN.fullmatch(origin)
+    ):
+        return f"{origin}/I/{inventory_identifier}/{identifier}"
+    return f"{base_url}/i/{quote(inventory_identifier, safe='')}/{quote(identifier, safe='')}"
+
+
+def qr_code_value(item, use_urls: bool) -> str:
+    """The scan URL, or the identifier alone if there is no base URL or the identifier can't be part of a URL."""
+    linkable = item.identifier not in DOT_SEGMENTS and item.inventory.identifier not in DOT_SEGMENTS
+    return scan_url(item) if use_urls and scan_base_url() and linkable else item.identifier
+
+
+def generate_codes_pdf(
+    selected_items,
+    code_type: str,
+    size: str,
+    layout: str,
+    error_correction: str = "M",
+    use_urls: bool = False,
+) -> BytesIO:
     page_sizes = {"a4": A4, "a5": A5, "letter": LETTER}
     page_width, page_height = page_sizes[size]
     columns, rows = (2, 4) if layout == "horizontal" else (4, 2)
@@ -37,7 +85,7 @@ def generate_codes_pdf(selected_items, code_type: str, size: str, layout: str) -
         pdf.drawCentredString(origin_x + cell_width / 2, origin_y + 10, f"{object_type}: {item.identifier}")
 
         if code_type == "qr":
-            code = QrCodeWidget(item.identifier)
+            code = QrCodeWidget(qr_code_value(item, use_urls), barLevel=error_correction)
             bounds = code.getBounds()
             code_width = bounds[2] - bounds[0]
             code_height = bounds[3] - bounds[1]

@@ -166,4 +166,4 @@ class CredentialResetSerializer(serializers.Serializer):
 class InstanceSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = InstanceSettings
-        fields = ('allow_email_login',)
+        fields = ('allow_email_login', 'qr_codes_include_url')

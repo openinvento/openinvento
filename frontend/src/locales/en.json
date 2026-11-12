@@ -367,7 +367,14 @@
     "unknownItem": "Inventory item"
   },
   "manageCodes": {
+    "urlHint": "These QR codes link to {{url}}. If the instance moves to another address, printed labels stop opening their entries. Administrators can turn the links off in the instance settings.",
     "clearSelection": "Clear selection",
+    "errorCorrection": "Error correction",
+    "errorCorrections": {
+      "L": "Low (smaller code, less tolerant of damage)",
+      "M": "Medium (recommended)"
+    },
+    "identifierPrintedHint": "Printed labels keep the old identifier and stop opening this entry until you print them again.",
     "codeType": "Code type",
     "codeTypes": {
       "barcode": "Barcode",
@@ -532,6 +539,7 @@
       "downloadBackup": "Download backup",
       "editUser": "Edit user",
       "email": "Email",
+      "enableQrCodesIncludeUrl": "Enable URLs in QR codes",
       "enableEmailLogin": "Enable email login",
       "loadUsersError": "Could not load users.",
       "loadingUsers": "Loading users...",
@@ -566,6 +574,8 @@
       }
     },
     "adminTab": "Admin settings (instance)",
+    "qrCodesIncludeUrl": "URLs in QR codes",
+    "qrCodesIncludeUrlDescription": "QR codes contain a link to the entry, so any camera app can open it. Without an APP_URL they contain the identifier only. Barcodes always contain the identifier.",
     "allowEmailLogin": "Allow email address login",
     "allowEmailLoginDescription": "When enabled, users can sign in with their email address in addition to their username.",
     "apiKeys": {
