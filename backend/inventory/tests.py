@@ -641,6 +641,10 @@ class QrCodeUrlTests(TestCase):
 	def test_scan_base_url_is_not_used_when_urls_are_off(self):
 		self.assertEqual(qr_code_value(self.entry, False), "box1")
 
+	@override_settings(SCAN_BASE_URL="https://short.example")
+	def test_settings_endpoint_shows_the_scan_base_url(self):
+		self.assertEqual(self.client.get("/api/codes/qr-settings/").data, {"include_url": True, "base_url": "https://short.example"})
+
 	def test_urls_are_on_by_default(self):
 		self.assertTrue(InstanceSettings.get_solo().qr_codes_include_url)
 
