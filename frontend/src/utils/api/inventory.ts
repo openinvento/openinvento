@@ -159,6 +159,7 @@ type EntryQuery = {
   within?: string
   ids?: string[]
   includeAncestors?: boolean
+  root?: boolean
 }
 
 const SELECTED_INVENTORY_KEY = "selectedInventoryUuid" // key for localStorage to store the selected inventory UUID
@@ -257,13 +258,13 @@ function toEntryPayload(kind: string, payload: CreatePayload) {
     const data = new FormData()
     payload.forEach((value, key) => {
       const isLocationField = ["area", "shelf", "box", "parent_box", "field_values"].includes(key)
-      const isEmptyCategory = key === "category" && value === ""
-      if (!isLocationField && !isEmptyCategory) data.append(key, value)
+      if (!isLocationField) data.append(key, value)
     })
 
     const parent = getParentValue(type, payload)
     data.append("type", type)
-    if (parent !== null && parent !== "") data.append("parent", String(parent))
+    // An article may have no location, so an empty parent has to reach the backend to clear it.
+    if (parent !== null && (parent !== "" || type === "article")) data.append("parent", String(parent))
 
     const fieldValues = payload.get("field_values")
     if (fieldValues !== null) data.append("field_values_input", fieldValues)
@@ -299,6 +300,7 @@ function entriesPath(query: EntryQuery = {}) {
   if (query.within) params.set("within", query.within)
   if (query.ids?.length) params.set("ids", query.ids.join(","))
   if (query.includeAncestors) params.set("include_ancestors", "true")
+  if (query.root) params.set("root", "true")
   return `${entryPath}?${params.toString()}`
 }
 

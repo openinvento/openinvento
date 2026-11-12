@@ -447,6 +447,73 @@ class GeneratedIdentifierTests(TestCase):
 		self.assertEqual(inventory.identifier, "X7k9P2mQ1a")
 
 
+class EntriesWithoutParentTests(TestCase):
+	def setUp(self):
+		self.user = CustomUser.objects.create_user(username="owner", password="StrongPassword!123")
+		self.inventory = Inventory.objects.create(name="Apartment")
+		self.inventory.users.add(self.user)
+		self.other = Inventory.objects.create(name="Other")
+		self.area = InventoryEntry.objects.create(inventory=self.inventory, type="area", name="Study")
+		self.category = ArticleCategory.objects.create(inventory=self.inventory, name="Tools")
+		self.article = InventoryEntry.objects.create(
+			inventory=self.inventory, type="article", name="Laptop", parent=self.area, category=self.category,
+		)
+		self.client = APIClient()
+		self.client.force_login(self.user)
+
+	def patch_form(self, **data):
+		return self.client.patch(f"/api/entries/{self.article.uuid}/", data, format="multipart")
+
+	def test_article_can_be_created_without_a_parent(self):
+		response = self.client.post(
+			"/api/entries/",
+			{"type": "article", "name": "Backpack", "inventory": str(self.inventory.uuid), "parent": ""},
+			format="multipart",
+		)
+
+		self.assertEqual(response.status_code, 201)
+		self.assertIsNone(response.data["parent"])
+
+	def test_empty_parent_removes_the_article_from_its_area(self):
+		response = self.patch_form(parent="", type="article")
+
+		self.assertEqual(response.status_code, 200)
+		self.article.refresh_from_db()
+		self.assertIsNone(self.article.parent)
+
+	def test_missing_parent_keeps_the_area(self):
+		response = self.patch_form(name="Renamed", type="article")
+
+		self.assertEqual(response.status_code, 200)
+		self.article.refresh_from_db()
+		self.assertEqual(self.article.parent, self.area)
+
+	def test_empty_category_removes_the_category(self):
+		response = self.patch_form(category="", type="article")
+
+		self.assertEqual(response.status_code, 200)
+		self.article.refresh_from_db()
+		self.assertIsNone(self.article.category)
+
+	def test_box_still_needs_a_parent(self):
+		response = self.client.post(
+			"/api/entries/",
+			{"type": "box", "name": "Crate", "inventory": str(self.inventory.uuid), "parent": ""},
+			format="multipart",
+		)
+
+		self.assertEqual(response.status_code, 400)
+
+	def test_root_filter_lists_only_entries_without_a_parent(self):
+		root = InventoryEntry.objects.create(inventory=self.inventory, type="article", name="Keys")
+		InventoryEntry.objects.create(inventory=self.other, type="article", name="Foreign")
+
+		response = self.client.get("/api/entries/", {"type": "article", "root": "true", "include_ancestors": "true"})
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual([entry["uuid"] for entry in response.data], [str(root.uuid)])
+
+
 class CodeLookupTests(TestCase):
 	def setUp(self):
 		self.user = CustomUser.objects.create_user(username="scanner", password="StrongPassword!123")

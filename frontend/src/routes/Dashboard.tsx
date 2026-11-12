@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { useEffect, useState, type FormEvent, type ReactNode } from "react"
-import { useNavigate } from "react-router"
+import { Link, useNavigate } from "react-router"
 import BaseScreen from "@/layouts/BaseScreen"
 import { Button } from "@/components/ui/button"
 import { inventoryApi, type DashboardData } from "@/utils/api/inventory"
@@ -97,7 +97,7 @@ export default function Dashboard() {
             icon={Package}
             title={t("dashboard.addArticle")}
             description={t("dashboard.addArticleDescription")}
-            onClickAction={() => navigate("/app/areas")}
+            onClickAction={() => navigate("/app/articles/new")}
           />
         </div>
       </section>
@@ -213,7 +213,9 @@ function LastAdded({ items, loading, t }: { items: DashboardData["last_added"]; 
       {items.map((item) => (
         <div key={`${item.type}-${item.uuid}`} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium">{item.name}</p>
+            <p className="truncate text-sm font-medium">
+              {item.type === "article" ? <Link to={`/app/articles/${item.uuid}`} className="hover:underline">{item.name}</Link> : item.name}
+            </p>
             <p className="text-xs text-muted-foreground">{t(`dashboard.types.${item.type}`)}</p>
           </div>
           <time className="shrink-0 text-xs text-muted-foreground" dateTime={item.created_at}>

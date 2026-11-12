@@ -86,7 +86,6 @@ export default function ArticlePage() {
           ])
         : [[], []]
       setArticle(fetchedArticle)
-      if (fetchedArticle) setAttachments(await inventoryApi.listArticleAttachments(fetchedArticle.uuid))
       setStockTracking(fetchedArticle?.stock_tracking ?? false)
       setSelectedArea(fetchedArticle?.area ?? null)
       setSelectedCategory(fetchedArticle?.category ?? null)
@@ -98,7 +97,10 @@ export default function ArticlePage() {
       setCategories(fetchedCategories)
       setCategoryFields(fetchedFields.filter((field) => field.category !== null))
       setGlobalFields(fetchedFields.filter((field) => field.category === null))
-    } 
+      // Load attachments last: if this fails, the form still holds the article's location and category,
+      // so saving another change doesn't clear them.
+      if (fetchedArticle) setAttachments(await inventoryApi.listArticleAttachments(fetchedArticle.uuid))
+    }
     catch (reason) {
       setError(reason instanceof Error ? reason.message : t("articles.page.errors.load")) } })()
     }, [articleId])

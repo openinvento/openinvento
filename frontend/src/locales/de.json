@@ -113,6 +113,7 @@
       "errors": {
         "delete": "Artikel konnte nicht gelöscht werden.",
         "load": "Artikel konnte nicht geladen werden.",
+        "noInventory": "Wähle ein Inventar aus, bevor du den Artikel speicherst.",
         "save": "Artikel konnte nicht gespeichert werden.",
         "unsavedChanges": "Du hast ungespeicherte Änderungen. Speichere sie, bevor du diese Seite verlässt."
       },

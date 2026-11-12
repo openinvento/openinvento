@@ -119,6 +119,10 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
             elif self.request.query_params.get("type"):
                 queryset = queryset.filter(type=self.request.query_params["type"])
 
+            # If the payload includes `root=true`, we only include entries without a parent.
+            if self.request.query_params.get("root") == "true":
+                queryset = queryset.filter(parent__isnull=True)
+
             # If the payload includes an `include_ancestors` parameter, we include all ancestor entries of the specified entries.
             if self.request.query_params.get("include_ancestors") == "true":
                 result_ids = set(queryset.values_list("pk", flat=True))

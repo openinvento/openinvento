@@ -113,6 +113,7 @@
       "errors": {
         "delete": "Could not delete article.",
         "load": "Could not load article.",
+        "noInventory": "Select an inventory before saving the article.",
         "save": "Could not save article.",
         "unsavedChanges": "You have unsaved changes. Save them before leaving this page."
       },
