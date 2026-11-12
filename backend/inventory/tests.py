@@ -564,6 +564,26 @@ class QrCodeUrlTests(TestCase):
 		self.entry.identifier = "a/b ü"
 		self.assertEqual(qr_code_value(self.entry, True), "https://inventory.example/i/AbC23/a%2Fb%20%C3%BC")
 
+	def test_dot_identifiers_keep_the_identifier(self):
+		# A link to /i/AbC23/.. would resolve to /i/ and never reach the entry.
+		for identifier in (".", ".."):
+			with self.subTest(identifier=identifier):
+				self.entry.identifier = identifier
+				self.assertEqual(qr_code_value(self.entry, True), identifier)
+
+	def test_settings_endpoint_tells_where_the_links_point(self):
+		self.assertEqual(self.client.get("/api/codes/qr-settings/").data, {"include_url": True, "base_url": "https://inventory.example"})
+
+		InstanceSettings.objects.update_or_create(pk=1, defaults={"qr_codes_include_url": False})
+		self.assertEqual(self.client.get("/api/codes/qr-settings/").data, {"include_url": False, "base_url": ""})
+
+	@override_settings(APP_URL="")
+	def test_settings_endpoint_without_app_url(self):
+		self.assertEqual(self.client.get("/api/codes/qr-settings/").data, {"include_url": False, "base_url": ""})
+
+	def test_settings_endpoint_needs_a_login(self):
+		self.assertIn(APIClient().get("/api/codes/qr-settings/").status_code, (401, 403))
+
 	def test_generated_identifiers_give_an_uppercase_url(self):
 		inventory = Inventory.objects.create(name="Office")
 		entry = InventoryEntry.objects.create(inventory=inventory, type="area", name="Area")
@@ -622,14 +642,14 @@ class QrCodeUrlTests(TestCase):
 		self.assertEqual(qr_code_value(self.entry, False), "box1")
 
 	def test_urls_are_on_by_default(self):
-		self.assertTrue(InstanceSettings.get_solo().qr_code_urls)
+		self.assertTrue(InstanceSettings.get_solo().qr_codes_include_url)
 
 	def test_pdf_uses_the_instance_setting_and_error_correction_m(self):
 		with patch("inventory.code_utils.QrCodeWidget", wraps=QrCodeWidget) as widget:
 			self.assertEqual(self.pdf().status_code, 200)
 		widget.assert_called_once_with("https://inventory.example/i/AbC23/box1", barLevel="M")
 
-		InstanceSettings.objects.update_or_create(pk=1, defaults={"qr_code_urls": False})
+		InstanceSettings.objects.update_or_create(pk=1, defaults={"qr_codes_include_url": False})
 		with patch("inventory.code_utils.QrCodeWidget", wraps=QrCodeWidget) as widget:
 			self.assertEqual(self.pdf(error_correction="L").status_code, 200)
 		widget.assert_called_once_with("box1", barLevel="L")

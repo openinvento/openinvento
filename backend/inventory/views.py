@@ -27,7 +27,7 @@ from account_auth.models import CustomUser, InstanceSettings
 from account_auth.serializers import UserSerializer
 from ai_features.object_detection.main import LUCIDE_ARTICLE_ICONS
 
-from .code_utils import generate_codes_pdf
+from .code_utils import generate_codes_pdf, scan_base_url
 from .export_utils import generate_inventory_csv_export
 from .models import (
     ArticleAttachment,
@@ -488,6 +488,19 @@ class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
                 return item
         return entries.first()
 
+class QrCodeSettingsView(StandardOrAPIKeyAuthMixin, APIView):
+    """Whether printed QR codes hold a URL, and which origin it points at.
+
+    The code page shows it before printing: labels stop working if that address changes.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        base_url = scan_base_url()
+        include_url = InstanceSettings.get_solo().qr_codes_include_url and bool(base_url)
+        return Response({"include_url": include_url, "base_url": base_url if include_url else ""})
+
+
 class CodePdfView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     page_sizes: ClassVar[dict[str, tuple[str, int, int]]] = {
         "a4": ("A4", 210, 297),
@@ -544,7 +557,7 @@ class CodePdfView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
             page_size_name,
             layout,
             error_correction=error_correction,
-            use_urls=InstanceSettings.get_solo().qr_code_urls,
+            use_urls=InstanceSettings.get_solo().qr_codes_include_url,
         )
         response = FileResponse(pdf_buffer, content_type="application/pdf")
         response["Content-Disposition"] = 'attachment; filename="openinvento-codes.pdf"'

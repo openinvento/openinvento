@@ -17,8 +17,12 @@ UPPERCASE_IDENTIFIER = re.compile(r"[0-9A-Z]+")
 UPPERCASE_ORIGIN = re.compile(r"HTTPS?://[0-9A-Z.:-]+")
 
 
+# A URL path segment of "." or ".." is removed when the URL is resolved, so such an identifier can't be in a link.
+DOT_SEGMENTS = (".", "..")
+
+
 def scan_base_url() -> str:
-    """SCAN_BASE_URL if set, otherwise APP_URL."""
+    """The origin that scan URLs in QR codes point at: SCAN_BASE_URL if set, otherwise APP_URL."""
     return settings.SCAN_BASE_URL or settings.APP_URL
 
 
@@ -41,8 +45,9 @@ def scan_url(item) -> str:
 
 
 def qr_code_value(item, use_urls: bool) -> str:
-    """Without a base URL there is no address to point at, so the QR code holds the identifier alone."""
-    return scan_url(item) if use_urls and scan_base_url() else item.identifier
+    """The scan URL, or the identifier alone if there is no base URL or the identifier can't be part of a URL."""
+    linkable = item.identifier not in DOT_SEGMENTS and item.inventory.identifier not in DOT_SEGMENTS
+    return scan_url(item) if use_urls and scan_base_url() and linkable else item.identifier
 
 
 def generate_codes_pdf(

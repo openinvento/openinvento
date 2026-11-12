@@ -5,7 +5,7 @@ import { LoaderCircle, Printer, ScanBarcode, ScanLine, X } from "lucide-react"
 import Scanner from "@/components/qr-bar-code/Scanner"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
-import { inventoryApi, type CodePdfOptions } from "@/utils/api/inventory"
+import { inventoryApi, type CodePdfOptions, type QrCodeSettings } from "@/utils/api/inventory"
 import { lookupScannedCode, openInventoryOfEntry } from "@/utils/scan-code"
 import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 import { useTranslation } from "react-i18next"
@@ -50,6 +50,7 @@ export default function ManageCodes() {
 	const [isLoading, setIsLoading] = useState(true)
 	const [isGenerating, setIsGenerating] = useState(false)
 	const [error, setError] = useState("")
+	const [qrSettings, setQrSettings] = useState<QrCodeSettings | null>(null)
 	const { selectedInventoryUuid: selectedInventory } = useSelectedInventory()
 
 	// Camera and external scanner both end up here, with a bare identifier or a scan URL.
@@ -114,6 +115,11 @@ export default function ManageCodes() {
 			setIsListeningForExternalCode(false)
 		}
 	}, [useExternalBarcodeScanner, isLookingUpExternalCode, t])
+
+	useEffect(() => {
+		// Only for the hint before printing, so a failure just leaves it out.
+		inventoryApi.getQrCodeSettings().then(setQrSettings).catch(() => setQrSettings(null))
+	}, [])
 
 	useEffect(() => {
 		void (async () => {
@@ -271,6 +277,11 @@ export default function ManageCodes() {
 										<option value="L">{t("manageCodes.errorCorrections.L")}</option>
 									</select>
 								</label>
+							)}
+							{options.code_type === "qr" && qrSettings?.include_url && (
+								<p className="rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">
+									{t("manageCodes.urlHint", { url: qrSettings.base_url })}
+								</p>
 							)}
 							<div className="grid gap-2 pt-2">
 								<Button variant="outline" onClick={() => void openCodes(true)} disabled={isGenerating || selectedIds.size === 0}>

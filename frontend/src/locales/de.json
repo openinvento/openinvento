@@ -367,6 +367,7 @@
     "unknownItem": "Inventarobjekt"
   },
   "manageCodes": {
+    "urlHint": "Diese QR-Codes verlinken auf {{url}}. Zieht die Instanz auf eine andere Adresse um, öffnen gedruckte Etiketten ihre Einträge nicht mehr. Administratoren können die Links in den Instanzeinstellungen abschalten.",
     "clearSelection": "Auswahl aufheben",
     "errorCorrection": "Fehlerkorrektur",
     "errorCorrections": {
@@ -536,7 +537,7 @@
       "downloadBackup": "Backup herunterladen",
       "editUser": "Benutzer bearbeiten",
       "email": "E-Mail",
-      "enableQrCodeUrls": "URLs in QR-Codes aktivieren",
+      "enableQrCodesIncludeUrl": "URLs in QR-Codes aktivieren",
       "enableEmailLogin": "Anmeldung per E-Mail aktivieren",
       "loadUsersError": "Benutzer konnten nicht geladen werden.",
       "loadingUsers": "Benutzer werden geladen...",
@@ -571,8 +572,8 @@
       }
     },
     "adminTab": "Administratoreinstellungen",
-    "qrCodeUrls": "URLs in QR-Codes",
-    "qrCodeUrlsDescription": "QR-Codes enthalten einen Link zum Eintrag, sodass jede Kamera-App ihn öffnen kann. Sie nutzen SCAN_BASE_URL, falls gesetzt, sonst APP_URL. Ohne beides enthalten sie nur die Kennung. Barcodes enthalten immer die Kennung.",
+    "qrCodesIncludeUrl": "URLs in QR-Codes",
+    "qrCodesIncludeUrlDescription": "QR-Codes enthalten einen Link zum Eintrag, sodass jede Kamera-App ihn öffnen kann. Sie nutzen SCAN_BASE_URL, falls gesetzt, sonst APP_URL. Ohne beides enthalten sie nur die Kennung. Barcodes enthalten immer die Kennung.",
     "allowEmailLogin": "Anmeldung mit E-Mail-Adresse erlauben",
     "allowEmailLoginDescription": "Wenn aktiviert, können sich Benutzer zusätzlich mit ihrer E-Mail-Adresse anmelden.",
     "apiKeys": {

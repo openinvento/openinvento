@@ -367,6 +367,7 @@
     "unknownItem": "Elemento del inventario"
   },
   "manageCodes": {
+    "urlHint": "Estos códigos QR enlazan a {{url}}. Si la instancia se muda a otra dirección, las etiquetas impresas dejan de abrir sus entradas. Los administradores pueden desactivar los enlaces en la configuración de la instancia.",
     "clearSelection": "Borrar selección",
     "errorCorrection": "Corrección de errores",
     "errorCorrections": {
@@ -536,7 +537,7 @@
       "downloadBackup": "Descargar copia de seguridad",
       "editUser": "Editar usuario",
       "email": "Correo electrónico",
-      "enableQrCodeUrls": "Activar URL en los códigos QR",
+      "enableQrCodesIncludeUrl": "Activar URL en los códigos QR",
       "enableEmailLogin": "Habilitar el inicio de sesión con correo electrónico",
       "loadUsersError": "No se pudo cargar usuarios.",
       "loadingUsers": "Cargando usuarios...",
@@ -571,8 +572,8 @@
       }
     },
     "adminTab": "Configuración de administración (instancia)",
-    "qrCodeUrls": "URL en los códigos QR",
-    "qrCodeUrlsDescription": "Los códigos QR contienen un enlace a la entrada, de modo que cualquier aplicación de cámara puede abrirla. Usan SCAN_BASE_URL si está definida y, si no, APP_URL. Sin ninguna de las dos, solo contienen el identificador. Los códigos de barras siempre contienen el identificador.",
+    "qrCodesIncludeUrl": "URL en los códigos QR",
+    "qrCodesIncludeUrlDescription": "Los códigos QR contienen un enlace a la entrada, de modo que cualquier aplicación de cámara puede abrirla. Usan SCAN_BASE_URL si está definida y, si no, APP_URL. Sin ninguna de las dos, solo contienen el identificador. Los códigos de barras siempre contienen el identificador.",
     "allowEmailLogin": "Permitir el inicio de sesión con correo electrónico",
     "allowEmailLoginDescription": "Cuando está activado, los usuarios pueden iniciar sesión con su dirección de correo electrónico además de con su nombre de usuario.",
     "apiKeys": {
