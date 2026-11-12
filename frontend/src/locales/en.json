@@ -18,7 +18,8 @@
         "shelf": "Shelf"
       },
       "allAreas": "All areas",
-      "articleCount": "{{count}} articles",
+      "articleCount_one": "{{count}} article",
+      "articleCount_other": "{{count}} articles",
       "articles": "Articles",
       "confirmDelete": "Delete {{name}}?",
       "deleteBox": "Delete box",
@@ -65,7 +66,12 @@
       "otherItems": "Other items",
       "renameShelf": "Rename shelf",
       "stockFields": "Stock thresholds",
-      "summary": "{{articles}} articles · {{boxes}} boxes · {{shelves}} shelves"
+      "summaryArticles_one": "{{count}} article",
+      "summaryArticles_other": "{{count}} articles",
+      "summaryBoxes_one": "{{count}} box",
+      "summaryBoxes_other": "{{count}} boxes",
+      "summaryShelves_one": "{{count}} shelf",
+      "summaryShelves_other": "{{count}} shelves"
     },
     "empty": {
       "noAreas": {
@@ -113,6 +119,7 @@
       "errors": {
         "delete": "Could not delete article.",
         "load": "Could not load article.",
+        "noInventory": "Select an inventory before saving the article.",
         "save": "Could not save article.",
         "unsavedChanges": "You have unsaved changes. Save them before leaving this page."
       },
@@ -197,7 +204,8 @@
     }
   },
   "boxes": {
-    "articleCount": "{{count}} articles",
+    "articleCount_one": "{{count}} article",
+    "articleCount_other": "{{count}} articles",
     "backToArea": "Back to area",
     "confirmDelete": "Delete {{name}}?",
     "editBox": "Edit box",
@@ -267,6 +275,7 @@
   "dashboard": {
     "addArticle": "Add an article",
     "addArticleDescription": "Save something new to your inventory.",
+    "addedLast7Days": "Added in the last 7 days",
     "areas": "Areas",
     "articles": "Articles",
     "categories": "Categories",
@@ -275,17 +284,18 @@
     "errors": {
       "load": "Could not load the dashboard."
     },
-    "greeting": "Good morning!",
+    "greetingAfternoon": "Good afternoon!",
+    "greetingEvening": "Good evening!",
+    "greetingMorning": "Good morning!",
     "inventoryByCategory": "Inventory by category",
     "lastAdded": "Last added",
     "loading": "Loading dashboard...",
-    "noCategoryDescription": "Create categories to see your inventory grouped here.",
-    "noCategoryTitle": "No categories yet",
+    "noArticlesDescription": "Your articles will appear here, grouped by category.",
+    "noArticlesTitle": "No articles yet",
     "noLastAddedDescription": "New areas, articles, and other inventory objects will appear here.",
     "noLastAddedTitle": "Nothing added yet",
     "overview": "Overview",
     "quickActions": "Quick actions",
-    "recentUpdates": "Recent updates",
     "search": "Search",
     "searchPlaceholder": "Search your items...",
     "title": "Start",
@@ -293,11 +303,9 @@
       "area": "Area",
       "article": "Article",
       "box": "Box",
-      "category": "Category",
-      "field": "Field",
       "shelf": "Shelf"
     },
-    "updatedNow": "Updated just now",
+    "updatedAt": "Updated at {{time}}",
     "viewAll": "View all",
     "viewCategories": "Categories"
   },

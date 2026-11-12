@@ -18,7 +18,8 @@
         "shelf": "Estante"
       },
       "allAreas": "Todas las áreas",
-      "articleCount": "{{count}} artículos",
+      "articleCount_one": "{{count}} artículo",
+      "articleCount_other": "{{count}} artículos",
       "articles": "Artículos",
       "confirmDelete": "¿Eliminar {{name}}?",
       "deleteShelf": "Eliminar estante",
@@ -65,7 +66,12 @@
       "otherItems": "Otros artículos",
       "renameShelf": "Renombrar estante",
       "stockFields": "Umbrales de existencias",
-      "summary": "{{articles}} artículos · {{boxes}} cajas · {{shelves}} estantes"
+      "summaryArticles_one": "{{count}} artículo",
+      "summaryArticles_other": "{{count}} artículos",
+      "summaryBoxes_one": "{{count}} caja",
+      "summaryBoxes_other": "{{count}} cajas",
+      "summaryShelves_one": "{{count}} estante",
+      "summaryShelves_other": "{{count}} estantes"
     },
     "empty": {
       "noAreas": {
@@ -113,6 +119,7 @@
       "errors": {
         "delete": "No se pudo eliminar el artículo.",
         "load": "No se pudo cargar el artículo.",
+        "noInventory": "Selecciona un inventario antes de guardar el artículo.",
         "save": "No se pudo guardar el artículo.",
         "unsavedChanges": "Tienes cambios sin guardar. Guárdalos antes de salir de esta página."
       },
@@ -197,7 +204,8 @@
     }
   },
   "boxes": {
-    "articleCount": "{{count}} artículos",
+    "articleCount_one": "{{count}} artículo",
+    "articleCount_other": "{{count}} artículos",
     "backToArea": "Volver al área",
     "confirmDelete": "¿Eliminar {{name}}?",
     "editBox": "Editar caja",
@@ -267,6 +275,7 @@
   "dashboard": {
     "addArticle": "Añadir un artículo",
     "addArticleDescription": "Guarda algo nuevo en tu inventario.",
+    "addedLast7Days": "Añadidos en los últimos 7 días",
     "areas": "áreas",
     "articles": "Artículos",
     "categories": "Categorías",
@@ -275,17 +284,18 @@
     "errors": {
       "load": "No se pudo cargar el panel."
     },
-    "greeting": "¡Buenos días!",
+    "greetingAfternoon": "¡Buenas tardes!",
+    "greetingEvening": "¡Buenas noches!",
+    "greetingMorning": "¡Buenos días!",
     "inventoryByCategory": "Inventario por categoría",
     "lastAdded": "Añadido recientemente",
     "loading": "Cargando el panel...",
-    "noCategoryDescription": "Crea categorías para ver aquí tu inventario agrupado.",
-    "noCategoryTitle": "Todavía no hay categorías",
+    "noArticlesDescription": "Tus artículos aparecerán aquí, agrupados por categoría.",
+    "noArticlesTitle": "Todavía no hay artículos",
     "noLastAddedDescription": "Las nuevas áreas, los artículos y otros elementos del inventario aparecerán aquí.",
     "noLastAddedTitle": "Todavía no se ha añadido nada",
     "overview": "Resumen",
     "quickActions": "Acciones rápidas",
-    "recentUpdates": "Actualizaciones recientes",
     "search": "Buscar",
     "searchPlaceholder": "Buscar tus elementos...",
     "title": "Inicio",
@@ -293,11 +303,9 @@
       "area": "área",
       "article": "Artículo",
       "box": "Caja",
-      "category": "Categoría",
-      "field": "Campo",
       "shelf": "Estante"
     },
-    "updatedNow": "Actualizado ahora",
+    "updatedAt": "Actualizado a las {{time}}",
     "viewAll": "Ver todo",
     "viewCategories": "Categorías"
   },

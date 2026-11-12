@@ -18,7 +18,8 @@
         "shelf": "Regal"
       },
       "allAreas": "Alle Bereiche",
-      "articleCount": "{{count}} Artikel",
+      "articleCount_one": "{{count}} Artikel",
+      "articleCount_other": "{{count}} Artikel",
       "articles": "Artikel",
       "confirmDelete": "{{name}} löschen?",
       "deleteShelf": "Regal löschen",
@@ -65,7 +66,12 @@
       "otherItems": "Weitere Elemente",
       "renameShelf": "Regal umbenennen",
       "stockFields": "Bestandsschwellenwerte",
-      "summary": "{{articles}} Artikel · {{boxes}} Kisten · {{shelves}} Regale"
+      "summaryArticles_one": "{{count}} Artikel",
+      "summaryArticles_other": "{{count}} Artikel",
+      "summaryBoxes_one": "{{count}} Kiste",
+      "summaryBoxes_other": "{{count}} Kisten",
+      "summaryShelves_one": "{{count}} Regal",
+      "summaryShelves_other": "{{count}} Regale"
     },
     "empty": {
       "noAreas": {
@@ -113,6 +119,7 @@
       "errors": {
         "delete": "Artikel konnte nicht gelöscht werden.",
         "load": "Artikel konnte nicht geladen werden.",
+        "noInventory": "Wähle ein Inventar aus, bevor du den Artikel speicherst.",
         "save": "Artikel konnte nicht gespeichert werden.",
         "unsavedChanges": "Du hast ungespeicherte Änderungen. Speichere sie, bevor du diese Seite verlässt."
       },
@@ -197,7 +204,8 @@
     }
   },
   "boxes": {
-    "articleCount": "{{count}} Artikel",
+    "articleCount_one": "{{count}} Artikel",
+    "articleCount_other": "{{count}} Artikel",
     "backToArea": "Zurück zum Bereich",
     "confirmDelete": "{{name}} löschen?",
     "editBox": "Kiste bearbeiten",
@@ -267,6 +275,7 @@
   "dashboard": {
     "addArticle": "Artikel hinzufügen",
     "addArticleDescription": "Speichere etwas Neues in deinem Inventar.",
+    "addedLast7Days": "In den letzten 7 Tagen hinzugefügt",
     "areas": "Bereiche",
     "articles": "Artikel",
     "categories": "Kategorien",
@@ -275,17 +284,18 @@
     "errors": {
       "load": "Dashboard konnte nicht geladen werden."
     },
-    "greeting": "Guten Morgen!",
+    "greetingAfternoon": "Guten Tag!",
+    "greetingEvening": "Guten Abend!",
+    "greetingMorning": "Guten Morgen!",
     "inventoryByCategory": "Inventar nach Kategorie",
     "lastAdded": "Zuletzt hinzugefügt",
     "loading": "Dashboard wird geladen...",
-    "noCategoryDescription": "Erstelle Kategorien, um dein Inventar hier gruppiert anzuzeigen.",
-    "noCategoryTitle": "Noch keine Kategorien",
+    "noArticlesDescription": "Deine Artikel erscheinen hier, nach Kategorien gruppiert.",
+    "noArticlesTitle": "Noch keine Artikel",
     "noLastAddedDescription": "Neue Bereiche, Artikel und andere Inventarelemente werden hier angezeigt.",
     "noLastAddedTitle": "Noch nichts hinzugefügt",
     "overview": "Übersicht",
     "quickActions": "Schnellaktionen",
-    "recentUpdates": "Letzte Aktualisierungen",
     "search": "Suche",
     "searchPlaceholder": "Inventar durchsuchen...",
     "title": "Startseite",
@@ -293,11 +303,9 @@
       "area": "Bereich",
       "article": "Artikel",
       "box": "Kiste",
-      "category": "Kategorie",
-      "field": "Feld",
       "shelf": "Regal"
     },
-    "updatedNow": "Gerade aktualisiert",
+    "updatedAt": "Aktualisiert um {{time}}",
     "viewAll": "Alle anzeigen",
     "viewCategories": "Kategorien"
   },

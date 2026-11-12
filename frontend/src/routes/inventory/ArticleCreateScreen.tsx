@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { inventoryApi, type ArticleCategory, type CategoryField, type Box, type Shelf } from "@/utils/api/inventory"
+import { inventoryApi, type Area, type ArticleCategory, type CategoryField, type Box, type Shelf } from "@/utils/api/inventory"
 import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 import { compressArticleImage } from "@/utils/article-image"
@@ -20,14 +20,18 @@ export default function ArticleCreateScreen() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { selectedInventory: inventory } = useSelectedInventory()
-  const [areaName, setAreaName] = useState("")
+  const [areas, setAreas] = useState<Area[]>([])
+  // Opened from an area, the article goes there. Otherwise the area is optional and picked in the form.
+  const [selectedArea, setSelectedArea] = useState("")
+  const area = areaId ?? selectedArea
   const [shelves, setShelves] = useState<Shelf[]>([])
   const [boxes, setBoxes] = useState<Box[]>([])
   const [categories, setCategories] = useState<ArticleCategory[]>([])
   const [fields, setFields] = useState<CategoryField[]>([])
   const [selectedCategory, setSelectedCategory] = useState("")
   const [selectedShelf, setSelectedShelf] = useState("")
-  const [selectedBox, setSelectedBox] = useState(() => searchParams.get("box") ?? "")
+  // A preselected box only comes with its area in the route, so the form never holds a box without an area.
+  const [selectedBox, setSelectedBox] = useState(() => (areaId ? searchParams.get("box") ?? "" : ""))
   const [selectedIcon, setSelectedIcon] = useState("Package")
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -37,25 +41,42 @@ export default function ArticleCreateScreen() {
 
   useEffect(() => {
     void (async () => {
-      if (!areaId) return
       try {
-        const [areas, fetchedShelves, fetchedBoxes, fetchedCategories, fetchedFields] = await Promise.all([
+        const [fetchedAreas, fetchedCategories, fetchedFields] = await Promise.all([
           inventoryApi.listAreas(),
-          inventoryApi.listShelves({ within: areaId }),
-          inventoryApi.listBoxes({ within: areaId }),
           inventoryApi.listCategories(),
           inventoryApi.listCategoryFields(),
         ])
-        setAreaName(areas.find((area) => area.uuid === areaId)?.name ?? "")
-        setShelves(fetchedShelves)
-        setBoxes(fetchedBoxes)
+        setAreas(fetchedAreas)
         setCategories(fetchedCategories)
         setFields(fetchedFields)
       } catch (reason) {
         setError(reason instanceof Error ? reason.message : t("areas.detail.errors.load"))
       }
     })()
-  }, [areaId, t])
+  }, [t])
+
+  useEffect(() => {
+    if (!area) return
+    let active = true
+    void (async () => {
+      try {
+        const [fetchedShelves, fetchedBoxes] = await Promise.all([
+          inventoryApi.listShelves({ within: area }),
+          inventoryApi.listBoxes({ within: area }),
+        ])
+        if (!active) return
+        setShelves(fetchedShelves)
+        setBoxes(fetchedBoxes)
+      } catch (reason) {
+        if (active) setError(reason instanceof Error ? reason.message : t("areas.detail.errors.load"))
+      }
+    })()
+    return () => { active = false }
+  }, [area, t])
+
+  const visibleShelves = area ? shelves : []
+  const visibleBoxes = area ? boxes : []
 
   const articleFields = useMemo(() => {
     const globalFields = fields.filter((field) => field.category === null)
@@ -67,7 +88,10 @@ export default function ArticleCreateScreen() {
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!areaId || !inventory) return
+    if (!inventory) {
+      setError(t("articles.page.errors.noInventory"))
+      return
+    }
     const form = new FormData(event.currentTarget)
     const name = form.get("name")?.toString().trim()
     if (!name) return
@@ -92,7 +116,7 @@ export default function ArticleCreateScreen() {
       payload.append("name", name)
       /* payload.append("identifier", form.get("identifier")?.toString().trim() || "") */
       payload.append("inventory", inventory.uuid)
-      payload.append("area", areaId)
+      payload.append("area", area)
       payload.append("shelf", selectedShelf)
       payload.append("box", selectedBox)
       payload.append("category", selectedCategory)
@@ -129,7 +153,7 @@ export default function ArticleCreateScreen() {
   return (
     <BaseScreen
       title={t("areas.detail.modal.new", { kind: t("areas.detail.actions.article") })}
-      description={areaName}
+      description={areas.find((item) => item.uuid === area)?.name ?? ""}
       actions={<Button type="submit" form="article-create-form" disabled={saving}><Save /> {saving ? "Saving..." : "Save article"}</Button>}
     >
       <Link to={areaId ? `/app/areas/${areaId}` : "/app/areas"} className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
@@ -164,6 +188,32 @@ export default function ArticleCreateScreen() {
         <section className="grid content-start gap-5 rounded-xl border bg-muted/15 p-5">
           <h2 className="text-sm font-semibold">{t("articles.page.headings.locationAndCategory")}</h2>
           {/* <Field label={t("articles.page.fields.identifier")}><Input name="identifier" maxLength={30} /></Field> */}
+          {!areaId && (
+            <Field label={t("articles.page.fields.area")}>
+              <Select
+                name="area"
+                value={selectedArea}
+                onValueChange={(value) => {
+                  setSelectedArea(value ?? "")
+                  setSelectedShelf("")
+                  setSelectedBox("")
+                  // Drop the previous area's options so none of them can be picked while the new ones load.
+                  setShelves([])
+                  setBoxes([])
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t("articles.page.noArea")}>
+                    {selectedArea ? areas.find((item) => item.uuid === selectedArea)?.name ?? selectedArea : t("articles.page.noArea")}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{t("articles.page.noArea")}</SelectItem>
+                  {areas.map((item) => <SelectItem key={item.uuid} value={item.uuid}>{item.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </Field>
+          )}
           <Field label={t("areas.detail.fields.category")}>
             <Select name="category" value={selectedCategory} onValueChange={(value) => setSelectedCategory(value ?? "")}>
               <SelectTrigger className="w-full">
@@ -181,20 +231,20 @@ export default function ArticleCreateScreen() {
             <Select name="shelf" value={selectedShelf} onValueChange={(value) => setSelectedShelf(value ?? "")}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={t("areas.detail.notOnShelf")}>
-                  {selectedShelf ? shelves.find((shelf) => shelf.uuid === selectedShelf)?.name ?? selectedShelf : t("areas.detail.notOnShelf")}
+                  {selectedShelf ? visibleShelves.find((shelf) => shelf.uuid === selectedShelf)?.name ?? selectedShelf : t("areas.detail.notOnShelf")}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent><SelectItem value="">{t("areas.detail.notOnShelf")}</SelectItem>{shelves.map((shelf) => <SelectItem key={shelf.uuid} value={shelf.uuid}>{shelf.name}</SelectItem>)}</SelectContent>
+              <SelectContent><SelectItem value="">{t("areas.detail.notOnShelf")}</SelectItem>{visibleShelves.map((shelf) => <SelectItem key={shelf.uuid} value={shelf.uuid}>{shelf.name}</SelectItem>)}</SelectContent>
             </Select>
           </Field>
           <Field label={t("areas.detail.fields.box")}>
             <Select name="box" value={selectedBox} onValueChange={(value) => setSelectedBox(value ?? "")}>
               <SelectTrigger className="w-full">
               <SelectValue placeholder={t("areas.detail.noBox")}>
-                {selectedBox ? boxes.find((box) => box.uuid === selectedBox)?.name ?? selectedBox : t("areas.detail.noBox")}
+                {selectedBox ? visibleBoxes.find((box) => box.uuid === selectedBox)?.name ?? selectedBox : t("areas.detail.noBox")}
               </SelectValue>
               </SelectTrigger>
-              <SelectContent><SelectItem value="">{t("areas.detail.noBox")}</SelectItem>{boxes.map((box) => <SelectItem key={box.uuid} value={box.uuid}>{box.name}</SelectItem>)}</SelectContent>
+              <SelectContent><SelectItem value="">{t("areas.detail.noBox")}</SelectItem>{visibleBoxes.map((box) => <SelectItem key={box.uuid} value={box.uuid}>{box.name}</SelectItem>)}</SelectContent>
             </Select>
           </Field>
         </section>

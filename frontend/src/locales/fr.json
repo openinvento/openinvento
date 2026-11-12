@@ -18,7 +18,8 @@
         "shelf": "Étagère"
       },
       "allAreas": "Toutes les zones",
-      "articleCount": "{{count}} articles",
+      "articleCount_one": "{{count}} article",
+      "articleCount_other": "{{count}} articles",
       "articles": "Articles",
       "confirmDelete": "Supprimer {{name}} ?",
       "deleteShelf": "Supprimer l’étagère",
@@ -65,7 +66,12 @@
       "otherItems": "Autres articles",
       "renameShelf": "Renommer l’étagère",
       "stockFields": "Seuils de stock",
-      "summary": "{{articles}} articles · {{boxes}} boîtes · {{shelves}} étagères"
+      "summaryArticles_one": "{{count}} article",
+      "summaryArticles_other": "{{count}} articles",
+      "summaryBoxes_one": "{{count}} boîte",
+      "summaryBoxes_other": "{{count}} boîtes",
+      "summaryShelves_one": "{{count}} étagère",
+      "summaryShelves_other": "{{count}} étagères"
     },
     "empty": {
       "noAreas": {
@@ -113,6 +119,7 @@
       "errors": {
         "delete": "Impossible de supprimer l’article.",
         "load": "Impossible de charger l’article.",
+        "noInventory": "Sélectionnez un inventaire avant d’enregistrer l’article.",
         "save": "Impossible d’enregistrer l’article.",
         "unsavedChanges": "Vous avez des modifications non enregistrées. Enregistrez-les avant de quitter cette page."
       },
@@ -197,7 +204,8 @@
     }
   },
   "boxes": {
-    "articleCount": "{{count}} articles",
+    "articleCount_one": "{{count}} article",
+    "articleCount_other": "{{count}} articles",
     "backToArea": "Retour à la zone",
     "confirmDelete": "Supprimer {{name}} ?",
     "editBox": "Modifier la boîte",
@@ -267,6 +275,7 @@
   "dashboard": {
     "addArticle": "Ajouter un article",
     "addArticleDescription": "Enregistrer un nouvel élément dans votre inventaire.",
+    "addedLast7Days": "Ajoutés ces 7 derniers jours",
     "areas": "Zones",
     "articles": "Articles",
     "categories": "Catégories",
@@ -275,17 +284,18 @@
     "errors": {
       "load": "Impossible de charger le tableau de bord."
     },
-    "greeting": "Bonjour !",
+    "greetingAfternoon": "Bon après-midi !",
+    "greetingEvening": "Bonsoir !",
+    "greetingMorning": "Bonjour !",
     "inventoryByCategory": "Inventaire par catégorie",
     "lastAdded": "Derniers ajouts",
     "loading": "Chargement du tableau de bord…",
-    "noCategoryDescription": "Créez des catégories pour afficher ici votre inventaire regroupé.",
-    "noCategoryTitle": "Aucune catégorie pour le moment",
+    "noArticlesDescription": "Vos articles apparaîtront ici, regroupés par catégorie.",
+    "noArticlesTitle": "Aucun article pour le moment",
     "noLastAddedDescription": "Les nouvelles zones, les articles et les autres éléments de l’inventaire apparaîtront ici.",
     "noLastAddedTitle": "Aucun ajout pour le moment",
     "overview": "Vue d’ensemble",
     "quickActions": "Actions rapides",
-    "recentUpdates": "Mises à jour récentes",
     "search": "Rechercher",
     "searchPlaceholder": "Rechercher des éléments…",
     "title": "Accueil",
@@ -293,11 +303,9 @@
       "area": "Zone",
       "article": "Article",
       "box": "Boîte",
-      "category": "Catégorie",
-      "field": "Champ",
       "shelf": "Étagère"
     },
-    "updatedNow": "Mis à jour à l’instant",
+    "updatedAt": "Mis à jour à {{time}}",
     "viewAll": "Tout afficher",
     "viewCategories": "Catégories"
   },
