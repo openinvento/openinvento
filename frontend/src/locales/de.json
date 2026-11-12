@@ -89,12 +89,55 @@
     "title": "Bereiche"
   },
   "articleBarcodeImport": {
+    "existingCheckFailed": "Konnte nicht prüfen, ob dieser Barcode schon gespeichert ist.",
+    "manualTitle": "Barcode-Scanner oder Tastatur",
+    "manualHint": "Ein Barcode-Scanner im Tastaturmodus tippt in dieses Feld; du kannst auch einen Code eingeben und Enter drücken.",
+    "alreadyStored": "Schon in diesem Inventar:",
+    "category": "Kategorie",
+    "categoryHint": "Gilt für jeden Artikel, den du in dieser Scan-Runde hinzufügst.",
+    "enterName": "Gib einen Namen ein, um ihn trotzdem hinzuzufügen.",
+    "name": "Artikelname",
+    "namePlaceholder": "Name des Artikels",
+    "noCategory": "Keine Kategorie",
+    "noName": "Der Katalog kennt keinen Namen für dieses Produkt.",
+    "notFound": "Für diesen Barcode wurde kein Produkt gefunden.",
+    "options": {
+      "title": "Optionen",
+      "sharedCategory": "Eine Kategorie für alle",
+      "sharedCategoryHint": "Aus: Für jeden gescannten Artikel eine eigene Kategorie wählen.",
+      "addWithoutCatalog": "Unbekannte Produkte hinzufügen",
+      "addWithoutCatalogHint": "Produkte ohne Katalogeintrag oder Namen lassen sich mit einem eingegebenen Namen hinzufügen. Aus: Sie zeigen nur einen Fehler.",
+      "checkExisting": "Vorhandene Artikel anzeigen",
+      "checkExistingHint": "Zeigt, welche Artikel dieses Inventars den gescannten Barcode schon haben.",
+      "storedInBrowser": "Diese Optionen werden in diesem Browser gespeichert."
+    },
     "description": "Scanne ein Produkt-Barcode, um es hier hinzuzufügen",
     "scannedArticles": "Gescannte Artikel"
+  },
+  "barcodeInput": {
+    "error": "Dieser Code konnte nicht nachgeschlagen werden.",
+    "label": "Barcode",
+    "placeholder": "Barcode scannen oder eingeben",
+    "submit": "Suchen"
   },
   "articles": {
     "page": {
       "areas": "Bereiche",
+      "barcodes": {
+        "title": "Barcodes",
+        "description": "EAN, UPC, ISBN oder PZN von der Verpackung. Beim Scannen findet jeder davon diesen Artikel.",
+        "add": "Barcode hinzufügen",
+        "remove": "Barcode entfernen",
+        "kind": "Barcode-Art",
+        "value": "Barcode",
+        "kinds": {
+          "auto": "Art erkennen",
+          "ean": "EAN / UPC",
+          "isbn": "ISBN",
+          "pzn": "PZN",
+          "other": "Sonstige"
+        }
+      },
       "attachments": {
         "add": "Datei hinzufügen",
         "addImages": "Bild hinzufügen",
@@ -392,6 +435,11 @@
     "inventoryItems": "Inventarelemente",
     "layout": "Anordnung",
     "loading": "Inventarelemente werden geladen...",
+    "matches": {
+      "close": "Schließen",
+      "description": "Dasselbe Produkt kann an mehreren Orten liegen. Wähle den gemeinten Eintrag.",
+      "title": "{{count}} Einträge haben diesen Barcode"
+    },
     "noItems": "Keine Inventarelemente gefunden.",
     "options": "Codeoptionen",
     "paperSize": "Papierformat",

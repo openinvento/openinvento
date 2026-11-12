@@ -12,7 +12,7 @@ from venv import logger
 from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
-from django.db.models import Count, Prefetch
+from django.db.models import Case, Count, Prefetch, When
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
@@ -27,6 +27,7 @@ from account_auth.models import CustomUser
 from account_auth.serializers import UserSerializer
 from ai_features.object_detection.main import LUCIDE_ARTICLE_ICONS
 
+from .barcodes import BarcodeKind, normalize
 from .code_utils import generate_codes_pdf
 from .export_utils import generate_inventory_csv_export
 from .models import (
@@ -338,6 +339,7 @@ class InventoryEntryViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     select_related_fields = ("inventory", "parent", "category")
     prefetch_related_fields = (
         "field_values__field",
+        "barcodes",
         Prefetch("inventory__categoryfield_set", queryset=CategoryField.objects.all(), to_attr="_category_fields"),
     )
     ordering = ("name",)
@@ -429,7 +431,7 @@ class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
             inventory__in=self.get_accessible_inventories(),
             inventory__uuid=inventory,
             name__icontains=query
-        ).filter(type__in=("article", "box")).select_related("inventory", "parent", "category").prefetch_related("field_values__field")
+        ).filter(type__in=("article", "box")).select_related("inventory", "parent", "category").prefetch_related("field_values__field", "barcodes")
         results = InventoryEntrySerializer(entries, many=True, context={"request": request}).data
         return Response(results)
 
@@ -437,19 +439,26 @@ class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
 # region QR/ BARCODE VIEWS
 
 class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
-    """Find an entry by its identifier. Entry identifiers are only unique within one inventory.
+    """Find the entries for a scanned code: an entry identifier or a product barcode.
 
     POST body:
-    - identifier: the identifier of the entry. Required.
+    - identifier: the scanned code. Required.
     - inventory_identifier: for a scan URL (/i/<inventory_identifier>/<identifier>), which names
-      its inventory. Only this inventory is searched. An unknown inventory and one the user is not a member 
-      of get the same 404, which does not reveal whether it exists.
-    - inventory or inventory_uuid: for a bare identifier, which does not name its inventory. This inventory is searched first, then all others the user can access.
+      its inventory. Only this inventory's identifiers are searched. An unknown inventory and one the user
+      is not a member of get the same 404, which does not reveal whether it exists.
+    - inventory or inventory_uuid: for a bare code, which does not name its inventory. It's searched first,
+      then all other inventories the user can access.
+
+    Response: {"matches": [{uuid, identifier, name, type, inventory: {uuid, name}, matched_by}]}, where
+    matched_by is "identifier" or "barcode". An identifier is unique, so it comes back alone. A barcode can be
+    on several entries, so all of them come back, those of the given inventory first. No match is a 404.
     """
 
+    MAX_BARCODE_MATCHES = 50
+
     def post(self, request, *args, **kwargs):
-        identifier = str(request.data.get("identifier", "")).strip()
-        if not identifier:
+        code = str(request.data.get("identifier", "")).strip()
+        if not code:
             return Response({"error": "identifier is required."}, status=400)
 
         accessible_inventories = self.get_accessible_inventories()
@@ -459,34 +468,62 @@ class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
             item = InventoryEntry.objects.filter(
                 inventory__in=accessible_inventories,
                 inventory__identifier=inventory_identifier,
-                identifier=identifier,
-            ).first()
+                identifier=code,
+            ).select_related("inventory").first()
+            matches = [(item, "identifier")] if item else []
         else:
-            item = self.find_by_bare_identifier(request, identifier, accessible_inventories)
+            preferred_inventory = self.preferred_inventory(request)
+            item = self.find_by_bare_identifier(code, accessible_inventories, preferred_inventory)
+            matches = (
+                [(item, "identifier")]
+                if item
+                else [(entry, "barcode") for entry in self.find_by_barcode(code, accessible_inventories, preferred_inventory)]
+            )
 
-        if item is not None:
-            return Response({
-                "uuid": str(item.uuid),
-                "identifier": item.identifier,
-                "name": getattr(item, "name", str(item)),
-                "type": item.type,
-                "inventory": {
-                    "uuid": str(item.inventory.uuid),
-                    "name": item.inventory.name,
-                },
-            })
-
-        return Response({"error": "No inventory item was found for this code."}, status=404)
+        if not matches:
+            return Response({"error": "No inventory item was found for this code."}, status=404)
+        return Response({"matches": [self.serialize_match(entry, matched_by) for entry, matched_by in matches]})
 
     @staticmethod
-    def find_by_bare_identifier(request, identifier, accessible_inventories):
-        entries = InventoryEntry.objects.filter(inventory__in=accessible_inventories, identifier=identifier)
-        inventory_uuid = request.data.get("inventory") or request.data.get("inventory_uuid")
-        if inventory_uuid:
-            item = entries.filter(inventory__uuid=inventory_uuid).first()
+    def preferred_inventory(request):
+        value = request.data.get("inventory") or request.data.get("inventory_uuid")
+        try:
+            return uuid.UUID(str(value)) if value else None
+        except ValueError:
+            return None
+
+    @staticmethod
+    def find_by_bare_identifier(code, accessible_inventories, preferred_inventory):
+        entries = InventoryEntry.objects.filter(inventory__in=accessible_inventories, identifier=code).select_related("inventory")
+        if preferred_inventory:
+            item = entries.filter(inventory__uuid=preferred_inventory).first()
             if item is not None:
                 return item
         return entries.first()
+
+    @classmethod
+    def find_by_barcode(cls, code, accessible_inventories, preferred_inventory):
+        # Barcodes are stored normalized per type, so try every normalized form of the scanned code.
+        candidates = {code} | {normalize(kind, code) for kind in BarcodeKind.values}
+        entries = (
+            InventoryEntry.objects.filter(inventory__in=accessible_inventories, barcodes__value__in=candidates)
+            .select_related("inventory")
+            .distinct()
+            .annotate(preferred=Case(When(inventory__uuid=preferred_inventory, then=0), default=1))
+            .order_by("preferred", "name", "uuid")
+        )
+        return list(entries[:cls.MAX_BARCODE_MATCHES])
+
+    @staticmethod
+    def serialize_match(entry, matched_by):
+        return {
+            "uuid": str(entry.uuid),
+            "identifier": entry.identifier,
+            "name": entry.name,
+            "type": entry.type,
+            "inventory": {"uuid": str(entry.inventory.uuid), "name": entry.inventory.name},
+            "matched_by": matched_by,
+        }
 
 class CodePdfView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     page_sizes: ClassVar[dict[str, tuple[str, int, int]]] = {

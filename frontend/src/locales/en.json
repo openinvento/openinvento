@@ -89,12 +89,55 @@
     "title": "Areas"
   },
   "articleBarcodeImport": {
+    "existingCheckFailed": "Could not check whether this barcode is already stored.",
+    "manualTitle": "Barcode scanner or keyboard",
+    "manualHint": "A barcode scanner in keyboard mode types into this field; you can also type a code and press Enter.",
+    "alreadyStored": "Already in this inventory:",
+    "category": "Category",
+    "categoryHint": "Applies to every article you add in this scan session.",
+    "enterName": "Enter a name to add it anyway.",
+    "name": "Article name",
+    "namePlaceholder": "Name of the article",
+    "noCategory": "No category",
+    "noName": "The catalog has no name for this product.",
+    "notFound": "No product was found for this barcode.",
+    "options": {
+      "title": "Options",
+      "sharedCategory": "One category for all",
+      "sharedCategoryHint": "Off: pick a category for each scanned article.",
+      "addWithoutCatalog": "Add unknown products",
+      "addWithoutCatalogHint": "Products without a catalog entry or name can be added with a name you type in. Off: they only show an error.",
+      "checkExisting": "Show existing articles",
+      "checkExistingHint": "Shows which articles of this inventory already have the scanned barcode.",
+      "storedInBrowser": "These options are saved in this browser."
+    },
     "description": "Scan a product barcode to look it up and add it here",
     "scannedArticles": "Scanned Articles"
+  },
+  "barcodeInput": {
+    "error": "Could not look up this code.",
+    "label": "Barcode",
+    "placeholder": "Scan or type a barcode",
+    "submit": "Look up"
   },
   "articles": {
     "page": {
       "areas": "Areas",
+      "barcodes": {
+        "title": "Barcodes",
+        "description": "EAN, UPC, ISBN or PZN from the product's packaging. Scanning one of them finds this article.",
+        "add": "Add barcode",
+        "remove": "Remove barcode",
+        "kind": "Barcode type",
+        "value": "Barcode",
+        "kinds": {
+          "auto": "Detect type",
+          "ean": "EAN / UPC",
+          "isbn": "ISBN",
+          "pzn": "PZN",
+          "other": "Other"
+        }
+      },
       "attachments": {
         "add": "Add file",
         "addImages": "Add image",
@@ -392,6 +435,11 @@
     "inventoryItems": "Inventory Items",
     "layout": "Layout",
     "loading": "Loading inventory items...",
+    "matches": {
+      "close": "Close",
+      "description": "The same product can be stored in several places. Pick the one you mean.",
+      "title": "{{count}} items have this barcode"
+    },
     "noItems": "No inventory items found.",
     "options": "Code options",
     "paperSize": "Paper size",

@@ -89,12 +89,55 @@
     "title": "Zones"
   },
   "articleBarcodeImport": {
+    "existingCheckFailed": "Impossible de vérifier si ce code-barres est déjà enregistré.",
+    "manualTitle": "Lecteur de codes-barres ou clavier",
+    "manualHint": "Un lecteur de codes-barres en mode clavier saisit dans ce champ ; vous pouvez aussi saisir un code et appuyer sur Entrée.",
+    "alreadyStored": "Déjà dans cet inventaire :",
+    "category": "Catégorie",
+    "categoryHint": "S’applique à chaque article ajouté pendant cette session de scan.",
+    "enterName": "Saisissez un nom pour l’ajouter quand même.",
+    "name": "Nom de l’article",
+    "namePlaceholder": "Nom de l’article",
+    "noCategory": "Aucune catégorie",
+    "noName": "Le catalogue n’a pas de nom pour ce produit.",
+    "notFound": "Aucun produit trouvé pour ce code-barres.",
+    "options": {
+      "title": "Options",
+      "sharedCategory": "Une catégorie pour tous",
+      "sharedCategoryHint": "Désactivé : choisissez une catégorie pour chaque article scanné.",
+      "addWithoutCatalog": "Ajouter des produits inconnus",
+      "addWithoutCatalogHint": "Les produits sans entrée de catalogue ou sans nom peuvent être ajoutés avec un nom saisi. Désactivé : ils affichent seulement une erreur.",
+      "checkExisting": "Afficher les articles existants",
+      "checkExistingHint": "Indique quels articles de cet inventaire ont déjà le code-barres scanné.",
+      "storedInBrowser": "Ces options sont enregistrées dans ce navigateur."
+    },
     "description": "Scannez le code-barres d'un produit pour le rechercher et ajoutez-le ici",
     "scannedArticles": "Articles scannés"
+  },
+  "barcodeInput": {
+    "error": "Impossible de rechercher ce code.",
+    "label": "Code-barres",
+    "placeholder": "Scannez ou saisissez un code-barres",
+    "submit": "Rechercher"
   },
   "articles": {
     "page": {
       "areas": "Zones",
+      "barcodes": {
+        "title": "Codes-barres",
+        "description": "EAN, UPC, ISBN ou PZN figurant sur l’emballage du produit. Scanner l’un d’eux retrouve cet article.",
+        "add": "Ajouter un code-barres",
+        "remove": "Supprimer le code-barres",
+        "kind": "Type de code-barres",
+        "value": "Code-barres",
+        "kinds": {
+          "auto": "Détecter le type",
+          "ean": "EAN / UPC",
+          "isbn": "ISBN",
+          "pzn": "PZN",
+          "other": "Autre"
+        }
+      },
       "attachments": {
         "add": "Ajouter un fichier",
         "addImages": "Ajouter une image",
@@ -392,6 +435,11 @@
     "inventoryItems": "Éléments de l’inventaire",
     "layout": "Disposition",
     "loading": "Chargement des éléments de l’inventaire…",
+    "matches": {
+      "close": "Fermer",
+      "description": "Le même produit peut être rangé à plusieurs endroits. Choisissez celui que vous cherchez.",
+      "title": "{{count}} éléments ont ce code-barres"
+    },
     "noItems": "Aucun élément d’inventaire trouvé.",
     "options": "Options du code",
     "paperSize": "Format du papier",

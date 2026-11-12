@@ -89,12 +89,55 @@
     "title": "áreas"
   },
   "articleBarcodeImport": {
+    "existingCheckFailed": "No se pudo comprobar si este código de barras ya está guardado.",
+    "manualTitle": "Lector de códigos o teclado",
+    "manualHint": "Un lector de códigos en modo teclado escribe en este campo; también puedes escribir un código y pulsar Intro.",
+    "alreadyStored": "Ya está en este inventario:",
+    "category": "Categoría",
+    "categoryHint": "Se aplica a cada artículo que añadas en esta sesión de escaneo.",
+    "enterName": "Introduce un nombre para añadirlo de todos modos.",
+    "name": "Nombre del artículo",
+    "namePlaceholder": "Nombre del artículo",
+    "noCategory": "Sin categoría",
+    "noName": "El catálogo no tiene nombre para este producto.",
+    "notFound": "No se encontró ningún producto para este código de barras.",
+    "options": {
+      "title": "Opciones",
+      "sharedCategory": "Una categoría para todos",
+      "sharedCategoryHint": "Desactivado: elige una categoría para cada artículo escaneado.",
+      "addWithoutCatalog": "Añadir productos desconocidos",
+      "addWithoutCatalogHint": "Los productos sin entrada en el catálogo o sin nombre se pueden añadir con un nombre que escribas. Desactivado: solo muestran un error.",
+      "checkExisting": "Mostrar artículos existentes",
+      "checkExistingHint": "Muestra qué artículos de este inventario ya tienen el código de barras escaneado.",
+      "storedInBrowser": "Estas opciones se guardan en este navegador."
+    },
     "description": "Escanee el código de barras de un producto para buscarlo y agregarlo aquí",
     "scannedArticles": "Artículos escaneados"
+  },
+  "barcodeInput": {
+    "error": "No se pudo buscar este código.",
+    "label": "Código de barras",
+    "placeholder": "Escanea o escribe un código de barras",
+    "submit": "Buscar"
   },
   "articles": {
     "page": {
       "areas": "áreas",
+      "barcodes": {
+        "title": "Códigos de barras",
+        "description": "EAN, UPC, ISBN o PZN del envase del producto. Al escanear cualquiera de ellos se encuentra este artículo.",
+        "add": "Añadir código de barras",
+        "remove": "Quitar código de barras",
+        "kind": "Tipo de código de barras",
+        "value": "Código de barras",
+        "kinds": {
+          "auto": "Detectar tipo",
+          "ean": "EAN / UPC",
+          "isbn": "ISBN",
+          "pzn": "PZN",
+          "other": "Otro"
+        }
+      },
       "attachments": {
         "add": "Añadir archivo",
         "addImages": "Agregar imagen",
@@ -392,6 +435,11 @@
     "inventoryItems": "Elementos del inventario",
     "layout": "Diseño",
     "loading": "Cargando inventario elementos...",
+    "matches": {
+      "close": "Cerrar",
+      "description": "El mismo producto puede estar guardado en varios lugares. Elige el que buscas.",
+      "title": "{{count}} elementos tienen este código de barras"
+    },
     "noItems": "No se encontraron elementos en el inventario.",
     "options": "Opciones de código",
     "paperSize": "Tamaño de papel",
