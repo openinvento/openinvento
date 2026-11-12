@@ -3,7 +3,7 @@ import uuid
 from rest_framework.exceptions import ValidationError
 
 
-def inventory_uuid_param(value, field="inventory"):
+def validate_inventory_uuid_param(value, field="inventory"):
     """The inventory UUID from a request parameter, or None if it's missing.
 
     Filtering by a malformed UUID raises a ValidationError in the database layer, which became a
