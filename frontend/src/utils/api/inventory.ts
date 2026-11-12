@@ -54,7 +54,12 @@ export type InventoryEntry = EntityBase & {
   category?: string | null
   field_values?: ArticleFieldValue[]
   category_fields?: CategoryField[]
+  barcodes?: Barcode[]
 }
+
+export type BarcodeKind = "ean" | "isbn" | "pzn" | "other"
+// Product barcodes of an entry. Saving sends the whole list as barcodes_input; an empty kind is detected by the backend.
+export type Barcode = { kind: BarcodeKind; value: string }
 
 export type Area = InventoryEntry & { type: "area" }
 export type Shelf = InventoryEntry & { type: "shelf"; area: string }
@@ -116,13 +121,17 @@ export type CodePdfOptions = {
   layout: "horizontal" | "vertical"
 }
 
-export type CodeLookupResult = {
+export type CodeLookupMatch = {
   uuid: string
   identifier: string
   name: string
   type: "article" | "area" | "shelf" | "box" | "category" | "field"
   inventory: { uuid: string; name: string }
+  matched_by: "identifier" | "barcode"
 }
+
+// An identifier matches one entry, a barcode can match several. No match is a 404.
+export type CodeLookupResult = { matches: CodeLookupMatch[] }
 
 export type InventoryUser = {
   uuid: string

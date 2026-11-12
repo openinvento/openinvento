@@ -95,6 +95,21 @@
   "articles": {
     "page": {
       "areas": "Areas",
+      "barcodes": {
+        "title": "Barcodes",
+        "description": "EAN, UPC, ISBN or PZN from the product's packaging. Scanning one of them finds this article.",
+        "add": "Add barcode",
+        "remove": "Remove barcode",
+        "kind": "Barcode type",
+        "value": "Barcode",
+        "kinds": {
+          "auto": "Detect type",
+          "ean": "EAN / UPC",
+          "isbn": "ISBN",
+          "pzn": "PZN",
+          "other": "Other"
+        }
+      },
       "attachments": {
         "add": "Add file",
         "addImages": "Add image",
@@ -392,6 +407,11 @@
     "inventoryItems": "Inventory Items",
     "layout": "Layout",
     "loading": "Loading inventory items...",
+    "matches": {
+      "close": "Close",
+      "description": "The same product can be stored in several places. Pick the one you mean.",
+      "title": "{{count}} items have this barcode"
+    },
     "noItems": "No inventory items found.",
     "options": "Code options",
     "paperSize": "Paper size",
