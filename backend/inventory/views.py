@@ -338,6 +338,7 @@ class InventoryEntryViewSet(StandardOrAPIKeyAuthMixin, InventoryScopedViewSet):
     select_related_fields = ("inventory", "parent", "category")
     prefetch_related_fields = (
         "field_values__field",
+        "barcodes",
         Prefetch("inventory__categoryfield_set", queryset=CategoryField.objects.all(), to_attr="_category_fields"),
     )
     ordering = ("name",)
@@ -429,7 +430,7 @@ class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
             inventory__in=self.get_accessible_inventories(),
             inventory__uuid=inventory,
             name__icontains=query
-        ).filter(type__in=("article", "box")).select_related("inventory", "parent", "category").prefetch_related("field_values__field")
+        ).filter(type__in=("article", "box")).select_related("inventory", "parent", "category").prefetch_related("field_values__field", "barcodes")
         results = InventoryEntrySerializer(entries, many=True, context={"request": request}).data
         return Response(results)
 

@@ -95,6 +95,21 @@
   "articles": {
     "page": {
       "areas": "Zones",
+      "barcodes": {
+        "title": "Codes-barres",
+        "description": "EAN, UPC, ISBN ou PZN figurant sur l’emballage du produit.",
+        "add": "Ajouter un code-barres",
+        "remove": "Supprimer le code-barres",
+        "kind": "Type de code-barres",
+        "value": "Code-barres",
+        "kinds": {
+          "auto": "Détecter le type",
+          "ean": "EAN / UPC",
+          "isbn": "ISBN",
+          "pzn": "PZN",
+          "other": "Autre"
+        }
+      },
       "attachments": {
         "add": "Ajouter un fichier",
         "addImages": "Ajouter une image",

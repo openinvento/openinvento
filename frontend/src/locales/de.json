@@ -95,6 +95,21 @@
   "articles": {
     "page": {
       "areas": "Bereiche",
+      "barcodes": {
+        "title": "Barcodes",
+        "description": "EAN, UPC, ISBN oder PZN von der Verpackung.",
+        "add": "Barcode hinzufügen",
+        "remove": "Barcode entfernen",
+        "kind": "Barcode-Art",
+        "value": "Barcode",
+        "kinds": {
+          "auto": "Art erkennen",
+          "ean": "EAN / UPC",
+          "isbn": "ISBN",
+          "pzn": "PZN",
+          "other": "Sonstige"
+        }
+      },
       "attachments": {
         "add": "Datei hinzufügen",
         "addImages": "Bild hinzufügen",
