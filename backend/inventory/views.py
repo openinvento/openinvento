@@ -18,7 +18,7 @@ from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import viewsets
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -31,6 +31,7 @@ from ai_features.object_detection.main import LUCIDE_ARTICLE_ICONS
 
 from .code_utils import generate_codes_pdf, scan_base_url
 from .export_utils import generate_inventory_csv_export
+from .params import validate_inventory_uuid_param
 from .models import (
     ArticleAttachment,
     ArticleCategory,
@@ -81,7 +82,7 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
         """ Get the queryset for the viewset, filtered by accessible inventories and optional query parameters. """
         # Basic scoping for GET, PUT, PATCH, DELETE
         queryset = super().get_queryset().filter(inventory__in=self.get_accessible_inventories())
-        inventory_uuid = self.request.query_params.get("inventory")
+        inventory_uuid = validate_inventory_uuid_param(self.request.query_params.get("inventory"))
         if inventory_uuid:
             queryset = queryset.filter(inventory__uuid=inventory_uuid)
 
@@ -413,7 +414,7 @@ class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         if not query:
             return Response({"error": "Query parameter 'q' is required."}, status=400)
 
-        inventory = request.query_params.get("inventory")
+        inventory = validate_inventory_uuid_param(request.query_params.get("inventory"))
         if not inventory:
             return Response({"error": "Query parameter 'inventory' is required."}, status=400)
         entries = InventoryEntry.objects.filter(
@@ -630,7 +631,10 @@ class MagicArticleImportView(InventoryScopedAPIView):
         
         if image.size > settings.MAX_FILE_SIZE:
             return Response({"image": "The image exceeds the maximum upload size."}, status=400)
-        inventory_uuid = request.data.get("inventory")
+        try:
+            inventory_uuid = validate_inventory_uuid_param(request.data.get("inventory"))
+        except ValidationError:
+            inventory_uuid = None
         if not inventory_uuid or not self.get_accessible_inventories().filter(uuid=inventory_uuid).exists():
             return Response({"inventory": "Select an inventory you can access."}, status=400)
 
