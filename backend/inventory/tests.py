@@ -681,7 +681,7 @@ class CodeLookupTests(TestCase):
 		self.assertNotIn("uuid", getattr(response, "data", None) or {})
 
 
-@override_settings(APP_URL="https://inventory.example")
+@override_settings(APP_URL="https://inventory.example", SCAN_BASE_URL="")
 class QrCodeUrlTests(TestCase):
 	def setUp(self):
 		self.user = CustomUser.objects.create_user(username="qr", password="password")
@@ -761,6 +761,26 @@ class QrCodeUrlTests(TestCase):
 	@override_settings(APP_URL="")
 	def test_value_is_the_identifier_without_app_url(self):
 		self.assertEqual(qr_code_value(self.entry, True), "box1")
+
+	@override_settings(SCAN_BASE_URL="https://short.example")
+	def test_scan_base_url_replaces_app_url(self):
+		self.assertEqual(qr_code_value(self.entry, True), "https://short.example/i/AbC23/box1")
+
+		self.inventory.identifier = "7GQ2M"
+		self.entry.identifier = "7GQ2MX4"
+		self.assertEqual(qr_code_value(self.entry, True), "HTTPS://SHORT.EXAMPLE/I/7GQ2M/7GQ2MX4")
+
+	@override_settings(APP_URL="", SCAN_BASE_URL="https://short.example")
+	def test_scan_base_url_works_without_app_url(self):
+		self.assertEqual(qr_code_value(self.entry, True), "https://short.example/i/AbC23/box1")
+
+	@override_settings(SCAN_BASE_URL="https://short.example")
+	def test_scan_base_url_is_not_used_when_urls_are_off(self):
+		self.assertEqual(qr_code_value(self.entry, False), "box1")
+
+	@override_settings(SCAN_BASE_URL="https://short.example")
+	def test_settings_endpoint_shows_the_scan_base_url(self):
+		self.assertEqual(self.client.get("/api/codes/qr-settings/").data, {"include_url": True, "base_url": "https://short.example"})
 
 	def test_urls_are_on_by_default(self):
 		self.assertTrue(InstanceSettings.get_solo().qr_codes_include_url)

@@ -581,7 +581,7 @@
     },
     "adminTab": "Configuración de administración (instancia)",
     "qrCodesIncludeUrl": "URL en los códigos QR",
-    "qrCodesIncludeUrlDescription": "Los códigos QR contienen un enlace a la entrada, de modo que cualquier aplicación de cámara puede abrirla. Sin APP_URL solo contienen el identificador. Los códigos de barras siempre contienen el identificador.",
+    "qrCodesIncludeUrlDescription": "Los códigos QR contienen un enlace a la entrada, de modo que cualquier aplicación de cámara puede abrirla. Usan SCAN_BASE_URL si está definida y, si no, APP_URL. Sin ninguna de las dos, solo contienen el identificador. Los códigos de barras siempre contienen el identificador.",
     "allowEmailLogin": "Permitir el inicio de sesión con correo electrónico",
     "allowEmailLoginDescription": "Cuando está activado, los usuarios pueden iniciar sesión con su dirección de correo electrónico además de con su nombre de usuario.",
     "apiKeys": {

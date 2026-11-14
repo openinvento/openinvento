@@ -22,8 +22,8 @@ DOT_SEGMENTS = (".", "..")
 
 
 def scan_base_url() -> str:
-    """The origin that scan URLs in QR codes point at."""
-    return settings.APP_URL
+    """The origin that scan URLs in QR codes point at: SCAN_BASE_URL if set, otherwise APP_URL."""
+    return settings.SCAN_BASE_URL or settings.APP_URL
 
 
 def scan_url(item) -> str:
