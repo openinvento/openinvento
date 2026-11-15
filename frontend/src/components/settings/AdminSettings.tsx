@@ -40,6 +40,9 @@ const emptyForm: UserForm = {
 export default function AdminSettings() {
   const { t } = useTranslation()
   const [allowEmailLogin, setAllowEmailLogin] = useState(false)
+  const [qrCodesIncludeUrl, setQrCodesIncludeUrl] = useState(true)
+  // The switch stays disabled until the stored value is known, so a click can't be overwritten by the load.
+  const [settingsLoaded, setSettingsLoaded] = useState(false)
   const [enabledModules, setEnabledModules] = useState<string[]>([])
   const [availableModules, setAvailableModules] = useState<{ name: string; label: string }[]>([])
   const [settingsError, setSettingsError] = useState<string | null>(null)
@@ -60,6 +63,8 @@ export default function AdminSettings() {
     Promise.all([getInstanceSettings(), getUsers()])
       .then(([settings, loadedUsers]) => {
         setAllowEmailLogin(settings.allow_email_login)
+        setQrCodesIncludeUrl(settings.qr_codes_include_url)
+        setSettingsLoaded(true)
         setEnabledModules(settings.enabled_modules)
         setAvailableModules(settings.available_modules)
         setUsers(loadedUsers)
@@ -80,6 +85,20 @@ export default function AdminSettings() {
       await updateInstanceSettings({ allow_email_login: value })
     } catch {
       setAllowEmailLogin(!value)
+      setSettingsError(t("settings.instanceSettingsSaveError"))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleQrCodesIncludeUrlChange(value: boolean) {
+    setQrCodesIncludeUrl(value)
+    setSaving(true)
+    setSettingsError(null)
+    try {
+      await updateInstanceSettings({ qr_codes_include_url: value })
+    } catch {
+      setQrCodesIncludeUrl(!value)
       setSettingsError(t("settings.instanceSettingsSaveError"))
     } finally {
       setSaving(false)
@@ -224,6 +243,19 @@ export default function AdminSettings() {
             {t("settings.admin.enableEmailLogin")}
           </FieldLabel>
           <FieldError>{settingsError}</FieldError>
+        </Field>
+      </section>
+
+      <section className="border-b pb-7">
+        <div className="mb-4">
+          <h2 className="font-semibold">{t("settings.qrCodesIncludeUrl")}</h2>
+          <p className="text-sm text-muted-foreground">{t("settings.qrCodesIncludeUrlDescription")}</p>
+        </div>
+        <Field>
+          <FieldLabel htmlFor="qr-codes-include-url" className="flex-row items-center text-sm font-normal">
+            <Switch id="qr-codes-include-url" checked={qrCodesIncludeUrl} disabled={saving || !settingsLoaded} onCheckedChange={(checked: boolean) => void handleQrCodesIncludeUrlChange(checked)} />
+            {t("settings.admin.enableQrCodesIncludeUrl")}
+          </FieldLabel>
         </Field>
       </section>
 

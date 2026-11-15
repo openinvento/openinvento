@@ -111,6 +111,19 @@ def _normalize_app_url(value):
     return f"{parsed.scheme}://{parsed.netloc}"
 
 
+def _normalize_scan_base_url(value):
+    """Like _normalize_app_url, but reject a path instead of dropping it: it would be on every label."""
+    origin = _normalize_app_url(value)
+    if origin:
+        value = value.strip()
+        parsed = urlsplit(value if "://" in value else "http://" + value)
+        if parsed.path not in ("", "/") or parsed.query or parsed.fragment:
+            raise ValueError(
+                f"Invalid SCAN_BASE_URL {value!r}: use an origin without a path, like https://short.example"
+            )
+    return origin
+
+
 def _host_from_url(value):
     """Return the host Django expects in ALLOWED_HOSTS (no scheme or port)."""
     candidate = value if "://" in value else "//" + value
@@ -186,6 +199,9 @@ APP_URL = _normalize_app_url(APP_URL) if APP_URL else ""
 # With only APP_URLS set, the first entry is the canonical origin (e.g. for the OIDC redirect URI).
 if not APP_URL and APP_URLS:
     APP_URL = APP_URLS[0]
+# Optional origin for the URLs in QR codes, e.g. a short domain that redirects to APP_URL with the
+# path unchanged. It only appears on labels, so it's not added to ALLOWED_HOSTS or CSRF origins.
+SCAN_BASE_URL = _normalize_scan_base_url(os.getenv("SCAN_BASE_URL", ""))
 for url in ([APP_URL] if APP_URL else []) + APP_URLS:
     host = _host_from_url(url)
     if host and host not in ALLOWED_HOSTS:

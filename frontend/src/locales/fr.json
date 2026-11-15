@@ -18,7 +18,8 @@
         "shelf": "Étagère"
       },
       "allAreas": "Toutes les zones",
-      "articleCount": "{{count}} articles",
+      "articleCount_one": "{{count}} article",
+      "articleCount_other": "{{count}} articles",
       "articles": "Articles",
       "confirmDelete": "Supprimer {{name}} ?",
       "deleteShelf": "Supprimer l’étagère",
@@ -65,7 +66,12 @@
       "otherItems": "Autres articles",
       "renameShelf": "Renommer l’étagère",
       "stockFields": "Seuils de stock",
-      "summary": "{{articles}} articles · {{boxes}} boîtes · {{shelves}} étagères"
+      "summaryArticles_one": "{{count}} article",
+      "summaryArticles_other": "{{count}} articles",
+      "summaryBoxes_one": "{{count}} boîte",
+      "summaryBoxes_other": "{{count}} boîtes",
+      "summaryShelves_one": "{{count}} étagère",
+      "summaryShelves_other": "{{count}} étagères"
     },
     "empty": {
       "noAreas": {
@@ -156,6 +162,7 @@
       "errors": {
         "delete": "Impossible de supprimer l’article.",
         "load": "Impossible de charger l’article.",
+        "noInventory": "Sélectionnez un inventaire avant d’enregistrer l’article.",
         "save": "Impossible d’enregistrer l’article.",
         "unsavedChanges": "Vous avez des modifications non enregistrées. Enregistrez-les avant de quitter cette page."
       },
@@ -240,7 +247,8 @@
     }
   },
   "boxes": {
-    "articleCount": "{{count}} articles",
+    "articleCount_one": "{{count}} article",
+    "articleCount_other": "{{count}} articles",
     "backToArea": "Retour à la zone",
     "confirmDelete": "Supprimer {{name}} ?",
     "editBox": "Modifier la boîte",
@@ -310,6 +318,7 @@
   "dashboard": {
     "addArticle": "Ajouter un article",
     "addArticleDescription": "Enregistrer un nouvel élément dans votre inventaire.",
+    "addedLast7Days": "Ajoutés ces 7 derniers jours",
     "areas": "Zones",
     "articles": "Articles",
     "categories": "Catégories",
@@ -318,17 +327,18 @@
     "errors": {
       "load": "Impossible de charger le tableau de bord."
     },
-    "greeting": "Bonjour !",
+    "greetingAfternoon": "Bon après-midi !",
+    "greetingEvening": "Bonsoir !",
+    "greetingMorning": "Bonjour !",
     "inventoryByCategory": "Inventaire par catégorie",
     "lastAdded": "Derniers ajouts",
     "loading": "Chargement du tableau de bord…",
-    "noCategoryDescription": "Créez des catégories pour afficher ici votre inventaire regroupé.",
-    "noCategoryTitle": "Aucune catégorie pour le moment",
+    "noArticlesDescription": "Vos articles apparaîtront ici, regroupés par catégorie.",
+    "noArticlesTitle": "Aucun article pour le moment",
     "noLastAddedDescription": "Les nouvelles zones, les articles et les autres éléments de l’inventaire apparaîtront ici.",
     "noLastAddedTitle": "Aucun ajout pour le moment",
     "overview": "Vue d’ensemble",
     "quickActions": "Actions rapides",
-    "recentUpdates": "Mises à jour récentes",
     "search": "Rechercher",
     "searchPlaceholder": "Rechercher des éléments…",
     "title": "Accueil",
@@ -336,11 +346,9 @@
       "area": "Zone",
       "article": "Article",
       "box": "Boîte",
-      "category": "Catégorie",
-      "field": "Champ",
       "shelf": "Étagère"
     },
-    "updatedNow": "Mis à jour à l’instant",
+    "updatedAt": "Mis à jour à {{time}}",
     "viewAll": "Tout afficher",
     "viewCategories": "Catégories"
   },
@@ -410,7 +418,14 @@
     "unknownItem": "Élément de l’inventaire"
   },
   "manageCodes": {
+    "urlHint": "Ces codes QR renvoient vers {{url}}. Si l’instance change d’adresse, les étiquettes imprimées n’ouvrent plus leurs entrées. Les administrateurs peuvent désactiver les liens dans les paramètres de l’instance.",
     "clearSelection": "Effacer la sélection",
+    "errorCorrection": "Correction d’erreurs",
+    "errorCorrections": {
+      "L": "Faible (code plus petit, moins tolérant aux dommages)",
+      "M": "Moyenne (recommandée)"
+    },
+    "identifierPrintedHint": "Les étiquettes imprimées conservent l’ancien identifiant et n’ouvrent plus cette entrée tant qu’elles ne sont pas réimprimées.",
     "codeType": "Type de code",
     "codeTypes": {
       "barcode": "Code-barres",
@@ -576,6 +591,7 @@
       "downloadBackup": "Télécharger la sauvegarde",
       "editUser": "Modifier l’utilisateur",
       "email": "E-mail",
+      "enableQrCodesIncludeUrl": "Activer les URL dans les codes QR",
       "enableEmailLogin": "Activer la connexion par e-mail",
       "loadUsersError": "Impossible de charger les utilisateurs.",
       "loadingUsers": "Chargement des utilisateurs…",
@@ -610,6 +626,8 @@
       }
     },
     "adminTab": "Paramètres d’administration (instance)",
+    "qrCodesIncludeUrl": "URL dans les codes QR",
+    "qrCodesIncludeUrlDescription": "Les codes QR contiennent un lien vers l’entrée, que toute application d’appareil photo peut ouvrir. Ils utilisent SCAN_BASE_URL si elle est définie, sinon APP_URL. Sans aucune des deux, ils ne contiennent que l’identifiant. Les codes-barres contiennent toujours l’identifiant.",
     "allowEmailLogin": "Autoriser la connexion par adresse e-mail",
     "allowEmailLoginDescription": "Lorsqu’elle est activée, les utilisateurs peuvent se connecter avec leur adresse e-mail en plus de leur nom d’utilisateur.",
     "apiKeys": {

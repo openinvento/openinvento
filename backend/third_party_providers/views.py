@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from account_auth.authentication import StandardOrAPIKeyAuthMixin
+from inventory.params import validate_inventory_uuid_param
 from inventory.permissions import IsInventoryMember
 
 from .catalog import PROVIDER_CONFIGURATIONS
@@ -22,5 +23,5 @@ class ThirdPartyProviderViewSet(StandardOrAPIKeyAuthMixin, viewsets.ModelViewSet
 
     def get_queryset(self):
         queryset = ThirdPartyProvider.objects.filter(inventory__in=self.request.user.inventories.all())
-        inventory_uuid = self.request.query_params.get("inventory")
+        inventory_uuid = validate_inventory_uuid_param(self.request.query_params.get("inventory"))
         return queryset.filter(inventory__uuid=inventory_uuid) if inventory_uuid else queryset
