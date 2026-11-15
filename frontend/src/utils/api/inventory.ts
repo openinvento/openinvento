@@ -109,9 +109,9 @@ export type CategoryField = EntityBase & {
 export type ArticleCategory = EntityBase & { fields: CategoryField[]; category_fields?: CategoryField[] }
 
 export type DashboardData = {
-  counts: { areas: number; articles: number; categories: number }
-  category_counts: Array<{ name: string; count: number }>
-  last_added: Array<{ uuid: string; name: string; type: string; created_at: string }>
+  counts: { areas: number; articles: number; categories: number; added_last_7_days: number }
+  category_counts: Array<{ name: string | null; count: number }>
+  last_added: Array<{ uuid: string; name: string; type: "area" | "shelf" | "box" | "article"; parent: string | null; created_at: string }>
 }
 
 export type CodePdfOptions = {
@@ -119,7 +119,11 @@ export type CodePdfOptions = {
   code_type: "qr" | "barcode"
   size: "a4" | "a5" | "letter"
   layout: "horizontal" | "vertical"
+  error_correction: "M" | "L"
 }
+
+// Whether printed QR codes hold a URL, and the origin it points at (empty without a URL).
+export type QrCodeSettings = { include_url: boolean; base_url: string }
 
 export type CodeLookupResult = {
   uuid: string
@@ -164,6 +168,7 @@ type EntryQuery = {
   within?: string
   ids?: string[]
   includeAncestors?: boolean
+  root?: boolean
 }
 
 const SELECTED_INVENTORY_KEY = "selectedInventoryUuid" // key for localStorage to store the selected inventory UUID
@@ -262,13 +267,13 @@ function toEntryPayload(kind: string, payload: CreatePayload) {
     const data = new FormData()
     payload.forEach((value, key) => {
       const isLocationField = ["area", "shelf", "box", "parent_box", "field_values"].includes(key)
-      const isEmptyCategory = key === "category" && value === ""
-      if (!isLocationField && !isEmptyCategory) data.append(key, value)
+      if (!isLocationField) data.append(key, value)
     })
 
     const parent = getParentValue(type, payload)
     data.append("type", type)
-    if (parent !== null && parent !== "") data.append("parent", String(parent))
+    // An article may have no location, so an empty parent has to reach the backend to clear it.
+    if (parent !== null && (parent !== "" || type === "article")) data.append("parent", String(parent))
 
     const fieldValues = payload.get("field_values")
     if (fieldValues !== null) data.append("field_values_input", fieldValues)
@@ -304,6 +309,7 @@ function entriesPath(query: EntryQuery = {}) {
   if (query.within) params.set("within", query.within)
   if (query.ids?.length) params.set("ids", query.ids.join(","))
   if (query.includeAncestors) params.set("include_ancestors", "true")
+  if (query.root) params.set("root", "true")
   return `${entryPath}?${params.toString()}`
 }
 
@@ -366,6 +372,7 @@ export const inventoryApi = {
     downloadFile(`/api/inventories/${inventory}/export/`, `inventory-${inventory}-csv-export.zip`),
   generateCodesPdf: (options: CodePdfOptions) =>
     postData<Blob>("/api/codes/pdf/", options),
+  getQrCodeSettings: () => fetchData<QrCodeSettings>("/api/codes/qr-settings/"),
   getDashboard: () => fetchData<DashboardData>(scopedPath("/api/dashboard/")),
   getEntry: <T>(uuid: string) => getEntry<T>(uuid),
   getMembership: (inventory: string) =>

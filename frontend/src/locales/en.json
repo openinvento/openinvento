@@ -18,7 +18,8 @@
         "shelf": "Shelf"
       },
       "allAreas": "All areas",
-      "articleCount": "{{count}} articles",
+      "articleCount_one": "{{count}} article",
+      "articleCount_other": "{{count}} articles",
       "articles": "Articles",
       "confirmDelete": "Delete {{name}}?",
       "deleteBox": "Delete box",
@@ -65,7 +66,12 @@
       "otherItems": "Other items",
       "renameShelf": "Rename shelf",
       "stockFields": "Stock thresholds",
-      "summary": "{{articles}} articles · {{boxes}} boxes · {{shelves}} shelves"
+      "summaryArticles_one": "{{count}} article",
+      "summaryArticles_other": "{{count}} articles",
+      "summaryBoxes_one": "{{count}} box",
+      "summaryBoxes_other": "{{count}} boxes",
+      "summaryShelves_one": "{{count}} shelf",
+      "summaryShelves_other": "{{count}} shelves"
     },
     "empty": {
       "noAreas": {
@@ -128,6 +134,7 @@
       "errors": {
         "delete": "Could not delete article.",
         "load": "Could not load article.",
+        "noInventory": "Select an inventory before saving the article.",
         "save": "Could not save article.",
         "unsavedChanges": "You have unsaved changes. Save them before leaving this page."
       },
@@ -212,7 +219,8 @@
     }
   },
   "boxes": {
-    "articleCount": "{{count}} articles",
+    "articleCount_one": "{{count}} article",
+    "articleCount_other": "{{count}} articles",
     "backToArea": "Back to area",
     "confirmDelete": "Delete {{name}}?",
     "editBox": "Edit box",
@@ -282,6 +290,7 @@
   "dashboard": {
     "addArticle": "Add an article",
     "addArticleDescription": "Save something new to your inventory.",
+    "addedLast7Days": "Added in the last 7 days",
     "areas": "Areas",
     "articles": "Articles",
     "categories": "Categories",
@@ -290,17 +299,18 @@
     "errors": {
       "load": "Could not load the dashboard."
     },
-    "greeting": "Good morning!",
+    "greetingAfternoon": "Good afternoon!",
+    "greetingEvening": "Good evening!",
+    "greetingMorning": "Good morning!",
     "inventoryByCategory": "Inventory by category",
     "lastAdded": "Last added",
     "loading": "Loading dashboard...",
-    "noCategoryDescription": "Create categories to see your inventory grouped here.",
-    "noCategoryTitle": "No categories yet",
+    "noArticlesDescription": "Your articles will appear here, grouped by category.",
+    "noArticlesTitle": "No articles yet",
     "noLastAddedDescription": "New areas, articles, and other inventory objects will appear here.",
     "noLastAddedTitle": "Nothing added yet",
     "overview": "Overview",
     "quickActions": "Quick actions",
-    "recentUpdates": "Recent updates",
     "search": "Search",
     "searchPlaceholder": "Search your items...",
     "title": "Start",
@@ -308,11 +318,9 @@
       "area": "Area",
       "article": "Article",
       "box": "Box",
-      "category": "Category",
-      "field": "Field",
       "shelf": "Shelf"
     },
-    "updatedNow": "Updated just now",
+    "updatedAt": "Updated at {{time}}",
     "viewAll": "View all",
     "viewCategories": "Categories"
   },
@@ -382,7 +390,14 @@
     "unknownItem": "Inventory item"
   },
   "manageCodes": {
+    "urlHint": "These QR codes link to {{url}}. If the instance moves to another address, printed labels stop opening their entries. Administrators can turn the links off in the instance settings.",
     "clearSelection": "Clear selection",
+    "errorCorrection": "Error correction",
+    "errorCorrections": {
+      "L": "Low (smaller code, less tolerant of damage)",
+      "M": "Medium (recommended)"
+    },
+    "identifierPrintedHint": "Printed labels keep the old identifier and stop opening this entry until you print them again.",
     "codeType": "Code type",
     "codeTypes": {
       "barcode": "Barcode",
@@ -547,6 +562,7 @@
       "downloadBackup": "Download backup",
       "editUser": "Edit user",
       "email": "Email",
+      "enableQrCodesIncludeUrl": "Enable URLs in QR codes",
       "enableEmailLogin": "Enable email login",
       "loadUsersError": "Could not load users.",
       "loadingUsers": "Loading users...",
@@ -581,6 +597,8 @@
       }
     },
     "adminTab": "Admin settings (instance)",
+    "qrCodesIncludeUrl": "URLs in QR codes",
+    "qrCodesIncludeUrlDescription": "QR codes contain a link to the entry, so any camera app can open it. They use SCAN_BASE_URL if set, otherwise APP_URL. Without either, they contain the identifier only. Barcodes always contain the identifier.",
     "allowEmailLogin": "Allow email address login",
     "allowEmailLoginDescription": "When enabled, users can sign in with their email address in addition to their username.",
     "apiKeys": {

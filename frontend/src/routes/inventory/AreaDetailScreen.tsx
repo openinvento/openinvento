@@ -189,7 +189,11 @@ export default function AreaDetailScreen() {
       {/* Area header and creation actions */}
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">{area.name}</h1>
-        <p className="mt-2 text-muted-foreground">{t("areas.detail.summary", { articles: articles.length, boxes: boxes.length, shelves: shelves.length })}</p>
+        <p className="mt-2 text-muted-foreground">{[
+          t("areas.detail.summaryArticles", { count: articles.length }),
+          t("areas.detail.summaryBoxes", { count: boxes.length }),
+          t("areas.detail.summaryShelves", { count: shelves.length }),
+        ].join(" · ")}</p>
       </div>
     
       <div className="flex flex-wrap items-center gap-2">

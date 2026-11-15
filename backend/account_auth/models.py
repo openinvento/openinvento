@@ -55,6 +55,7 @@ class UserAPIKey(AbstractAPIKey):
 class InstanceSettings(models.Model):
     allow_email_login = models.BooleanField(default=False)
     enabled_modules = models.JSONField(default=list, blank=True)
+    qr_codes_include_url = models.BooleanField(default=True)
 
     @classmethod
     def get_solo(cls):

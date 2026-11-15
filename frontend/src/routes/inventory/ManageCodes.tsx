@@ -5,7 +5,7 @@ import { LoaderCircle, Printer, ScanBarcode, ScanLine, X } from "lucide-react"
 import Scanner from "@/components/qr-bar-code/Scanner"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
-import { inventoryApi, type CodePdfOptions } from "@/utils/api/inventory"
+import { inventoryApi, type CodePdfOptions, type QrCodeSettings } from "@/utils/api/inventory"
 import { lookupScannedCode, openInventoryOfEntry } from "@/utils/scan-code"
 import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 import { useTranslation } from "react-i18next"
@@ -35,6 +35,7 @@ export default function ManageCodes() {
 		code_type: "qr",
 		size: "a4",
 		layout: "vertical",
+		error_correction: "M",
 	})
 
 	const [isScannerOpen, setIsScannerOpen] = useState(false)
@@ -49,6 +50,7 @@ export default function ManageCodes() {
 	const [isLoading, setIsLoading] = useState(true)
 	const [isGenerating, setIsGenerating] = useState(false)
 	const [error, setError] = useState("")
+	const [qrSettings, setQrSettings] = useState<QrCodeSettings | null>(null)
 	const { selectedInventoryUuid: selectedInventory } = useSelectedInventory()
 
 	// Camera and external scanner both end up here, with a bare identifier or a scan URL.
@@ -113,6 +115,11 @@ export default function ManageCodes() {
 			setIsListeningForExternalCode(false)
 		}
 	}, [useExternalBarcodeScanner, isLookingUpExternalCode, t])
+
+	useEffect(() => {
+		// Only for the hint before printing, so a failure just leaves it out.
+		inventoryApi.getQrCodeSettings().then(setQrSettings).catch(() => setQrSettings(null))
+	}, [])
 
 	useEffect(() => {
 		void (async () => {
@@ -241,27 +248,41 @@ export default function ManageCodes() {
 						)}
 					</section>
 
-					<aside className="h-fit rounded-xl border bg-card p-4">
+					<aside className="min-w-0 h-fit rounded-xl border bg-card p-4">
 						<h2 className="font-semibold">{t("manageCodes.options")}</h2>
-						<div className="mt-4 grid gap-4">
+						<div className="mt-4 grid min-w-0 gap-4">
 							<label className="grid gap-1.5 text-sm font-medium">
 								{t("manageCodes.codeType")}
-								<select className="h-9 rounded-lg border bg-background px-2" value={options.code_type} onChange={(event) => setOptions({ ...options, code_type: event.target.value as CodePdfOptions["code_type"] })}>
+								<select className="h-9 w-full min-w-0 rounded-lg border bg-background px-2" value={options.code_type} onChange={(event) => setOptions({ ...options, code_type: event.target.value as CodePdfOptions["code_type"] })}>
 									{codeTypes.map((type) => <option key={type} value={type}>{t(`manageCodes.codeTypes.${type}`)}</option>)}
 								</select>
 							</label>
 							<label className="grid gap-1.5 text-sm font-medium">
 								{t("manageCodes.paperSize")}
-								<select className="h-9 rounded-lg border bg-background px-2" value={options.size} onChange={(event) => setOptions({ ...options, size: event.target.value as CodePdfOptions["size"] })}>
+								<select className="h-9 w-full min-w-0 rounded-lg border bg-background px-2" value={options.size} onChange={(event) => setOptions({ ...options, size: event.target.value as CodePdfOptions["size"] })}>
 									<option value="a4">A4</option><option value="a5">A5</option><option value="letter">Letter</option>
 								</select>
 							</label>
 							<label className="grid gap-1.5 text-sm font-medium">
 								{t("manageCodes.layout")}
-								<select className="h-9 rounded-lg border bg-background px-2" value={options.layout} onChange={(event) => setOptions({ ...options, layout: event.target.value as CodePdfOptions["layout"] })}>
+								<select className="h-9 w-full min-w-0 rounded-lg border bg-background px-2" value={options.layout} onChange={(event) => setOptions({ ...options, layout: event.target.value as CodePdfOptions["layout"] })}>
 									<option value="vertical">Vertical</option><option value="horizontal">Horizontal</option>
 								</select>
 							</label>
+							{options.code_type === "qr" && (
+								<label className="grid gap-1.5 text-sm font-medium">
+									{t("manageCodes.errorCorrection")}
+									<select className="h-9 w-full min-w-0 rounded-lg border bg-background px-2" value={options.error_correction} onChange={(event) => setOptions({ ...options, error_correction: event.target.value as CodePdfOptions["error_correction"] })}>
+										<option value="M">{t("manageCodes.errorCorrections.M")}</option>
+										<option value="L">{t("manageCodes.errorCorrections.L")}</option>
+									</select>
+								</label>
+							)}
+							{options.code_type === "qr" && qrSettings?.include_url && (
+								<p className="rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">
+									{t("manageCodes.urlHint", { url: qrSettings.base_url })}
+								</p>
+							)}
 							<div className="grid gap-2 pt-2">
 								<Button variant="outline" onClick={() => void openCodes(true)} disabled={isGenerating || selectedIds.size === 0}>
 									<Printer /> {t("manageCodes.print")}

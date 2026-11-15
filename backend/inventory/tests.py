@@ -3,14 +3,19 @@ import tempfile
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from datetime import timedelta
+
 from django.test import Client, TestCase, override_settings
 from django.test.client import MULTIPART_CONTENT, encode_multipart
 from rest_framework.test import APIClient
 from django.utils import timezone
+from reportlab.graphics.barcode import createBarcodeDrawing
+from reportlab.graphics.barcode.qr import QrCodeWidget
 
-from account_auth.models import CustomUser, Notification, UserAPIKey
+from account_auth.models import CustomUser, InstanceSettings, Notification, UserAPIKey
 from inventory.jobs.date_field_sync import sync_date_field_notifications
 
+from .code_utils import qr_code_value
 from .models import CODE_CHARACTERS, ArticleAttachment, ArticleCategory, ArticleFieldValue, CategoryField, Inventory, InventoryEntry
 
 
@@ -447,6 +452,141 @@ class GeneratedIdentifierTests(TestCase):
 		self.assertEqual(inventory.identifier, "X7k9P2mQ1a")
 
 
+class EntriesWithoutParentTests(TestCase):
+	def setUp(self):
+		self.user = CustomUser.objects.create_user(username="owner", password="StrongPassword!123")
+		self.inventory = Inventory.objects.create(name="Apartment")
+		self.inventory.users.add(self.user)
+		self.other = Inventory.objects.create(name="Other")
+		self.area = InventoryEntry.objects.create(inventory=self.inventory, type="area", name="Study")
+		self.category = ArticleCategory.objects.create(inventory=self.inventory, name="Tools")
+		self.article = InventoryEntry.objects.create(
+			inventory=self.inventory, type="article", name="Laptop", parent=self.area, category=self.category,
+		)
+		self.client = APIClient()
+		self.client.force_login(self.user)
+
+	def patch_form(self, **data):
+		return self.client.patch(f"/api/entries/{self.article.uuid}/", data, format="multipart")
+
+	def test_article_can_be_created_without_a_parent(self):
+		response = self.client.post(
+			"/api/entries/",
+			{"type": "article", "name": "Backpack", "inventory": str(self.inventory.uuid), "parent": ""},
+			format="multipart",
+		)
+
+		self.assertEqual(response.status_code, 201)
+		self.assertIsNone(response.data["parent"])
+
+	def test_empty_parent_removes_the_article_from_its_area(self):
+		response = self.patch_form(parent="", type="article")
+
+		self.assertEqual(response.status_code, 200)
+		self.article.refresh_from_db()
+		self.assertIsNone(self.article.parent)
+
+	def test_missing_parent_keeps_the_area(self):
+		response = self.patch_form(name="Renamed", type="article")
+
+		self.assertEqual(response.status_code, 200)
+		self.article.refresh_from_db()
+		self.assertEqual(self.article.parent, self.area)
+
+	def test_empty_category_removes_the_category(self):
+		response = self.patch_form(category="", type="article")
+
+		self.assertEqual(response.status_code, 200)
+		self.article.refresh_from_db()
+		self.assertIsNone(self.article.category)
+
+	def test_box_still_needs_a_parent(self):
+		response = self.client.post(
+			"/api/entries/",
+			{"type": "box", "name": "Crate", "inventory": str(self.inventory.uuid), "parent": ""},
+			format="multipart",
+		)
+
+		self.assertEqual(response.status_code, 400)
+
+	def test_root_filter_lists_only_entries_without_a_parent(self):
+		root = InventoryEntry.objects.create(inventory=self.inventory, type="article", name="Keys")
+		InventoryEntry.objects.create(inventory=self.other, type="article", name="Foreign")
+
+		response = self.client.get("/api/entries/", {"type": "article", "root": "true", "include_ancestors": "true"})
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual([entry["uuid"] for entry in response.data], [str(root.uuid)])
+
+
+class DashboardTests(TestCase):
+	def setUp(self):
+		self.user = CustomUser.objects.create_user(username="owner", password="StrongPassword!123")
+		self.inventory = Inventory.objects.create(name="Home")
+		self.inventory.users.add(self.user)
+		self.client = APIClient()
+		self.client.force_login(self.user)
+
+	def dashboard(self):
+		return self.client.get("/api/dashboard/", {"inventory": str(self.inventory.uuid)}).data
+
+	def entry(self, name, entry_type="area", **kwargs):
+		return InventoryEntry.objects.create(inventory=self.inventory, type=entry_type, name=name, **kwargs)
+
+	def test_last_added_only_holds_entries(self):
+		# The inventory's default categories and fields exist already, but aren't listed.
+		self.assertEqual(self.dashboard()["last_added"], [])
+
+		area = self.entry("Study")
+		shelf = self.entry("Cabinet", "shelf", parent=area)
+
+		last_added = self.dashboard()["last_added"]
+		self.assertEqual({item["name"] for item in last_added}, {"Study", "Cabinet"})
+		parents = {item["name"]: item["parent"] for item in last_added}
+		self.assertIsNone(parents["Study"])
+		self.assertEqual(parents[shelf.name], str(area.uuid))
+
+	def test_last_added_shows_the_four_newest(self):
+		entries = [self.entry(f"Area {number}") for number in range(5)]
+		for age, entry in enumerate(reversed(entries)):
+			InventoryEntry.objects.filter(pk=entry.pk).update(created_at=timezone.now() - timedelta(minutes=age))
+
+		names = [item["name"] for item in self.dashboard()["last_added"]]
+
+		self.assertEqual(names, ["Area 4", "Area 3", "Area 2", "Area 1"])
+
+	def test_added_last_7_days_is_not_capped_and_ignores_older_entries(self):
+		for number in range(6):
+			self.entry(f"New {number}")
+		old = self.entry("Old")
+		InventoryEntry.objects.filter(pk=old.pk).update(created_at=timezone.now() - timedelta(days=8))
+
+		self.assertEqual(self.dashboard()["counts"]["added_last_7_days"], 6)
+
+	def test_category_counts_use_null_for_articles_without_a_category(self):
+		category = ArticleCategory.objects.create(inventory=self.inventory, name="Tools")
+		self.entry("Hammer", "article", category=category)
+		self.entry("Saw", "article", category=category)
+		self.entry("Laptop", "article")
+
+		self.assertEqual(
+			self.dashboard()["category_counts"],
+			[{"name": "Tools", "count": 2}, {"name": None, "count": 1}],
+		)
+
+	def test_other_inventories_are_not_counted(self):
+		other = Inventory.objects.create(name="Other")
+		other.users.add(self.user)
+		InventoryEntry.objects.create(inventory=other, type="area", name="Elsewhere")
+		self.entry("Study")
+
+		data = self.dashboard()
+
+		self.assertEqual(data["counts"]["areas"], 1)
+		self.assertEqual(data["counts"]["added_last_7_days"], 1)
+		self.assertEqual([item["name"] for item in data["last_added"]], ["Study"])
+
+
 class CodeLookupTests(TestCase):
 	def setUp(self):
 		self.user = CustomUser.objects.create_user(username="scanner", password="StrongPassword!123")
@@ -539,3 +679,126 @@ class CodeLookupTests(TestCase):
 
 		self.assertIn(response.status_code, (302, 401, 403))
 		self.assertNotIn("uuid", getattr(response, "data", None) or {})
+
+
+@override_settings(APP_URL="https://inventory.example", SCAN_BASE_URL="")
+class QrCodeUrlTests(TestCase):
+	def setUp(self):
+		self.user = CustomUser.objects.create_user(username="qr", password="password")
+		self.inventory = Inventory.objects.create(name="Home", identifier="AbC23")
+		self.user.inventories.add(self.inventory)
+		self.entry = InventoryEntry.objects.create(inventory=self.inventory, type="area", name="Area", identifier="box1")
+		self.client = APIClient()
+		self.client.force_authenticate(self.user)
+
+	def pdf(self, **options):
+		return self.client.post("/api/codes/pdf/", {"uuids": [str(self.entry.uuid)], **options}, format="json")
+
+	def test_value_is_the_scan_url(self):
+		self.assertEqual(qr_code_value(self.entry, True), "https://inventory.example/i/AbC23/box1")
+
+	def test_value_percent_encodes_the_identifier(self):
+		self.entry.identifier = "a/b ü"
+		self.assertEqual(qr_code_value(self.entry, True), "https://inventory.example/i/AbC23/a%2Fb%20%C3%BC")
+
+	def test_dot_identifiers_keep_the_identifier(self):
+		# A link to /i/AbC23/.. would resolve to /i/ and never reach the entry.
+		for identifier in (".", ".."):
+			with self.subTest(identifier=identifier):
+				self.entry.identifier = identifier
+				self.assertEqual(qr_code_value(self.entry, True), identifier)
+
+	def test_settings_endpoint_tells_where_the_links_point(self):
+		self.assertEqual(self.client.get("/api/codes/qr-settings/").data, {"include_url": True, "base_url": "https://inventory.example"})
+
+		InstanceSettings.objects.update_or_create(pk=1, defaults={"qr_codes_include_url": False})
+		self.assertEqual(self.client.get("/api/codes/qr-settings/").data, {"include_url": False, "base_url": ""})
+
+	@override_settings(APP_URL="")
+	def test_settings_endpoint_without_app_url(self):
+		self.assertEqual(self.client.get("/api/codes/qr-settings/").data, {"include_url": False, "base_url": ""})
+
+	def test_settings_endpoint_needs_a_login(self):
+		self.assertIn(APIClient().get("/api/codes/qr-settings/").status_code, (401, 403))
+
+	def test_generated_identifiers_give_an_uppercase_url(self):
+		inventory = Inventory.objects.create(name="Office")
+		entry = InventoryEntry.objects.create(inventory=inventory, type="area", name="Area")
+
+		self.assertEqual(
+			qr_code_value(entry, True),
+			f"HTTPS://INVENTORY.EXAMPLE/I/{inventory.identifier}/{entry.identifier}",
+		)
+
+	@override_settings(APP_URL="https://inv.example.de")
+	def test_uppercase_url_uses_alphanumeric_mode(self):
+		self.inventory.identifier = "7GQ2M"
+		self.entry.identifier = "7GQ2MX4"
+		code = QrCodeWidget(qr_code_value(self.entry, True), barLevel="M")
+		code.qr.make()
+
+		self.assertEqual([type(data).__name__ for data in code.qr.dataList], ["QRAlphaNum"])
+		self.assertEqual(code.qr.version, 2)
+
+	def test_lowercase_in_an_identifier_keeps_the_url_lowercase(self):
+		for inventory_identifier, identifier in (("AbC23", "7GQ2MX4"), ("7GQ2M", "box1"), ("7GQ2M", "A-1")):
+			with self.subTest(inventory=inventory_identifier, identifier=identifier):
+				self.inventory.identifier = inventory_identifier
+				self.entry.identifier = identifier
+				self.assertTrue(qr_code_value(self.entry, True).startswith("https://inventory.example/i/"))
+
+	def test_port_is_kept_in_the_uppercase_url(self):
+		self.inventory.identifier = "7GQ2M"
+		self.entry.identifier = "7GQ2MX4"
+		with override_settings(APP_URL="http://inventory.example:8000"):
+			self.assertEqual(qr_code_value(self.entry, True), "HTTP://INVENTORY.EXAMPLE:8000/I/7GQ2M/7GQ2MX4")
+		with override_settings(APP_URL="http://[::1]:8000"):
+			self.assertEqual(qr_code_value(self.entry, True), "http://[::1]:8000/i/7GQ2M/7GQ2MX4")
+
+	def test_value_is_the_identifier_when_urls_are_off(self):
+		self.assertEqual(qr_code_value(self.entry, False), "box1")
+
+	@override_settings(APP_URL="")
+	def test_value_is_the_identifier_without_app_url(self):
+		self.assertEqual(qr_code_value(self.entry, True), "box1")
+
+	@override_settings(SCAN_BASE_URL="https://short.example")
+	def test_scan_base_url_replaces_app_url(self):
+		self.assertEqual(qr_code_value(self.entry, True), "https://short.example/i/AbC23/box1")
+
+		self.inventory.identifier = "7GQ2M"
+		self.entry.identifier = "7GQ2MX4"
+		self.assertEqual(qr_code_value(self.entry, True), "HTTPS://SHORT.EXAMPLE/I/7GQ2M/7GQ2MX4")
+
+	@override_settings(APP_URL="", SCAN_BASE_URL="https://short.example")
+	def test_scan_base_url_works_without_app_url(self):
+		self.assertEqual(qr_code_value(self.entry, True), "https://short.example/i/AbC23/box1")
+
+	@override_settings(SCAN_BASE_URL="https://short.example")
+	def test_scan_base_url_is_not_used_when_urls_are_off(self):
+		self.assertEqual(qr_code_value(self.entry, False), "box1")
+
+	@override_settings(SCAN_BASE_URL="https://short.example")
+	def test_settings_endpoint_shows_the_scan_base_url(self):
+		self.assertEqual(self.client.get("/api/codes/qr-settings/").data, {"include_url": True, "base_url": "https://short.example"})
+
+	def test_urls_are_on_by_default(self):
+		self.assertTrue(InstanceSettings.get_solo().qr_codes_include_url)
+
+	def test_pdf_uses_the_instance_setting_and_error_correction_m(self):
+		with patch("inventory.code_utils.QrCodeWidget", wraps=QrCodeWidget) as widget:
+			self.assertEqual(self.pdf().status_code, 200)
+		widget.assert_called_once_with("https://inventory.example/i/AbC23/box1", barLevel="M")
+
+		InstanceSettings.objects.update_or_create(pk=1, defaults={"qr_codes_include_url": False})
+		with patch("inventory.code_utils.QrCodeWidget", wraps=QrCodeWidget) as widget:
+			self.assertEqual(self.pdf(error_correction="L").status_code, 200)
+		widget.assert_called_once_with("box1", barLevel="L")
+
+	def test_pdf_rejects_other_error_correction_levels(self):
+		self.assertEqual(self.pdf(error_correction="H").status_code, 400)
+
+	def test_barcode_keeps_the_identifier(self):
+		with patch("inventory.code_utils.createBarcodeDrawing", wraps=createBarcodeDrawing) as drawing:
+			self.assertEqual(self.pdf(code_type="barcode").status_code, 200)
+		self.assertEqual(drawing.call_args.kwargs["value"], "box1")
