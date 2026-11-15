@@ -144,6 +144,10 @@ const router = createBrowserRouter([
         element: <AreasPage />,
       },
       {
+        path: "articles/new",
+        element: <ArticleCreateScreen />,
+      },
+      {
         path: "areas/:areaId/articles/new",
         element: <ArticleCreateScreen />,
       },

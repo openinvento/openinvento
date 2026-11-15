@@ -3,6 +3,7 @@ import json
 import os
 import tempfile
 import uuid
+from datetime import timedelta
 from typing import ClassVar
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
@@ -15,21 +16,23 @@ from django.db import transaction
 from django.db.models import Case, Count, Prefetch, When
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import viewsets
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from account_auth.authentication import StandardOrAPIKeyAuthMixin
-from account_auth.models import CustomUser
+from account_auth.models import CustomUser, InstanceSettings
 from account_auth.serializers import UserSerializer
 from ai_features.object_detection.main import LUCIDE_ARTICLE_ICONS
 
 from .barcodes import BarcodeKind, normalize
-from .code_utils import generate_codes_pdf
+from .code_utils import generate_codes_pdf, scan_base_url
 from .export_utils import generate_inventory_csv_export
+from .params import validate_inventory_uuid_param
 from .models import (
     ArticleAttachment,
     ArticleCategory,
@@ -80,7 +83,7 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
         """ Get the queryset for the viewset, filtered by accessible inventories and optional query parameters. """
         # Basic scoping for GET, PUT, PATCH, DELETE
         queryset = super().get_queryset().filter(inventory__in=self.get_accessible_inventories())
-        inventory_uuid = self.request.query_params.get("inventory")
+        inventory_uuid = validate_inventory_uuid_param(self.request.query_params.get("inventory"))
         if inventory_uuid:
             queryset = queryset.filter(inventory__uuid=inventory_uuid)
 
@@ -119,6 +122,10 @@ class InventoryScopedViewSet(viewsets.ModelViewSet):
             # If the payload includes a `type` parameter, we filter to only include entries of the specified type.
             elif self.request.query_params.get("type"):
                 queryset = queryset.filter(type=self.request.query_params["type"])
+
+            # If the payload includes `root=true`, we only include entries without a parent.
+            if self.request.query_params.get("root") == "true":
+                queryset = queryset.filter(parent__isnull=True)
 
             # If the payload includes an `include_ancestors` parameter, we include all ancestor entries of the specified entries.
             if self.request.query_params.get("include_ancestors") == "true":
@@ -283,53 +290,38 @@ class DashboardView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         inventory_uuid = request.query_params.get("inventory")
         if inventory_uuid:
             inventories = inventories.filter(uuid=inventory_uuid)
-        scoped_models = (
-            ("area", "area"),
-            ("shelf", "shelf"),
-            ("box", "box"),
-            ("article", "article"),
-            (ArticleCategory, "category", "name"),
-            (CategoryField, "field", "label"),
-        )
 
-        counts = {
-            "areas": InventoryEntry.objects.filter(inventory__in=inventories, type="area").count(),
-            "articles": InventoryEntry.objects.filter(inventory__in=inventories, type="article").count(),
-            "categories": ArticleCategory.objects.filter(inventory__in=inventories).count(),
-        }
+        entries = InventoryEntry.objects.filter(inventory__in=inventories)
+        articles = entries.filter(type="article")
         category_counts = (
-            InventoryEntry.objects.filter(inventory__in=inventories, type="article")
-            .values("category__name")
+            articles.values("category__name")
             .annotate(count=Count("uuid"))
             .order_by("-count", "category__name")
         )
+        last_added = entries.order_by("-created_at").values("uuid", "name", "type", "parent_id", "created_at")[:4]
 
-        last_added = []
-        for item in scoped_models:
-            if len(item) == 2:
-                entry_type, object_type = item
-                model, name_field = InventoryEntry, "name"
-                queryset = model.objects.filter(inventory__in=inventories, type=entry_type)
-            else:
-                model, object_type, name_field = item
-                queryset = model.objects.filter(inventory__in=inventories)
-            fields = {"uuid", name_field, "created_at"}
-            for item in queryset.values(*fields).order_by("-created_at")[:10]:
-                last_added.append({
-                    "uuid": str(item["uuid"]),
-                    "name": item[name_field],
-                    "type": object_type,
-                    "created_at": item["created_at"],
-                })
-
-        last_added.sort(key=lambda item: item["created_at"], reverse=True)
         return Response({
-            "counts": counts,
+            "counts": {
+                "areas": entries.filter(type="area").count(),
+                "articles": articles.count(),
+                "categories": ArticleCategory.objects.filter(inventory__in=inventories).count(),
+                "added_last_7_days": entries.filter(created_at__gte=timezone.now() - timedelta(days=7)).count(),
+            },
+            # Name is null for articles without a category; the frontend translates that.
             "category_counts": [
-                {"name": item["category__name"] or "No category", "count": item["count"]}
+                {"name": item["category__name"], "count": item["count"]}
                 for item in category_counts
             ],
-            "last_added": last_added[:4],
+            "last_added": [
+                {
+                    "uuid": str(item["uuid"]),
+                    "name": item["name"],
+                    "type": item["type"],
+                    "parent": str(item["parent_id"]) if item["parent_id"] else None,
+                    "created_at": item["created_at"],
+                }
+                for item in last_added
+            ],
         })
 
 
@@ -424,7 +416,7 @@ class SearchView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         if not query:
             return Response({"error": "Query parameter 'q' is required."}, status=400)
 
-        inventory = request.query_params.get("inventory")
+        inventory = validate_inventory_uuid_param(request.query_params.get("inventory"))
         if not inventory:
             return Response({"error": "Query parameter 'inventory' is required."}, status=400)
         entries = InventoryEntry.objects.filter(
@@ -525,6 +517,19 @@ class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
             "matched_by": matched_by,
         }
 
+class QrCodeSettingsView(StandardOrAPIKeyAuthMixin, APIView):
+    """Whether printed QR codes hold a URL, and which origin it points at.
+
+    The code page shows it before printing: labels stop working if that address changes.
+    """
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        base_url = scan_base_url()
+        include_url = InstanceSettings.get_solo().qr_codes_include_url and bool(base_url)
+        return Response({"include_url": include_url, "base_url": base_url if include_url else ""})
+
+
 class CodePdfView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     page_sizes: ClassVar[dict[str, tuple[str, int, int]]] = {
         "a4": ("A4", 210, 297),
@@ -533,12 +538,14 @@ class CodePdfView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     }
     code_types = ("qr", "barcode")
     layouts = ("horizontal", "vertical")
+    error_corrections = ("M", "L")
 
     def post(self, request, *args, **kwargs):
         item_uuids = request.data.get("uuids")
         code_type = request.data.get("code_type", "qr")
         page_size_name = str(request.data.get("size", "a4")).lower()
         layout = request.data.get("layout", "vertical")
+        error_correction = request.data.get("error_correction", "M")
 
         if not isinstance(item_uuids, list) or not item_uuids:
             return Response({"error": "uuids must be a non-empty list."}, status=400)
@@ -548,6 +555,8 @@ class CodePdfView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
             return Response({"error": "size must be a4, a5, or letter."}, status=400)
         if layout not in self.layouts:
             return Response({"error": "layout must be horizontal or vertical."}, status=400)
+        if error_correction not in self.error_corrections:
+            return Response({"error": "error_correction must be M or L."}, status=400)
 
         accessible = self.get_accessible_inventories()
         selected_items = []
@@ -571,7 +580,14 @@ class CodePdfView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         if invalid_uuids:
             return Response({"error": "Some selected items are invalid or inaccessible.", "uuids": invalid_uuids}, status=400)
 
-        pdf_buffer = generate_codes_pdf(selected_items, code_type, page_size_name, layout)
+        pdf_buffer = generate_codes_pdf(
+            selected_items,
+            code_type,
+            page_size_name,
+            layout,
+            error_correction=error_correction,
+            use_urls=InstanceSettings.get_solo().qr_codes_include_url,
+        )
         response = FileResponse(pdf_buffer, content_type="application/pdf")
         response["Content-Disposition"] = 'attachment; filename="openinvento-codes.pdf"'
         return response
@@ -652,7 +668,10 @@ class MagicArticleImportView(InventoryScopedAPIView):
         
         if image.size > settings.MAX_FILE_SIZE:
             return Response({"image": "The image exceeds the maximum upload size."}, status=400)
-        inventory_uuid = request.data.get("inventory")
+        try:
+            inventory_uuid = validate_inventory_uuid_param(request.data.get("inventory"))
+        except ValidationError:
+            inventory_uuid = None
         if not inventory_uuid or not self.get_accessible_inventories().filter(uuid=inventory_uuid).exists():
             return Response({"inventory": "Select an inventory you can access."}, status=400)
 

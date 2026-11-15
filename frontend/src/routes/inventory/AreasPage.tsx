@@ -2,11 +2,11 @@ import { useEffect, useState, type FormEvent } from "react"
 import { Plus, Warehouse } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router"
-import { AreaCard } from "@/components/inventory/entity-cards"
+import { AreaCard, ArticleCard } from "@/components/inventory/entity-cards"
 import { InventoryModal } from "@/components/inventory/inventory-modal"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
-import { inventoryApi, type Area } from "@/utils/api/inventory"
+import { inventoryApi, type Area, type Article } from "@/utils/api/inventory"
 import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 
 export default function AreasPage() {
@@ -14,6 +14,7 @@ export default function AreasPage() {
   const navigate = useNavigate()
   const { selectedInventory: inventory } = useSelectedInventory()
   const [areas, setAreas] = useState<Area[]>([])
+  const [articlesWithoutArea, setArticlesWithoutArea] = useState<Article[]>([])
   const [modal, setModal] = useState<{ area?: Area } | null>(null)
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
@@ -21,8 +22,12 @@ export default function AreasPage() {
   async function load() {
     setError("")
     try {
-      const nextAreas = await inventoryApi.listAreas()
+      const [nextAreas, nextArticles] = await Promise.all([
+        inventoryApi.listAreas(),
+        inventoryApi.listArticles({ root: true }),
+      ])
       setAreas(nextAreas)
+      setArticlesWithoutArea(nextArticles)
     } catch (reason) { setError(reason instanceof Error ? reason.message : t("areas.errors.load")) }
   }
   useEffect(() => { void load() }, [])
@@ -47,6 +52,14 @@ export default function AreasPage() {
       await inventoryApi.remove("areas", area.uuid)
       await load()
       window.dispatchEvent(new Event("openinvento:inventory-moved"))
+    }
+    catch (reason) { setError(reason instanceof Error ? reason.message : t("areas.errors.delete")) }
+  }
+  async function removeArticle(article: Article) {
+    if (!window.confirm(t("areas.detail.confirmDelete", { name: article.name }))) return
+    try {
+      await inventoryApi.remove("articles", article.uuid)
+      await load()
     }
     catch (reason) { setError(reason instanceof Error ? reason.message : t("areas.errors.delete")) }
   }
@@ -91,6 +104,26 @@ export default function AreasPage() {
             />
           ))}
         </div>
+      )}
+
+      {articlesWithoutArea.length > 0 && (
+        <section className="mt-8">
+          <h2 className="mb-3 text-lg font-semibold">{t("articles.page.noArea")}</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+            {articlesWithoutArea.map((article) => (
+              <ArticleCard
+                key={article.uuid}
+                name={article.name}
+                articleIcon={article.icon}
+                articleImage={article.image}
+                subtitle={t("areas.detail.inStock", { count: article.quantity })}
+                onOpen={() => navigate(`/app/articles/${article.uuid}`)}
+                onRename={() => navigate(`/app/articles/${article.uuid}`)}
+                onDelete={() => void removeArticle(article)}
+              />
+            ))}
+          </div>
+        </section>
       )}
 
       <InventoryModal 
