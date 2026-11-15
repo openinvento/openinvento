@@ -225,6 +225,7 @@ export function NavActions() {
           {t("navActions.identifier")}
           <input autoFocus name="identifier" maxLength={30} defaultValue={entity?.identifier ?? ""} required className="h-10 rounded-lg border bg-background px-3 font-normal" />
         </label>
+        <p className="text-xs text-muted-foreground">{t("manageCodes.identifierPrintedHint")}</p>
       </InventoryModal>
       {error && !renameOpen && <span role="alert" className="text-xs text-destructive">{error}</span>}
     </div>
