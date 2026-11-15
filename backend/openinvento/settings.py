@@ -112,11 +112,18 @@ def _normalize_app_url(value):
 
 
 def _normalize_scan_base_url(value):
-    """Like _normalize_app_url, but reject a path instead of dropping it: it would be on every label."""
+    """Like _normalize_app_url, but reject a path or credentials instead of keeping them: they would be on every label."""
+    value = value.strip()
+    try:
+        parsed = urlsplit(value if "://" in value else "http://" + value)
+    except ValueError:
+        # urlsplit's own message would repeat the value, which may hold a password.
+        raise ValueError("Invalid SCAN_BASE_URL: use an origin like https://short.example") from None
+    if parsed.username or parsed.password:
+        # Checked before anything that repeats the value, so the password doesn't end up in the logs.
+        raise ValueError("Invalid SCAN_BASE_URL: remove the user name and password, like https://short.example")
     origin = _normalize_app_url(value)
     if origin:
-        value = value.strip()
-        parsed = urlsplit(value if "://" in value else "http://" + value)
         if parsed.path not in ("", "/") or parsed.query or parsed.fragment:
             raise ValueError(
                 f"Invalid SCAN_BASE_URL {value!r}: use an origin without a path, like https://short.example"
