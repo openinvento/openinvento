@@ -193,8 +193,8 @@ class InstanceBackupTests(TransactionTestCase):
 
 
 def load_settings(**env):
-	"""Execute settings.py with only the given APP_URL/APP_URLS values in the environment."""
-	base = {key: value for key, value in os.environ.items() if key not in {"APP_URL", "APP_URLS"}}
+	"""Execute settings.py with only the given APP_URL/APP_URLS/SCAN_BASE_URL values in the environment."""
+	base = {key: value for key, value in os.environ.items() if key not in {"APP_URL", "APP_URLS", "SCAN_BASE_URL"}}
 	with patch.dict(os.environ, {**base, **env}, clear=True):
 		return runpy.run_module("openinvento.settings")
 
@@ -248,3 +248,29 @@ class CorsSettingsTests(SimpleTestCase):
 			settings = runpy.run_module("openinvento.settings")
 
 		self.assertIn("Content-Disposition", settings["CORS_EXPOSE_HEADERS"])
+
+
+class ScanBaseUrlSettingsTests(SimpleTestCase):
+	def test_is_empty_by_default(self):
+		self.assertEqual(load_settings()["SCAN_BASE_URL"], "")
+
+	def test_is_normalized_like_app_url(self):
+		for value, expected in (
+			("https://short.example", "https://short.example"),
+			("https://short.example/", "https://short.example"),
+			("short.example:8080", "http://short.example:8080"),
+		):
+			with self.subTest(value=value):
+				self.assertEqual(load_settings(SCAN_BASE_URL=value)["SCAN_BASE_URL"], expected)
+
+	def test_path_query_and_fragment_are_rejected(self):
+		# APP_URL drops them, but on a label they would silently send every scan to the wrong place.
+		for value in ("https://short.example/inventory", "https://short.example/?a=1", "short.example/#x"):
+			with self.subTest(value=value), self.assertRaisesMessage(ValueError, "SCAN_BASE_URL"):
+				load_settings(SCAN_BASE_URL=value)
+
+	def test_is_not_an_allowed_host_or_csrf_origin(self):
+		settings = load_settings(APP_URL="https://inventory.example.test", SCAN_BASE_URL="https://short.example")
+
+		self.assertNotIn("short.example", settings["ALLOWED_HOSTS"])
+		self.assertNotIn("https://short.example", settings["CSRF_TRUSTED_ORIGINS"])
