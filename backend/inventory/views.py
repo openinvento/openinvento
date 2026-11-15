@@ -286,7 +286,7 @@ class ExportInventoryView(StandardOrAPIKeyAuthMixin, InventoryAccessMixin, APIVi
 class DashboardView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
     def get(self, request, *args, **kwargs):
         inventories = self.get_accessible_inventories()
-        inventory_uuid = request.query_params.get("inventory")
+        inventory_uuid = validate_inventory_uuid_param(request.query_params.get("inventory"))
         if inventory_uuid:
             inventories = inventories.filter(uuid=inventory_uuid)
 
