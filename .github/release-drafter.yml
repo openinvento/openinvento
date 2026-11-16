@@ -29,15 +29,18 @@ categories:
   - type: 'version-resolver'
     semver-increment: 'patch'
 change-template: |
-  - **$TITLE** (#$NUMBER)
-      $BODY
+  - **$TITLE** (#$NUMBER)<br>$BODY
 replacers:
   - target: change-body
     section: '## Release notes'
     not-found: empty
 # Add # and @ to prevent mentions. Add ` to prevent code blocks.
 change-title-escapes: '\<*_&'
-footer: "\n\nThank you for using Openinvento! If you like this project, please consider giving it a star on GitHub and spreading the word. Your support helps us continue to improve and maintain Openinvento for everyone!"
+footer: |
+
+  ## Thank you
+
+  **Thank you for using Openinvento! If you like this project, please consider giving it a star on GitHub and spreading the word. Your support helps us continue to improve and maintain Openinvento for everyone!**
 template: |
   ## Changes
 
