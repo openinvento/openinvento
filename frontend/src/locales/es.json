@@ -103,7 +103,7 @@
       "areas": "áreas",
       "barcodes": {
         "title": "Códigos de barras",
-        "description": "EAN, UPC, ISBN o PZN del envase del producto. Al escanear cualquiera de ellos se encuentra este artículo.",
+        "description": "EAN, UPC, ISBN o PZN del envase del producto. Permite encontrar el artículo escaneándolo.",
         "add": "Añadir código de barras",
         "remove": "Quitar código de barras",
         "kind": "Tipo de código de barras",

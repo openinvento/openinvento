@@ -103,7 +103,7 @@
       "areas": "Areas",
       "barcodes": {
         "title": "Barcodes",
-        "description": "EAN, UPC, ISBN or PZN from the product's packaging. Scanning one of them finds this article.",
+        "description": "EAN, UPC, ISBN or PZN from the product's packaging. Lets you find the article by scanning it.",
         "add": "Add barcode",
         "remove": "Remove barcode",
         "kind": "Barcode type",

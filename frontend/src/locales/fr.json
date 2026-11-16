@@ -103,7 +103,7 @@
       "areas": "Zones",
       "barcodes": {
         "title": "Codes-barres",
-        "description": "EAN, UPC, ISBN ou PZN figurant sur l’emballage du produit. Scanner l’un d’eux retrouve cet article.",
+        "description": "EAN, UPC, ISBN ou PZN figurant sur l’emballage du produit. Permet de retrouver l’article en le scannant.",
         "add": "Ajouter un code-barres",
         "remove": "Supprimer le code-barres",
         "kind": "Type de code-barres",

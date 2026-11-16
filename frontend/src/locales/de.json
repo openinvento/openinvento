@@ -103,7 +103,7 @@
       "areas": "Bereiche",
       "barcodes": {
         "title": "Barcodes",
-        "description": "EAN, UPC, ISBN oder PZN von der Verpackung. Beim Scannen findet jeder davon diesen Artikel.",
+        "description": "EAN, UPC, ISBN oder PZN von der Verpackung. Damit findest du den Artikel auch per Scan.",
         "add": "Barcode hinzufügen",
         "remove": "Barcode entfernen",
         "kind": "Barcode-Art",
