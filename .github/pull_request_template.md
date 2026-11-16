@@ -3,6 +3,8 @@
 
 <!-- Please describe what this pull request changes and why. -->
 
+<!-- For frontend/ UI related changes, including screenshots or demos if applicable. -->
+
 ## Release notes
 
 <!-- Add the user-facing description for the release here. -->
