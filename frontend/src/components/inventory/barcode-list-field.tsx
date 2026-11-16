@@ -25,7 +25,7 @@ export function BarcodeListField({ value, onChange }: BarcodeListFieldProps) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p id={headingId} className="flex items-center gap-2 text-sm font-medium">
-            <BarcodeIcon className="size-4 text-muted-foreground" />
+            <BarcodeIcon className="size-5 text-muted-foreground" />
             {t("articles.page.barcodes.title")}
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground">{t("articles.page.barcodes.description")}</p>
