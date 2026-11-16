@@ -5,10 +5,12 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
+from .barcodes import BarcodeKind, detect_kind, is_valid, normalize
 from .models import (
     ArticleAttachment,
     ArticleCategory,
     ArticleFieldValue,
+    Barcode,
     CategoryField,
     Inventory,
     InventoryEntry,
@@ -56,11 +58,16 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
     field_values = serializers.SerializerMethodField()
     category_fields = serializers.SerializerMethodField()
     field_values_input = serializers.JSONField(required=False, write_only=True, source="_field_values")
+    barcodes = serializers.SerializerMethodField()
+    # Replaces all barcodes of the entry: [{"kind": "ean" | "isbn" | "pzn" | "other" | "", "value": "..."}].
+    # An empty kind is detected from the value.
+    barcodes_input = serializers.JSONField(required=False, write_only=True, source="_barcodes")
 
     class Meta:
         model = InventoryEntry
         fields = ("uuid", "identifier", "inventory", "created_at", "updated_at", "name", "type", "parent",
-                  "description", "quantity", "stock_tracking", "image", "icon", "category", "field_values", "field_values_input", "category_fields")
+                  "description", "quantity", "stock_tracking", "image", "icon", "category", "field_values", "field_values_input",
+                  "category_fields", "barcodes", "barcodes_input")
         read_only_fields = ("uuid", "created_at", "updated_at")
 
     def __init__(self, *args, **kwargs):
@@ -119,7 +126,37 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError({"field_values_input": "Invalid date notification setting."})
                 seen_fields.add(field_id)
 
+        if attrs.get("_barcodes") is not None:
+            attrs["_barcodes"] = self._clean_barcodes(attrs["_barcodes"])
+
         return attrs
+
+    @staticmethod
+    def _clean_barcodes(values):
+        """Normalize the barcodes and check them against their type's check digit."""
+        if not isinstance(values, list):
+            raise serializers.ValidationError({"barcodes_input": "Expected a JSON list."})
+        cleaned = {}
+        for item in values:
+            if not isinstance(item, dict) or not isinstance(item.get("value"), str):
+                raise serializers.ValidationError({"barcodes_input": "Each barcode must be an object with a value."})
+            kind = item.get("kind") or detect_kind(item["value"])
+            if kind not in BarcodeKind.values:
+                raise serializers.ValidationError({"barcodes_input": f"Unknown barcode type: {kind}."})
+            value = normalize(kind, item["value"])
+            if not value or len(value) > 80:
+                raise serializers.ValidationError({"barcodes_input": "A barcode needs 1 to 80 characters."})
+            if not is_valid(kind, value):
+                raise serializers.ValidationError(
+                    {"barcodes_input": f"{value} is not a valid {BarcodeKind(kind).label} barcode. Check the number, or save it as Other."}
+                )
+            if value in cleaned:
+                raise serializers.ValidationError({"barcodes_input": f"{value} is listed twice."})
+            cleaned[value] = kind
+        return [(kind, value) for value, kind in cleaned.items()]
+
+    def get_barcodes(self, obj):
+        return [{"kind": barcode.kind, "value": barcode.value} for barcode in obj.barcodes.all()]
 
     def get_field_values(self, obj):
         return [{"field": str(row.field_id), "key": row.field.key, "value": row.value,
@@ -142,16 +179,27 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Save field values for an article entry. This method is called during create operations."""
         values = validated_data.pop("_field_values", None)
+        barcodes = validated_data.pop("_barcodes", None)
         entry = super().create(validated_data)
         self._save_field_values(entry, values)
+        self._save_barcodes(entry, barcodes)
         return entry
 
     def update(self, instance, validated_data):
         """Save field values for an article entry. This method is called during update operations."""
         values = validated_data.pop("_field_values", None)
+        barcodes = validated_data.pop("_barcodes", None)
         entry = super().update(instance, validated_data)
         self._save_field_values(entry, values)
+        self._save_barcodes(entry, barcodes)
         return entry
+
+    @staticmethod
+    def _save_barcodes(entry, barcodes):
+        if barcodes is None:
+            return
+        entry.barcodes.all().delete()
+        Barcode.objects.bulk_create(Barcode(entry=entry, kind=kind, value=value) for kind, value in barcodes)
 
     def _save_field_values(self, entry, values):
         """Save field values for an article entry. This method is called during create and update operations."""

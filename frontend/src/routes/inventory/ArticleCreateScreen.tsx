@@ -5,13 +5,16 @@ import { useTranslation } from "react-i18next"
 import BaseScreen from "@/layouts/BaseScreen"
 import { ArticleIconPicker } from "@/components/inventory/article-icon-picker"
 import { ImageUploadField } from "@/components/inventory/image-upload-field"
+import { BarcodeListField } from "@/components/inventory/barcode-list-field"
+import { CategoryFields } from "@/components/inventory/category-fields"
+import { barcodesPayload, type BarcodeDraft } from "@/utils/barcodes"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { inventoryApi, type Area, type ArticleCategory, type CategoryField, type Box, type Shelf } from "@/utils/api/inventory"
 import { useSelectedInventory } from "@/hooks/use-selected-inventory"
-import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
+import { getCategoryLabel } from "@/utils/i18n-labels"
 import { compressArticleImage } from "@/utils/article-image"
 
 export default function ArticleCreateScreen() {
@@ -36,6 +39,7 @@ export default function ArticleCreateScreen() {
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [stockTracking, setStockTracking] = useState(false)
+  const [barcodes, setBarcodes] = useState<BarcodeDraft[]>([])
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
 
@@ -125,6 +129,7 @@ export default function ArticleCreateScreen() {
       payload.append("description", form.get("description")?.toString() || "")
       payload.append("icon", selectedIcon)
       payload.append("field_values", JSON.stringify(fieldValues))
+      payload.append("barcodes_input", barcodesPayload(barcodes))
       if (image) payload.append("image", image)
 
       const article = await inventoryApi.create<{ area: string }>("articles", payload)
@@ -250,8 +255,9 @@ export default function ArticleCreateScreen() {
         </section>
         <section className="grid gap-5 rounded-xl border p-5 lg:col-span-2">
           <Field label={t("areas.detail.fields.description")}><textarea name="description" rows={5} className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50" /></Field>
-          {otherFields.length > 0 && <div className="grid gap-5 sm:grid-cols-2">{otherFields.map((field) => <CustomField key={field.uuid} field={field} label={getFieldLabel(field)} selectLabel={t("articles.page.fields.selectValue")} />)}</div>}
-          {stockTracking && stockFields.length > 0 && <div className="grid gap-5 border-t pt-5 sm:grid-cols-2">{stockFields.map((field) => <CustomField key={field.uuid} field={field} label={getFieldLabel(field)} selectLabel={t("articles.page.fields.selectValue")} />)}</div>}
+          <BarcodeListField value={barcodes} onChange={setBarcodes} />
+          <CategoryFields fields={otherFields} />
+          {stockTracking && <CategoryFields fields={stockFields} className="border-t pt-5" />}
         </section>
       </form>
     </BaseScreen>
@@ -262,18 +268,3 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   return <label className="grid gap-1.5 text-sm font-medium">{label}{children}</label>
 }
 
-function CustomField({ field, label, selectLabel }: { field: CategoryField; label: string; selectLabel: string }) {
-  const { t } = useTranslation()
-  return <Field label={label}>
-    {field.field_type === "select" ? <Select name={`custom_${field.key}`} defaultValue=""><SelectTrigger className="w-full"><SelectValue placeholder={selectLabel} /></SelectTrigger><SelectContent><SelectItem value="">{selectLabel}</SelectItem>{field.options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent></Select>
-      : field.field_type === "boolean" ? <Switch name={`custom_${field.key}`} value="true" />
-        : field.field_type === "date" ? <div className="grid gap-2">
-          <Input name={`custom_${field.key}`} type="date" />
-          <span className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm font-normal">
-            <span>{t("categoriesAndFields.dateNotifications")}</span>
-            <Switch name={`notify_date_${field.key}`} value="true" aria-label={t("categoriesAndFields.dateNotifications")} />
-          </span>
-        </div>
-          : <Input name={`custom_${field.key}`} type={field.field_type === "number" ? "number" : "text"} />}
-  </Field>
-}

@@ -11,6 +11,8 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 from PIL import Image, UnidentifiedImageError
 
+from .barcodes import BarcodeKind
+
 INVENTORY_ENTRY_TYPE_CONFIG = {
     "area": {
         "name": "Area",
@@ -320,3 +322,22 @@ class ArticleFieldValue(models.Model):
 
     def __str__(self):
         return f"{self.entry}: {self.field.label}"
+
+
+class Barcode(models.Model):
+    """A product barcode of an entry. An entry can have several, and the same one can be on several entries.
+
+    Barcodes belong to any entry type, not only articles, so custom entry types need no change later.
+    """
+    entry = models.ForeignKey(InventoryEntry, on_delete=models.CASCADE, related_name="barcodes")
+    kind = models.CharField(max_length=10, choices=BarcodeKind.choices)
+    value = models.CharField(max_length=80, db_index=True)
+
+    class Meta:
+        ordering = ("id",)
+        constraints = (
+            models.UniqueConstraint(fields=("entry", "value"), name="unique_entry_barcode"),
+        )
+
+    def __str__(self):
+        return f"{self.entry}: {self.value}"
