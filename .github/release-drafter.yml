@@ -29,8 +29,8 @@ categories:
   - type: 'version-resolver'
     semver-increment: 'patch'
 change-template: |
-  - **$TITLE** (#$NUMBER) $AUTHORS
-    $BODY
+  - **$TITLE** (#$NUMBER)
+      $BODY
 replacers:
   - target: change-body
     section: '## Release notes'
@@ -42,3 +42,9 @@ template: |
   ## Changes
 
   $CHANGES
+
+  ## Contributors
+
+  Thank you to all contributors who helped make this release possible!
+
+  $CONTRIBUTORS
