@@ -29,7 +29,7 @@ categories:
   - type: 'version-resolver'
     semver-increment: 'patch'
 change-template: |
-  - **$TITLE** (#$NUMBER)<br><span>$BODY</span>
+  - **$TITLE** (#$NUMBER) – $BODY
 replacers:
   - target: change-body
     section: '## Release notes'
