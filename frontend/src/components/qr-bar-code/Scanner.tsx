@@ -168,7 +168,11 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 						</Button>
 					</div>
 				)}
-				{status === "scanning" && <div className="pointer-events-none absolute inset-[18%] rounded-lg border-2 border-white/80" />}
+				{status === "scanning" && (
+					<div className="pointer-events-none absolute inset-x-8 inset-y-10" aria-hidden="true">
+						<div className="absolute inset-x-0 top-0 h-1 animate-scanner-scan rounded-full bg-white/50" />
+					</div>
+				)}
 			</div>
 
 			{status === "error" && (
