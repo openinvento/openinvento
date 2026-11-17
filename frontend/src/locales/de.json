@@ -103,7 +103,7 @@
       "areas": "Bereiche",
       "barcodes": {
         "title": "Barcodes",
-        "description": "EAN, UPC, ISBN oder PZN von der Verpackung.",
+        "description": "EAN, UPC, ISBN oder PZN von der Verpackung. Damit findest du den Artikel auch per Scan.",
         "add": "Barcode hinzufügen",
         "remove": "Barcode entfernen",
         "kind": "Barcode-Art",
@@ -422,6 +422,11 @@
     "inventoryItems": "Inventarelemente",
     "layout": "Anordnung",
     "loading": "Inventarelemente werden geladen...",
+    "matches": {
+      "close": "Schließen",
+      "description": "Dasselbe Produkt kann an mehreren Orten liegen. Wähle den gemeinten Eintrag.",
+      "title": "{{count}} Einträge haben diesen Barcode"
+    },
     "noItems": "Keine Inventarelemente gefunden.",
     "options": "Codeoptionen",
     "paperSize": "Papierformat",
@@ -517,6 +522,21 @@
     "loading": "Code wird geöffnet...",
     "notFoundDescription": "Diesen Code gibt es nicht, oder du hast keinen Zugriff auf sein Inventar.",
     "notFoundTitle": "Code nicht gefunden"
+  },
+  "scanner": {
+    "access": "Kamerazugriff nicht möglich.",
+    "cancel": "Abbrechen",
+    "close": "Scanner schließen",
+    "description": "Richte die Kamera auf einen Barcode oder QR-Code.",
+    "errors": {
+      "lookup": "Das gescannte Element konnte nicht gefunden werden.",
+      "unavailable": "Kamerazugriff ist in diesem Browser nicht verfügbar."
+    },
+    "lookingUp": "Inventarelement wird gesucht...",
+    "preparing": "Kamera wird vorbereitet...",
+    "retry": "Suche wiederholen",
+    "starting": "Kamera wird gestartet...",
+    "title": "Code scannen"
   },
   "search": {
     "box": "Kiste",

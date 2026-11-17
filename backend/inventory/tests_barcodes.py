@@ -215,3 +215,80 @@ class MoveBarcodeFieldsTests(TestCase):
 		ensure_default_categories(self.inventory)
 
 		self.assertFalse(CategoryField.objects.filter(inventory=self.inventory, key__in=("barcode", "isbn", "pzn_barcode")).exists())
+
+
+class BarcodeLookupTests(TestCase):
+	def setUp(self):
+		self.user = CustomUser.objects.create_user(username="scanner", password="StrongPassword!123")
+		self.home = Inventory.objects.create(name="Home")
+		self.office = Inventory.objects.create(name="Office")
+		self.foreign = Inventory.objects.create(name="Foreign")
+		self.home.users.add(self.user)
+		self.office.users.add(self.user)
+		self.client = APIClient()
+		self.client.force_login(self.user)
+
+	def article(self, inventory, name, *barcodes, identifier=""):
+		entry = InventoryEntry.objects.create(inventory=inventory, type="article", name=name, identifier=identifier)
+		for kind, value in barcodes:
+			Barcode.objects.create(entry=entry, kind=kind, value=value)
+		return entry
+
+	def lookup(self, code, **data):
+		return self.client.post("/api/codes/lookup/", {"identifier": code, **data}, format="json")
+
+	def names(self, response):
+		return [(match["name"], match["matched_by"]) for match in response.data["matches"]]
+
+	def test_barcode_finds_all_entries_with_the_given_inventory_first(self):
+		self.article(self.home, "Tea at home", ("ean", "4006381333931"))
+		self.article(self.office, "Tea at the office", ("ean", "4006381333931"))
+		self.article(self.foreign, "Foreign tea", ("ean", "4006381333931"))
+
+		response = self.lookup("4006381333931", inventory=str(self.office.uuid))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(self.names(response), [("Tea at the office", "barcode"), ("Tea at home", "barcode")])
+		self.assertEqual(response.data["matches"][0]["inventory"]["uuid"], str(self.office.uuid))
+
+	def test_identifier_wins_and_comes_back_alone(self):
+		self.article(self.home, "By identifier", identifier="4006381333931")
+		self.article(self.home, "By barcode", ("ean", "4006381333931"))
+
+		self.assertEqual(self.names(self.lookup("4006381333931")), [("By identifier", "identifier")])
+
+	def test_scanned_forms_are_normalized(self):
+		self.article(self.home, "Pills", ("pzn", "08585997"))
+		self.article(self.home, "Book", ("isbn", "9780306406157"))
+
+		# A PZN barcode (Code 39) starts with "-"; ISBNs are often typed with hyphens.
+		self.assertEqual(self.names(self.lookup("-08585997")), [("Pills", "barcode")])
+		self.assertEqual(self.names(self.lookup("978-0-306-40615-7")), [("Book", "barcode")])
+
+	def test_entry_with_a_matching_barcode_twice_is_listed_once(self):
+		self.article(self.home, "Pills", ("pzn", "08585997"), ("other", "-08585997"))
+
+		self.assertEqual(self.names(self.lookup("-08585997")), [("Pills", "barcode")])
+
+	def test_scan_url_never_searches_barcodes(self):
+		self.article(self.home, "Tea", ("ean", "4006381333931"))
+
+		response = self.lookup("4006381333931", inventory_identifier=self.home.identifier)
+
+		self.assertEqual(response.status_code, 404)
+
+	def test_foreign_and_unknown_codes_get_the_same_404(self):
+		self.article(self.foreign, "Foreign tea", ("ean", "4006381333931"))
+
+		foreign = self.lookup("4006381333931")
+		unknown = self.lookup("96385074")
+
+		self.assertEqual(foreign.status_code, 404)
+		self.assertEqual(foreign.data, unknown.data)
+
+	def test_invalid_inventory_uuid_is_ignored(self):
+		self.article(self.home, "Tea", ("ean", "4006381333931"))
+
+		response = self.lookup("4006381333931", inventory="not-a-uuid")
+
+		self.assertEqual(self.names(response), [("Tea", "barcode")])

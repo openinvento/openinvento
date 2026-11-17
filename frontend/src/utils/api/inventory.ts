@@ -125,13 +125,17 @@ export type CodePdfOptions = {
 // Whether printed QR codes hold a URL, and the origin it points at (empty without a URL).
 export type QrCodeSettings = { include_url: boolean; base_url: string }
 
-export type CodeLookupResult = {
+export type CodeLookupMatch = {
   uuid: string
   identifier: string
   name: string
   type: "article" | "area" | "shelf" | "box" | "category" | "field"
   inventory: { uuid: string; name: string }
+  matched_by: "identifier" | "barcode"
 }
+
+// An identifier matches one entry, a barcode can match several. No match is a 404.
+export type CodeLookupResult = { matches: CodeLookupMatch[] }
 
 export type InventoryUser = {
   uuid: string

@@ -23,9 +23,10 @@ export default function ScanCode() {
     let active = true
     void (async () => {
       try {
-        const result = await inventoryApi.lookupCodeInInventory(identifier ?? "", inventory ?? "")
+        // A scan URL names one entry, so there is exactly one match.
+        const { matches } = await inventoryApi.lookupCodeInInventory(identifier ?? "", inventory ?? "")
         if (!active) return
-        const target = await openInventoryOfEntry(result)
+        const target = matches[0] ? await openInventoryOfEntry(matches[0]) : null
         if (!active) return
         if (target) navigate(target.path, { replace: true })
         else setNotFound(true)

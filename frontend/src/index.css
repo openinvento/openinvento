@@ -12,6 +12,19 @@
   @apply bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-50;
 }
 
+@utility animate-scanner-scan {
+  animation: scanner-scan 3.5s ease-in-out infinite;
+}
+
+@keyframes scanner-scan {
+  0%, 100% {
+    top: 0;
+  }
+  50% {
+    top: calc(100% - 4px);
+  }
+}
+
 /* Use normal colors for dark mode for example with dark:bg-blue-300 */
 
 

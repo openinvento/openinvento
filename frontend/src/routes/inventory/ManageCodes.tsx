@@ -3,9 +3,10 @@ import { useNavigate } from "react-router"
 import { LoaderCircle, Printer, ScanBarcode, ScanLine, X } from "lucide-react"
 
 import Scanner from "@/components/qr-bar-code/Scanner"
+import ScanMatchesModal from "@/components/inventory/ScanMatchesModal"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
-import { inventoryApi, type CodePdfOptions, type QrCodeSettings } from "@/utils/api/inventory"
+import { inventoryApi, type CodeLookupMatch, type CodePdfOptions, type QrCodeSettings } from "@/utils/api/inventory"
 import { lookupScannedCode, openInventoryOfEntry } from "@/utils/scan-code"
 import { useSelectedInventory } from "@/hooks/use-selected-inventory"
 import { useTranslation } from "react-i18next"
@@ -39,6 +40,7 @@ export default function ManageCodes() {
 	})
 
 	const [isScannerOpen, setIsScannerOpen] = useState(false)
+	const [matchChoices, setMatchChoices] = useState<CodeLookupMatch[] | null>(null)
 
 	const [useExternalBarcodeScanner, setUseExternalBarcodeScanner] = useState(false)
 	const [externalScanError, setExternalScanError] = useState("")
@@ -53,10 +55,18 @@ export default function ManageCodes() {
 	const [qrSettings, setQrSettings] = useState<QrCodeSettings | null>(null)
 	const { selectedInventoryUuid: selectedInventory } = useSelectedInventory()
 
-	// Camera and external scanner both end up here, with a bare identifier or a scan URL.
+	// Camera and external scanner both end up here, with a bare identifier, a scan URL or a product barcode.
 	async function handleCodeDetected(code: string) {
-		const result = await lookupScannedCode(code.trim(), selectedInventory)
-		const target = await openInventoryOfEntry(result)
+		const { matches } = await lookupScannedCode(code.trim(), selectedInventory)
+		if (matches.length === 1) return openMatch(matches[0])
+		// The same product can be stored in several places, so opening the first match could pick the wrong one.
+		setIsScannerOpen(false)
+		setUseExternalBarcodeScanner(false)
+		setMatchChoices(matches)
+	}
+
+	async function openMatch(match: CodeLookupMatch) {
+		const target = await openInventoryOfEntry(match)
 		if (!target) throw new Error(t("manageCodes.externalScanner.errors.lookup"))
 		// The mounted layout only loads the selected inventory on load, like the inventory switcher.
 		if (target.inventoryChanged) window.location.assign(target.path)
@@ -311,6 +321,7 @@ export default function ManageCodes() {
 					</section>
 				</div>
 			)}
+			{matchChoices && <ScanMatchesModal matches={matchChoices} onClose={() => setMatchChoices(null)} onSelect={openMatch} />}
 		</BaseScreen>
 	)
 }
