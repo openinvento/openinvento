@@ -4,6 +4,7 @@ import { Printer, ScanBarcode, ScanLine, X } from "lucide-react"
 
 import Scanner from "@/components/qr-bar-code/Scanner"
 import { BarcodeInputForm } from "@/components/qr-bar-code/BarcodeInputForm"
+import ScanMatchesModal from "@/components/inventory/ScanMatchesModal"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
 import { inventoryApi, type CodeLookupMatch, type CodePdfOptions, type QrCodeSettings } from "@/utils/api/inventory"
@@ -41,7 +42,6 @@ export default function ManageCodes() {
 
 	const [isScannerOpen, setIsScannerOpen] = useState(false)
 	const [matchChoices, setMatchChoices] = useState<CodeLookupMatch[] | null>(null)
-	const [matchError, setMatchError] = useState("")
 
 	// A barcode scanner in keyboard (HID) mode types into the field of this dialog, like a person would.
 	const [useExternalBarcodeScanner, setUseExternalBarcodeScanner] = useState(false)
@@ -58,7 +58,6 @@ export default function ManageCodes() {
 		// The same product can be stored in several places, so opening the first match could pick the wrong one.
 		setIsScannerOpen(false)
 		setUseExternalBarcodeScanner(false)
-		setMatchError("")
 		setMatchChoices(matches)
 	}
 
@@ -272,43 +271,7 @@ export default function ManageCodes() {
 					</section>
 				</div>
 			)}
-			{matchChoices && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="presentation" onMouseDown={(event) => {
-					if (event.target === event.currentTarget) setMatchChoices(null)
-				}}>
-					<section role="dialog" aria-modal="true" aria-labelledby="scan-matches-title" className="flex max-h-[80vh] w-full max-w-md flex-col rounded-xl border bg-card p-6 shadow-lg">
-						<div className="flex items-start justify-between gap-4">
-							<div>
-								<h2 id="scan-matches-title" className="text-lg font-semibold">{t("manageCodes.matches.title", { count: matchChoices.length })}</h2>
-								<p className="mt-2 text-sm text-muted-foreground">{t("manageCodes.matches.description")}</p>
-							</div>
-							<Button aria-label={t("manageCodes.matches.close")} size="icon" variant="ghost" onClick={() => setMatchChoices(null)}>
-								<X />
-							</Button>
-						</div>
-						<ul className="mt-4 divide-y overflow-y-auto rounded-lg border">
-							{matchChoices.map((match) => (
-								<li key={match.uuid}>
-									<button
-										type="button"
-										className="flex w-full flex-col items-start gap-0.5 p-3 text-left transition-colors hover:bg-muted/50"
-										onClick={() => {
-											setMatchError("")
-											openMatch(match).catch((reason) => setMatchError(reason instanceof Error ? reason.message : t("manageCodes.externalScanner.errors.lookup")))
-										}}
-									>
-										<span className="font-medium">{match.name}</span>
-										<span className="text-xs text-muted-foreground">
-											{t(`manageCodes.types.${match.type}`, { defaultValue: match.type })} · {match.inventory.name}
-										</span>
-									</button>
-								</li>
-							))}
-						</ul>
-						{matchError && <p className="mt-4 text-sm text-destructive">{matchError}</p>}
-					</section>
-				</div>
-			)}
+			{matchChoices && <ScanMatchesModal matches={matchChoices} onClose={() => setMatchChoices(null)} onSelect={openMatch} />}
 		</BaseScreen>
 	)
 }

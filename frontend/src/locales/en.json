@@ -131,7 +131,7 @@
       "areas": "Areas",
       "barcodes": {
         "title": "Barcodes",
-        "description": "EAN, UPC, ISBN or PZN from the product's packaging. Scanning one of them finds this article.",
+        "description": "EAN, UPC, ISBN or PZN from the product's packaging. Lets you find the article by scanning it.",
         "add": "Add barcode",
         "remove": "Remove barcode",
         "kind": "Barcode type",
@@ -550,6 +550,21 @@
     "loading": "Opening code...",
     "notFoundDescription": "This code does not exist, or you do not have access to its inventory.",
     "notFoundTitle": "Code not found"
+  },
+  "scanner": {
+    "access": "Unable to access the camera.",
+    "cancel": "Cancel",
+    "close": "Close scanner",
+    "description": "Point your camera at a barcode or QR code.",
+    "errors": {
+      "lookup": "Unable to find the scanned item.",
+      "unavailable": "Camera access is not available in this browser."
+    },
+    "lookingUp": "Finding the inventory item...",
+    "preparing": "Preparing the camera...",
+    "retry": "Retry lookup",
+    "starting": "Starting camera...",
+    "title": "Scan a code"
   },
   "search": {
     "box": "Box",

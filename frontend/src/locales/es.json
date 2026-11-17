@@ -131,7 +131,7 @@
       "areas": "áreas",
       "barcodes": {
         "title": "Códigos de barras",
-        "description": "EAN, UPC, ISBN o PZN del envase del producto. Al escanear cualquiera de ellos se encuentra este artículo.",
+        "description": "EAN, UPC, ISBN o PZN del envase del producto. Permite encontrar el artículo escaneándolo.",
         "add": "Añadir código de barras",
         "remove": "Quitar código de barras",
         "kind": "Tipo de código de barras",
@@ -548,6 +548,21 @@
     "loading": "Abriendo el código...",
     "notFoundDescription": "Este código no existe o no tienes acceso a su inventario.",
     "notFoundTitle": "Código no encontrado"
+  },
+  "scanner": {
+    "access": "No se pudo acceder a la cámara.",
+    "cancel": "Cancelar",
+    "close": "Cerrar escáner",
+    "description": "Apunta la cámara a un código de barras o código QR.",
+    "errors": {
+      "lookup": "No se pudo encontrar el elemento escaneado.",
+      "unavailable": "El acceso a la cámara no está disponible en este navegador."
+    },
+    "lookingUp": "Buscando el elemento del inventario...",
+    "preparing": "Preparando la cámara...",
+    "retry": "Reintentar búsqueda",
+    "starting": "Iniciando la cámara...",
+    "title": "Escanear un código"
   },
   "search": {
     "box": "Caja",
