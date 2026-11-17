@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { BarcodeDetector, prepareZXingModule } from "barcode-detector/ponyfill"
+import zxingReaderWasm from "zxing-wasm/reader/zxing_reader.wasm?url"
 import { Camera, LoaderCircle, RotateCcw, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -10,16 +11,13 @@ interface PrepareZXingOptions {
 	};
 }
 
-const BASE_PATH = import.meta.env?.BASE_URL || "/"; 
-
 prepareZXingModule({
 	overrides: {
 		locateFile: (path: string, prefix: string): string => {
 			if (path.endsWith(".wasm")) {
-				const fullUrl = new URL(path, window.location.origin + BASE_PATH).href;
-				return fullUrl;
+				return zxingReaderWasm
 			}
-			return prefix + path;
+			return prefix + path
 		},
 	},
 } as PrepareZXingOptions);
