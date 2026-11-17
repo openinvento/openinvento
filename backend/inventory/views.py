@@ -457,7 +457,7 @@ class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         inventory_identifier = str(request.data.get("inventory_identifier", "")).strip()
 
         if inventory_identifier:
-            item = self.find_by_scan_url(code, inventory_identifier, accessible_inventories)
+            item = self.find_by_inventory_and_identifier(code, inventory_identifier, accessible_inventories)
             matches = [(item, "identifier")] if item else []
         else:
             preferred_inventory = self.preferred_inventory(request)
@@ -489,7 +489,7 @@ class CodeLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView):
         return matches[0] if len(matches) == 1 else None
 
     @classmethod
-    def find_by_scan_url(cls, code, inventory_identifier, accessible_inventories):
+    def find_by_inventory_and_identifier(cls, code, inventory_identifier, accessible_inventories):
         entries = InventoryEntry.objects.filter(inventory__in=accessible_inventories).select_related("inventory")
         item = entries.filter(inventory__identifier=inventory_identifier, identifier=code).first()
         if item is not None:
