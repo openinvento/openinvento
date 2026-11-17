@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { BarcodeDetector, prepareZXingModule } from "barcode-detector/ponyfill"
 import zxingReaderWasm from "zxing-wasm/reader/zxing_reader.wasm?url"
-import { Camera, LoaderCircle, RotateCcw, X } from "lucide-react"
+import { Camera, LoaderCircle, RotateCcw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
