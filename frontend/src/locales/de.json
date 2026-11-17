@@ -523,6 +523,21 @@
     "notFoundDescription": "Diesen Code gibt es nicht, oder du hast keinen Zugriff auf sein Inventar.",
     "notFoundTitle": "Code nicht gefunden"
   },
+  "scanner": {
+    "access": "Kamerazugriff nicht möglich.",
+    "cancel": "Abbrechen",
+    "close": "Scanner schließen",
+    "description": "Richte die Kamera auf einen Barcode oder QR-Code.",
+    "errors": {
+      "lookup": "Das gescannte Element konnte nicht gefunden werden.",
+      "unavailable": "Kamerazugriff ist in diesem Browser nicht verfügbar."
+    },
+    "lookingUp": "Inventarelement wird gesucht...",
+    "preparing": "Kamera wird vorbereitet...",
+    "retry": "Suche wiederholen",
+    "starting": "Kamera wird gestartet...",
+    "title": "Code scannen"
+  },
   "search": {
     "box": "Kiste",
     "empty": "Keine Artikel gefunden.",

@@ -525,6 +525,21 @@
     "notFoundDescription": "This code does not exist, or you do not have access to its inventory.",
     "notFoundTitle": "Code not found"
   },
+  "scanner": {
+    "access": "Unable to access the camera.",
+    "cancel": "Cancel",
+    "close": "Close scanner",
+    "description": "Point your camera at a barcode or QR code.",
+    "errors": {
+      "lookup": "Unable to find the scanned item.",
+      "unavailable": "Camera access is not available in this browser."
+    },
+    "lookingUp": "Finding the inventory item...",
+    "preparing": "Preparing the camera...",
+    "retry": "Retry lookup",
+    "starting": "Starting camera...",
+    "title": "Scan a code"
+  },
   "search": {
     "box": "Box",
     "empty": "No articles found.",

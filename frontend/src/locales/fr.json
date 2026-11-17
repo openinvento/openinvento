@@ -523,6 +523,21 @@
     "notFoundDescription": "Ce code n’existe pas, ou vous n’avez pas accès à son inventaire.",
     "notFoundTitle": "Code introuvable"
   },
+  "scanner": {
+    "access": "Impossible d’accéder à la caméra.",
+    "cancel": "Annuler",
+    "close": "Fermer le scanner",
+    "description": "Pointez votre caméra vers un code-barres ou un code QR.",
+    "errors": {
+      "lookup": "Impossible de trouver l’élément correspondant au code scanné.",
+      "unavailable": "L’accès à la caméra n’est pas disponible dans ce navigateur."
+    },
+    "lookingUp": "Recherche de l’élément dans l’inventaire...",
+    "preparing": "Préparation de la caméra...",
+    "retry": "Réessayer la recherche",
+    "starting": "Démarrage de la caméra...",
+    "title": "Scanner un code"
+  },
   "search": {
     "box": "Boîte",
     "empty": "Aucun article trouvé.",

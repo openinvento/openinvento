@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { BarcodeDetector, prepareZXingModule } from "barcode-detector/ponyfill"
 import zxingReaderWasm from "zxing-wasm/reader/zxing_reader.wasm?url"
 import { Camera, LoaderCircle, RotateCcw, X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 
@@ -28,6 +29,7 @@ type ScannerProps = {
 }
 
 export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
+	const { t } = useTranslation()
 	const videoRef = useRef<HTMLVideoElement>(null)
 	const streamRef = useRef<MediaStream | null>(null)
 	const frameRef = useRef<number | null>(null)
@@ -62,7 +64,7 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 					} catch (lookupError) {
 						if (isActive) {
 							setStatus("scanning")
-							setError(lookupError instanceof Error ? lookupError.message : "Unable to find the scanned item.")
+							setError(lookupError instanceof Error ? lookupError.message : t("scanner.errors.lookup"))
 						}
 					} finally {
 						if (isActive) {
@@ -91,7 +93,7 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 		const startScanner = async () => {
 			try {
 				if (!navigator.mediaDevices?.getUserMedia) {
-					throw new Error("Camera access is not available in this browser.")
+					throw new Error(t("scanner.errors.unavailable"))
 				}
 
 				const stream = await navigator.mediaDevices.getUserMedia({
@@ -110,7 +112,7 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 			} catch (cameraError) {
 				stopScanner()
 				setStatus("error")
-				setError(cameraError instanceof Error ? cameraError.message : "Unable to access the camera.")
+				setError(cameraError instanceof Error ? cameraError.message : t("scanner.errors.access"))
 			}
 		}
 
@@ -128,14 +130,14 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 				<div>
 					<h2 className="flex items-center gap-2 text-lg font-semibold">
 						<Camera className="size-5" />
-						Scan a code
+						{t("scanner.title")}
 					</h2>
 					<p className="mt-1 text-sm text-muted-foreground">
-						{status === "scanning" ? "Point your camera at a barcode or QR code." : status === "looking-up" ? "Finding the inventory item..." : "Preparing the camera..."}
+						{status === "scanning" ? t("scanner.description") : status === "looking-up" ? t("scanner.lookingUp") : t("scanner.preparing")}
 					</p>
 				</div>
-				<Button aria-label="Close scanner" className="px-5" variant={"outline"} onClick={onClose}>
-					Cancel
+				<Button aria-label={t("scanner.close")} className="px-5" variant={"outline"} onClick={onClose}>
+					{t("scanner.cancel")}
 				</Button>
 			</div>
 
@@ -144,7 +146,7 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 				{(status === "starting" || status === "looking-up") && (
 					<div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/80 text-white">
 						<LoaderCircle className="size-7 animate-spin" />
-						<span className="text-sm">{status === "looking-up" ? "Finding item..." : "Starting camera..."}</span>
+						<span className="text-sm">{status === "looking-up" ? t("scanner.lookingUp") : t("scanner.starting")}</span>
 					</div>
 				)}
 				{status === "error" && (
@@ -156,7 +158,7 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 					<div className="absolute inset-x-4 bottom-4 flex items-center justify-between gap-3 rounded-md bg-slate-950/85 p-3 text-left text-sm text-white">
 						<span>{error}</span>
 						<Button
-							aria-label="Retry lookup"
+							aria-label={t("scanner.retry")}
 							size="icon"
 							variant="ghost"
 							onClick={() => {
@@ -177,7 +179,7 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 
 			{status === "error" && (
 				<Button className="mt-4" variant="outline" onClick={onClose}>
-					Close
+					{t("scanner.close")}
 				</Button>
 			)}
 		</div>
