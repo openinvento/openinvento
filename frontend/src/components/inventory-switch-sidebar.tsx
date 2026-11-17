@@ -28,8 +28,9 @@ export function AccountSidebarManager({
   userName: string
   inventories: Inventory[]
 }) {
-  const { selectedInventory: activeInventory } = useSelectedInventory()
-  const {t} = useTranslation()
+  const { selectedInventory: activeInventory, selectedInventoryUuid } =
+    useSelectedInventory()
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   if (!activeInventory) {
@@ -51,13 +52,22 @@ export function AccountSidebarManager({
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<SidebarMenuButton className="w-fit px-1.5" />}
+            render={<SidebarMenuButton className="w-full max-w-full min-w-0 overflow-hidden px-1.5" />}
           >
-            <div className="flex aspect-square size-7.5 items-center justify-center rounded-md bg-none text-sidebar-primary-foreground">
+            <div className="flex aspect-square size-7.5 shrink-0 items-center justify-center rounded-md bg-none text-sidebar-primary-foreground">
               <img src="/compact_icon.png" alt="" className="rounded-xl" />
             </div>
-            <span className="truncate font-medium">{`${userName} (${activeInventory.name})`}</span>
-            <ChevronDownIcon className="opacity-50" />
+            <span className="@container min-w-0 flex-1 overflow-hidden">
+              <span
+                className="block truncate font-medium"
+                style={{
+                  fontSize: `clamp(0.8125rem, calc(100cqw / ${Math.max(`${userName} (${activeInventory.name})`.length, 1)} * 2), 0.9375rem)`,
+                }}
+              >
+                {`${userName} (${activeInventory.name})`}
+              </span>
+            </span>
+            <ChevronDownIcon className="shrink-0 opacity-50" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-64 rounded-lg"
@@ -79,12 +89,28 @@ export function AccountSidebarManager({
                     setSelectedInventory(inventory.uuid)
                     navigate(0)
                   }}
-                  className="gap-2 p-2"
+                  aria-current={
+                    inventory.uuid === selectedInventoryUuid ? "true" : undefined
+                  }
+                  className={`gap-2 p-2 ${
+                    inventory.uuid === selectedInventoryUuid
+                      ? "bg-accent text-accent-foreground"
+                      : ""
+                  }`}
                 >
                   <div className="flex size-6 items-center justify-center rounded-xs border">
                     <img src="/compact_icon.png" alt="" className="rounded-xl" />
                   </div>
-                  {inventory.name}
+                  <span className="@container min-w-0 flex-1 overflow-hidden">
+                    <span
+                      className="block truncate"
+                      style={{
+                        fontSize: `clamp(0.812rem, calc(100cqw / ${Math.max(inventory.name.length, 1)} * 2), 0.937rem)`,
+                      }}
+                    >
+                      {inventory.name}
+                    </span>
+                  </span>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuGroup>
