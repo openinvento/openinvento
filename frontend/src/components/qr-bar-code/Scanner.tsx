@@ -123,7 +123,7 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 	}, [onCodeDetected, onClose])
 
 	return (
-		<div className="w-full max-w-2xl rounded-xl border bg-card p-4 shadow-sm">
+		<div className="w-full">
 			<div className="mb-4 flex items-center justify-between gap-4">
 				<div>
 					<h2 className="flex items-center gap-2 text-lg font-semibold">
@@ -134,12 +134,12 @@ export default function Scanner({ onClose, onCodeDetected }: ScannerProps) {
 						{status === "scanning" ? "Point your camera at a barcode or QR code." : status === "looking-up" ? "Finding the inventory item..." : "Preparing the camera..."}
 					</p>
 				</div>
-				<Button aria-label="Close scanner" size="icon" variant="ghost" onClick={onClose}>
-					<X />
+				<Button aria-label="Close scanner" className="px-5" variant={"outline"} onClick={onClose}>
+					Cancel
 				</Button>
 			</div>
 
-			<div className="relative aspect-square overflow-hidden rounded-lg bg-slate-950">
+			<div className="relative mx-auto aspect-square w-full max-w-2xl overflow-hidden rounded-lg bg-slate-950">
 				<video ref={videoRef} className="size-full object-cover" muted playsInline />
 				{(status === "starting" || status === "looking-up") && (
 					<div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/80 text-white">
