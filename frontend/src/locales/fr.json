@@ -103,7 +103,7 @@
       "areas": "Zones",
       "barcodes": {
         "title": "Codes-barres",
-        "description": "EAN, UPC, ISBN ou PZN figurant sur l’emballage du produit. Scanner l’un d’eux retrouve cet article.",
+        "description": "EAN, UPC, ISBN ou PZN figurant sur l’emballage du produit. Permet de retrouver l’article en le scannant.",
         "add": "Ajouter un code-barres",
         "remove": "Supprimer le code-barres",
         "kind": "Type de code-barres",
@@ -522,6 +522,21 @@
     "loading": "Ouverture du code...",
     "notFoundDescription": "Ce code n’existe pas, ou vous n’avez pas accès à son inventaire.",
     "notFoundTitle": "Code introuvable"
+  },
+  "scanner": {
+    "access": "Impossible d’accéder à la caméra.",
+    "cancel": "Annuler",
+    "close": "Fermer le scanner",
+    "description": "Pointez votre caméra vers un code-barres ou un code QR.",
+    "errors": {
+      "lookup": "Impossible de trouver l’élément correspondant au code scanné.",
+      "unavailable": "L’accès à la caméra n’est pas disponible dans ce navigateur."
+    },
+    "lookingUp": "Recherche de l’élément dans l’inventaire...",
+    "preparing": "Préparation de la caméra...",
+    "retry": "Réessayer la recherche",
+    "starting": "Démarrage de la caméra...",
+    "title": "Scanner un code"
   },
   "search": {
     "box": "Boîte",
