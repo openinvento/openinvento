@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { Check, LoaderCircle, Plus, PlusIcon, Settings2, Trash2 } from "lucide-react"
+import { Check, LoaderCircle, Plus, PlusIcon, ScanLine, Settings2, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router"
 import Scanner from "@/components/qr-bar-code/Scanner"
@@ -42,9 +42,10 @@ export default function BarcodeArticleImportPage() {
   const [articles, setArticles] = useState<ScannedArticle[]>([])
   const [error, setError] = useState("")
   const [saving, setSaving] = useState<string | null>(null)
+  const [isScannerOpen, setIsScannerOpen] = useState(false)
   const area = new URLSearchParams(window.location.search).get("area")
   const box = new URLSearchParams(window.location.search).get("box")
-  const handleScannerClose = useCallback(() => navigate(-1), [navigate])
+  const handleScannerClose = useCallback(() => setIsScannerOpen(false), [])
 
   useEffect(() => {
     if (!inventory) return
@@ -70,6 +71,7 @@ export default function BarcodeArticleImportPage() {
     if (!inventory) throw new Error("Select an inventory before scanning.")
     setError("")
     const [lookup, existing] = await Promise.all([
+      // lookup item via the 3rd party provider
       inventoryApi.lookupBarcodeProduct(barcode, inventory.uuid, providerId || null)
         .then((product) => {
           if (!product.name && !options.addWithoutCatalog) throw new Error(t("articleBarcodeImport.noName"))
@@ -83,6 +85,7 @@ export default function BarcodeArticleImportPage() {
           }
         }),
       options.checkExisting
+        // lookup item in the inventory to search for existing entries with the same barcode
         ? inventoryApi.lookupCode(barcode, inventory.uuid)
           .then(({ matches }) => ({
             existing: matches.filter((match) => match.matched_by === "barcode" && match.inventory.uuid === inventory.uuid),
@@ -92,10 +95,12 @@ export default function BarcodeArticleImportPage() {
           .catch((reason: unknown) => ({ existing: [] as CodeLookupMatch[], existingCheckFailed: !(reason instanceof ApiError && reason.status === 404) }))
         : Promise.resolve({ existing: [] as CodeLookupMatch[], existingCheckFailed: false }),
     ])
+
     setArticles((current) => current.some((item) => item.barcode === barcode)
       ? current
       : [...current, { ...lookup.product, lookupError: lookup.lookupError, ...existing, categoryId: "", id: crypto.randomUUID(), added: false }])
-  }, [inventory, providerId, options.addWithoutCatalog, options.checkExisting, t])
+  
+    }, [inventory, providerId, options.addWithoutCatalog, options.checkExisting, t])
 
   const updateArticle = (id: string, change: Partial<ScannedArticle>) =>
     setArticles((current) => current.map((item) => item.id === id ? { ...item, ...change } : item))
@@ -169,7 +174,26 @@ export default function BarcodeArticleImportPage() {
           <p className="mb-3 text-sm text-muted-foreground">{t("articleBarcodeImport.manualHint")}</p>
           <BarcodeInputForm onSubmit={handleCodeDetected} />
         </section>
-        <Scanner onCodeDetected={handleCodeDetected} onClose={handleScannerClose} />
+        {!isScannerOpen && (
+          <section className="flex w-full items-center justify-between gap-4 rounded-xl border bg-card p-4 shadow-sm">
+            <div>
+              <h2 className="flex items-center gap-2 text-sm font-medium">
+                <ScanLine className="size-4" />
+                {t("scanner.title")}
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">{t("scanner.description")}</p>
+            </div>
+            <Button type="button" variant="outline" onClick={() => setIsScannerOpen(true)}>
+              <ScanLine />
+              {t("scanner.title")}
+            </Button>
+          </section>
+        )}
+        {isScannerOpen && (
+          <div className="w-full rounded-xl border bg-card p-4 shadow-sm">
+            <Scanner onCodeDetected={handleCodeDetected} onClose={handleScannerClose} />
+          </div>
+        )}
         <section className="min-h-40 flex-1 rounded-xl border bg-card p-4 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold">{t("articleBarcodeImport.scannedArticles")} ({articles.length})</h2>
           {error && <p role="alert" className="mb-3 rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
