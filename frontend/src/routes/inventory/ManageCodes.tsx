@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
-import { Printer, ScanBarcode, ScanLine, X } from "lucide-react"
+import { Printer, ScanBarcode, ScanLine } from "lucide-react"
 
 import Scanner from "@/components/qr-bar-code/Scanner"
-import { BarcodeInputForm } from "@/components/qr-bar-code/BarcodeInputForm"
 import ScanMatchesModal from "@/components/inventory/ScanMatchesModal"
+import ExternalBarcodeScannerModal from "@/components/qr-bar-code/ExternalBarcodeScannerModal"
 import { Button } from "@/components/ui/button"
 import BaseScreen from "@/layouts/BaseScreen"
 import { inventoryApi, type CodeLookupMatch, type CodePdfOptions, type QrCodeSettings } from "@/utils/api/inventory"
@@ -245,32 +245,11 @@ export default function ManageCodes() {
 					</aside>
 				</div>
 			)}
+			
 			{useExternalBarcodeScanner && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="presentation" onMouseDown={(event) => {
-					if (event.target === event.currentTarget) setUseExternalBarcodeScanner(false)
-				}}>
-					<section
-						role="dialog"
-						aria-modal="true"
-						aria-labelledby="external-scanner-title"
-						className="w-full max-w-md rounded-xl border bg-card p-6 shadow-lg"
-						onKeyDown={(event) => { if (event.key === "Escape") setUseExternalBarcodeScanner(false) }}
-					>
-						<div className="flex items-start justify-between gap-4">
-							<div>
-								<h2 id="external-scanner-title" className="text-lg font-semibold">{t("manageCodes.externalScanner.title")}</h2>
-								<p className="mt-2 text-sm text-muted-foreground">{t("manageCodes.externalScanner.ready")}</p>
-							</div>
-							<Button aria-label={t("manageCodes.externalScanner.close")} size="icon" variant="ghost" onClick={() => setUseExternalBarcodeScanner(false)}>
-								<X />
-							</Button>
-						</div>
-						<div className="mt-4">
-							<BarcodeInputForm onSubmit={handleCodeDetected} />
-						</div>
-					</section>
-				</div>
+				<ExternalBarcodeScannerModal onClose={() => setUseExternalBarcodeScanner(false)} onSubmit={handleCodeDetected} />
 			)}
+
 			{matchChoices && <ScanMatchesModal matches={matchChoices} onClose={() => setMatchChoices(null)} onSelect={openMatch} />}
 		</BaseScreen>
 	)
