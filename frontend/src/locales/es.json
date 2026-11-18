@@ -95,8 +95,36 @@
     "title": "áreas"
   },
   "articleBarcodeImport": {
+    "existingCheckFailed": "No se pudo comprobar si este código de barras ya está guardado.",
+    "manualTitle": "Lector de códigos o teclado",
+    "manualHint": "Un lector de códigos en modo teclado escribe en este campo; también puedes escribir un código y pulsar Intro.",
+    "alreadyStored": "Ya está en este inventario:",
+    "category": "Categoría",
+    "categoryHint": "Se aplica a cada artículo que añadas en esta sesión de escaneo.",
+    "enterName": "Introduce un nombre para añadirlo de todos modos.",
+    "name": "Nombre del artículo",
+    "namePlaceholder": "Nombre del artículo",
+    "noCategory": "Sin categoría",
+    "noName": "El catálogo no tiene nombre para este producto.",
+    "notFound": "No se encontró ningún producto para este código de barras.",
+    "options": {
+      "title": "Opciones",
+      "sharedCategory": "Una categoría para todos",
+      "sharedCategoryHint": "Desactivado: elige una categoría para cada artículo escaneado.",
+      "addWithoutCatalog": "Añadir productos desconocidos",
+      "addWithoutCatalogHint": "Los productos sin entrada en el catálogo o sin nombre se pueden añadir con un nombre que escribas. Desactivado: solo muestran un error.",
+      "checkExisting": "Mostrar artículos existentes",
+      "checkExistingHint": "Muestra qué artículos de este inventario ya tienen el código de barras escaneado.",
+      "storedInBrowser": "Estas opciones se guardan en este navegador."
+    },
     "description": "Escanee el código de barras de un producto para buscarlo y agregarlo aquí",
     "scannedArticles": "Artículos escaneados"
+  },
+  "barcodeInput": {
+    "error": "No se pudo buscar este código.",
+    "label": "Código de barras",
+    "placeholder": "Escanea o escribe un código de barras",
+    "submit": "Buscar"
   },
   "articles": {
     "page": {
