@@ -2,7 +2,7 @@ from django.db import models
 
 
 class LostFoundEntry(models.Model):
-    """An entry whose scan URL shows a public "Found this item?" page to people who are not signed in.
+    """An entry whose scan URL shows a public contact page to people who are not signed in.
 
     The row existing is the opt-in. Only the name (if show_name), the photo (if show_photo) and the
     note are ever public.
@@ -16,7 +16,7 @@ class LostFoundEntry(models.Model):
     )
     show_name = models.BooleanField(default=True)
     show_photo = models.BooleanField(default=False)
-    # Contact hints or a reward, shown to the finder as written.
+    # Contact hints or a reward, shown to visitors as written.
     note = models.TextField(blank=True, max_length=500)
 
     def __str__(self):

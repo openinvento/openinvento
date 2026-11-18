@@ -104,7 +104,7 @@ class FoundContactView(PublicView):
             create_notification(
                 user,
                 kind="lostfound",
-                title=f"Someone found {entry.name}",
+                title=f"New message about {entry.name}",
                 message=message,
                 # Resolves to the entry's page for signed-in members, whatever its type.
                 link=f"/i/{entry.inventory.identifier}/{entry.identifier}",

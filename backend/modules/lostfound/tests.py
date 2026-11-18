@@ -117,7 +117,7 @@ class PublicFoundPageTests(LostFoundTestCase):
         notifications = Notification.objects.filter(kind="lostfound")
         self.assertEqual({n.user for n in notifications}, {self.owner, self.member})
         notification = notifications.first()
-        self.assertEqual(notification.title, "Someone found Blue backpack")
+        self.assertEqual(notification.title, "New message about Blue backpack")
         self.assertEqual(notification.message, "Found it at the station.\n\nContact: +49 123")
         self.assertEqual(notification.link, "/i/HOME1/BAG1")
 

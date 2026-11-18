@@ -419,21 +419,21 @@
   },
   "lostfound": {
     "card": {
-      "title": "Objetos perdidos",
-      "enable": "Quien lo encuentre puede contactarme",
+      "title": "Página de contacto pública",
+      "enable": "Mostrar la página de contacto al escanear",
       "enableHint": "Quien escanee el código QR sin iniciar sesión verá una página con los datos que actives abajo y podrá enviarte un mensaje.",
       "showName": "Mostrar el nombre",
       "showPhoto": "Mostrar la foto",
-      "note": "Nota para quien lo encuentre",
-      "notePlaceholder": "Por ejemplo, cómo devolverlo o una recompensa",
+      "note": "Nota para visitantes",
+      "notePlaceholder": "Por ejemplo, cómo devolverlo, a quién preguntar o una recompensa",
       "saveNote": "Guardar nota"
     },
     "found": {
-      "title": "¿Has encontrado este objeto?",
-      "photo": "Foto del objeto",
+      "title": "Contactar con el propietario",
+      "photo": "Foto",
       "description": "Envía un mensaje al propietario. Recibirá un aviso en OpenInvento y no sabrá quién eres a menos que se lo digas.",
       "message": "Mensaje",
-      "messagePlaceholder": "¿Dónde lo encontraste?",
+      "messagePlaceholder": "Por ejemplo, dónde lo encontraste",
       "contact": "¿Cómo puede contactarte el propietario? (opcional)",
       "contactHint": "Por ejemplo, un número de teléfono o un correo electrónico. Solo lo verán los miembros del inventario.",
       "send": "Enviar al propietario",

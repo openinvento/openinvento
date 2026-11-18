@@ -13,7 +13,7 @@ const DEFAULT_SETTINGS: LostFoundSettings = { show_name: true, show_photo: false
 
 type LostFoundCardProps = { entryUuid: string; className?: string }
 
-/** Owner settings for the public "Found this item?" page of one entry. Hidden while the module is off. */
+/** Owner settings for the public contact page of one entry. Hidden while the module is off. */
 export default function LostFoundCard(props: LostFoundCardProps) {
   // Entry pages stay mounted when navigating to another entry; a new card keeps one entry's state off the next.
   return <EntryLostFoundCard key={props.entryUuid} {...props} />
@@ -95,7 +95,7 @@ function EntryLostFoundCard({ entryUuid, className = "" }: LostFoundCardProps) {
             {t("lostfound.card.note")}
             <Textarea maxLength={500} value={note} onChange={(event) => setNote(event.target.value)} placeholder={t("lostfound.card.notePlaceholder")} />
           </label>
-          <Button variant="outline" className="justify-self-start" disabled={saving || note === settings.note} onClick={() => void save({ ...settings, note })}>
+          <Button type="button" variant="outline" className="justify-self-start" disabled={saving || note === settings.note} onClick={() => void save({ ...settings, note })}>
             {t("lostfound.card.saveNote")}
           </Button>
         </>

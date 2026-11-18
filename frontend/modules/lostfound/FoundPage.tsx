@@ -13,7 +13,7 @@ type FoundPageProps = {
   entry: FoundEntry
 }
 
-/** Public page for someone who found an item and is not signed in. Shows only what the owner enabled. */
+/** Public contact page for someone who scans an entry and is not signed in. Shows only what the owner enabled. */
 export default function FoundPage({ inventory, identifier, entry }: FoundPageProps) {
   const { t } = useTranslation()
   const [message, setMessage] = useState("")

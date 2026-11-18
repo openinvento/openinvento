@@ -9,7 +9,7 @@ import FoundPage from "./FoundPage"
 
 /**
  * Element of the scan route /i/:inventory/:identifier. Someone who is not signed in sees the
- * "Found this item?" page if the owner enabled it. Everybody else gets the usual protected route:
+ * public contact page if the owner enabled it. Everybody else gets the usual protected route:
  * signed-in users go on to the entry, the rest to the login. With the module off the public
  * endpoint is a 404, so scans go to the login as before.
  */
