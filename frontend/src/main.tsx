@@ -26,6 +26,7 @@ import ManageCategoriesAndFieldsPage from './routes/inventory/ManageCategoriesAn
 import ManageCodes from './routes/inventory/ManageCodes.tsx'
 import ResetCredentialsPage from './routes/auth/ResetCredentials.tsx'
 import LoansPage from '../modules/loans/LoansPage.tsx'
+import LostFoundScanRoute from '../modules/lostfound/LostFoundScanRoute.tsx'
 import { getEnabledModules, MODULES_CHANGED_EVENT } from './utils/api/modules'
 import BarcodeArticleImportPage from './routes/inventory/BarcodeArticleImport.tsx'
 import ScanCode from './routes/ScanCode.tsx'
@@ -186,7 +187,8 @@ const router = createBrowserRouter([
   {
     /* URL in QR codes; printed on labels, so it has to stay stable. */
     path: "/i/:inventory/:identifier",
-    element: <SessionGuard mode="protected" />,
+    // Shows the lost and found page instead of the login when the module and the entry allow it.
+    element: <LostFoundScanRoute />,
     children: [{ index: true, element: <ScanCode /> }],
   },
   {

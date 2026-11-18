@@ -417,6 +417,30 @@
     "title": "Ausleihen",
     "unknownItem": "Inventarobjekt"
   },
+  "lostfound": {
+    "card": {
+      "title": "Verloren & gefunden",
+      "enable": "Finder können mich kontaktieren",
+      "enableHint": "Wer den QR-Code ohne Anmeldung scannt, sieht eine Seite mit den unten freigegebenen Angaben und kann dir eine Nachricht schicken.",
+      "showName": "Namen anzeigen",
+      "showPhoto": "Foto anzeigen",
+      "note": "Hinweis für den Finder",
+      "notePlaceholder": "Zum Beispiel, wie man es zurückgeben kann, oder ein Finderlohn",
+      "saveNote": "Hinweis speichern"
+    },
+    "found": {
+      "title": "Diesen Gegenstand gefunden?",
+      "photo": "Foto des Gegenstands",
+      "description": "Schick dem Besitzer eine Nachricht. Er wird in OpenInvento benachrichtigt und erfährt nicht, wer du bist, außer du schreibst es dazu.",
+      "message": "Nachricht",
+      "messagePlaceholder": "Wo hast du ihn gefunden?",
+      "contact": "Wie erreicht dich der Besitzer? (optional)",
+      "contactHint": "Zum Beispiel eine Telefonnummer oder E-Mail-Adresse. Nur die Mitglieder des Inventars sehen sie.",
+      "send": "An Besitzer senden",
+      "sent": "Danke! Der Besitzer wurde benachrichtigt.",
+      "error": "Die Nachricht konnte nicht gesendet werden."
+    }
+  },
   "manageCodes": {
     "urlHint": "Diese QR-Codes verlinken auf {{url}}. Zieht die Instanz auf eine andere Adresse um, öffnen gedruckte Etiketten ihre Einträge nicht mehr. Administratoren können die Links in den Instanzeinstellungen abschalten.",
     "clearSelection": "Auswahl aufheben",

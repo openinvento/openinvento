@@ -417,6 +417,30 @@
     "title": "Préstamos",
     "unknownItem": "Elemento del inventario"
   },
+  "lostfound": {
+    "card": {
+      "title": "Objetos perdidos",
+      "enable": "Quien lo encuentre puede contactarme",
+      "enableHint": "Quien escanee el código QR sin iniciar sesión verá una página con los datos que actives abajo y podrá enviarte un mensaje.",
+      "showName": "Mostrar el nombre",
+      "showPhoto": "Mostrar la foto",
+      "note": "Nota para quien lo encuentre",
+      "notePlaceholder": "Por ejemplo, cómo devolverlo o una recompensa",
+      "saveNote": "Guardar nota"
+    },
+    "found": {
+      "title": "¿Has encontrado este objeto?",
+      "photo": "Foto del objeto",
+      "description": "Envía un mensaje al propietario. Recibirá un aviso en OpenInvento y no sabrá quién eres a menos que se lo digas.",
+      "message": "Mensaje",
+      "messagePlaceholder": "¿Dónde lo encontraste?",
+      "contact": "¿Cómo puede contactarte el propietario? (opcional)",
+      "contactHint": "Por ejemplo, un número de teléfono o un correo electrónico. Solo lo verán los miembros del inventario.",
+      "send": "Enviar al propietario",
+      "sent": "¡Gracias! Se ha avisado al propietario.",
+      "error": "No se pudo enviar el mensaje."
+    }
+  },
   "manageCodes": {
     "urlHint": "Estos códigos QR enlazan a {{url}}. Si la instancia se muda a otra dirección, las etiquetas impresas dejan de abrir sus entradas. Los administradores pueden desactivar los enlaces en la configuración de la instancia.",
     "clearSelection": "Borrar selección",
