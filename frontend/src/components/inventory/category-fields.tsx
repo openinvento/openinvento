@@ -83,6 +83,8 @@ function CategoryFieldInput({
         <Input
           name={inputName}
           type={field.field_type === "number" ? "number" : "text"}
+          // Allow decimal values; the browser default step of 1 rejects e.g. 1.5
+          step={field.field_type === "number" ? "any" : undefined}
           defaultValue={currentValue}
         />
       )}
