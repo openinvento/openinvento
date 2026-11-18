@@ -1,8 +1,9 @@
-import { X } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { X } from "lucide-react"
 
 import { BarcodeInputForm } from "@/components/qr-bar-code/BarcodeInputForm"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 type ExternalBarcodeScannerModalProps = {
 	onClose: () => void
@@ -13,33 +14,21 @@ export default function ExternalBarcodeScannerModal({ onClose, onSubmit }: Exter
 	const { t } = useTranslation()
 
 	return (
-		<div
-			className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-			role="presentation"
-			onMouseDown={(event) => {
-				if (event.target === event.currentTarget) onClose()
-			}}
-		>
-			<section
-				role="dialog"
-				aria-modal="true"
-				aria-labelledby="external-scanner-title"
-				className="w-full max-w-md rounded-xl border bg-card p-6 shadow-lg"
-				onKeyDown={(event) => { if (event.key === "Escape") onClose() }}
-			>
-				<div className="flex items-start justify-between gap-4">
+		<Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
+			<DialogContent showCloseButton={false} className="w-full max-w-md p-6">
+				<DialogHeader className="flex-row items-start justify-between gap-4">
 					<div>
-						<h2 id="external-scanner-title" className="text-lg font-semibold">{t("manageCodes.externalScanner.title")}</h2>
-						<p className="mt-2 text-sm text-muted-foreground">{t("manageCodes.externalScanner.ready")}</p>
+						<DialogTitle>{t("manageCodes.externalScanner.title")}</DialogTitle>
+						<DialogDescription className="mt-2">{t("manageCodes.externalScanner.ready")}</DialogDescription>
 					</div>
-					<Button aria-label={t("manageCodes.externalScanner.close")} size="icon" variant="ghost" onClick={onClose}>
+					<DialogClose render={<Button aria-label={t("manageCodes.externalScanner.close")} size="icon" variant="ghost" />}>
 						<X />
-					</Button>
-				</div>
+					</DialogClose>
+				</DialogHeader>
 				<div className="mt-4">
 					<BarcodeInputForm onSubmit={onSubmit} />
 				</div>
-			</section>
-		</div>
+			</DialogContent>
+		</Dialog>
 	)
 }
