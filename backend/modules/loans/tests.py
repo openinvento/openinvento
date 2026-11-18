@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from account_auth.models import CustomUser
+from account_auth.models import CustomUser, InstanceSettings
 from inventory.models import Inventory, InventoryEntry
 
 from .models import Loan
@@ -10,6 +10,10 @@ from .models import Loan
 
 class LoanAPITests(TestCase):
     def setUp(self):
+        settings = InstanceSettings.get_solo()
+        settings.enabled_modules = ["loans"]
+        settings.save()
+
         self.client = APIClient()
         self.user = CustomUser.objects.create_user(
             username="loan-recorder", password="password"
