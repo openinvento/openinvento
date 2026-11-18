@@ -3,6 +3,7 @@ import { X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { type CodeLookupMatch } from "@/utils/api/inventory"
 
 type ScanMatchesModalProps = {
@@ -16,28 +17,17 @@ export default function ScanMatchesModal({ matches, onClose, onSelect }: ScanMat
 	const [error, setError] = useState("")
 
 	return (
-		<div
-			className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-0 sm:p-4"
-			role="presentation"
-			onMouseDown={(event) => {
-				if (event.target === event.currentTarget) onClose()
-			}}
-		>
-			<section
-				role="dialog"
-				aria-modal="true"
-				aria-labelledby="scan-matches-title"
-				className="flex h-full max-h-[100dvh] w-full flex-col rounded-none border bg-card p-4 shadow-lg sm:h-auto sm:max-h-[80vh] sm:max-w-md sm:rounded-xl sm:p-6"
-			>
-				<div className="flex items-start justify-between gap-4">
+		<Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
+			<DialogContent showCloseButton={false} className="flex h-full max-h-[100dvh] w-full flex-col rounded-none p-4 sm:h-auto sm:max-h-[80vh] sm:max-w-md sm:rounded-xl sm:p-6">
+				<DialogHeader className="flex-row items-start justify-between gap-4">
 					<div>
-						<h2 id="scan-matches-title" className="text-lg font-semibold">{t("manageCodes.matches.title", { count: matches.length })}</h2>
-						<p className="mt-2 text-sm text-muted-foreground">{t("manageCodes.matches.description")}</p>
+						<DialogTitle>{t("manageCodes.matches.title", { count: matches.length })}</DialogTitle>
+						<DialogDescription className="mt-2">{t("manageCodes.matches.description")}</DialogDescription>
 					</div>
-					<Button aria-label={t("manageCodes.matches.close")} size="icon" variant="ghost" onClick={onClose}>
+					<DialogClose render={<Button aria-label={t("manageCodes.matches.close")} size="icon" variant="ghost" />}>
 						<X />
-					</Button>
-				</div>
+					</DialogClose>
+				</DialogHeader>
 				<ul className="mt-4 min-h-0 divide-y overflow-y-auto rounded-lg border">
 					{matches.map((match) => (
 						<li key={match.uuid}>
@@ -58,7 +48,7 @@ export default function ScanMatchesModal({ matches, onClose, onSelect }: ScanMat
 					))}
 				</ul>
 				{error && <p className="mt-4 text-sm text-destructive">{error}</p>}
-			</section>
-		</div>
+			</DialogContent>
+		</Dialog>
 	)
 }
