@@ -116,8 +116,13 @@ class InstanceBackupView(APIView):
             database_copy = os.path.join(temp_dir, BACKUP_DATABASE_NAME)
             copy_database(database_copy)
             archive.write(database_copy, BACKUP_DATABASE_NAME)
+            # The cache holds throttle counters, which must not be restored from a backup.
+            cache_path = os.path.join(data_dir, "cache")
             for root, directories, filenames in os.walk(data_dir, followlinks=False):
-                directories[:] = [name for name in directories if not os.path.islink(os.path.join(root, name))]
+                directories[:] = [
+                    name for name in directories
+                    if not os.path.islink(os.path.join(root, name)) and os.path.join(root, name) != cache_path
+                ]
                 for filename in filenames:
                     source_path = os.path.join(root, filename)
                     if os.path.islink(source_path) or source_path in skipped_paths:
