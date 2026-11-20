@@ -6,10 +6,13 @@ from datetime import timedelta
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from django.core.management.utils import get_random_secret_key
-
-from .custom_logger import LOGGING, configure_early_logging
-from .settings_utils import group_inventories_env
+from .custom_logger import configure_early_logging
+from .settings_utils import (
+    _host_from_url,
+    _normalize_app_url,
+    _normalize_scan_base_url,
+    group_inventories_env,
+)
 
 configure_early_logging()
 
@@ -108,56 +111,6 @@ def _csv_env(name, default):
         return default
 
     return [item.strip() for item in raw_value.split(",") if item.strip()]
-
-
-def _normalize_app_url(value):
-    """Return an origin from a URL or host[:port], defaulting bare hosts to HTTP."""
-    value = value.strip()
-    if not value:
-        return ""
-
-    if "://" not in value:
-        value = "http://" + value
-    parsed = urlsplit(value)
-    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
-        raise ValueError(
-            f"Invalid application URL {value!r}: use a hostname with optional http:// or https://"
-        )
-    # An origin has no path, query, or fragment. Keep an explicitly supplied port.
-    return f"{parsed.scheme}://{parsed.netloc}"
-
-
-def _normalize_scan_base_url(value):
-    """Like _normalize_app_url, but reject a path or credentials instead of keeping them: they would be on every label."""
-    value = value.strip()
-    try:
-        parsed = urlsplit(value if "://" in value else "http://" + value)
-    except ValueError:
-        # urlsplit's own message would repeat the value, which may hold a password.
-        raise ValueError("Invalid SCAN_BASE_URL: use an origin like https://short.example") from None
-    if parsed.username or parsed.password:
-        # Checked before anything that repeats the value, so the password doesn't end up in the logs.
-        raise ValueError("Invalid SCAN_BASE_URL: remove the user name and password, like https://short.example")
-    origin = _normalize_app_url(value)
-    if origin:
-        if parsed.path not in ("", "/") or parsed.query or parsed.fragment:
-            raise ValueError(
-                f"Invalid SCAN_BASE_URL {value!r}: use an origin without a path, like https://short.example"
-            )
-    return origin
-
-
-def _host_from_url(value):
-    """Return the host Django expects in ALLOWED_HOSTS (no scheme or port)."""
-    candidate = value if "://" in value else "//" + value
-    parsed = urlsplit(candidate)
-    hostname = parsed.hostname
-    if hostname is None:
-        return value.split("/", 1)[0]
-    # Django expects IPv6 hosts in ALLOWED_HOSTS to retain their brackets.
-    if ":" in hostname:
-        return f"[{hostname}]"
-    return hostname
 
 
 INSTALLED_APPS = [
