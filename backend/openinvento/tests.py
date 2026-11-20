@@ -108,6 +108,12 @@ class InstanceBackupTests(TransactionTestCase):
 		self.assertIn("media/photo.jpg", names)
 		self.assertNotIn("outside.txt", names)
 
+	def test_cache_directory_is_left_out(self):
+		(self.data_dir / "cache").mkdir()
+		(self.data_dir / "cache" / "counter.djcache").write_bytes(b"x")
+
+		self.assertNotIn("cache/counter.djcache", self.download().namelist())
+
 	def test_live_database_files_are_replaced_by_the_copy(self):
 		# A database in the data directory, as in a default installation, with a leftover sidecar file.
 		live_database = self.data_dir / "db.sqlite3"
@@ -274,3 +280,16 @@ class ScanBaseUrlSettingsTests(SimpleTestCase):
 
 		self.assertNotIn("short.example", settings["ALLOWED_HOSTS"])
 		self.assertNotIn("https://short.example", settings["CSRF_TRUSTED_ORIGINS"])
+
+
+class SharedCacheTests(SimpleTestCase):
+	def test_throttle_counters_are_shared_between_cache_instances(self):
+		# Gunicorn workers are separate processes; each builds its own cache object on the same directory.
+		from django.core.cache.backends.filebased import FileBasedCache
+
+		with tempfile.TemporaryDirectory() as directory:
+			first = FileBasedCache(directory, {})
+			second = FileBasedCache(directory, {})
+			first.set("throttle_anon_127.0.0.1", [1.0, 2.0])
+
+			self.assertEqual(second.get("throttle_anon_127.0.0.1"), [1.0, 2.0])

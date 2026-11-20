@@ -1,6 +1,7 @@
 
 import logging
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -61,6 +62,21 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 DATABASE_PATH = Path(
     os.getenv("DATABASE_PATH", DATA_DIR / "db.sqlite3")
 )
+
+
+# Rate limit counters (DRF throttles) live in the cache. The default per-process LocMemCache would count
+# per gunicorn worker and forget everything on restart, so use a file cache that all workers share.
+# The directory is excluded from the instance backup.
+CACHE_DIR = DATA_DIR / "cache"
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": str(CACHE_DIR),
+    }
+}
+if sys.argv[1:2] == ["test"]:
+    # Test runs must not read throttle counters left behind by earlier runs or a running instance.
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 
 
 # Quick-start development settings - unsuitable for production
