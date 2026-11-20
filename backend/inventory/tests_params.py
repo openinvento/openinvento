@@ -29,6 +29,12 @@ class MalformedInventoryUuidTests(TestCase):
 				self.assertEqual(response.status_code, 400)
 				self.assertEqual(response.data, {"inventory": ["Must be a valid UUID."]})
 
+	def test_dashboard_rejects_it(self):
+		response = self.client.get("/api/dashboard/", {"inventory": "not-a-uuid"})
+
+		self.assertEqual(response.status_code, 400)
+		self.assertEqual(response.data, {"inventory": ["Must be a valid UUID."]})
+
 	def test_search_rejects_it(self):
 		response = self.client.get("/api/search/", {"q": "Kitchen", "inventory": "not-a-uuid"})
 

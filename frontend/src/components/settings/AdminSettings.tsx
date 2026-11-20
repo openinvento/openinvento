@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Download, Pencil, Plus, RefreshCw, ShieldCheck, Trash2, X } from "lucide-react"
 
@@ -59,6 +59,13 @@ export default function AdminSettings() {
   const [editingUuid, setEditingUuid] = useState<string | null>(null)
   const [formOpen, setFormOpen] = useState(false)
 
+  // Read through a ref, so a language change doesn't load the settings again: a load that finished
+  // after a save would show the old value.
+  const translate = useRef(t)
+  useEffect(() => {
+    translate.current = t
+  }, [t])
+
   useEffect(() => {
     Promise.all([getInstanceSettings(), getUsers()])
       .then(([settings, loadedUsers]) => {
@@ -70,11 +77,11 @@ export default function AdminSettings() {
         setUsers(loadedUsers)
       })
       .catch(() => {
-        setSettingsError(t("settings.instanceSettingsLoadError"))
-        setUserError(t("settings.admin.loadUsersError"))
+        setSettingsError(translate.current("settings.instanceSettingsLoadError"))
+        setUserError(translate.current("settings.admin.loadUsersError"))
       })
       .finally(() => setUsersLoading(false))
-  }, [t])
+  }, [])
 
   async function handleEmailLoginChange(event: React.ChangeEvent<HTMLInputElement>) {
     const value = event.target.checked
