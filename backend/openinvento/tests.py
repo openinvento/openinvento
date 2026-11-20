@@ -275,6 +275,13 @@ class ScanBaseUrlSettingsTests(SimpleTestCase):
 			with self.subTest(value=value), self.assertRaisesMessage(ValueError, "SCAN_BASE_URL"):
 				load_settings(SCAN_BASE_URL=value)
 
+	def test_credentials_are_rejected_without_repeating_them(self):
+		for value in ("https://user:secret@short.example", "https://user@short.example", "https://user:secret@short.example/path", "ftp://user:secret@short.example", "https://user:secret@short.example\uff0f"):
+			with self.subTest(value=value), self.assertRaises(ValueError) as error:
+				load_settings(SCAN_BASE_URL=value)
+			self.assertIn("SCAN_BASE_URL", str(error.exception))
+			self.assertNotIn("secret", str(error.exception))
+
 	def test_is_not_an_allowed_host_or_csrf_origin(self):
 		settings = load_settings(APP_URL="https://inventory.example.test", SCAN_BASE_URL="https://short.example")
 
