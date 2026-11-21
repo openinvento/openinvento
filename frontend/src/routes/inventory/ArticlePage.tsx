@@ -17,6 +17,7 @@ import { getCategoryLabel } from "@/utils/i18n-labels"
 import { useTranslation } from "react-i18next"
 import { compressArticleImage } from "@/utils/article-image"
 import { getMediaUrl } from "@/utils/api/base"
+import Slot from "@/slots/Slot"
 
 export default function ArticlePage() {
   const { articleId } = useParams()
@@ -516,6 +517,7 @@ export default function ArticlePage() {
           </div>
           {imageAttachments.length > 0 && <ArticleImageGallery images={imageAttachments} onRemove={(attachment) => void deleteAttachment(attachment)} />}
         </section>
+        <Slot name="entry-details" entryUuid={article.uuid} entryType="article" className="mt-8" />
       </div>
     </section>
   );

@@ -417,6 +417,30 @@
     "title": "Loans",
     "unknownItem": "Inventory item"
   },
+  "publicpage": {
+    "card": {
+      "title": "Public contact page",
+      "enable": "Show contact page when scanned",
+      "enableHint": "Anyone who scans the QR code without signing in sees a page with the details you enable below and can send you a message.",
+      "showName": "Show the name",
+      "showPhoto": "Show the photo",
+      "note": "Note for visitors",
+      "notePlaceholder": "For example how to return it, who to ask or a reward",
+      "saveNote": "Save note"
+    },
+    "view": {
+      "title": "Contact the owner",
+      "photo": "Photo",
+      "description": "Send the owner a message. They are notified in OpenInvento and do not see who you are unless you tell them.",
+      "message": "Message",
+      "messagePlaceholder": "For example where you found it",
+      "contact": "How can the owner reach you? (optional)",
+      "contactHint": "For example a phone number or email address. Only the members of the inventory see it.",
+      "send": "Send to owner",
+      "sent": "Thank you! The owner has been notified.",
+      "error": "The message could not be sent."
+    }
+  },
   "manageCodes": {
     "urlHint": "These QR codes link to {{url}}. If the instance moves to another address, printed labels stop opening their entries. Administrators can turn the links off in the instance settings.",
     "clearSelection": "Clear selection",

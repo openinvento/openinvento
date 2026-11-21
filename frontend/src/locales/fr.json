@@ -417,6 +417,30 @@
     "title": "Prêts",
     "unknownItem": "Élément de l’inventaire"
   },
+  "publicpage": {
+    "card": {
+      "title": "Page de contact publique",
+      "enable": "Afficher la page de contact lors du scan",
+      "enableHint": "Toute personne qui scanne le code QR sans être connectée voit une page avec les informations activées ci-dessous et peut vous envoyer un message.",
+      "showName": "Afficher le nom",
+      "showPhoto": "Afficher la photo",
+      "note": "Note pour les visiteurs",
+      "notePlaceholder": "Par exemple comment le rendre, qui contacter ou une récompense",
+      "saveNote": "Enregistrer la note"
+    },
+    "view": {
+      "title": "Contacter le propriétaire",
+      "photo": "Photo",
+      "description": "Envoyez un message au propriétaire. Il est averti dans OpenInvento et ne sait pas qui vous êtes, sauf si vous le lui dites.",
+      "message": "Message",
+      "messagePlaceholder": "Par exemple où vous l'avez trouvé",
+      "contact": "Comment le propriétaire peut-il vous joindre ? (facultatif)",
+      "contactHint": "Par exemple un numéro de téléphone ou une adresse e-mail. Seuls les membres de l'inventaire le voient.",
+      "send": "Envoyer au propriétaire",
+      "sent": "Merci ! Le propriétaire a été averti.",
+      "error": "Le message n'a pas pu être envoyé."
+    }
+  },
   "manageCodes": {
     "urlHint": "Ces codes QR renvoient vers {{url}}. Si l’instance change d’adresse, les étiquettes imprimées n’ouvrent plus leurs entrées. Les administrateurs peuvent désactiver les liens dans les paramètres de l’instance.",
     "clearSelection": "Effacer la sélection",

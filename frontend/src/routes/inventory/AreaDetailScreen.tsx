@@ -17,6 +17,7 @@ import {
   type Shelf,
 } from "@/utils/api/inventory"
 import { useSelectedInventory } from "@/hooks/use-selected-inventory"
+import Slot from "@/slots/Slot"
 
 type CreateKind = "box" | "shelf"
 
@@ -328,6 +329,8 @@ export default function AreaDetailScreen() {
         />
       </label>
 
+      {modal?.kind === "shelf" && modal.item && <Slot name="entry-details" entryUuid={modal.item.uuid} entryType="shelf" />}
+
       {modal?.item && <label className="grid gap-1.5 text-sm font-medium">
         {t("areas.detail.fields.area")}
         <select name="area" value={editAreaId} 
@@ -391,6 +394,7 @@ export default function AreaDetailScreen() {
       </fieldset>
     </InventoryModal>
 
+    {area && <Slot name="entry-details" entryUuid={area.uuid} entryType="area" className="mt-8" />}
     {area && !modal && <FloatingCreateButton areaId={areaId} articleTo={`/app/areas/${areaId}/articles/new`} />}
 
   </section>)
