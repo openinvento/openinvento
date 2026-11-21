@@ -9,7 +9,7 @@ import { InventoryViewToggle, useInventoryViewMode } from "@/components/inventor
 import { InventoryDraggable } from "@/components/inventory/inventory-dnd"
 import { FloatingCreateButton } from "@/components/inventory/FloatingCreateButton"
 import { inventoryApi, type Area, type Article, type Box, type Shelf } from "@/utils/api/inventory"
-import LostFoundCard from "../../../modules/lostfound/LostFoundCard"
+import Slot from "@/slots/Slot"
 
 function getLowStockBadge(article: Article, label: string) {
   const minimumQuantity = article.field_values.find((field) => field.key === "minimum_quantity")?.value
@@ -158,7 +158,7 @@ export default function BoxPage() {
             </InventoryDraggable>)}
           </div>
         )}
-        <LostFoundCard entryUuid={box.uuid} className="mt-8" />
+        <Slot name="entry-details" entryUuid={box.uuid} entryType="box" className="mt-8" />
       </>}
       {area && box && !identifierOpen && !editOpen && <FloatingCreateButton areaId={area.uuid} boxId={box.uuid} articleTo={`/app/areas/${box.area}/articles/new?box=${box.uuid}`} />}
       {box && 
