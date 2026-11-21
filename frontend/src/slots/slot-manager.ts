@@ -21,7 +21,7 @@ const registry = new Map<SlotName, SlotRegistration<SlotName>[]>()
 /** Registers a component of a module for a slot. It is only shown while the module is enabled. */
 export function registerSlot<N extends SlotName>(name: N, module: string, component: ComponentType<SlotProps[N]>) {
   const registrations = registry.get(name) ?? []
-  if (!registrations.some((registration) => registration.component === component)) {
+  if (!registrations.some((registration) => registration.module === module && registration.component === component)) {
     registrations.push({ module, component })
   }
   registry.set(name, registrations)

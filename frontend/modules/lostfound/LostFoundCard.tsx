@@ -37,10 +37,9 @@ function EntryLostFoundCard({ entryUuid }: { entryUuid: string }) {
         if (!active) return
         setSettings(current)
         setNote(current?.note ?? "")
+        setLoaded(true)
       } catch (err) {
         if (active) setError(err instanceof Error ? err.message : String(err))
-      } finally {
-        if (active) setLoaded(true)
       }
     })()
     return () => {
@@ -67,7 +66,8 @@ function EntryLostFoundCard({ entryUuid }: { entryUuid: string }) {
     }
   }
 
-  if (!loaded) return null
+  // Without the current settings the controls stay hidden; the switch would look off and overwrite them.
+  if (!loaded) return error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null
 
   return (
     <section className="grid gap-4 rounded-xl border bg-muted/15 p-4 sm:p-5" aria-labelledby={`lostfound-${entryUuid}`}>
