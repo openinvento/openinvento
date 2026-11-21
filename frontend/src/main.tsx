@@ -31,6 +31,9 @@ import { getEnabledModules, MODULES_CHANGED_EVENT } from './utils/api/modules'
 import BarcodeArticleImportPage from './routes/inventory/BarcodeArticleImport.tsx'
 import ScanCode from './routes/ScanCode.tsx'
 
+// Each module registers its slot components in its own index.ts, see src/slots/slot-manager.ts.
+import.meta.glob('../modules/*/index.ts', { eager: true })
+
 function EnabledModuleRoute({ name, children }: { name: string; children: ReactNode }) {
   const [enabled, setEnabled] = useState<boolean | null>(null)
   useEffect(() => {
