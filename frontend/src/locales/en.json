@@ -417,7 +417,7 @@
     "title": "Loans",
     "unknownItem": "Inventory item"
   },
-  "lostfound": {
+  "publicpage": {
     "card": {
       "title": "Public contact page",
       "enable": "Show contact page when scanned",
@@ -428,7 +428,7 @@
       "notePlaceholder": "For example how to return it, who to ask or a reward",
       "saveNote": "Save note"
     },
-    "found": {
+    "view": {
       "title": "Contact the owner",
       "photo": "Photo",
       "description": "Send the owner a message. They are notified in OpenInvento and do not see who you are unless you tell them.",

@@ -10,16 +10,16 @@ from account_auth.services import create_notification
 from inventory.models import Inventory, InventoryEntry
 from inventory.views import CodeLookupView
 
-from .models import LostFoundEntry
+from .models import PublicPage
 
 
-class LostFoundEntrySerializer(serializers.ModelSerializer):
+class PublicPageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = LostFoundEntry
+        model = PublicPage
         fields = ("show_name", "show_photo", "note")
 
 
-class LostFoundEntryView(APIView):
+class PublicPageSettingsView(APIView):
     """Owner settings for one entry: GET reads them, PUT turns the public page on or updates it, DELETE turns it off."""
 
     permission_classes = (IsAuthenticated,)
@@ -28,29 +28,29 @@ class LostFoundEntryView(APIView):
         return get_object_or_404(InventoryEntry, uuid=entry_uuid, inventory__users=request.user)
 
     def get(self, request, entry_uuid):
-        lostfound = get_object_or_404(LostFoundEntry, entry=self.get_entry(request, entry_uuid))
-        return Response(LostFoundEntrySerializer(lostfound).data)
+        page = get_object_or_404(PublicPage, entry=self.get_entry(request, entry_uuid))
+        return Response(PublicPageSerializer(page).data)
 
     def put(self, request, entry_uuid):
         entry = self.get_entry(request, entry_uuid)
-        lostfound = LostFoundEntry.objects.filter(entry=entry).first()
-        serializer = LostFoundEntrySerializer(lostfound, data=request.data)
+        page = PublicPage.objects.filter(entry=entry).first()
+        serializer = PublicPageSerializer(page, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(entry=entry)
         return Response(serializer.data)
 
     def delete(self, request, entry_uuid):
-        LostFoundEntry.objects.filter(entry=self.get_entry(request, entry_uuid)).delete()
+        PublicPage.objects.filter(entry=self.get_entry(request, entry_uuid)).delete()
         return Response(status=204)
 
 
 def get_public_entry(inventory, identifier):
     """The opted-in entry for a scan URL. Unknown codes and entries without opt-in get the same 404."""
     entry = CodeLookupView.find_by_inventory_and_identifier(identifier, inventory, Inventory.objects.all())
-    lostfound = LostFoundEntry.objects.filter(entry=entry).select_related("entry__inventory").first() if entry else None
-    if lostfound is None:
+    page = PublicPage.objects.filter(entry=entry).select_related("entry__inventory").first() if entry else None
+    if page is None:
         raise Http404
-    return lostfound
+    return page
 
 
 class PublicView(APIView):
@@ -59,27 +59,27 @@ class PublicView(APIView):
     permission_classes = (AllowAny,)
 
 
-class FoundView(PublicView):
+class PublicPageView(PublicView):
     def get(self, request, inventory, identifier):
-        lostfound = get_public_entry(inventory, identifier)
+        page = get_public_entry(inventory, identifier)
         return Response({
-            "name": lostfound.entry.name if lostfound.show_name else None,
-            "has_photo": bool(lostfound.show_photo and lostfound.entry.image),
-            "note": lostfound.note,
+            "name": page.entry.name if page.show_name else None,
+            "has_photo": bool(page.show_photo and page.entry.image),
+            "note": page.note,
         })
 
 
-class FoundPhotoView(PublicView):
+class PublicPhotoView(PublicView):
     def get(self, request, inventory, identifier):
-        lostfound = get_public_entry(inventory, identifier)
-        if not (lostfound.show_photo and lostfound.entry.image):
+        page = get_public_entry(inventory, identifier)
+        if not (page.show_photo and page.entry.image):
             raise Http404
-        return FileResponse(lostfound.entry.image.open("rb"))
+        return FileResponse(page.entry.image.open("rb"))
 
 
 class ContactThrottle(AnonRateThrottle):
     # Every message notifies all members of the inventory, so keep it far below the general anonymous rate.
-    scope = "lostfound_contact"
+    scope = "publicpage_contact"
     rate = "5/hour"
 
 
@@ -88,14 +88,14 @@ class ContactSerializer(serializers.Serializer):
     contact = serializers.CharField(max_length=200, required=False, allow_blank=True)
 
 
-class FoundContactView(PublicView):
+class PublicContactView(PublicView):
     throttle_classes = (ContactThrottle,)
 
     def post(self, request, inventory, identifier):
-        lostfound = get_public_entry(inventory, identifier)
+        page = get_public_entry(inventory, identifier)
         serializer = ContactSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        entry = lostfound.entry
+        entry = page.entry
         message = serializer.validated_data["message"]
         contact = serializer.validated_data.get("contact", "")
         if contact:
@@ -103,7 +103,7 @@ class FoundContactView(PublicView):
         for user in entry.inventory.users.all():
             create_notification(
                 user,
-                kind="lostfound",
+                kind="publicpage",
                 title=f"New message about {entry.name}",
                 message=message,
                 # Resolves to the entry's page for signed-in members, whatever its type.

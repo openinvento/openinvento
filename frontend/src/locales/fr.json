@@ -417,7 +417,7 @@
     "title": "Prêts",
     "unknownItem": "Élément de l’inventaire"
   },
-  "lostfound": {
+  "publicpage": {
     "card": {
       "title": "Page de contact publique",
       "enable": "Afficher la page de contact lors du scan",
@@ -428,7 +428,7 @@
       "notePlaceholder": "Par exemple comment le rendre, qui contacter ou une récompense",
       "saveNote": "Enregistrer la note"
     },
-    "found": {
+    "view": {
       "title": "Contacter le propriétaire",
       "photo": "Photo",
       "description": "Envoyez un message au propriétaire. Il est averti dans OpenInvento et ne sait pas qui vous êtes, sauf si vous le lui dites.",

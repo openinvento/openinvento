@@ -417,7 +417,7 @@
     "title": "Ausleihen",
     "unknownItem": "Inventarobjekt"
   },
-  "lostfound": {
+  "publicpage": {
     "card": {
       "title": "Öffentliche Kontaktseite",
       "enable": "Kontaktseite beim Scannen zeigen",
@@ -428,7 +428,7 @@
       "notePlaceholder": "Zum Beispiel, wie man es zurückgibt, wen man fragen kann, oder ein Finderlohn",
       "saveNote": "Hinweis speichern"
     },
-    "found": {
+    "view": {
       "title": "Besitzer kontaktieren",
       "photo": "Foto",
       "description": "Schick dem Besitzer eine Nachricht. Er wird in OpenInvento benachrichtigt und erfährt nicht, wer du bist, außer du schreibst es dazu.",
