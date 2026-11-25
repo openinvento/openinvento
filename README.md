@@ -5,7 +5,7 @@
   <img alt="Header" width="100%" src="https://raw.githubusercontent.com/openinvento/openinvento/refs/heads/main/assets/banner_light.png">
 </picture>
 
-# OpenInvento
+# OpenInvento - Selfhosted Inventory Manager
 
 [![Release](https://img.shields.io/github/v/release/openinvento/openinvento)](https://github.com/openinvento/openinvento/releases/latest) 
 [![Build](https://github.com/openinvento/openinvento/actions/workflows/docker.yml/badge.svg)](https://github.com/openinvento/openinvento/actions/workflows/docker.yml) 
@@ -15,11 +15,16 @@
 [![As seen on Open Source Alternatives](https://www.opensourcealternatives.to/badge-osa.svg)](https://www.opensourcealternatives.to)
 
 
-OpenInvento - Selfhosted Inventory Manager
+## Quick Links
 
-Landing Page: https://openinvento.github.io/landingpage/
-Documentation: https://openinvento.github.io/docs/
-
+<p align="left">
+  <a href="https://openinvento.github.io/landingpage/">
+    <img src="https://img.shields.io/badge/🌐_Landing_Page-openinvento.github.io-2ea44f?style=for-the-badge" alt="Landing Page">
+  </a>
+  <a href="https://openinvento.github.io/docs/">
+    <img src="https://img.shields.io/badge/📚_Documentation-Open_Docs-0969da?style=for-the-badge" alt="Documentation">
+  </a>
+</p>
 
 ## Features
 - Self-hosted inventory management system
