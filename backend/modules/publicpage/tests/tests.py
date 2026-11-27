@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from account_auth.models import CustomUser, InstanceSettings, Notification
 from inventory.models import Inventory, InventoryEntry
 
-from .models import PublicPage
+from ..models import PublicPage
 
 ONE_PIXEL_PNG = base64.b64decode(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
