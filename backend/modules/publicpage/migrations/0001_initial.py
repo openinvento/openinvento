@@ -19,6 +19,7 @@ class Migration(migrations.Migration):
                 ('entry', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, related_name='public_page', serialize=False, to='inventory.inventoryentry')),
                 ('show_name', models.BooleanField(default=True)),
                 ('show_photo', models.BooleanField(default=False)),
+                ('allow_contact', models.BooleanField(default=True)),
                 ('note', models.TextField(blank=True, max_length=500)),
             ],
         ),

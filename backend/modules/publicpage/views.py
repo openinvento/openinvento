@@ -16,7 +16,7 @@ from .models import PublicPage
 class PublicPageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PublicPage
-        fields = ("show_name", "show_photo", "note")
+        fields = ("show_name", "show_photo", "allow_contact", "note")
 
 
 class PublicPageSettingsView(APIView):
@@ -65,6 +65,7 @@ class PublicPageView(PublicView):
         return Response({
             "name": page.entry.name if page.show_name else None,
             "has_photo": bool(page.show_photo and page.entry.image),
+            "allow_contact": page.allow_contact,
             "note": page.note,
         })
 
@@ -93,6 +94,8 @@ class PublicContactView(PublicView):
 
     def post(self, request, inventory, identifier):
         page = get_public_entry(inventory, identifier)
+        if not page.allow_contact:
+            raise Http404
         serializer = ContactSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         entry = page.entry

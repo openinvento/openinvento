@@ -57,15 +57,38 @@ class PublicPageViewTests(PublicPageTestCase):
         response = self.client.get(self.public_url())
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"name": "Blue backpack", "has_photo": True, "note": "Reward: 20 EUR"})
+        self.assertEqual(response.json(), {
+            "name": "Blue backpack",
+            "has_photo": True,
+            "allow_contact": True,
+            "note": "Reward: 20 EUR",
+        })
 
     def test_hides_name_and_photo_unless_enabled(self):
         PublicPage.objects.filter(entry=self.backpack).update(show_name=False, show_photo=False)
 
         response = self.client.get(self.public_url())
 
-        self.assertEqual(response.json(), {"name": None, "has_photo": False, "note": "Reward: 20 EUR"})
+        self.assertEqual(response.json(), {
+            "name": None,
+            "has_photo": False,
+            "allow_contact": True,
+            "note": "Reward: 20 EUR",
+        })
         self.assertEqual(self.client.get(self.public_url(suffix="photo/")).status_code, 404)
+
+    def test_disables_contact_without_hiding_the_public_page(self):
+        PublicPage.objects.filter(entry=self.backpack).update(allow_contact=False)
+
+        response = self.client.get(self.public_url())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()["allow_contact"])
+        self.assertEqual(
+            self.client.post(self.public_url(suffix="contact/"), {"message": "Hi"}, format="json").status_code,
+            404,
+        )
+        self.assertFalse(Notification.objects.exists())
 
     def test_serves_the_photo_only_when_enabled(self):
         response = self.client.get(self.public_url(suffix="photo/"))
@@ -155,8 +178,26 @@ class OwnerSettingsTests(PublicPageTestCase):
         response = self.client.put(self.url(self.drill), {"show_name": False, "note": "Reward"}, format="json")
 
         self.assertEqual(response.status_code, 200, response.data)
-        self.assertEqual(response.data, {"show_name": False, "show_photo": False, "note": "Reward"})
+        self.assertEqual(response.data, {
+            "show_name": False,
+            "show_photo": False,
+            "allow_contact": True,
+            "note": "Reward",
+        })
         self.assertEqual(self.client.get(self.url(self.drill)).data["note"], "Reward")
+
+    def test_contact_can_be_disabled_per_entry(self):
+        self.client.force_authenticate(self.owner)
+
+        response = self.client.put(
+            self.url(self.drill),
+            {"show_name": True, "show_photo": False, "allow_contact": False, "note": ""},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertFalse(response.data["allow_contact"])
+        self.assertFalse(self.client.get(self.public_url("DRILL")).json()["allow_contact"])
 
     def test_delete_turns_the_page_off(self):
         PublicPage.objects.create(entry=self.drill)

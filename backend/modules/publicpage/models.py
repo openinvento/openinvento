@@ -16,6 +16,7 @@ class PublicPage(models.Model):
     )
     show_name = models.BooleanField(default=True)
     show_photo = models.BooleanField(default=False)
+    allow_contact = models.BooleanField(default=True)
     # Contact hints or a reward, shown to visitors as written.
     note = models.TextField(blank=True, max_length=500)
 
