@@ -52,7 +52,7 @@ export default function PublicPageView({ inventory, identifier, entry }: PublicP
       {entry.note && <p className="whitespace-pre-line rounded-xl border bg-muted/20 p-4 text-sm">{entry.note}</p>}
       {sent ? (
         <p role="status" className="rounded-xl bg-primary/10 p-4 text-center text-sm">{t("publicpage.view.sent")}</p>
-      ) : (
+      ) : entry.allow_contact ? (
         <form className="grid gap-4" onSubmit={(event) => void submit(event)}>
           <p className="text-sm text-muted-foreground">{t("publicpage.view.description")}</p>
           <label className="grid gap-1.5 text-sm font-medium">
@@ -67,7 +67,7 @@ export default function PublicPageView({ inventory, identifier, entry }: PublicP
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <Button type="submit" disabled={sending || !message.trim()}>{t("publicpage.view.send")}</Button>
         </form>
-      )}
+      ) : <p className="rounded-xl bg-muted/40 p-4 text-center text-sm text-muted-foreground">{t("publicpage.view.contactDisabled")}</p>}
     </main>
   )
 }

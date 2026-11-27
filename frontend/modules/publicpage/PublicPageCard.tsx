@@ -9,7 +9,7 @@ import { ApiError } from "@/utils/api/base"
 
 import { publicPageApi, type PublicPageSettings } from "./api"
 
-const DEFAULT_SETTINGS: PublicPageSettings = { show_name: true, show_photo: false, note: "" }
+const DEFAULT_SETTINGS: PublicPageSettings = { show_name: true, show_photo: false, allow_contact: true, note: "" }
 
 /** Owner settings for the public contact page of one entry, shown in the entry-details slot. */
 export default function PublicPageCard({ entryUuid }: SlotProps["entry-details"]) {
@@ -88,6 +88,10 @@ function EntryPublicPageCard({ entryUuid }: { entryUuid: string }) {
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={settings.show_photo} disabled={saving} onChange={(event) => void save({ ...settings, show_photo: event.target.checked })} />
             {t("publicpage.card.showPhoto")}
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={settings.allow_contact} disabled={saving} onChange={(event) => void save({ ...settings, allow_contact: event.target.checked })} />
+            {t("publicpage.card.allowContact")}
           </label>
           <label className="grid gap-1.5 text-sm font-medium">
             {t("publicpage.card.note")}

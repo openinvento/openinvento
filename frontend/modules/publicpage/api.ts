@@ -3,12 +3,14 @@ import { deleteData, fetchData, getApiUrl, postData, putData } from "@/utils/api
 export type PublicPageSettings = {
   show_name: boolean
   show_photo: boolean
+  allow_contact: boolean
   note: string
 }
 
 export type PublicEntry = {
   name: string | null
   has_photo: boolean
+  allow_contact: boolean
   note: string
 }
 
