@@ -67,7 +67,7 @@ export default function PublicPageView({ inventory, identifier, entry }: PublicP
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <Button type="submit" disabled={sending || !message.trim()}>{t("publicpage.view.send")}</Button>
         </form>
-      ) : <p className="rounded-xl bg-muted/40 p-4 text-center text-sm text-muted-foreground">{t("publicpage.view.contactDisabled")}</p>}
+      ) : <div></div>}
     </main>
   )
 }

@@ -433,7 +433,6 @@
       "title": "Besitzer kontaktieren",
       "photo": "Foto",
       "description": "Schick dem Besitzer eine Nachricht. Er wird in OpenInvento benachrichtigt und erfährt nicht, wer du bist, außer du schreibst es dazu.",
-      "contactDisabled": "Der Besitzer nimmt für diesen Gegenstand keine Nachrichten entgegen.",
       "message": "Nachricht",
       "messagePlaceholder": "Zum Beispiel, wo du es gefunden hast",
       "contact": "Wie erreicht dich der Besitzer? (optional)",

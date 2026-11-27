@@ -433,7 +433,6 @@
       "title": "Contactar con el propietario",
       "photo": "Foto",
       "description": "Envía un mensaje al propietario. Recibirá un aviso en OpenInvento y no sabrá quién eres a menos que se lo digas.",
-      "contactDisabled": "El propietario no acepta mensajes sobre este artículo.",
       "message": "Mensaje",
       "messagePlaceholder": "Por ejemplo, dónde lo encontraste",
       "contact": "¿Cómo puede contactarte el propietario? (opcional)",
