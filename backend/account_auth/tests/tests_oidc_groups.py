@@ -9,8 +9,8 @@ from rest_framework.test import APIClient
 from inventory.models import Inventory, InventoryEntry, is_prefix_group
 from openinvento.settings_utils import group_inventories_env
 
-from .models import CustomUser
-from .oidc_groups import get_groups
+from ..models import CustomUser
+from ..oidc_groups import get_groups
 from .tests_oidc import OIDCTestCase
 
 PREFIX = 'openinvento-'

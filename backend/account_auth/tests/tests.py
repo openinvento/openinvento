@@ -10,7 +10,7 @@ from rest_framework.test import APIClient
 
 from inventory.models import Inventory, InventoryEntry
 
-from .models import CustomUser, InstanceSettings, UserAPIKey
+from ..models import CustomUser, InstanceSettings, UserAPIKey
 
 
 class SignupInventoryTests(TestCase):

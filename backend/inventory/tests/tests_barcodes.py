@@ -10,10 +10,10 @@ from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser
 
-from .barcodes import BarcodeKind, detect_kind, gtin_is_valid, isbn_is_valid, normalize, pzn_is_valid
-from .category_defaults import ensure_default_categories
-from .export_utils import generate_inventory_csv_export
-from .models import ArticleCategory, ArticleFieldValue, Barcode, CategoryField, Inventory, InventoryEntry
+from ..barcodes import BarcodeKind, detect_kind, gtin_is_valid, isbn_is_valid, normalize, pzn_is_valid
+from ..category_defaults import ensure_default_categories
+from ..export_utils import generate_inventory_csv_export
+from ..models import ArticleCategory, ArticleFieldValue, Barcode, CategoryField, Inventory, InventoryEntry
 
 move_barcode_fields = importlib.import_module("inventory.migrations.0019_move_barcode_fields").move_barcode_fields
 

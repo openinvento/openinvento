@@ -2,7 +2,7 @@ from django.test import TestCase
 
 from inventory.models import Inventory
 
-from .models import ThirdPartyProvider
+from ..models import ThirdPartyProvider
 
 
 class ProviderApiKeyTests(TestCase):

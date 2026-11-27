@@ -15,8 +15,8 @@ from reportlab.graphics.barcode.qr import QrCodeWidget
 from account_auth.models import CustomUser, InstanceSettings, Notification, UserAPIKey
 from inventory.jobs.date_field_sync import sync_date_field_notifications
 
-from .code_utils import qr_code_value
-from .models import CODE_CHARACTERS, ArticleAttachment, ArticleCategory, ArticleFieldValue, CategoryField, Inventory, InventoryEntry
+from ..code_utils import qr_code_value
+from ..models import CODE_CHARACTERS, ArticleAttachment, ArticleCategory, ArticleFieldValue, CategoryField, Inventory, InventoryEntry
 
 
 class TypedEntryFacade:

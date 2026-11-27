@@ -7,7 +7,7 @@ from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser
 
-from .models import Inventory, InventoryEntry
+from ..models import Inventory, InventoryEntry
 
 
 class MalformedInventoryUuidTests(TestCase):

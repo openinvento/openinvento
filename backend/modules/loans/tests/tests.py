@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 from account_auth.models import CustomUser, InstanceSettings
 from inventory.models import Inventory, InventoryEntry
 
-from .models import Loan
+from ..models import Loan
 
 
 class LoanAPITests(TestCase):

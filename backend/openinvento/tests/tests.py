@@ -19,7 +19,7 @@ from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser
 
-from .daily_scheduler import DailyScheduler
+from ..daily_scheduler import DailyScheduler
 
 
 class DailySchedulerTests(SimpleTestCase):
