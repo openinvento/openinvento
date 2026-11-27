@@ -430,7 +430,7 @@
       "saveNote": "Guardar nota"
     },
     "view": {
-      "title": "Contactar con el propietario",
+      "title": "Detalles",
       "photo": "Foto",
       "description": "Envía un mensaje al propietario. Recibirá un aviso en OpenInvento y no sabrá quién eres a menos que se lo digas.",
       "message": "Mensaje",

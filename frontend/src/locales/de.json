@@ -430,7 +430,7 @@
       "saveNote": "Hinweis speichern"
     },
     "view": {
-      "title": "Besitzer kontaktieren",
+      "title": "Details",
       "photo": "Foto",
       "description": "Schick dem Besitzer eine Nachricht. Er wird in OpenInvento benachrichtigt und erfährt nicht, wer du bist, außer du schreibst es dazu.",
       "message": "Nachricht",
