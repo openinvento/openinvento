@@ -421,9 +421,10 @@
     "card": {
       "title": "Página de contacto pública",
       "enable": "Mostrar la página de contacto al escanear",
-      "enableHint": "Quien escanee el código QR sin iniciar sesión verá una página con los datos que actives abajo y podrá enviarte un mensaje.",
+      "enableHint": "Quien escanee el código QR sin iniciar sesión verá una página con los datos que actives abajo.",
       "showName": "Mostrar el nombre",
       "showPhoto": "Mostrar la foto",
+      "allowContact": "Permitir que los visitantes envíen un mensaje",
       "note": "Nota para visitantes",
       "notePlaceholder": "Por ejemplo, cómo devolverlo, a quién preguntar o una recompensa",
       "saveNote": "Guardar nota"
@@ -432,6 +433,7 @@
       "title": "Contactar con el propietario",
       "photo": "Foto",
       "description": "Envía un mensaje al propietario. Recibirá un aviso en OpenInvento y no sabrá quién eres a menos que se lo digas.",
+      "contactDisabled": "El propietario no acepta mensajes sobre este artículo.",
       "message": "Mensaje",
       "messagePlaceholder": "Por ejemplo, dónde lo encontraste",
       "contact": "¿Cómo puede contactarte el propietario? (opcional)",

@@ -421,9 +421,10 @@
     "card": {
       "title": "Öffentliche Kontaktseite",
       "enable": "Kontaktseite beim Scannen zeigen",
-      "enableHint": "Wer den QR-Code ohne Anmeldung scannt, sieht eine Seite mit den unten freigegebenen Angaben und kann dir eine Nachricht schicken.",
+      "enableHint": "Wer den QR-Code ohne Anmeldung scannt, sieht eine Seite mit den unten freigegebenen Angaben.",
       "showName": "Namen anzeigen",
       "showPhoto": "Foto anzeigen",
+      "allowContact": "Besuchern erlauben, eine Nachricht zu schicken",
       "note": "Hinweis für Besucher",
       "notePlaceholder": "Zum Beispiel, wie man es zurückgibt, wen man fragen kann, oder ein Finderlohn",
       "saveNote": "Hinweis speichern"
@@ -432,6 +433,7 @@
       "title": "Besitzer kontaktieren",
       "photo": "Foto",
       "description": "Schick dem Besitzer eine Nachricht. Er wird in OpenInvento benachrichtigt und erfährt nicht, wer du bist, außer du schreibst es dazu.",
+      "contactDisabled": "Der Besitzer nimmt für diesen Gegenstand keine Nachrichten entgegen.",
       "message": "Nachricht",
       "messagePlaceholder": "Zum Beispiel, wo du es gefunden hast",
       "contact": "Wie erreicht dich der Besitzer? (optional)",
