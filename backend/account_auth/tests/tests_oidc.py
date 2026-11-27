@@ -21,8 +21,8 @@ from rest_framework.test import APIClient
 
 from inventory.models import Inventory
 
-from .models import CustomUser, InstanceSettings, OIDCIdentity
-from .oidc import OIDCBackend, OIDCConfigurationError, provider_get
+from ..models import CustomUser, InstanceSettings, OIDCIdentity
+from ..oidc import OIDCBackend, OIDCConfigurationError, provider_get
 
 ISSUER = 'https://idp.example.test'
 CLIENT_ID = 'openinvento'
