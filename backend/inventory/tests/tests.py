@@ -344,6 +344,33 @@ class DateFieldNotificationTests(TestCase):
 		self.assertEqual(value.value, timezone.localdate().isoformat())
 		self.assertTrue(value.notify_on_date)
 
+	def test_article_api_removes_selected_field_values(self):
+		article = Article.objects.create(name="Milk", inventory=self.inventory, area=self.area)
+		field_value = ArticleFieldValue.objects.create(
+			entry=article,
+			field=self.field,
+			value=timezone.localdate().isoformat(),
+			notify_on_date=True,
+		)
+
+		preserve_response = self.client.patch(
+			f"/api/entries/{article.uuid}/",
+			{"name": "Milk updated"},
+			format="json",
+		)
+		self.assertEqual(preserve_response.status_code, 200, preserve_response.json())
+		self.assertTrue(ArticleFieldValue.objects.filter(pk=field_value.pk).exists())
+
+		response = self.client.patch(
+			f"/api/entries/{article.uuid}/",
+			{"field_values_remove_input": [str(self.field.uuid)]},
+			format="json",
+		)
+
+		self.assertEqual(response.status_code, 200, response.json())
+		self.assertFalse(ArticleFieldValue.objects.filter(pk=field_value.pk).exists())
+		self.assertEqual(response.json()["field_values"], [])
+
 	def test_sync_creates_idempotent_reminder_for_due_date(self):
 		article = Article.objects.create(name="Milk", inventory=self.inventory, area=self.area)
 		ArticleFieldValue.objects.create(

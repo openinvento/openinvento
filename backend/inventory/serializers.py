@@ -58,6 +58,7 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
     field_values = serializers.SerializerMethodField()
     category_fields = serializers.SerializerMethodField()
     field_values_input = serializers.JSONField(required=False, write_only=True, source="_field_values")
+    field_values_remove_input = serializers.JSONField(required=False, write_only=True, source="_field_values_remove")
     barcodes = serializers.SerializerMethodField()
     # Replaces all barcodes of the entry: [{"kind": "ean" | "isbn" | "pzn" | "other" | "", "value": "..."}].
     # An empty kind is detected from the value.
@@ -67,7 +68,7 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
         model = InventoryEntry
         fields = ("uuid", "identifier", "inventory", "created_at", "updated_at", "name", "type", "parent",
                   "description", "quantity", "stock_tracking", "image", "icon", "category", "field_values", "field_values_input",
-                  "category_fields", "barcodes", "barcodes_input")
+                  "category_fields", "barcodes", "barcodes_input", "field_values_remove_input")
         read_only_fields = ("uuid", "created_at", "updated_at")
 
     def __init__(self, *args, **kwargs):
@@ -107,14 +108,17 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(exc.message_dict) from exc
         
         values = attrs.get("_field_values")
-        if values is not None:
-            if not isinstance(values, list):
+        fields_to_remove = attrs.get("_field_values_remove")
+        if values is not None or fields_to_remove is not None:
+            if values is not None and not isinstance(values, list):
                 raise serializers.ValidationError({"field_values_input": "Expected a JSON list."})
+            if fields_to_remove is not None and not isinstance(fields_to_remove, list):
+                raise serializers.ValidationError({"field_values_remove_input": "Expected a JSON list."})
             if entry_type_key != "article":
                 raise serializers.ValidationError({"field_values_input": "Only articles can have field values."})
             fields = {str(field.pk): field for field in CategoryField.objects.filter(inventory=inventory)}
             seen_fields = set()
-            for value in values:
+            for value in values or []:
                 if not isinstance(value, dict):
                     raise serializers.ValidationError({"field_values_input": "Each item must be an object."})
                 field_id = str(value.get("field", ""))
@@ -124,6 +128,11 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
                 notify = value.get("notify_on_date", False)
                 if not isinstance(notify, bool) or (notify and field.field_type != "date"):
                     raise serializers.ValidationError({"field_values_input": "Invalid date notification setting."})
+                seen_fields.add(field_id)
+            for field_id in fields_to_remove or []:
+                field_id = str(field_id)
+                if field_id not in fields or field_id in seen_fields:
+                    raise serializers.ValidationError({"field_values_remove_input": "Invalid or duplicate field."})
                 seen_fields.add(field_id)
 
         if attrs.get("_barcodes") is not None:
@@ -179,18 +188,22 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Save field values for an article entry. This method is called during create operations."""
         values = validated_data.pop("_field_values", None)
+        fields_to_remove = validated_data.pop("_field_values_remove", None)
         barcodes = validated_data.pop("_barcodes", None)
         entry = super().create(validated_data)
         self._save_field_values(entry, values)
+        self._remove_field_values(entry, fields_to_remove)
         self._save_barcodes(entry, barcodes)
         return entry
 
     def update(self, instance, validated_data):
         """Save field values for an article entry. This method is called during update operations."""
         values = validated_data.pop("_field_values", None)
+        fields_to_remove = validated_data.pop("_field_values_remove", None)
         barcodes = validated_data.pop("_barcodes", None)
         entry = super().update(instance, validated_data)
         self._save_field_values(entry, values)
+        self._remove_field_values(entry, fields_to_remove)
         self._save_barcodes(entry, barcodes)
         return entry
 
@@ -222,6 +235,12 @@ class InventoryEntrySerializer(serializers.ModelSerializer):
                 entry=entry, field=field,
                 defaults={"value": item.get("value"), "notify_on_date": notify},
             )
+
+    @staticmethod
+    def _remove_field_values(entry, fields_to_remove):
+        if fields_to_remove is None:
+            return
+        ArticleFieldValue.objects.filter(entry=entry, field_id__in=fields_to_remove).delete()
 
 
 class InventoryScopedSerializer(serializers.ModelSerializer):
