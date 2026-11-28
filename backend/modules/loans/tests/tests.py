@@ -4,6 +4,7 @@ from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser, InstanceSettings
 from inventory.models import Inventory, InventoryEntry
+from test_support import CREDENTIAL
 
 from ..models import Loan
 
@@ -16,10 +17,10 @@ class LoanAPITests(TestCase):
 
         self.client = APIClient()
         self.user = CustomUser.objects.create_user(
-            username="loan-recorder", password="password"
+            username="loan-recorder", password=CREDENTIAL
         )
         self.other_user = CustomUser.objects.create_user(
-            username="other-recorder", password="password"
+            username="other-recorder", password=CREDENTIAL
         )
         self.inventory = Inventory.objects.create(name="Loan inventory")
         self.inventory.users.add(self.user, self.other_user)

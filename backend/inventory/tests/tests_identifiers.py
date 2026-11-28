@@ -5,6 +5,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser
+from test_support import CREDENTIAL
 
 from ..models import Inventory, InventoryEntry
 
@@ -71,7 +72,7 @@ class UppercaseIdentifiersCommandTests(TestCase):
 
 class CaseInsensitiveLookupTests(TestCase):
 	def setUp(self):
-		self.user = CustomUser.objects.create_user(username="scanner", password="StrongPassword!123")
+		self.user = CustomUser.objects.create_user(username="scanner", password=CREDENTIAL)
 		self.inventory = Inventory.objects.create(name="Home", identifier="URB29")
 		self.inventory.users.add(self.user)
 		self.entry = InventoryEntry.objects.create(inventory=self.inventory, type="area", name="Kitchen", identifier="YHKXKRPTFW")

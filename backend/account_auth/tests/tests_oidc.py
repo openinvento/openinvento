@@ -23,6 +23,21 @@ from inventory.models import Inventory
 
 from ..models import CustomUser, InstanceSettings, OIDCIdentity
 from ..oidc import OIDCBackend, OIDCConfigurationError, provider_get
+from test_support import (
+	ACCESS_VALUE,
+	ALTERNATE_CREDENTIAL,
+	BEARER_VALUE,
+	CLIENT_VALUE,
+	CREDENTIAL,
+	DPOP_VALUE,
+	EMPTY_VALUE,
+	HMAC_CLIENT_VALUE,
+	HTTP_ENDPOINT,
+	LOWERCASE_BEARER_VALUE,
+	NO_VALUE,
+	SPECIAL_CLIENT_VALUE,
+	WRONG_CREDENTIAL,
+)
 
 ISSUER = 'https://idp.example.test'
 CLIENT_ID = 'openinvento'
@@ -36,7 +51,7 @@ OIDC_SETTINGS = {
 	'OIDC_ENABLED': True,
 	'OIDC_ISSUER': ISSUER,
 	'OIDC_RP_CLIENT_ID': CLIENT_ID,
-	'OIDC_RP_CLIENT_SECRET': 'client-secret',
+	'OIDC_RP_CLIENT_SECRET': CLIENT_VALUE,
 	'OIDC_OP_AUTHORIZATION_ENDPOINT': '',
 	'OIDC_OP_TOKEN_ENDPOINT': '',
 	'OIDC_OP_USER_ENDPOINT': '',
@@ -168,7 +183,7 @@ class FakeProvider:
 		self.token_request_kwargs.append(kwargs)
 		if url != f'{self.issuer}/token' or self.token_status != 200:
 			return FakeResponse({'error': 'invalid_grant'}, status_code=400, url=url)
-		response = {'id_token': self.id_token(), 'access_token': 'access-token', 'token_type': 'Bearer', **self.token_response}
+		response = {'id_token': self.id_token(), 'access_token': ACCESS_VALUE, 'token_type': BEARER_VALUE, **self.token_response}
 		return FakeResponse({key: value for key, value in response.items() if value is not None}, url=url)
 
 
@@ -432,7 +447,7 @@ class OIDCCallbackTests(OIDCTestCase):
 		self.assertEqual(response['Location'], '/app')
 
 	def test_username_collision_gets_suffix_and_never_links(self):
-		local_user = CustomUser.objects.create_user(username='alice', password='StrongPassword!123', name='Local')
+		local_user = CustomUser.objects.create_user(username='alice', password=CREDENTIAL, name='Local')
 
 		self.login()
 
@@ -465,7 +480,7 @@ class OIDCCallbackTests(OIDCTestCase):
 
 	def test_existing_email_is_not_linked_by_default(self):
 		local_user = CustomUser.objects.create_user(
-			username='local-alice', email='alice@example.com', password='StrongPassword!123',
+			username='local-alice', email='alice@example.com', password=CREDENTIAL,
 		)
 
 		self.login()
@@ -478,7 +493,7 @@ class OIDCCallbackTests(OIDCTestCase):
 	@override_settings(OIDC_LINK_EXISTING_BY_EMAIL=True)
 	def test_existing_email_is_linked_when_enabled_and_verified(self):
 		local_user = CustomUser.objects.create_user(
-			username='local-alice', email='Alice@Example.com', password='StrongPassword!123',
+			username='local-alice', email='Alice@Example.com', password=CREDENTIAL,
 		)
 
 		self.login()
@@ -487,7 +502,7 @@ class OIDCCallbackTests(OIDCTestCase):
 		self.assertEqual(CustomUser.objects.count(), 1)
 		local_user.refresh_from_db()
 		# Linking keeps the existing local password.
-		self.assertTrue(local_user.check_password('StrongPassword!123'))
+		self.assertTrue(local_user.check_password(CREDENTIAL))
 
 	@override_settings(OIDC_LINK_EXISTING_BY_EMAIL=True)
 	def test_unverified_email_is_never_linked(self):
@@ -636,11 +651,11 @@ class OIDCCallbackTests(OIDCTestCase):
 class LocalLoginTests(OIDCTestCase):
 	def setUp(self):
 		super().setUp()
-		CustomUser.objects.create_user(username='member', password='StrongPassword!123')
-		CustomUser.objects.create_superuser(username='breakglass', password='StrongPassword!123', name='Admin')
+		CustomUser.objects.create_user(username='member', password=CREDENTIAL)
+		CustomUser.objects.create_superuser(username='breakglass', password=CREDENTIAL, name='Admin')
 
 	def password_login(self, username):
-		return APIClient().post('/api/login/', {'identifier': username, 'password': 'StrongPassword!123'}, format='json')
+		return APIClient().post('/api/login/', {'identifier': username, 'password': CREDENTIAL}, format='json')
 
 	def test_local_login_works_by_default(self):
 		self.assertEqual(self.password_login('member').status_code, 200)
@@ -654,7 +669,7 @@ class LocalLoginTests(OIDCTestCase):
 
 	@override_settings(DISABLE_LOCAL_LOGIN=True, LOCAL_LOGIN_USERS=['breakglass'])
 	def test_disabled_local_login_rejects_wrong_password_the_same_way(self):
-		response = APIClient().post('/api/login/', {'identifier': 'member', 'password': 'wrong'}, format='json')
+		response = APIClient().post('/api/login/', {'identifier': 'member', 'password': WRONG_CREDENTIAL}, format='json')
 
 		self.assertEqual(response.status_code, 403)
 
@@ -671,7 +686,7 @@ class LocalLoginTests(OIDCTestCase):
 		response = APIClient().post('/api/signup/', {
 			'username': 'newuser',
 			'name': 'New User',
-			'password': 'StrongPassword!123',
+			'password': CREDENTIAL,
 		}, format='json')
 
 		self.assertEqual(response.status_code, 403)
@@ -688,13 +703,13 @@ class LocalLoginTests(OIDCTestCase):
 		client.force_login(CustomUser.objects.get(username='breakglass'))
 
 		response = client.post('/api/credentials/reset/', {
-			'username': 'admin', 'password': 'AnotherStrongPassword!123',
+			'username': 'admin', 'password': ALTERNATE_CREDENTIAL,
 		}, format='json')
 
 		self.assertEqual(response.status_code, 400)
 		self.assertIn('username', response.data)
 		self.assertEqual(client.post('/api/credentials/reset/', {
-			'username': 'breakglass', 'password': 'AnotherStrongPassword!123',
+			'username': 'breakglass', 'password': ALTERNATE_CREDENTIAL,
 		}, format='json').status_code, 200)
 
 	@override_settings(DISABLE_LOCAL_LOGIN=True, LOCAL_LOGIN_USERS=['breakglass', 'spare'])
@@ -733,7 +748,7 @@ class OIDCAccountTests(OIDCTestCase):
 
 		response = self.client.post('/api/credentials/reset/', {
 			'username': 'alice',
-			'password': 'AnotherStrongPassword!123',
+			'password': ALTERNATE_CREDENTIAL,
 		}, format='json')
 
 		self.assertEqual(response.status_code, 400)
@@ -749,15 +764,15 @@ class OIDCAccountTests(OIDCTestCase):
 		self.assertEqual(CustomUser.objects.get(username='alice').name, 'Alice Local')
 
 	def test_local_user_reports_password(self):
-		user = CustomUser.objects.create_user(username='member', password='StrongPassword!123')
+		user = CustomUser.objects.create_user(username='member', password=CREDENTIAL)
 		self.client.force_login(user)
 
 		self.assertTrue(self.client.get('/api/me/').data['user']['has_password'])
 
 	def test_password_login_does_not_contact_the_provider(self):
-		CustomUser.objects.create_user(username='member', password='StrongPassword!123')
+		CustomUser.objects.create_user(username='member', password=CREDENTIAL)
 
-		APIClient().post('/api/login/', {'identifier': 'member', 'password': 'StrongPassword!123'}, format='json')
+		APIClient().post('/api/login/', {'identifier': 'member', 'password': CREDENTIAL}, format='json')
 
 		self.assertEqual(self.provider.discovery_requests, 0)
 
@@ -806,27 +821,27 @@ class OIDCHardeningTests(OIDCTestCase):
 	# Token response (OIDC Core 3.1.3.5, RFC 6749 5.1)
 
 	def test_token_response_with_other_token_type_is_rejected(self):
-		self.provider.token_response = {'token_type': 'DPoP'}
+		self.provider.token_response = {'token_type': DPOP_VALUE}
 
 		self.assert_login_failed(self.login())
 		self.assertEqual(self.provider.userinfo_requests, 0)
 
 	def test_token_response_without_token_type_is_rejected(self):
-		self.provider.token_response = {'token_type': None}
+		self.provider.token_response = {'token_type': NO_VALUE}
 
 		self.assert_login_failed(self.login())
 
 	def test_token_type_is_case_insensitive(self):
-		self.provider.token_response = {'token_type': 'bearer'}
+		self.provider.token_response = {'token_type': LOWERCASE_BEARER_VALUE}
 
 		self.assertEqual(self.login()['Location'], '/app')
 
 	def test_token_response_without_id_token_fails_cleanly(self):
-		self.provider.token_response = {'id_token': None}
+		self.provider.token_response = {'id_token': NO_VALUE}
 
 		self.assert_login_failed(self.login())
 
-	@override_settings(OIDC_TOKEN_USE_BASIC_AUTH=True, OIDC_RP_CLIENT_SECRET='')
+	@override_settings(OIDC_TOKEN_USE_BASIC_AUTH=True, OIDC_RP_CLIENT_SECRET=EMPTY_VALUE)
 	def test_basic_auth_is_not_used_for_public_clients(self):
 		self.assertEqual(self.login()['Location'], '/app')
 		self.assertIsNone(self.provider.token_request_kwargs[-1].get('auth'))
@@ -837,7 +852,7 @@ class OIDCHardeningTests(OIDCTestCase):
 
 		self.assertEqual(self.provider.token_request_kwargs[-1]['timeout'], 7)
 
-	@override_settings(OIDC_TOKEN_USE_BASIC_AUTH=True, OIDC_RP_CLIENT_SECRET='se:cret/ä')
+	@override_settings(OIDC_TOKEN_USE_BASIC_AUTH=True, OIDC_RP_CLIENT_SECRET=SPECIAL_CLIENT_VALUE)
 	def test_basic_auth_credentials_are_form_urlencoded(self):
 		# RFC 6749, section 2.3.1: client ID and secret are form-urlencoded before Basic encoding.
 		self.login()
@@ -941,7 +956,7 @@ class OIDCHardeningTests(OIDCTestCase):
 
 		self.assertIn('OIDC_SIGN_ALGO', logs.output[0])
 
-	@override_settings(OIDC_RP_SIGN_ALGO='HS256', OIDC_RP_CLIENT_SECRET='a-client-secret-that-is-long-enough-for-hmac')
+	@override_settings(OIDC_RP_SIGN_ALGO='HS256', OIDC_RP_CLIENT_SECRET=HMAC_CLIENT_VALUE)
 	def test_hmac_algorithms_are_not_supported(self):
 		# The client secret would be the signing key, so anyone who knows it could issue ID tokens.
 		self.assertFalse(APIClient().get('/api/login-config/').data['oidc']['enabled'])
@@ -1158,7 +1173,7 @@ class OIDCHardeningTests(OIDCTestCase):
 		self.assertEqual(self.provider.discovery_requests, 0)
 
 	def test_http_endpoint_from_discovery_is_rejected(self):
-		self.provider.metadata_extra = {'token_endpoint': 'http://idp.example.test/token'}
+		self.provider.metadata_extra = {'token_endpoint': HTTP_ENDPOINT}
 
 		self.assertEqual(self.client.get('/api/oidc/authenticate/')['Location'], FAILURE_URL)
 
@@ -1237,9 +1252,9 @@ class OIDCHardeningTests(OIDCTestCase):
 		self.assertEqual(CustomUser.objects.get(username='eve').email, 'eve@example.com')
 
 	def test_wrong_password_does_not_contact_the_provider(self):
-		CustomUser.objects.create_user(username='member', password='StrongPassword!123')
+		CustomUser.objects.create_user(username='member', password=CREDENTIAL)
 
-		response = APIClient().post('/api/login/', {'identifier': 'member', 'password': 'wrong'}, format='json')
+		response = APIClient().post('/api/login/', {'identifier': 'member', 'password': WRONG_CREDENTIAL}, format='json')
 
 		self.assertEqual(response.status_code, 401)
 		self.assertEqual(self.provider.discovery_requests, 0)

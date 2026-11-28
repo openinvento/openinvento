@@ -11,6 +11,7 @@ from rest_framework.test import APIClient
 from inventory.models import Inventory, InventoryEntry
 
 from ..models import CustomUser, InstanceSettings, UserAPIKey
+from test_support import CREDENTIAL, SHORT_CREDENTIAL
 
 
 class SignupInventoryTests(TestCase):
@@ -22,7 +23,7 @@ class SignupInventoryTests(TestCase):
 				'username': 'newuser',
 				'email': 'newuser@example.com',
 				'name': 'New User',
-				'password': 'StrongPassword!123',
+				'password': CREDENTIAL,
 			},
 			format='json',
 		)
@@ -42,7 +43,7 @@ class SignupInventoryTests(TestCase):
 class InitialAdminCommandTests(TestCase):
 	@patch.dict(os.environ, {
 		'INIT_ADMIN_USERNAME': 'initial-admin',
-		'INIT_ADMIN_PASSWORD': 'StrongPassword!123',
+		'INIT_ADMIN_PASSWORD': CREDENTIAL,
 		'CREATE_INIT_ADMIN': 'true',
 	}, clear=False)
 	def test_creates_initial_admin_with_reset_required(self):
@@ -52,17 +53,17 @@ class InitialAdminCommandTests(TestCase):
 		self.assertTrue(user.is_superuser)
 		self.assertTrue(user.is_staff)
 		self.assertTrue(user.require_reset)
-		self.assertTrue(user.check_password('StrongPassword!123'))
+		self.assertTrue(user.check_password(CREDENTIAL))
 		self.assertEqual(user.inventories.count(), 1)
 		self.assertEqual(user.inventories.get().name, "initial-admin's Inventory")
 
 	@patch.dict(os.environ, {
 		'INIT_ADMIN_USERNAME': 'initial-admin',
-		'INIT_ADMIN_PASSWORD': 'StrongPassword!123',
+		'INIT_ADMIN_PASSWORD': CREDENTIAL,
 		'CREATE_INIT_ADMIN': 'true',
 	}, clear=False)
 	def test_does_not_create_second_admin(self):
-		CustomUser.objects.create_user(username='existing', password='StrongPassword!123')
+		CustomUser.objects.create_user(username='existing', password=CREDENTIAL)
 
 		call_command('create_initial_admin')
 
@@ -88,19 +89,19 @@ class EmailLoginSettingTests(TestCase):
 		user = CustomUser.objects.create_user(
 			username='login-user',
 			email='login@example.com',
-			password='StrongPassword!123',
+			password=CREDENTIAL,
 		)
 
 		response = self.client.post('/api/login/', {
 			'identifier': user.email,
-			'password': 'StrongPassword!123',
+			'password': CREDENTIAL,
 		}, content_type='application/json')
 
 		self.assertEqual(response.status_code, 403)
 
 	def test_admin_can_enable_email_login(self):
 		admin = CustomUser.objects.create_superuser(
-			username='admin', password='StrongPassword!123', name='Admin',
+			username='admin', password=CREDENTIAL, name='Admin',
 		)
 		self.client.force_login(admin)
 
@@ -116,13 +117,13 @@ class AdminUserManagementTests(TestCase):
 	def setUp(self):
 		self.client = APIClient()
 		self.admin = CustomUser.objects.create_superuser(
-			username='admin', email='admin@example.com', password='StrongPassword!123', name='Admin',
+			username='admin', email='admin@example.com', password=CREDENTIAL, name='Admin',
 		)
 		self.client.force_login(self.admin)
 
 	def test_non_admin_cannot_list_users(self):
 		self.client.force_login(CustomUser.objects.create_user(
-			username='member', password='StrongPassword!123', name='Member',
+			username='member', password=CREDENTIAL, name='Member',
 		))
 
 		response = self.client.get('/api/users/')
@@ -134,7 +135,7 @@ class AdminUserManagementTests(TestCase):
 			'username': 'new-user',
 			'email': 'new-user@example.com',
 			'name': 'New User',
-			'password': 'StrongPassword!123',
+			'password': CREDENTIAL,
 		}, format='json')
 
 		self.assertEqual(response.status_code, 201)
@@ -146,7 +147,7 @@ class AdminUserManagementTests(TestCase):
 		response = self.client.post('/api/users/', {
 			'username': 'short-password-user',
 			'name': 'Short Password User',
-			'password': 'short',
+			'password': SHORT_CREDENTIAL,
 		}, format='json')
 
 		self.assertEqual(response.status_code, 400)
@@ -157,12 +158,12 @@ class AdminUserManagementTests(TestCase):
 			'username': 'no-email-user',
 			'email': 'not-an-email',
 			'name': 'No Email User',
-			'password': 'StrongPassword!123',
+			'password': CREDENTIAL,
 		}, format='json')
 		second_response = self.client.post('/api/users/', {
 			'username': 'another-no-email-user',
 			'name': 'Another No Email User',
-			'password': 'StrongPassword!123',
+			'password': CREDENTIAL,
 		}, format='json')
 
 		self.assertEqual(first_response.status_code, 201)
@@ -187,10 +188,10 @@ class APIKeyManagementTests(TestCase):
 	def setUp(self):
 		self.client = APIClient()
 		self.user = CustomUser.objects.create_user(
-			username='api-user', password='StrongPassword!123', name='API User',
+			username='api-user', password=CREDENTIAL, name='API User',
 		)
 		self.other_user = CustomUser.objects.create_user(
-			username='other-api-user', password='StrongPassword!123', name='Other User',
+			username='other-api-user', password=CREDENTIAL, name='Other User',
 		)
 		self.inventory = Inventory.objects.create(name='User inventory')
 		self.inventory.users.add(self.user)

@@ -1,22 +1,30 @@
 import base64
 import tempfile
+from datetime import timedelta
 from unittest.mock import patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from datetime import timedelta
-
 from django.test import Client, TestCase, override_settings
 from django.test.client import MULTIPART_CONTENT, encode_multipart
-from rest_framework.test import APIClient
 from django.utils import timezone
 from reportlab.graphics.barcode import createBarcodeDrawing
 from reportlab.graphics.barcode.qr import QrCodeWidget
+from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser, InstanceSettings, Notification, UserAPIKey
 from inventory.jobs.date_field_sync import sync_date_field_notifications
+from test_support import CREDENTIAL
 
 from ..code_utils import qr_code_value
-from ..models import CODE_CHARACTERS, ArticleAttachment, ArticleCategory, ArticleFieldValue, CategoryField, Inventory, InventoryEntry
+from ..models import (
+	CODE_CHARACTERS,
+	ArticleAttachment,
+	ArticleCategory,
+	ArticleFieldValue,
+	CategoryField,
+	Inventory,
+	InventoryEntry,
+)
 
 
 class TypedEntryFacade:
@@ -56,10 +64,10 @@ class ArticleImageTests(TestCase):
 		self.media_settings.enable()
 		self.client = Client()
 		self.user = CustomUser.objects.create_user(
-			username="owner", email="owner@example.com", password="password"
+			username="owner", email="owner@example.com", password=CREDENTIAL
 		)
 		self.other_user = CustomUser.objects.create_user(
-			username="other", email="other@example.com", password="password"
+			username="other", email="other@example.com", password=CREDENTIAL
 		)
 		self.inventory = Inventory.objects.create(name="Private inventory")
 		self.inventory.users.add(self.user)
@@ -127,8 +135,8 @@ class ArticleImageTests(TestCase):
 class InventoryIsolationTests(TestCase):
 	def setUp(self):
 		self.client = APIClient()
-		self.user = CustomUser.objects.create_user(username="member", password="password")
-		self.other_user = CustomUser.objects.create_user(username="outsider", password="password")
+		self.user = CustomUser.objects.create_user(username="member", password=CREDENTIAL)
+		self.other_user = CustomUser.objects.create_user(username="outsider", password=CREDENTIAL)
 		self.inventory = Inventory.objects.create(name="Primary inventory")
 		self.other_inventory = Inventory.objects.create(name="Other inventory")
 		self.inventory.users.add(self.user)
@@ -312,7 +320,7 @@ class InventoryIsolationTests(TestCase):
 class DateFieldNotificationTests(TestCase):
 	def setUp(self):
 		self.client = APIClient()
-		self.user = CustomUser.objects.create_user(username="date-owner", password="password")
+		self.user = CustomUser.objects.create_user(username="date-owner", password=CREDENTIAL)
 		self.inventory = Inventory.objects.create(name="Reminder inventory")
 		self.inventory.users.add(self.user)
 		self.area = Area.objects.create(name="Reminder area", inventory=self.inventory)
@@ -454,7 +462,7 @@ class GeneratedIdentifierTests(TestCase):
 
 class EntriesWithoutParentTests(TestCase):
 	def setUp(self):
-		self.user = CustomUser.objects.create_user(username="owner", password="StrongPassword!123")
+		self.user = CustomUser.objects.create_user(username="owner", password=CREDENTIAL)
 		self.inventory = Inventory.objects.create(name="Apartment")
 		self.inventory.users.add(self.user)
 		self.other = Inventory.objects.create(name="Other")
@@ -521,7 +529,7 @@ class EntriesWithoutParentTests(TestCase):
 
 class DashboardTests(TestCase):
 	def setUp(self):
-		self.user = CustomUser.objects.create_user(username="owner", password="StrongPassword!123")
+		self.user = CustomUser.objects.create_user(username="owner", password=CREDENTIAL)
 		self.inventory = Inventory.objects.create(name="Home")
 		self.inventory.users.add(self.user)
 		self.client = APIClient()
@@ -589,7 +597,7 @@ class DashboardTests(TestCase):
 
 class CodeLookupTests(TestCase):
 	def setUp(self):
-		self.user = CustomUser.objects.create_user(username="scanner", password="StrongPassword!123")
+		self.user = CustomUser.objects.create_user(username="scanner", password=CREDENTIAL)
 		self.home = self.user.inventories.first() or Inventory.objects.create(name="Home")
 		self.home.users.add(self.user)
 		self.office = Inventory.objects.create(name="Office")
@@ -684,7 +692,7 @@ class CodeLookupTests(TestCase):
 @override_settings(APP_URL="https://inventory.example", SCAN_BASE_URL="")
 class QrCodeUrlTests(TestCase):
 	def setUp(self):
-		self.user = CustomUser.objects.create_user(username="qr", password="password")
+		self.user = CustomUser.objects.create_user(username="qr", password=CREDENTIAL)
 		self.inventory = Inventory.objects.create(name="Home", identifier="AbC23")
 		self.user.inventories.add(self.inventory)
 		self.entry = InventoryEntry.objects.create(inventory=self.inventory, type="area", name="Area", identifier="box1")
