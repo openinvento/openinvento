@@ -186,7 +186,7 @@
         "stockTracking": "Suivi du stock"
       },
       "addGlobalField": "Ajouter {{field}}",
-      "globalFields": "Champs globaux",
+      "globalFields": "Autres champs",
       "removeGlobalField": "Retirer {{field}}",
       "headings": {
         "articleDetails": "Détails de l’article",

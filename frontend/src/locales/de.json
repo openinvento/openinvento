@@ -186,7 +186,7 @@
         "stockTracking": "Bestandsverfolgung"
       },
       "addGlobalField": "{{field}} hinzufügen",
-      "globalFields": "Allgemeine Felder",
+      "globalFields": "Weitere Felder",
       "removeGlobalField": "{{field}} entfernen",
       "headings": {
         "articleDetails": "Artikeldetails",
