@@ -21,11 +21,12 @@ export function CategoryFields({ fields, values = [], className, onRemoveField }
 
   return (
     <div className={`grid gap-4 sm:grid-cols-2${className ? ` ${className}` : ""}`}>
-      {fields.map((field) => {
+      {fields.map((field, index) => {
         const value = values.find((item) => item.field === field.uuid)
         return (
           <CategoryFieldInput
             key={field.uuid}
+            className={fields.length % 2 === 1 && index === fields.length - 1 ? "sm:col-span-2" : undefined}
             field={field}
             label={getFieldLabel(field)}
             selectLabel={t("articles.page.fields.selectValue")}
@@ -44,19 +45,21 @@ function CategoryFieldInput({
   selectLabel,
   value,
   onRemove,
+  className,
 }: {
   field: CategoryField
   label: string
   selectLabel: string
   value?: ArticleFieldValue
   onRemove?: () => void
+  className?: string
 }) {
   const { t } = useTranslation()
   const inputName = `custom_${field.key}`
   const currentValue = value?.value?.toString() ?? ""
 
   return (
-    <div className="grid gap-1.5 text-sm font-medium">
+    <div className={`grid gap-1.5 text-sm font-medium${className ? ` ${className}` : ""}`}>
       <div className="flex items-center justify-between gap-2">
         <label htmlFor={inputName}>{label}</label>
         {onRemove && (
