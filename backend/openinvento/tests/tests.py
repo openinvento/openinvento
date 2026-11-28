@@ -290,6 +290,15 @@ class ScanBaseUrlSettingsTests(SimpleTestCase):
 
 
 class SharedCacheTests(SimpleTestCase):
+	def test_debug_settings_use_in_memory_cache(self):
+		with patch.object(sys, "argv", ["manage.py", "runserver"]):
+			settings = load_settings(DEBUG="true")
+
+		self.assertEqual(
+			settings["CACHES"]["default"]["BACKEND"],
+			"django.core.cache.backends.locmem.LocMemCache",
+		)
+
 	def test_throttle_counters_are_shared_between_cache_instances(self):
 		# Gunicorn workers are separate processes; each builds its own cache object on the same directory.
 		from django.core.cache.backends.filebased import FileBasedCache

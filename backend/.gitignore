@@ -10,3 +10,5 @@ media
 .vscode
 *.egg-info/
 build
+data
+cache

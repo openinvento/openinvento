@@ -77,8 +77,8 @@ CACHES = {
         "LOCATION": str(CACHE_DIR),
     }
 }
-if sys.argv[1:2] == ["test"]:
-    # Test runs must not read throttle counters left behind by earlier runs or a running instance.
+if DEBUG or os.name == "nt" or sys.argv[1:2] == ["test"]:
+    # Local, Windows, and test runs should not depend on writable shared cache files.
     CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 
 
