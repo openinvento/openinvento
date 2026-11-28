@@ -1,7 +1,7 @@
 # Usage: python manage_licenses.py [--check]
 
 import sys
-import subprocess
+import subprocess  # nosec B404 - subprocess calls use fixed argument lists without a shell.
 
 # List of licenses to block in your source-available project during the CI check
 FORBIDDEN_LICENSES = "GPL;AGPL;LGPL"
@@ -13,7 +13,7 @@ IGNORED_PACKAGES = "pip;setuptools;wheel;pip-licenses;pip-tools;uv"
 def run_command(command):
     """Executes a CLI command and returns the result."""
     try:
-        result = subprocess.run(command, check=True, capture_output=True, text=True)
+        result = subprocess.run(command, check=True, capture_output=True, text=True)  # nosec B603 - caller supplies fixed command arguments.
         return result
     except subprocess.CalledProcessError as e:
         return e
@@ -21,7 +21,7 @@ def run_command(command):
 def install_dependencies():
     """Ensures pip-licenses is installed."""
     print("📦 Checking/Installing pip-licenses...")
-    subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "pip-licenses"], check=True)
+    subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", "pip-licenses"], check=True)  # nosec B603 - fixed installation command.
 
 def generate_licenses():
     """Generates the third-party license documentation file without versions."""

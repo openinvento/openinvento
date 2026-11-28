@@ -831,6 +831,12 @@ class OIDCHardeningTests(OIDCTestCase):
 		self.assertEqual(self.login()['Location'], '/app')
 		self.assertIsNone(self.provider.token_request_kwargs[-1].get('auth'))
 
+	@override_settings(OIDC_TIMEOUT=7)
+	def test_token_request_uses_configured_timeout(self):
+		self.login()
+
+		self.assertEqual(self.provider.token_request_kwargs[-1]['timeout'], 7)
+
 	@override_settings(OIDC_TOKEN_USE_BASIC_AUTH=True, OIDC_RP_CLIENT_SECRET='se:cret/ä')
 	def test_basic_auth_credentials_are_form_urlencoded(self):
 		# RFC 6749, section 2.3.1: client ID and secret are form-urlencoded before Basic encoding.

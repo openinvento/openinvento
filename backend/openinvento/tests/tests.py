@@ -189,7 +189,7 @@ class InstanceBackupTests(TransactionTestCase):
 		)
 
 	def test_only_instance_admins_can_download_it(self):
-		member = CustomUser.objects.create_user(username="member", password="StrongPassword!123")
+		member = CustomUser.objects.create_user(username="member")
 		self.client.force_login(member)
 
 		with override_settings(DATA_DIR=self.data_dir):
