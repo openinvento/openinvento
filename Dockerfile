@@ -24,10 +24,21 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends -y nginx \
+    && apt-get install --no-install-recommends -y libcap2-bin nginx \
+    && setcap 'cap_net_bind_service=+ep' /usr/sbin/nginx \
     && rm -rf /etc/nginx/sites-enabled/* /etc/nginx/sites-available/* \
     && rm -f /etc/nginx/conf.d/*.conf \
     && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd --system --gid 10001 app \
+    && useradd --system --uid 10001 --gid app --home-dir /app --no-create-home app \
+    && mkdir -p /data \
+        /tmp/nginx/client_temp \
+        /tmp/nginx/proxy_temp \
+        /tmp/nginx/fastcgi_temp \
+        /tmp/nginx/uwsgi_temp \
+        /tmp/nginx/scgi_temp \
+    && chown -R app:app /data /tmp/nginx
 
 COPY backend/pyproject.toml .
 
@@ -37,14 +48,15 @@ COPY backend/ .
 COPY --from=frontend-build /app/frontend/dist /usr/share/nginx/html
 
 COPY docker/nginx.conf /etc/nginx/nginx.conf
-COPY docker/trusted-proxies.conf /etc/nginx/trusted-proxies.conf
 
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ARG APP_VERSION
 ENV APP_VERSION=${APP_VERSION}
+ENV DATA_DIRECTORY=/data
 
 EXPOSE 80
 
+USER app
 ENTRYPOINT ["/entrypoint.sh"]
