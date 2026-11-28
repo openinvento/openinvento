@@ -20,9 +20,6 @@ from requests.auth import HTTPBasicAuth
 from rest_framework.test import APIClient
 
 from inventory.models import Inventory
-
-from ..models import CustomUser, InstanceSettings, OIDCIdentity
-from ..oidc import OIDCBackend, OIDCConfigurationError, provider_get
 from test_support import (
 	ACCESS_VALUE,
 	ALTERNATE_CREDENTIAL,
@@ -38,6 +35,9 @@ from test_support import (
 	SPECIAL_CLIENT_VALUE,
 	WRONG_CREDENTIAL,
 )
+
+from ..models import CustomUser, InstanceSettings, OIDCIdentity
+from ..oidc import OIDCBackend, OIDCConfigurationError, provider_get
 
 ISSUER = 'https://idp.example.test'
 CLIENT_ID = 'openinvento'
