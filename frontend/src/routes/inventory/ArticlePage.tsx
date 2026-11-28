@@ -480,7 +480,7 @@ export default function ArticlePage() {
                       type="button"
                       variant="outline"
                       size="xs"
-                      className="rounded-full px-4"
+                      className="rounded-full px-4 py-4"
                       aria-label={t("articles.page.addGlobalField", { field: getFieldLabel(field) })}
                       onClick={() => {
                         setSelectedGlobalFieldIds((current) => new Set(current).add(field.uuid))
