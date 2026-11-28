@@ -61,10 +61,10 @@ KEY_TYPE_FOR_ALGO = {
     "ES256": ("EC", "P-256"), "ES384": ("EC", "P-384"), "ES512": ("EC", "P-521"),
 }
 
-# Maps the mozilla-django-oidc endpoint settings to the keys of the discovery document.
+# Maps the mozilla-django-oidc endpoint settings to protocol field names, not credentials.
 ENDPOINT_SETTINGS = {
     "OIDC_OP_AUTHORIZATION_ENDPOINT": "authorization_endpoint",
-    "OIDC_OP_TOKEN_ENDPOINT": "token_endpoint",  # nosec B105 - OIDC discovery field, not a credential.
+    "OIDC_OP_TOKEN_ENDPOINT": "token_endpoint",  # nosec B105
     "OIDC_OP_USER_ENDPOINT": "userinfo_endpoint",
     "OIDC_OP_JWKS_ENDPOINT": "jwks_uri",
 }
