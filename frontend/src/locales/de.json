@@ -185,6 +185,9 @@
         "shelf": "Regal",
         "stockTracking": "Bestandsverfolgung"
       },
+      "addGlobalField": "{{field}} hinzufügen",
+      "globalFields": "Allgemeine Felder",
+      "removeGlobalField": "{{field}} entfernen",
       "headings": {
         "articleDetails": "Artikeldetails",
         "general": "Allgemein",

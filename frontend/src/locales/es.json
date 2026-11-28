@@ -185,6 +185,9 @@
         "shelf": "Estante",
         "stockTracking": "Seguimiento de existencias"
       },
+      "addGlobalField": "Añadir {{field}}",
+      "globalFields": "Campos globales",
+      "removeGlobalField": "Quitar {{field}}",
       "headings": {
         "articleDetails": "Detalles del artículo",
         "general": "General",
