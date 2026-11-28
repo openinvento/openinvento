@@ -64,6 +64,7 @@ Here are some example screenshots:
 # Installation and updating
 Follow the instructions in the [documentation](https://openinvento.github.io/docs/docs/setup-installation/docker) to install OpenInvento.
 
+The container runs as UID 10001. Ensure this UID can write to `/data`; this may require updating ownership on existing data volumes or host bind mounts.
 
 # Configuration and Environment Variables
 For a complete list of configuratin options and environment variables, please refer to the [documentation](https://openinvento.github.io/docs/docs/setup-installation/configuration).

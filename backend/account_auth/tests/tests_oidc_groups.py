@@ -8,6 +8,7 @@ from rest_framework.test import APIClient
 
 from inventory.models import Inventory, InventoryEntry, is_prefix_group
 from openinvento.settings_utils import group_inventories_env
+from test_support import CREDENTIAL
 
 from ..models import CustomUser
 from ..oidc_groups import get_groups
@@ -312,7 +313,7 @@ class InventorySyncTests(GroupSyncTestCase):
 	def test_other_members_are_not_touched(self):
 		self.login_with_groups(['openinvento-workshop'])
 		workshop = Inventory.objects.get(oidc_group='openinvento-workshop')
-		local = CustomUser.objects.create_user(username='local', password='StrongPassword!123')
+		local = CustomUser.objects.create_user(username='local', password=CREDENTIAL)
 		workshop.users.add(local)
 
 		self.login_with_groups([])
@@ -379,7 +380,7 @@ class AdminGroupTests(GroupSyncTestCase):
 
 	@override_settings(OIDC_ADMIN_GROUP='admins')
 	def test_non_member_loses_admin_access(self):
-		CustomUser.objects.create_superuser(username='breakglass', password='StrongPassword!123')
+		CustomUser.objects.create_superuser(username='breakglass', password=CREDENTIAL)
 		self.login_with_groups(['admins'])
 
 		self.login_with_groups(['family'])
@@ -390,7 +391,7 @@ class AdminGroupTests(GroupSyncTestCase):
 
 	@override_settings(OIDC_ADMIN_GROUP='admins')
 	def test_last_active_admin_keeps_admin_access(self):
-		CustomUser.objects.create_superuser(username='retired', password='StrongPassword!123', is_active=False)
+		CustomUser.objects.create_superuser(username='retired', password=CREDENTIAL, is_active=False)
 		self.login_with_groups(['admins'])
 
 		with self.assertLogs('account_auth.oidc_groups', 'WARNING'):
@@ -400,7 +401,7 @@ class AdminGroupTests(GroupSyncTestCase):
 
 	@override_settings(OIDC_ADMIN_GROUP='admins')
 	def test_missing_claim_keeps_admin_access(self):
-		CustomUser.objects.create_superuser(username='breakglass', password='StrongPassword!123')
+		CustomUser.objects.create_superuser(username='breakglass', password=CREDENTIAL)
 		self.login_with_groups(['admins'])
 
 		with self.assertLogs('account_auth.oidc_groups', 'WARNING'):
@@ -422,7 +423,7 @@ class ManagedInventoryAPITests(GroupSyncTestCase):
 		super().setUp()
 		self.login_with_groups(['openinvento-workshop'])
 		self.inventory = Inventory.objects.get(oidc_group='openinvento-workshop')
-		self.other = CustomUser.objects.create_user(username='other', password='StrongPassword!123')
+		self.other = CustomUser.objects.create_user(username='other', password=CREDENTIAL)
 
 	def members_url(self, user=None):
 		url = f'/api/inventories/{self.inventory.uuid}/members/'

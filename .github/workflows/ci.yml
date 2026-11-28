@@ -99,6 +99,6 @@ jobs:
 
           docker run --rm \
             -v "$PWD/docker/nginx.conf:/etc/nginx/nginx.conf:ro" \
-            -v "$PWD/docker/trusted-proxies.conf:/etc/nginx/trusted-proxies.conf:ro" \
+            -v "$PWD/docker/trusted-proxies.conf:/tmp/trusted-proxies.conf:ro" \
             nginx:stable \
-            nginx -t
+            sh -c 'mkdir -p /tmp/nginx/client_temp /tmp/nginx/proxy_temp /tmp/nginx/fastcgi_temp /tmp/nginx/uwsgi_temp /tmp/nginx/scgi_temp && nginx -t'

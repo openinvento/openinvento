@@ -6,6 +6,7 @@ from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser, InstanceSettings, UserAPIKey
 from inventory.models import Inventory, InventoryEntry
+from test_support import CREDENTIAL
 
 
 class MetricsEndpointTests(TestCase):
@@ -15,9 +16,9 @@ class MetricsEndpointTests(TestCase):
         settings.save()
 
         self.client = APIClient()
-        self.admin = CustomUser.objects.create_superuser(username="admin", password="StrongPassword!123")
-        self.user = CustomUser.objects.create_user(username="member", password="StrongPassword!123")
-        CustomUser.objects.create_user(username="former", password="StrongPassword!123", is_active=False)
+        self.admin = CustomUser.objects.create_superuser(username="admin", password=CREDENTIAL)
+        self.user = CustomUser.objects.create_user(username="member", password=CREDENTIAL)
+        CustomUser.objects.create_user(username="former", password=CREDENTIAL, is_active=False)
 
         self.own_inventory = Inventory.objects.create(name="Workshop")
         self.own_inventory.users.add(self.user, self.admin)

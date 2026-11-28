@@ -10,14 +10,14 @@ echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
 echo "Configuring trusted proxy addresses..."
-: > /etc/nginx/trusted-proxies.conf
+: > /tmp/trusted-proxies.conf
 trusted_proxy_ips=${TRUSTED_PROXY_IPS:-127.0.0.1}
 old_ifs=$IFS
 IFS=','
 for proxy_ip in $trusted_proxy_ips; do
     proxy_ip=$(printf '%s' "$proxy_ip" | tr -d '[:space:]')
     if [ -n "$proxy_ip" ]; then
-        printf 'set_real_ip_from %s;\n' "$proxy_ip" >> /etc/nginx/trusted-proxies.conf
+        printf 'set_real_ip_from %s;\n' "$proxy_ip" >> /tmp/trusted-proxies.conf
     fi
 done
 IFS=$old_ifs

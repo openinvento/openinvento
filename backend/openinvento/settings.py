@@ -6,6 +6,8 @@ from datetime import timedelta
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from django.core.exceptions import ImproperlyConfigured
+
 from .custom_logger import configure_early_logging
 from .settings_utils import (
     _host_from_url,
@@ -85,13 +87,9 @@ if DEBUG or os.name == "nt" or sys.argv[1:2] == ["test"]:
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = None
-if envSecretKey:
-    SECRET_KEY = envSecretKey
-else:
-    logger.warning("SECRET_KEY not found in environment variables. Using an unsafe fallback. This is not recommended for production.")
-    SECRET_KEY = "secretkey123"
+SECRET_KEY = envSecretKey
+if not SECRET_KEY:
+    raise ImproperlyConfigured("SECRET_KEY must be set in the environment.")
 
 AUTH_USER_MODEL = "account_auth.CustomUser"
 

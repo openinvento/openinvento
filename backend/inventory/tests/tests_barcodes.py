@@ -3,17 +3,34 @@ import importlib
 import io
 import json
 import zipfile
+from unittest.mock import Mock, patch
 
 from django.apps import apps
 from django.test import SimpleTestCase, TestCase
 from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser
+from test_support import CREDENTIAL
+from third_party_providers.models import ThirdPartyProvider
 
-from ..barcodes import BarcodeKind, detect_kind, gtin_is_valid, isbn_is_valid, normalize, pzn_is_valid
+from ..barcodes import (
+	BarcodeKind,
+	detect_kind,
+	gtin_is_valid,
+	isbn_is_valid,
+	normalize,
+	pzn_is_valid,
+)
 from ..category_defaults import ensure_default_categories
 from ..export_utils import generate_inventory_csv_export
-from ..models import ArticleCategory, ArticleFieldValue, Barcode, CategoryField, Inventory, InventoryEntry
+from ..models import (
+	ArticleCategory,
+	ArticleFieldValue,
+	Barcode,
+	CategoryField,
+	Inventory,
+	InventoryEntry,
+)
 
 move_barcode_fields = importlib.import_module("inventory.migrations.0019_move_barcode_fields").move_barcode_fields
 
@@ -61,7 +78,7 @@ class CheckDigitTests(SimpleTestCase):
 
 class BarcodeApiTests(TestCase):
 	def setUp(self):
-		self.user = CustomUser.objects.create_user(username="owner", password="StrongPassword!123")
+		self.user = CustomUser.objects.create_user(username="owner", password=CREDENTIAL)
 		self.inventory = Inventory.objects.create(name="Home")
 		self.inventory.users.add(self.user)
 		self.client = APIClient()
@@ -219,7 +236,7 @@ class MoveBarcodeFieldsTests(TestCase):
 
 class BarcodeLookupTests(TestCase):
 	def setUp(self):
-		self.user = CustomUser.objects.create_user(username="scanner", password="StrongPassword!123")
+		self.user = CustomUser.objects.create_user(username="scanner", password=CREDENTIAL)
 		self.home = Inventory.objects.create(name="Home")
 		self.office = Inventory.objects.create(name="Office")
 		self.foreign = Inventory.objects.create(name="Foreign")
@@ -227,6 +244,33 @@ class BarcodeLookupTests(TestCase):
 		self.office.users.add(self.user)
 		self.client = APIClient()
 		self.client.force_login(self.user)
+
+	def test_product_lookup_uses_a_timed_http_request(self):
+		provider = ThirdPartyProvider.objects.create(
+			inventory=self.home,
+			provider="openfoodfacts",
+			type="barcode_lookup",
+			name="Open Food Facts",
+			encrypted_api_key="",
+		)
+		upstream = Mock(status_code=200)
+		upstream.json.return_value = {"status": 1, "product": {"product_name": "Tea"}}
+
+		with patch("inventory.views.requests.get", return_value=upstream) as get:
+			response = self.client.post(
+				"/api/barcodes/lookup/",
+				{
+					"barcode": "A/1",
+					"inventory": str(self.home.uuid),
+					"provider": str(provider.uuid),
+				},
+				format="json",
+			)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(response.data["name"], "Tea")
+		self.assertEqual(get.call_args.kwargs["timeout"], 8)
+		self.assertIn("A%2F1.json", get.call_args.args[0])
 
 	def article(self, inventory, name, *barcodes, identifier=""):
 		entry = InventoryEntry.objects.create(inventory=inventory, type="article", name=name, identifier=identifier)

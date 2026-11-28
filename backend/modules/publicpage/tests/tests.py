@@ -8,6 +8,7 @@ from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser, InstanceSettings, Notification
 from inventory.models import Inventory, InventoryEntry
+from test_support import CREDENTIAL
 
 from ..models import PublicPage
 
@@ -30,9 +31,9 @@ class PublicPageTestCase(TestCase):
         settings.save()
 
         self.client = APIClient()
-        self.owner = CustomUser.objects.create_user(username="owner", email="owner@example.com", password="password")
-        self.member = CustomUser.objects.create_user(username="member", email="member@example.com", password="password")
-        self.stranger = CustomUser.objects.create_user(username="stranger", password="password")
+        self.owner = CustomUser.objects.create_user(username="owner", email="owner@example.com", password=CREDENTIAL)
+        self.member = CustomUser.objects.create_user(username="member", email="member@example.com", password=CREDENTIAL)
+        self.stranger = CustomUser.objects.create_user(username="stranger", password=CREDENTIAL)
         self.inventory = Inventory.objects.create(name="Home", identifier="HOME1")
         self.inventory.users.add(self.owner, self.member)
         self.backpack = InventoryEntry.objects.create(

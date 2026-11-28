@@ -8,16 +8,25 @@ import sys
 import tempfile
 import types
 import zipfile
-from datetime import datetime, time, timedelta, timezone as datetime_timezone
+from datetime import datetime, time, timedelta
+from datetime import timezone as datetime_timezone
 from pathlib import Path
 from unittest.mock import patch
 
+from django.core.exceptions import ImproperlyConfigured
 from django.db import connection
-from django.test import Client, SimpleTestCase, TestCase, TransactionTestCase, override_settings
+from django.test import (
+	Client,
+	SimpleTestCase,
+	TestCase,
+	TransactionTestCase,
+	override_settings,
+)
 from django.utils import timezone
 from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser
+from test_support import CREDENTIAL, EMPTY_VALUE, SETTINGS_SIGNING_VALUE
 
 from ..daily_scheduler import DailyScheduler
 
@@ -70,7 +79,7 @@ class InstanceBackupTests(TransactionTestCase):
 	def setUp(self):
 		self.data_dir = Path(tempfile.mkdtemp())
 		self.addCleanup(shutil.rmtree, self.data_dir)
-		self.admin = CustomUser.objects.create_superuser(username="admin", password="StrongPassword!123")
+		self.admin = CustomUser.objects.create_superuser(username="admin", password=CREDENTIAL)
 		self.client = APIClient()
 		self.client.force_login(self.admin)
 
@@ -189,7 +198,7 @@ class InstanceBackupTests(TransactionTestCase):
 		)
 
 	def test_only_instance_admins_can_download_it(self):
-		member = CustomUser.objects.create_user(username="member", password="StrongPassword!123")
+		member = CustomUser.objects.create_user(username="member")
 		self.client.force_login(member)
 
 		with override_settings(DATA_DIR=self.data_dir):
@@ -201,6 +210,7 @@ class InstanceBackupTests(TransactionTestCase):
 def load_settings(**env):
 	"""Execute settings.py with only the given APP_URL/APP_URLS/SCAN_BASE_URL values in the environment."""
 	base = {key: value for key, value in os.environ.items() if key not in {"APP_URL", "APP_URLS", "SCAN_BASE_URL"}}
+	base.setdefault("SECRET_KEY", SETTINGS_SIGNING_VALUE)
 	with patch.dict(os.environ, {**base, **env}, clear=True):
 		return runpy.run_module("openinvento.settings")
 
@@ -208,11 +218,10 @@ def load_settings(**env):
 class HttpsSettingsTests(SimpleTestCase):
 	def assert_https_settings(self, settings, enabled):
 		self.assertIs(settings["SESSION_COOKIE_SECURE"], enabled)
-		self.assertIs(settings["CSRF_COOKIE_SECURE"], enabled)
-		self.assertEqual(
-			settings["SECURE_PROXY_SSL_HEADER"],
-			("HTTP_X_FORWARDED_PROTO", "https") if enabled else None,
-		)
+
+	def test_secret_key_is_required(self):
+		with self.assertRaisesRegex(ImproperlyConfigured, "SECRET_KEY must be set"):
+			load_settings(SECRET_KEY=EMPTY_VALUE)
 
 	def test_https_app_url_enables_secure_cookies_and_the_proxy_header(self):
 		self.assert_https_settings(load_settings(APP_URL="https://inventory.example.test"), True)

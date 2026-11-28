@@ -1,15 +1,13 @@
-import http.client
 import json
 import os
 import tempfile
 import uuid
 from datetime import timedelta
 from typing import ClassVar
-from urllib.error import HTTPError, URLError
 from urllib.parse import quote
-from urllib.request import Request, urlopen
 from venv import logger
 
+import requests
 from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
@@ -644,10 +642,16 @@ class BarcodeProductLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView
         if configured_provider is None:
             return Response({"error": "Select a configured barcode lookup provider in inventory settings."}, status=503)
         try:
-            OPENFOODFACTS_API_URL = "https://world.openfoodfacts.org/api/v2/product/"
-            req = Request(f"{OPENFOODFACTS_API_URL}{quote(barcode, safe='')}.json", headers={"User-Agent": "OpenInvento/1.0 (barcode lookup)"})
-            with urlopen(req, timeout=8) as response:
-                payload = json.loads(response.read())
+            openfoodfacts_api_url = "https://world.openfoodfacts.org/api/v2/product/"
+            response = requests.get(
+                f"{openfoodfacts_api_url}{quote(barcode, safe='')}.json",
+                headers={"User-Agent": "OpenInvento/1.0 (barcode lookup)"},
+                timeout=8,
+            )
+            if response.status_code == 404:
+                return Response({"error": "No product was found for this barcode."}, status=404)
+            response.raise_for_status()
+            payload = response.json()
             product = payload.get("product") or {}
             if payload.get("status") != 1 or not product:
                 return Response({"error": "No product was found for this barcode."}, status=404)
@@ -659,11 +663,7 @@ class BarcodeProductLookupView(StandardOrAPIKeyAuthMixin, InventoryScopedAPIView
                 "image": product.get("image_front_url") or product.get("image_url"),
                 "source": "Open Food Facts",
             })
-        except HTTPError as error:
-            if error.code == 404:
-                return Response({"error": "No product was found for this barcode."}, status=404)
-            return Response({"error": "Open Food Facts could not be reached."}, status=502)
-        except (URLError, TimeoutError, ValueError, http.client.HTTPException):
+        except (requests.RequestException, ValueError):
              return Response({"error": "Open Food Facts could not be reached."}, status=502)
 
 class MagicArticleImportView(InventoryScopedAPIView):
