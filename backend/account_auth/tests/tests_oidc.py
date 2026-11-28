@@ -53,7 +53,7 @@ OIDC_SETTINGS = {
 	'OIDC_RP_CLIENT_ID': CLIENT_ID,
 	'OIDC_RP_CLIENT_SECRET': CLIENT_VALUE,
 	'OIDC_OP_AUTHORIZATION_ENDPOINT': '',
-	'OIDC_OP_TOKEN_ENDPOINT': '',
+	'OIDC_OP_TOKEN_ENDPOINT': EMPTY_VALUE,
 	'OIDC_OP_USER_ENDPOINT': '',
 	'OIDC_OP_JWKS_ENDPOINT': '',
 	'OIDC_CREATE_USERS': True,
@@ -404,7 +404,7 @@ class OIDCCallbackTests(OIDCTestCase):
 		self.assertEqual(token_request['redirect_uri'], CALLBACK_URL)
 		self.assertEqual(token_request['client_secret'], 'client-secret')
 
-	@override_settings(OIDC_RP_CLIENT_SECRET='')
+	@override_settings(OIDC_RP_CLIENT_SECRET=EMPTY_VALUE)
 	def test_public_client_does_not_send_empty_secret(self):
 		self.login()
 
@@ -1080,7 +1080,7 @@ class OIDCHardeningTests(OIDCTestCase):
 		self.assertEqual(params['tenant'], 'home')
 		self.assertTrue(params['state'])
 
-	@override_settings(OIDC_RP_CLIENT_SECRET='')
+	@override_settings(OIDC_RP_CLIENT_SECRET=EMPTY_VALUE)
 	def test_public_client_rejects_provider_without_s256(self):
 		self.provider.metadata_extra = {'code_challenge_methods_supported': ['plain']}
 

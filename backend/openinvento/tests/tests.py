@@ -26,7 +26,7 @@ from django.utils import timezone
 from rest_framework.test import APIClient
 
 from account_auth.models import CustomUser
-from test_support import CREDENTIAL, SETTINGS_SIGNING_VALUE
+from test_support import CREDENTIAL, EMPTY_VALUE, SETTINGS_SIGNING_VALUE
 
 from ..daily_scheduler import DailyScheduler
 
@@ -221,12 +221,7 @@ class HttpsSettingsTests(SimpleTestCase):
 
 	def test_secret_key_is_required(self):
 		with self.assertRaisesRegex(ImproperlyConfigured, "SECRET_KEY must be set"):
-			load_settings(SECRET_KEY="")
-		self.assertIs(settings["CSRF_COOKIE_SECURE"], enabled)
-		self.assertEqual(
-			settings["SECURE_PROXY_SSL_HEADER"],
-			("HTTP_X_FORWARDED_PROTO", "https") if enabled else None,
-		)
+			load_settings(SECRET_KEY=EMPTY_VALUE)
 
 	def test_https_app_url_enables_secure_cookies_and_the_proxy_header(self):
 		self.assert_https_settings(load_settings(APP_URL="https://inventory.example.test"), True)
