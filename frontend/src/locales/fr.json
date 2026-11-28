@@ -185,6 +185,9 @@
         "shelf": "Étagère",
         "stockTracking": "Suivi du stock"
       },
+      "addGlobalField": "Ajouter {{field}}",
+      "globalFields": "Autres champs",
+      "removeGlobalField": "Retirer {{field}}",
       "headings": {
         "articleDetails": "Détails de l’article",
         "general": "Général",

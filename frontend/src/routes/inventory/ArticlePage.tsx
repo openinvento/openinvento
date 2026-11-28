@@ -1,5 +1,5 @@
 import { useEffect, useId, useState, type ChangeEvent, type FormEvent } from "react"
-import { ArrowLeft, ChevronDown, Download, FileText, Info, Paperclip, Save, Trash2, Upload } from "lucide-react"
+import { ArrowLeft, Download, FileText, Info, Paperclip, Plus, Save, Trash2, Upload } from "lucide-react"
 import { Link, useBlocker, useNavigate, useParams } from "react-router"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverDescription, PopoverTrigger } from "@/components/ui/popover"
@@ -13,7 +13,7 @@ import { barcodesPayload, toBarcodeDrafts, type BarcodeDraft } from "@/utils/bar
 import { FullscreenImagePreview } from "@/components/inventory/fullscreen-image-preview"
 import { ArticleImageGallery } from "@/components/inventory/article-image-gallery"
 import { inventoryApi, type Area, type Article, type ArticleAttachment, type ArticleCategory, type CategoryField, type Box, type Shelf } from "@/utils/api/inventory"
-import { getCategoryLabel } from "@/utils/i18n-labels"
+import { getCategoryLabel, getFieldLabel } from "@/utils/i18n-labels"
 import { useTranslation } from "react-i18next"
 import { compressArticleImage } from "@/utils/article-image"
 import { getMediaUrl } from "@/utils/api/base"
@@ -31,10 +31,11 @@ export default function ArticlePage() {
   const [categories, setCategories] = useState<ArticleCategory[]>([])
   const [categoryFields, setCategoryFields] = useState<CategoryField[]>([])
   const [globalFields, setGlobalFields] = useState<CategoryField[]>([])
+  const [selectedGlobalFieldIds, setSelectedGlobalFieldIds] = useState<Set<string>>(new Set())
+  const [removedGlobalFieldIds, setRemovedGlobalFieldIds] = useState<Set<string>>(new Set())
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
   const [stockTracking, setStockTracking] = useState(false)
-  const [stockFieldsOpen, setStockFieldsOpen] = useState(false)
 
   const [selectedArea, setSelectedArea] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
@@ -102,7 +103,14 @@ export default function ArticlePage() {
       setBoxes(nextBoxes)
       setCategories(fetchedCategories)
       setCategoryFields(fetchedFields.filter((field) => field.category !== null))
-      setGlobalFields(fetchedFields.filter((field) => field.category === null))
+      const fetchedGlobalFields = fetchedFields.filter((field) => field.category === null)
+      setGlobalFields(fetchedGlobalFields)
+      setSelectedGlobalFieldIds(new Set(
+        fetchedGlobalFields
+          .filter((field) => fetchedArticle?.field_values.some((value) => value.field === field.uuid))
+          .map((field) => field.uuid),
+      ))
+      setRemovedGlobalFieldIds(new Set())
       // Load attachments last: if this fails, the form still holds the article's location and category,
       // so saving another change doesn't clear them.
       if (fetchedArticle) setAttachments(await inventoryApi.listArticleAttachments(fetchedArticle.uuid))
@@ -122,7 +130,9 @@ export default function ArticlePage() {
     try {
       const activeFieldIds = new Set(articleFields.map((field) => field.uuid))
       const fieldValues = [
-        ...article.field_values.filter((fieldValue) => !activeFieldIds.has(fieldValue.field)),
+        ...article.field_values.filter((fieldValue) =>
+          !activeFieldIds.has(fieldValue.field) && !removedGlobalFieldIds.has(fieldValue.field),
+        ),
         ...articleFields.flatMap((field) => {
           const previous = article.field_values.find((fieldValue) => fieldValue.field === field.uuid)
           const valueControl = formElement.elements.namedItem(`custom_${field.key}`)
@@ -157,6 +167,7 @@ export default function ArticlePage() {
       payload.append("box", value("box") || "")
       payload.append("category", value("category") || "")
       payload.append("field_values", JSON.stringify(fieldValues))
+      payload.append("field_values_remove_input", JSON.stringify([...removedGlobalFieldIds]))
       payload.append("barcodes_input", barcodesPayload(barcodes))
       payload.append("icon", selectedIcon || "")
       if (image) payload.append("image", image)
@@ -259,9 +270,11 @@ export default function ArticlePage() {
   
   const relevantShelves = shelves.filter((shelf) => !selectedArea || shelf.area === selectedArea)
   const relevantBoxes = boxes.filter((box) => !selectedArea || box.area === selectedArea)
-  const articleFields = [...categoryFields.filter((field) => field.category === selectedCategory), ...globalFields]
-  const stockFields = articleFields.filter((field) => field.key === "minimum_quantity" || field.key === "stock_level")
-  const otherFields = articleFields.filter((field) => field.key !== "minimum_quantity" && field.key !== "stock_level")
+  const articleFields = [
+    ...categoryFields.filter((field) => field.category === selectedCategory),
+    ...globalFields.filter((field) => selectedGlobalFieldIds.has(field.uuid)),
+  ]
+  const availableGlobalFields = globalFields.filter((field) => !selectedGlobalFieldIds.has(field.uuid))
   const imageAttachments = attachments.filter((attachment) => attachment.is_image)
   const fileAttachments = attachments.filter((attachment) => !attachment.is_image)
 
@@ -330,10 +343,7 @@ export default function ArticlePage() {
                   name="stock_tracking"
                   value="true"
                   checked={stockTracking}
-                  onCheckedChange={(checked) => {
-                    setStockTracking(checked)
-                    if (!checked) setStockFieldsOpen(false)
-                  }}
+                  onCheckedChange={setStockTracking}
                 />
                 {t("articles.page.fields.stockTracking")}
               </label>
@@ -460,29 +470,56 @@ export default function ArticlePage() {
               onChange={(next) => { setBarcodes(next); setUnsavedChanges(true) }}
             />
 
-            {otherFields.length > 0 && (
-              <CategoryFields fields={otherFields} values={article.field_values} />
+            {globalFields.length > 0 && (
+              <div className="grid gap-2">
+                <h2 className="text-sm font-semibold">{t("articles.page.globalFields")}</h2>
+                <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1">
+                  {availableGlobalFields.map((field) => (
+                    <Button
+                      key={field.uuid}
+                      type="button"
+                      variant="outline"
+                      size="xs"
+                      className="rounded-full px-4 py-4"
+                      aria-label={t("articles.page.addGlobalField", { field: getFieldLabel(field) })}
+                      onClick={() => {
+                        setSelectedGlobalFieldIds((current) => new Set(current).add(field.uuid))
+                        setRemovedGlobalFieldIds((current) => {
+                          const next = new Set(current)
+                          next.delete(field.uuid)
+                          return next
+                        })
+                        setUnsavedChanges(true)
+                      }}
+                    >
+                      <Plus className="size-3" />
+                      {getFieldLabel(field)}
+                    </Button>
+                  ))}
+                </div>
+              </div>
             )}
 
-            {stockTracking && stockFields.length > 0 && (
-              <div>
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-between border-t pt-5 text-left text-sm font-semibold"
-                  aria-expanded={stockFieldsOpen}
-                  onClick={() => setStockFieldsOpen((open) => !open)}
-                >
-                  {t("articles.page.stockFields")}
-                  <ChevronDown className={`size-4 transition-transform ${stockFieldsOpen ? "rotate-180" : ""}`} />
-                </button>
-                {stockFieldsOpen && (
-                  <CategoryFields
-                    fields={stockFields}
-                    values={article.field_values}
-                    className="mt-5"
-                  />
-                )}
-              </div>
+            {articleFields.length > 0 && (
+              <>
+                <CategoryFields
+                  fields={categoryFields.filter((field) => field.category === selectedCategory)}
+                  values={article.field_values}
+                />
+                <CategoryFields
+                  fields={globalFields.filter((field) => selectedGlobalFieldIds.has(field.uuid))}
+                  values={article.field_values}
+                  onRemoveField={(field) => {
+                    setSelectedGlobalFieldIds((current) => {
+                      const next = new Set(current)
+                      next.delete(field.uuid)
+                      return next
+                    })
+                    setRemovedGlobalFieldIds((current) => new Set(current).add(field.uuid))
+                    setUnsavedChanges(true)
+                  }}
+                />
+              </>
             )}
           </div>
 

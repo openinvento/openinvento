@@ -185,6 +185,9 @@
         "shelf": "Shelf",
         "stockTracking": "Stock tracking"
       },
+      "addGlobalField": "Add {{field}}",
+      "globalFields": "Other fields",
+      "removeGlobalField": "Remove {{field}}",
       "headings": {
         "articleDetails": "Article Details",
         "general": "General",
